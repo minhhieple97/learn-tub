@@ -71,7 +71,6 @@ export function EnhancedAddVideoForm() {
                 }`}
                 required
               />
-              <Youtube className="absolute left-5 top-1/2 transform -translate-y-1/2 h-6 w-6 text-red-500" />
               {url && isValidYouTubeUrl(url) && (
                 <CheckCircle2 className="absolute right-5 top-1/2 transform -translate-y-1/2 h-6 w-6 text-green-500" />
               )}
@@ -105,39 +104,6 @@ export function EnhancedAddVideoForm() {
             </div>
           )}
         </form>
-
-        {/* Enhanced Features Preview */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-6 border-t border-white/20">
-          <div className="flex items-center space-x-4 p-4 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/15 transition-colors">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-500/20 border border-blue-400/30">
-              <Clock className="h-6 w-6 text-blue-200" />
-            </div>
-            <div>
-              <p className="font-semibold text-white">Timestamp Notes</p>
-              <p className="text-sm text-red-100">Sync with video timeline</p>
-            </div>
-          </div>
-
-          <div className="flex items-center space-x-4 p-4 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/15 transition-colors">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-purple-500/20 border border-purple-400/30">
-              <Zap className="h-6 w-6 text-purple-200" />
-            </div>
-            <div>
-              <p className="font-semibold text-white">AI Insights</p>
-              <p className="text-sm text-red-100">Smart analysis & quizzes</p>
-            </div>
-          </div>
-
-          <div className="flex items-center space-x-4 p-4 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/15 transition-colors">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-500/20 border border-green-400/30">
-              <BookOpen className="h-6 w-6 text-green-200" />
-            </div>
-            <div>
-              <p className="font-semibold text-white">Study Plans</p>
-              <p className="text-sm text-red-100">Personalized learning</p>
-            </div>
-          </div>
-        </div>
       </CardContent>
     </Card>
   );

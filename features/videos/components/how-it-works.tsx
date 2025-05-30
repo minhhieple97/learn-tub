@@ -24,7 +24,7 @@ export function HowItWorks() {
   ]
 
   return (
-    <Card className="border border-blue-200 dark:border-blue-800 bg-gradient-to-br from-white to-blue-50 dark:from-slate-800 dark:to-blue-950/30 shadow-lg">
+    <Card className="h-full flex flex-col border border-blue-200 dark:border-blue-800 bg-gradient-to-br from-white to-blue-50 dark:from-slate-800 dark:to-blue-950/30 shadow-lg">
       <CardHeader>
         <CardTitle className="text-xl text-blue-900 dark:text-blue-100 flex items-center gap-2">
           <Rocket className="h-5 w-5" />
@@ -34,7 +34,7 @@ export function HowItWorks() {
           Get the most out of LearnTub in 3 simple steps
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="flex-1 flex flex-col justify-center space-y-6">
         {steps.map((step) => (
           <div key={step.number} className="flex items-start space-x-4">
             <div
@@ -44,7 +44,9 @@ export function HowItWorks() {
             </div>
             <div>
               <h4
-                className={`font-semibold text-${step.color.split("-")[0]}-900 dark:text-${step.color.split("-")[0]}-100 mb-1`}
+                className={`font-semibold text-${step.color.split('-')[0]}-900 dark:text-${
+                  step.color.split('-')[0]
+                }-100 mb-1`}
               >
                 {step.title}
               </h4>
@@ -54,5 +56,5 @@ export function HowItWorks() {
         ))}
       </CardContent>
     </Card>
-  )
+  );
 }
