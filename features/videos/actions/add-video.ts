@@ -33,6 +33,28 @@ export async function addVideoAction(prevState: any, formData: FormData) {
     return { error: "You must be logged in to add videos" }
   }
 
+  // Ensure profile exists (safety net)
+  const { data: profile, error: profileError } = await supabase.from("profiles").select("id").eq("id", user.id).single()
+
+  if (profileError && profileError.code === "PGRST116") {
+    // Profile doesn't exist, create it
+    const { error: insertError } = await supabase.from("profiles").insert({
+      id: user.id,
+      email: user.email,
+      full_name: user.user_metadata?.full_name || "",
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    })
+
+    if (insertError) {
+      console.error("Error creating profile:", insertError)
+      return { error: "Failed to create user profile. Please try again." }
+    }
+  } else if (profileError) {
+    console.error("Error checking profile:", profileError)
+    return { error: "Database error. Please try again." }
+  }
+
   const videoUrl = formData.get("videoUrl") as string
 
   if (!videoUrl) {
