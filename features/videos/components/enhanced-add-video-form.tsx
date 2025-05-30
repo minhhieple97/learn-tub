@@ -27,23 +27,27 @@ export function EnhancedAddVideoForm() {
     return regex.test(url)
   }
 
+  const dotPatternUrl =
+    "data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fillRule='evenodd'%3E%3Cg fill='%23ffffff' fillOpacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E";
+
   return (
     <Card className="relative overflow-hidden border-0 shadow-xl bg-gradient-to-br from-red-500 via-red-600 to-red-700 dark:from-red-600 dark:via-red-700 dark:to-red-800">
       {/* Background Pattern */}
-      <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"none\" fillRule=\"evenodd\"%3E%3Cg fill=\"%23ffffff\" fillOpacity=\"0.1\"%3E%3Cpath d=\"M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-20"></div>
-      
+      <div
+        className="absolute inset-0 opacity-20"
+        style={{ backgroundImage: `url('${dotPatternUrl}')` }}
+      ></div>
+
       <CardHeader className="relative text-center pb-6 pt-8">
         <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm border border-white/30 shadow-lg">
           <Youtube className="h-10 w-10 text-white" />
         </div>
-        <CardTitle className="text-3xl font-bold text-white mb-2">
-          Import YouTube Video
-        </CardTitle>
+        <CardTitle className="text-3xl font-bold text-white mb-2">Import YouTube Video</CardTitle>
         <CardDescription className="text-lg text-red-100 max-w-md mx-auto">
           Transform any YouTube video into an interactive learning experience
         </CardDescription>
       </CardHeader>
-      
+
       <CardContent className="relative space-y-6 pb-8">
         <form action={action} className="space-y-6">
           <div className="space-y-4">
@@ -60,10 +64,10 @@ export function EnhancedAddVideoForm() {
                 onChange={(e) => setUrl(e.target.value)}
                 className={`pl-14 h-14 text-lg bg-white/95 backdrop-blur-sm border-0 shadow-lg placeholder:text-gray-500 focus:bg-white focus:ring-2 focus:ring-white/50 ${
                   url && isValidYouTubeUrl(url)
-                    ? "ring-2 ring-green-400"
+                    ? 'ring-2 ring-green-400'
                     : url && !isValidYouTubeUrl(url)
-                      ? "ring-2 ring-orange-400"
-                      : ""
+                    ? 'ring-2 ring-orange-400'
+                    : ''
                 }`}
                 required
               />
@@ -113,7 +117,7 @@ export function EnhancedAddVideoForm() {
               <p className="text-sm text-red-100">Sync with video timeline</p>
             </div>
           </div>
-          
+
           <div className="flex items-center space-x-4 p-4 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/15 transition-colors">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-purple-500/20 border border-purple-400/30">
               <Zap className="h-6 w-6 text-purple-200" />
@@ -123,7 +127,7 @@ export function EnhancedAddVideoForm() {
               <p className="text-sm text-red-100">Smart analysis & quizzes</p>
             </div>
           </div>
-          
+
           <div className="flex items-center space-x-4 p-4 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/15 transition-colors">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-500/20 border border-green-400/30">
               <BookOpen className="h-6 w-6 text-green-200" />
@@ -136,5 +140,5 @@ export function EnhancedAddVideoForm() {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
