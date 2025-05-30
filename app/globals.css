@@ -120,21 +120,85 @@
 
 /* Enhanced typography */
 .prose-enhanced {
-  @apply prose prose-slate max-w-none;
-  --tw-prose-body: #4a5568; /* theme(colors.slate.700) */
-  --tw-prose-headings: #2d3748; /* theme(colors.slate.900) */
-  --tw-prose-lead: #718096; /* theme(colors.slate.600) */
-  --tw-prose-links: #4299e1; /* theme(colors.blue.600) */
-  --tw-prose-bold: #2d3748; /* theme(colors.slate.900) */
-  --tw-prose-counters: #718096; /* theme(colors.slate.500) */
-  --tw-prose-bullets: #a0aec0; /* theme(colors.slate.300) */
-  --tw-prose-hr: #edf2f7; /* theme(colors.slate.200) */
-  --tw-prose-quotes: #2d3748; /* theme(colors.slate.900) */
-  --tw-prose-quote-borders: #edf2f7; /* theme(colors.slate.200) */
-  --tw-prose-captions: #718096; /* theme(colors.slate.500) */
-  --tw-prose-code: #2d3748; /* theme(colors.slate.900) */
-  --tw-prose-pre-code: #edf2f7; /* theme(colors.slate.200) */
-  --tw-prose-pre-bg: #1a202c; /* theme(colors.slate.800) */
-  --tw-prose-th-borders: #a0aec0; /* theme(colors.slate.300) */
-  --tw-prose-td-borders: #edf2f7; /* theme(colors.slate.200) */
+  color: #4a5568;
+  line-height: 1.75;
+}
+
+.prose-enhanced h1,
+.prose-enhanced h2,
+.prose-enhanced h3,
+.prose-enhanced h4 {
+  color: #2d3748;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.prose-enhanced h1 {
+  font-size: 2.25rem;
+  margin-bottom: 1rem;
+}
+
+.prose-enhanced h2 {
+  font-size: 1.875rem;
+  margin-bottom: 0.75rem;
+}
+
+.prose-enhanced h3 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.prose-enhanced p {
+  margin-bottom: 1rem;
+}
+
+.prose-enhanced a {
+  color: #4299e1;
+  text-decoration: underline;
+}
+
+.prose-enhanced strong {
+  color: #2d3748;
+  font-weight: 600;
+}
+
+.prose-enhanced ul,
+.prose-enhanced ol {
+  margin-bottom: 1rem;
+  padding-left: 1.5rem;
+}
+
+.prose-enhanced li {
+  margin-bottom: 0.25rem;
+}
+
+.prose-enhanced blockquote {
+  border-left: 4px solid #edf2f7;
+  padding-left: 1rem;
+  color: #2d3748;
+  font-style: italic;
+  margin: 1rem 0;
+}
+
+.prose-enhanced code {
+  background-color: #edf2f7;
+  color: #2d3748;
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+}
+
+.prose-enhanced pre {
+  background-color: #1a202c;
+  color: #edf2f7;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  margin: 1rem 0;
+}
+
+.prose-enhanced pre code {
+  background-color: transparent;
+  color: inherit;
+  padding: 0;
 }
