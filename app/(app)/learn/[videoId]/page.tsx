@@ -9,7 +9,7 @@ interface VideoPageProps {
 }
 
 export default async function VideoPage({ params }: VideoPageProps) {
-  const { videoId } = params
+  const { videoId } = await params;
   const supabase = await createClient()
 
   // Check if video exists in database
