@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button"
 import { createClient } from "@/lib/supabase/client"
 import { useState } from "react"
+import { useToast } from "@/components/ui/use-toast"
 
 interface GoogleAuthButtonProps {
   mode: "signin" | "signup"
@@ -11,6 +12,7 @@ interface GoogleAuthButtonProps {
 export function GoogleAuthButton({ mode }: GoogleAuthButtonProps) {
   const [isLoading, setIsLoading] = useState(false)
   const supabase = createClient()
+  const { toast } = useToast()
 
   const handleGoogleAuth = async () => {
     setIsLoading(true)
@@ -29,9 +31,19 @@ export function GoogleAuthButton({ mode }: GoogleAuthButtonProps) {
 
       if (error) {
         console.error("Google auth error:", error.message)
+        toast({
+          title: "Authentication Error",
+          description: "Failed to authenticate with Google. Please try again.",
+          variant: "destructive",
+        })
       }
     } catch (error) {
       console.error("Unexpected error:", error)
+      toast({
+        title: "Unexpected Error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      })
     } finally {
       setIsLoading(false)
     }
