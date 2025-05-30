@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button"
+import { ThemeToggle } from "@/components/theme-toggle"
 import { LogOut, User } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
@@ -24,6 +25,7 @@ export function Header({ user }: HeaderProps) {
             <User className="h-4 w-4" />
             <span className="text-sm text-gray-600 dark:text-gray-300">{user.email}</span>
           </div>
+          <ThemeToggle />
           <form action={signOut}>
             <Button variant="outline" size="sm">
               <LogOut className="h-4 w-4 mr-2" />

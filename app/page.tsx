@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { ThemeToggle } from "@/components/theme-toggle"
 import { BookOpen, Brain, Clock, Users } from "lucide-react"
 import Link from "next/link"
 
@@ -13,7 +14,8 @@ export default function LandingPage() {
             <BookOpen className="h-8 w-8 text-blue-600" />
             <span className="text-2xl font-bold text-gray-900 dark:text-white">LearnTub</span>
           </div>
-          <div className="space-x-4">
+          <div className="flex items-center space-x-4">
+            <ThemeToggle />
             <Button variant="ghost" asChild>
               <Link href="/login">Login</Link>
             </Button>
