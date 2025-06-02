@@ -13,220 +13,227 @@ import { useToast } from "@/components/ui/use-toast"
 import { Clock, Save, Plus, X } from "lucide-react"
 
 interface NoteEditorProps {
-  videoId: string
-  currentTimestamp: number
+  videoId: string;
+  currentTimestamp: number;
+  onTimestampClick?: (time: number) => void;
 }
 
 interface Note {
-  id: string
-  content: string
-  timestamp_seconds: number
-  tags: string[]
-  created_at: string
-  updated_at: string
+  id: string;
+  content: string;
+  timestamp_seconds: number;
+  tags: string[];
+  created_at: string;
+  updated_at: string;
 }
 
-export function NoteEditor({ videoId, currentTimestamp }: NoteEditorProps) {
-  const [notes, setNotes] = useState<Note[]>([])
-  const [content, setContent] = useState("")
-  const [tagInput, setTagInput] = useState("")
-  const [tags, setTags] = useState<string[]>([])
-  const [isLoading, setIsLoading] = useState(false)
-  const [editingNoteId, setEditingNoteId] = useState<string | null>(null)
-  const [dbVideoId, setDbVideoId] = useState<string | null>(null)
-  const supabase = createClient()
-  const { toast } = useToast()
+export function NoteEditor({ videoId, currentTimestamp, onTimestampClick }: NoteEditorProps) {
+  const [notes, setNotes] = useState<Note[]>([]);
+  const [content, setContent] = useState('');
+  const [tagInput, setTagInput] = useState('');
+  const [tags, setTags] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [editingNoteId, setEditingNoteId] = useState<string | null>(null);
+  const [dbVideoId, setDbVideoId] = useState<string | null>(null);
+  const supabase = createClient();
+  const { toast } = useToast();
 
   // Fetch video ID from database
   useEffect(() => {
     const fetchVideoId = async () => {
       try {
-        const { data: videos } = await supabase.from("videos").select("id").eq("youtube_id", videoId).limit(1)
+        const { data: videos } = await supabase
+          .from('videos')
+          .select('id')
+          .eq('youtube_id', videoId)
+          .limit(1);
 
         if (videos && videos.length > 0) {
-          setDbVideoId(videos[0].id)
+          setDbVideoId(videos[0].id);
         }
       } catch (error) {
-        console.error("Error fetching video ID:", error)
+        console.error('Error fetching video ID:', error);
       }
-    }
+    };
 
-    fetchVideoId()
-  }, [videoId])
+    fetchVideoId();
+  }, [videoId]);
 
   // Fetch notes when dbVideoId is available
   useEffect(() => {
-    if (!dbVideoId) return
+    if (!dbVideoId) return;
 
     const fetchNotes = async () => {
       try {
-        const { data: user } = await supabase.auth.getUser()
-        if (!user.user) return
+        const { data: user } = await supabase.auth.getUser();
+        if (!user.user) return;
 
         const { data, error } = await supabase
-          .from("notes")
-          .select("*")
-          .eq("video_id", dbVideoId)
-          .eq("user_id", user.user.id)
-          .order("timestamp_seconds", { ascending: true })
+          .from('notes')
+          .select('*')
+          .eq('video_id', dbVideoId)
+          .eq('user_id', user.user.id)
+          .order('timestamp_seconds', { ascending: true });
 
         if (error) {
-          throw error
+          throw error;
         }
 
-        setNotes(data || [])
+        setNotes(data || []);
       } catch (error) {
-        console.error("Error fetching notes:", error)
+        console.error('Error fetching notes:', error);
       }
-    }
+    };
 
-    fetchNotes()
+    fetchNotes();
 
     // Set up real-time subscription
     const notesSubscription = supabase
-      .channel("notes_changes")
+      .channel('notes_changes')
       .on(
-        "postgres_changes",
+        'postgres_changes',
         {
-          event: "*",
-          schema: "public",
-          table: "notes",
+          event: '*',
+          schema: 'public',
+          table: 'notes',
           filter: `video_id=eq.${dbVideoId}`,
         },
         (payload) => {
-          if (payload.eventType === "INSERT") {
-            setNotes((prev) => [...prev, payload.new as Note])
-          } else if (payload.eventType === "UPDATE") {
-            setNotes((prev) => prev.map((note) => (note.id === payload.new.id ? (payload.new as Note) : note)))
-          } else if (payload.eventType === "DELETE") {
-            setNotes((prev) => prev.filter((note) => note.id !== payload.old.id))
+          if (payload.eventType === 'INSERT') {
+            setNotes((prev) => [...prev, payload.new as Note]);
+          } else if (payload.eventType === 'UPDATE') {
+            setNotes((prev) =>
+              prev.map((note) => (note.id === payload.new.id ? (payload.new as Note) : note)),
+            );
+          } else if (payload.eventType === 'DELETE') {
+            setNotes((prev) => prev.filter((note) => note.id !== payload.old.id));
           }
         },
       )
-      .subscribe()
+      .subscribe();
 
     return () => {
-      supabase.removeChannel(notesSubscription)
-    }
-  }, [dbVideoId])
+      supabase.removeChannel(notesSubscription);
+    };
+  }, [dbVideoId]);
 
   const handleAddTag = () => {
     if (tagInput.trim() && !tags.includes(tagInput.trim())) {
-      setTags([...tags, tagInput.trim()])
-      setTagInput("")
+      setTags([...tags, tagInput.trim()]);
+      setTagInput('');
     }
-  }
+  };
 
   const handleRemoveTag = (tag: string) => {
-    setTags(tags.filter((t) => t !== tag))
-  }
+    setTags(tags.filter((t) => t !== tag));
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault()
-      handleAddTag()
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleAddTag();
     }
-  }
+  };
 
   const handleSaveNote = async () => {
-    if (!content.trim() || !dbVideoId) return
+    if (!content.trim() || !dbVideoId) return;
 
-    setIsLoading(true)
+    setIsLoading(true);
 
     try {
-      const { data: user } = await supabase.auth.getUser()
+      const { data: user } = await supabase.auth.getUser();
       if (!user.user) {
         toast({
-          title: "Authentication Error",
-          description: "You must be logged in to save notes",
-          variant: "destructive",
-        })
-        return
+          title: 'Authentication Error',
+          description: 'You must be logged in to save notes',
+          variant: 'destructive',
+        });
+        return;
       }
 
       if (editingNoteId) {
         // Update existing note
         const { error } = await supabase
-          .from("notes")
+          .from('notes')
           .update({
             content,
             tags,
             updated_at: new Date().toISOString(),
           })
-          .eq("id", editingNoteId)
+          .eq('id', editingNoteId);
 
-        if (error) throw error
+        if (error) throw error;
 
         toast({
-          title: "Note Updated",
-          description: "Your note has been updated successfully",
-        })
+          title: 'Note Updated',
+          description: 'Your note has been updated successfully',
+        });
 
-        setEditingNoteId(null)
+        setEditingNoteId(null);
       } else {
         // Create new note
-        const { error } = await supabase.from("notes").insert({
+        const { error } = await supabase.from('notes').insert({
           video_id: dbVideoId,
           user_id: user.user.id,
           content,
           timestamp_seconds: currentTimestamp,
           tags,
-        })
+        });
 
-        if (error) throw error
+        if (error) throw error;
 
         toast({
-          title: "Note Saved",
-          description: "Your note has been saved successfully",
-        })
+          title: 'Note Saved',
+          description: 'Your note has been saved successfully',
+        });
       }
 
       // Reset form
-      setContent("")
-      setTags([])
+      setContent('');
+      setTags([]);
     } catch (error) {
-      console.error("Error saving note:", error)
+      console.error('Error saving note:', error);
       toast({
-        title: "Error",
-        description: "Failed to save note. Please try again.",
-        variant: "destructive",
-      })
+        title: 'Error',
+        description: 'Failed to save note. Please try again.',
+        variant: 'destructive',
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleEditNote = (note: Note) => {
-    setContent(note.content)
-    setTags(note.tags || [])
-    setEditingNoteId(note.id)
-  }
+    setContent(note.content);
+    setTags(note.tags || []);
+    setEditingNoteId(note.id);
+  };
 
   const handleDeleteNote = async (noteId: string) => {
     try {
-      const { error } = await supabase.from("notes").delete().eq("id", noteId)
+      const { error } = await supabase.from('notes').delete().eq('id', noteId);
 
-      if (error) throw error
+      if (error) throw error;
 
       toast({
-        title: "Note Deleted",
-        description: "Your note has been deleted successfully",
-      })
+        title: 'Note Deleted',
+        description: 'Your note has been deleted successfully',
+      });
     } catch (error) {
-      console.error("Error deleting note:", error)
+      console.error('Error deleting note:', error);
       toast({
-        title: "Error",
-        description: "Failed to delete note. Please try again.",
-        variant: "destructive",
-      })
+        title: 'Error',
+        description: 'Failed to delete note. Please try again.',
+        variant: 'destructive',
+      });
     }
-  }
+  };
 
   const formatTimestamp = (seconds: number) => {
-    const mins = Math.floor(seconds / 60)
-    const secs = Math.floor(seconds % 60)
-    return `${mins}:${secs < 10 ? "0" : ""}${secs}`
-  }
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+  };
 
   return (
     <div className="space-y-4">
@@ -267,7 +274,7 @@ export function NoteEditor({ videoId, currentTimestamp }: NoteEditorProps) {
           </div>
           <Button onClick={handleSaveNote} disabled={isLoading} className="w-full">
             <Save className="mr-2 h-4 w-4" />
-            {editingNoteId ? "Update Note" : "Save Note"}
+            {editingNoteId ? 'Update Note' : 'Save Note'}
           </Button>
         </CardContent>
       </Card>
@@ -275,14 +282,23 @@ export function NoteEditor({ videoId, currentTimestamp }: NoteEditorProps) {
       <div className="space-y-2">
         <h3 className="text-lg font-medium">Your Notes</h3>
         {notes.length === 0 ? (
-          <p className="text-sm text-gray-500">No notes yet. Start taking notes to see them here.</p>
+          <p className="text-sm text-gray-500">
+            No notes yet. Start taking notes to see them here.
+          </p>
         ) : (
           notes.map((note) => (
             <Card key={note.id} className="overflow-hidden">
               <div className="bg-muted px-4 py-2 flex justify-between items-center">
                 <div className="flex items-center space-x-2">
                   <Clock className="h-4 w-4" />
-                  <span className="text-sm font-medium">{formatTimestamp(note.timestamp_seconds)}</span>
+                  <span
+                    className={`text-sm font-medium ${
+                      onTimestampClick ? 'cursor-pointer hover:text-blue-600' : ''
+                    }`}
+                    onClick={() => onTimestampClick?.(note.timestamp_seconds)}
+                  >
+                    {formatTimestamp(note.timestamp_seconds)}
+                  </span>
                 </div>
                 <div className="flex space-x-2">
                   <Button variant="ghost" size="sm" onClick={() => handleEditNote(note)}>
@@ -310,5 +326,5 @@ export function NoteEditor({ videoId, currentTimestamp }: NoteEditorProps) {
         )}
       </div>
     </div>
-  )
+  );
 }

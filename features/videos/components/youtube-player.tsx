@@ -5,73 +5,78 @@ import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Pause, Play, SkipBack, SkipForward, Volume2, VolumeX } from "lucide-react"
 import { Slider } from "@/components/ui/slider"
-import { createClient } from "@/lib/supabase/client"
-import { useRouter } from "next/navigation"
+import { createClient } from '@/lib/supabase/client';
 
 interface YouTubePlayerProps {
-  videoId: string
-  initialTimestamp?: number
-  onTimeUpdate?: (time: number) => void
+  videoId: string;
+  initialTimestamp?: number;
+  onTimeUpdate?: (time: number) => void;
+  targetSeekTime?: number;
 }
 
 declare global {
   interface Window {
-    onYouTubeIframeAPIReady: () => void
-    YT: any
+    onYouTubeIframeAPIReady: () => void;
+    YT: any;
   }
 }
 
-export function YouTubePlayer({ videoId, initialTimestamp = 0, onTimeUpdate }: YouTubePlayerProps) {
-  const [player, setPlayer] = useState<any>(null)
-  const [playerState, setPlayerState] = useState(-1)
-  const [currentTime, setCurrentTime] = useState(initialTimestamp)
-  const [duration, setDuration] = useState(0)
-  const [volume, setVolume] = useState(100)
-  const [isMuted, setIsMuted] = useState(false)
-  const [isApiLoaded, setIsApiLoaded] = useState(false)
-  const playerRef = useRef<HTMLDivElement>(null)
-  const timeUpdateIntervalRef = useRef<NodeJS.Timeout | null>(null)
-  const router = useRouter()
-  const supabase = createClient()
+export function YouTubePlayer({
+  videoId,
+  initialTimestamp = 0,
+  onTimeUpdate,
+  targetSeekTime,
+}: YouTubePlayerProps) {
+  const [player, setPlayer] = useState<any>(null);
+  const [playerState, setPlayerState] = useState(-1);
+  const [currentTime, setCurrentTime] = useState(initialTimestamp);
+  const [duration, setDuration] = useState(0);
+  const [volume, setVolume] = useState(100);
+  const [isMuted, setIsMuted] = useState(false);
+  const [isApiLoaded, setIsApiLoaded] = useState(false);
+  const playerRef = useRef<HTMLDivElement>(null);
+  const timeUpdateIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const supabase = createClient();
 
   // Load YouTube API
   useEffect(() => {
     if (!window.YT) {
-      const tag = document.createElement("script")
-      tag.src = "https://www.youtube.com/iframe_api"
-      const firstScriptTag = document.getElementsByTagName("script")[0]
-      firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag)
+      const tag = document.createElement('script');
+      tag.src = 'https://www.youtube.com/iframe_api';
+      const firstScriptTag = document.getElementsByTagName('script')[0];
+      firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
 
       window.onYouTubeIframeAPIReady = () => {
-        setIsApiLoaded(true)
-      }
+        setIsApiLoaded(true);
+      };
     } else {
-      setIsApiLoaded(true)
+      setIsApiLoaded(true);
     }
 
     return () => {
       if (timeUpdateIntervalRef.current) {
-        clearInterval(timeUpdateIntervalRef.current)
+        clearInterval(timeUpdateIntervalRef.current);
       }
-    }
-  }, [])
+    };
+  }, []);
 
   // Initialize player when API is loaded
   useEffect(() => {
-    if (!isApiLoaded || !playerRef.current) return
+    if (!isApiLoaded || !playerRef.current || player) return;
 
     const onPlayerReady = (event: any) => {
-      setDuration(event.target.getDuration())
-      if (initialTimestamp > 0) {
-        event.target.seekTo(initialTimestamp)
+      setPlayer(event.target);
+      setDuration(event.target.getDuration());
+      if (initialTimestamp > 0 && initialTimestamp < event.target.getDuration()) {
+        event.target.seekTo(initialTimestamp, true);
       }
-      setVolume(event.target.getVolume())
-      setIsMuted(event.target.isMuted())
-    }
+      setVolume(event.target.getVolume());
+      setIsMuted(event.target.isMuted());
+    };
 
     const onPlayerStateChange = (event: any) => {
-      setPlayerState(event.data)
-    }
+      setPlayerState(event.data);
+    };
 
     const newPlayer = new window.YT.Player(playerRef.current, {
       videoId,
@@ -83,143 +88,187 @@ export function YouTubePlayer({ videoId, initialTimestamp = 0, onTimeUpdate }: Y
         modestbranding: 1,
         rel: 0,
         showinfo: 0,
-        start: initialTimestamp,
       },
       events: {
         onReady: onPlayerReady,
         onStateChange: onPlayerStateChange,
       },
-    })
-
-    setPlayer(newPlayer)
-
-    // Set up interval to track current time
-    timeUpdateIntervalRef.current = setInterval(() => {
-      if (newPlayer && newPlayer.getCurrentTime) {
-        const time = Math.floor(newPlayer.getCurrentTime())
-        setCurrentTime(time)
-        if (onTimeUpdate) {
-          onTimeUpdate(time)
-        }
-      }
-    }, 1000)
-
-    // Track learning session
-    const trackSession = async () => {
-      try {
-        const {
-          data: { user },
-        } = await supabase.auth.getUser()
-
-        if (user) {
-          // Get video from database
-          const { data: videos } = await supabase.from("videos").select("id").eq("youtube_id", videoId).limit(1)
-
-          if (videos && videos.length > 0) {
-            const videoDbId = videos[0].id
-
-            // Check if session exists
-            const { data: existingSessions } = await supabase
-              .from("learning_sessions")
-              .select("id")
-              .eq("user_id", user.id)
-              .eq("video_id", videoDbId)
-              .limit(1)
-
-            if (existingSessions && existingSessions.length > 0) {
-              // Update existing session
-              await supabase
-                .from("learning_sessions")
-                .update({
-                  updated_at: new Date().toISOString(),
-                })
-                .eq("id", existingSessions[0].id)
-            } else {
-              // Create new session
-              await supabase.from("learning_sessions").insert({
-                user_id: user.id,
-                video_id: videoDbId,
-                duration_seconds: 0,
-                progress_seconds: 0,
-              })
-            }
-          }
-        }
-      } catch (error) {
-        console.error("Error tracking session:", error)
-      }
-    }
-
-    trackSession()
+    });
 
     return () => {
       if (timeUpdateIntervalRef.current) {
-        clearInterval(timeUpdateIntervalRef.current)
+        clearInterval(timeUpdateIntervalRef.current);
       }
-      if (newPlayer && newPlayer.destroy) {
-        newPlayer.destroy()
+      if (newPlayer && typeof newPlayer.destroy === 'function') {
+        newPlayer.destroy();
+      }
+      setPlayer(null);
+    };
+  }, [isApiLoaded, videoId]);
+
+  // Effect for time updates using player state
+  useEffect(() => {
+    if (player && typeof player.getCurrentTime === 'function') {
+      if (timeUpdateIntervalRef.current) {
+        clearInterval(timeUpdateIntervalRef.current);
+      }
+
+      timeUpdateIntervalRef.current = setInterval(() => {
+        const time = player.getCurrentTime();
+        if (time !== undefined) {
+          const flooredTime = Math.floor(time);
+          setCurrentTime(flooredTime);
+          if (onTimeUpdate) {
+            onTimeUpdate(flooredTime);
+          }
+        }
+      }, 1000);
+    }
+    return () => {
+      if (timeUpdateIntervalRef.current) {
+        clearInterval(timeUpdateIntervalRef.current);
+      }
+    };
+  }, [player, onTimeUpdate]);
+
+  // Effect to handle external seek requests
+  useEffect(() => {
+    if (
+      player &&
+      typeof targetSeekTime === 'number' &&
+      targetSeekTime >= 0 &&
+      typeof player.seekTo === 'function'
+    ) {
+      const currentVideoTime = Math.floor(player.getCurrentTime() || 0);
+      if (targetSeekTime !== currentVideoTime) {
+        player.seekTo(targetSeekTime, true);
+        setCurrentTime(targetSeekTime);
       }
     }
-  }, [isApiLoaded, videoId, initialTimestamp, onTimeUpdate])
+  }, [player, targetSeekTime]);
 
-  // Update session progress periodically
+  // Track learning session (Initial session creation or update last_accessed_at)
   useEffect(() => {
-    const updateProgress = async () => {
-      if (
-        !player ||
-        (typeof window !== 'undefined' && playerState !== window.YT?.PlayerState?.PLAYING)
-      )
-        return;
+    if (!player || !videoId) return;
 
+    const trackInitialSession = async () => {
       try {
         const {
           data: { user },
         } = await supabase.auth.getUser();
+        if (!user) return;
 
-        if (user) {
-          // Get video from database
-          const { data: videos } = await supabase
-            .from('videos')
-            .select('id')
-            .eq('youtube_id', videoId)
-            .limit(1);
-
-          if (videos && videos.length > 0) {
-            const videoDbId = videos[0].id;
-
-            // Update session progress
-            await supabase
-              .from('learning_sessions')
-              .update({
-                progress_seconds: currentTime,
-                duration_seconds: Math.max(duration, 0),
-                updated_at: new Date().toISOString(),
-              })
-              .eq('user_id', user.id)
-              .eq('video_id', videoDbId);
-          }
+        const { data: videos } = await supabase
+          .from('videos')
+          .select('id')
+          .eq('youtube_id', videoId)
+          .single();
+        if (!videos) {
+          console.error('Video not found in DB for session tracking:', videoId);
+          return;
         }
+        const videoDbId = videos.id;
+
+        const { data: existingSession, error: fetchError } = await supabase
+          .from('learning_sessions')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('video_id', videoDbId)
+          .single();
+
+        if (fetchError && fetchError.code !== 'PGRST116') {
+          console.error('Error fetching existing session:', fetchError);
+          return;
+        }
+
+        if (existingSession) {
+          await supabase
+            .from('learning_sessions')
+            .update({ updated_at: new Date().toISOString() })
+            .eq('id', existingSession.id);
+        } else {
+          const playerDuration = player.getDuration ? Math.floor(player.getDuration()) : 0;
+          await supabase.from('learning_sessions').insert({
+            user_id: user.id,
+            video_id: videoDbId,
+            duration_seconds: Math.max(playerDuration, 0),
+            progress_seconds: Math.floor(initialTimestamp),
+            updated_at: new Date().toISOString(),
+          });
+        }
+      } catch (error) {
+        console.error('Error tracking initial session:', error);
+      }
+    };
+
+    if (player && typeof player.getDuration === 'function') {
+      trackInitialSession();
+    }
+  }, [player, videoId, supabase, initialTimestamp]);
+
+  // Update session progress periodically
+  useEffect(() => {
+    if (
+      !player ||
+      (typeof window !== 'undefined' && playerState !== window.YT?.PlayerState?.PLAYING)
+    ) {
+      return;
+    }
+
+    const updateProgress = async () => {
+      try {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (!user) return;
+
+        const { data: videoInfo } = await supabase
+          .from('videos')
+          .select('id')
+          .eq('youtube_id', videoId)
+          .single();
+        if (!videoInfo) return;
+
+        const videoDbId = videoInfo.id;
+        const currentVideoTime = player.getCurrentTime
+          ? Math.floor(player.getCurrentTime())
+          : currentTime;
+        const videoDuration = player.getDuration ? Math.floor(player.getDuration()) : duration;
+
+        await supabase
+          .from('learning_sessions')
+          .update({
+            progress_seconds: currentVideoTime,
+            duration_seconds: Math.max(videoDuration, 0),
+            updated_at: new Date().toISOString(),
+          })
+          .eq('user_id', user.id)
+          .eq('video_id', videoDbId);
       } catch (error) {
         console.error('Error updating progress:', error);
       }
     };
 
-    // Update progress every 30 seconds
     const progressInterval = setInterval(updateProgress, 30000);
 
     return () => {
       clearInterval(progressInterval);
     };
-  }, [player, playerState, currentTime, duration, videoId]);
+  }, [player, playerState, videoId, supabase, currentTime, duration]);
 
-  const formatTime = (seconds: number) => {
+  const formatTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   };
 
   const handlePlayPause = () => {
-    if (!player) return;
+    if (
+      !player ||
+      typeof player.playVideo !== 'function' ||
+      typeof player.pauseVideo !== 'function'
+    )
+      return;
 
     if (playerState === window.YT.PlayerState.PLAYING) {
       player.pauseVideo();
@@ -229,14 +278,17 @@ export function YouTubePlayer({ videoId, initialTimestamp = 0, onTimeUpdate }: Y
   };
 
   const handleSeek = (value: number[]) => {
-    if (!player) return;
+    if (!player || typeof player.seekTo !== 'function') return;
     const newTime = value[0];
-    player.seekTo(newTime);
+    player.seekTo(newTime, true);
     setCurrentTime(newTime);
+    if (onTimeUpdate) {
+      onTimeUpdate(newTime);
+    }
   };
 
   const handleVolumeChange = (value: number[]) => {
-    if (!player) return;
+    if (!player || typeof player.setVolume !== 'function') return;
     const newVolume = value[0];
     player.setVolume(newVolume);
     setVolume(newVolume);
@@ -250,7 +302,7 @@ export function YouTubePlayer({ videoId, initialTimestamp = 0, onTimeUpdate }: Y
   };
 
   const toggleMute = () => {
-    if (!player) return;
+    if (!player || typeof player.mute !== 'function' || typeof player.unMute !== 'function') return;
     if (isMuted) {
       player.unMute();
       setIsMuted(false);
@@ -261,17 +313,27 @@ export function YouTubePlayer({ videoId, initialTimestamp = 0, onTimeUpdate }: Y
   };
 
   const skipForward = () => {
-    if (!player) return;
-    const newTime = Math.min(currentTime + 10, duration);
-    player.seekTo(newTime);
-    setCurrentTime(newTime);
+    if (!player || typeof player.seekTo !== 'function' || typeof player.getDuration !== 'function')
+      return;
+    const currentVideoTime = player.getCurrentTime ? player.getCurrentTime() : currentTime;
+    const videoDuration = player.getDuration ? player.getDuration() : duration;
+    const newTime = Math.min(currentVideoTime + 10, videoDuration);
+    player.seekTo(newTime, true);
+    setCurrentTime(Math.floor(newTime));
+    if (onTimeUpdate) {
+      onTimeUpdate(Math.floor(newTime));
+    }
   };
 
   const skipBackward = () => {
-    if (!player) return;
-    const newTime = Math.max(currentTime - 10, 0);
-    player.seekTo(newTime);
-    setCurrentTime(newTime);
+    if (!player || typeof player.seekTo !== 'function') return;
+    const currentVideoTime = player.getCurrentTime ? player.getCurrentTime() : currentTime;
+    const newTime = Math.max(currentVideoTime - 10, 0);
+    player.seekTo(newTime, true);
+    setCurrentTime(Math.floor(newTime));
+    if (onTimeUpdate) {
+      onTimeUpdate(Math.floor(newTime));
+    }
   };
 
   return (
