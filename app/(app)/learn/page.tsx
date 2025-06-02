@@ -1,8 +1,8 @@
 import { EnhancedAddVideoForm } from "@/features/videos/components/enhanced-add-video-form"
 import { VideoLibrary } from "@/features/videos/components/video-library"
-import { LearningCategories } from "@/features/videos/components/learning-categories"
-import { HowItWorks } from "@/features/videos/components/how-it-works"
-import { ProTips } from "@/features/videos/components/pro-tips"
+
+import { HowItWorks } from '@/features/videos/components/how-it-works';
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Play, Plus, Library } from "lucide-react"
 
