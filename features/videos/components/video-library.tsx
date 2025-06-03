@@ -1,6 +1,6 @@
 "use client"
 
-import { useVideos } from '@/hooks/use-videos';
+import { useVideos } from '@/features/videos/hooks/use-videos';
 import { VideoLibrarySkeleton } from './video-library-skeleton';
 import { VideoLibraryError } from './video-library-error';
 import { VideoLibraryEmpty } from './video-library-empty';

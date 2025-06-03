@@ -4,8 +4,18 @@ import { ThemeToggle } from "@/components/theme-toggle"
 import { BookOpen, Brain, Clock, Users, ArrowRight, Play } from 'lucide-react';
 import Link from 'next/link';
 import { routes } from '@/routes';
+import { createClient } from '@/lib/supabase/server';
+import { redirect } from 'next/navigation';
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (user) {
+    redirect(routes.learn);
+  }
   return (
     <div className="min-h-screen bg-neutral-pearl">
       <header className="bg-neutral-pearl/80 backdrop-blur-sm border-b border-neutral-stone sticky top-0 z-50">
