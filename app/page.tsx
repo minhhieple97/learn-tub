@@ -7,7 +7,6 @@ import Link from 'next/link';
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-neutral-pearl">
-      {/* Header */}
       <header className="bg-neutral-pearl/80 backdrop-blur-sm border-b border-neutral-stone sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
           <nav className="flex items-center justify-between">
@@ -38,7 +37,6 @@ export default function LandingPage() {
       </header>
 
       <main>
-        {/* Hero Section */}
         <section className="relative bg-gradient-to-br from-neutral-pearl via-neutral-dust to-neutral-stone">
           <div className="absolute inset-0 bg-gradient-to-r from-neutral-sage/5 to-neutral-mist/5"></div>
           <div className="relative container mx-auto px-4 py-24 lg:py-32">
@@ -81,7 +79,6 @@ export default function LandingPage() {
                 </Button>
               </div>
 
-              {/* Trust indicators */}
               <div className="flex items-center justify-center space-x-8 text-neutral-stone-foreground">
                 <div className="text-center">
                   <div className="text-2xl font-bold text-neutral-pearl-foreground">10K+</div>
@@ -102,7 +99,6 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* Features Section */}
         <section className="py-24 bg-neutral-dust">
           <div className="container mx-auto px-4">
             <div className="text-center mb-16">
@@ -186,7 +182,6 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* CTA Section */}
         <section className="py-24 bg-gradient-to-r from-neutral-stone to-neutral-mist">
           <div className="container mx-auto px-4">
             <div className="text-center bg-neutral-pearl rounded-3xl p-12 lg:p-16 shadow-2xl max-w-4xl mx-auto">
