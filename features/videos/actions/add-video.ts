@@ -1,5 +1,6 @@
 "use server"
 
+import { env } from '@/env.mjs';
 import { createClient } from "@/lib/supabase/server"
 
 interface YouTubeVideoData {
@@ -82,7 +83,7 @@ export async function addVideoAction(prevState: any, formData: FormData) {
     }
 
     // Fetch video data from YouTube API
-    const apiKey = process.env.YOUTUBE_API_KEY
+    const apiKey = env.YOUTUBE_API_KEY;
     let videoData: YouTubeVideoData | null = null
 
     if (apiKey) {

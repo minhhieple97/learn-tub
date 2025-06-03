@@ -10,4 +10,9 @@ export const routes = {
   settings: {
     root: '/settings',
   },
+  auth: {
+    confirm: '/auth/confirm',
+    authCodeError: '/auth/auth-code-error',
+    callback: '/auth/callback',
+  },
 };
