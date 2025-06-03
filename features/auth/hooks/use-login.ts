@@ -1,12 +1,11 @@
 'use client';
 
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { createClient } from '@/lib/supabase/client';
-import { routes } from '@/routes';
+import { useAction } from 'next-safe-action/hooks';
 import { loginSchema } from '../schemas';
+import { loginAction } from '../actions';
 import type { LoginFormData } from '../types';
 import { toast } from '@/hooks/use-toast';
 
@@ -20,10 +19,23 @@ type UseLoginReturn = {
 };
 
 export function useLogin(): UseLoginReturn {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
-  const router = useRouter();
-  const supabase = createClient();
+  
+  const { execute, isPending } = useAction(loginAction, {
+    onError: ({ error }) => {
+      toast({
+        title: 'Error',
+        description: error.serverError || 'An unexpected error occurred',
+        variant: 'destructive',
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: 'Success',
+        description: 'Successfully signed in!',
+        variant: 'default',
+      });
+    },
+  });
 
   const {
     register,
@@ -37,39 +49,8 @@ export function useLogin(): UseLoginReturn {
     },
   });
 
-  const login = async ({ email, password }: LoginFormData) => {
-    setIsLoading(true);
-    setError('');
-
-    try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) {
-        toast({
-          title: 'Error',
-          description: error.message,
-          variant: 'destructive',
-        });
-        return;
-      }
-      router.push(routes.learn);
-      router.refresh();
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'An unexpected error occurred',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const onSubmit = async (data: LoginFormData) => {
-    await login(data);
+    execute(data);
   };
 
   return {
@@ -77,7 +58,7 @@ export function useLogin(): UseLoginReturn {
     handleSubmit,
     errors,
     isSubmitting,
-    isLoading,
+    isLoading: isPending,
     onSubmit,
   };
 }

@@ -1,14 +1,11 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { createClient } from '@/lib/supabase/client';
+import { useAction } from 'next-safe-action/hooks';
 import { useToast } from '@/hooks/use-toast';
-import { routes } from '@/routes';
-import { getPasswordStrength, getPasswordStrengthColor } from '@/lib/utils';
 import { registerSchema } from '../schemas';
+import { registerAction } from '../actions';
 import type { RegisterFormData } from '../types';
 
 type UseRegisterReturn = {
@@ -18,16 +15,31 @@ type UseRegisterReturn = {
   isSubmitting: boolean;
   isLoading: boolean;
   password: string;
-  passwordStrength: ReturnType<typeof getPasswordStrength>;
-  passwordStrengthColor: string;
+  confirmPassword: string;
+  passwordRequirements: {
+    hasMinLength: boolean;
+  };
   onSubmit: (data: RegisterFormData) => Promise<void>;
 };
 
 export function useRegister(): UseRegisterReturn {
-  const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
-  const supabase = createClient();
   const { toast } = useToast();
+
+  const { execute, isPending } = useAction(registerAction, {
+    onError: ({ error }) => {
+      toast({
+        title: 'Error',
+        description: error.serverError || 'An unexpected error occurred during registration',
+        variant: 'destructive',
+      });
+    },
+    onSuccess: () => {
+      toast({
+        title: 'Account created successfully!',
+        description: 'Welcome to LearnTub. You can now start learning.',
+      });
+    },
+  });
 
   const {
     register,
@@ -40,60 +52,19 @@ export function useRegister(): UseRegisterReturn {
       fullName: '',
       email: '',
       password: '',
+      confirmPassword: '',
     },
   });
 
   const password = watch('password') || '';
-  const passwordStrength = getPasswordStrength(password);
-  const passwordStrengthColor = getPasswordStrengthColor(passwordStrength.strength);
+  const confirmPassword = watch('confirmPassword') || '';
 
-  const registerUser = async ({ email, password, fullName }: RegisterFormData) => {
-    setIsLoading(true);
-
-    try {
-      const { data, error: signUpError } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            full_name: fullName,
-          },
-        },
-      });
-
-      if (signUpError) {
-        toast({
-          title: 'Error',
-          description: signUpError.message,
-          variant: 'destructive',
-        });
-        return;
-      }
-
-      if (data.user) {
-        toast({
-          title: 'Account created successfully!',
-          description: 'Welcome to LearnTub. You can now start learning.',
-        });
-
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        router.push(routes.learn);
-        router.refresh();
-      }
-    } catch (error) {
-      console.error('Registration error:', error);
-      toast({
-        title: 'Error',
-        description: 'An unexpected error occurred during registration',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsLoading(false);
-    }
+  const passwordRequirements = {
+    hasMinLength: password.length >= 8,
   };
 
   const onSubmit = async (data: RegisterFormData) => {
-    await registerUser(data);
+    execute(data);
   };
 
   return {
@@ -101,10 +72,10 @@ export function useRegister(): UseRegisterReturn {
     handleSubmit,
     errors,
     isSubmitting,
-    isLoading,
+    isLoading: isPending,
     password,
-    passwordStrength,
-    passwordStrengthColor,
+    confirmPassword,
+    passwordRequirements,
     onSubmit,
   };
 }

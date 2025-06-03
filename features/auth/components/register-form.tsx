@@ -5,22 +5,13 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { GoogleAuthButton } from './google-auth-button'
 import { useRegister } from '@/features/auth/hooks/use-register';
+import { CheckCircle2, Circle, Loader2 } from 'lucide-react';
 
 export function RegisterForm() {
-  const {
-    register,
-    handleSubmit,
-    errors,
-    isSubmitting,
-    isLoading,
-    password,
-    passwordStrength,
-    passwordStrengthColor,
-    onSubmit,
-  } = useRegister();
+  const { register, handleSubmit, errors, isSubmitting, isLoading, onSubmit } = useRegister();
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <GoogleAuthButton mode="signup" />
 
       <div className="relative">
@@ -32,75 +23,116 @@ export function RegisterForm() {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="fullName">Full Name</Label>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+        <div className="space-y-2 mb-4">
+          <Label htmlFor="fullName" className="text-sm font-medium">
+            Full Name
+          </Label>
           <Input
             id="fullName"
             type="text"
             {...register('fullName')}
-            className={errors.fullName ? 'border-red-500 focus-visible:ring-red-500' : ''}
+            className={`transition-colors ${
+              errors.fullName
+                ? 'border-red-500 focus-visible:ring-red-500'
+                : 'focus-visible:ring-blue-500'
+            }`}
             placeholder="Enter your full name"
+            disabled={isLoading || isSubmitting}
           />
           {errors.fullName && (
-            <p className="text-sm text-red-600 dark:text-red-400">{errors.fullName.message}</p>
+            <p className="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+              <Circle className="h-3 w-3 fill-current" />
+              {errors.fullName.message}
+            </p>
           )}
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
+        <div className="space-y-2 mb-4">
+          <Label htmlFor="email" className="text-sm font-medium">
+            Email Address
+          </Label>
           <Input
             id="email"
             type="email"
             {...register('email')}
-            className={errors.email ? 'border-red-500 focus-visible:ring-red-500' : ''}
+            className={`transition-colors ${
+              errors.email
+                ? 'border-red-500 focus-visible:ring-red-500'
+                : 'focus-visible:ring-blue-500'
+            }`}
             placeholder="Enter your email address"
+            disabled={isLoading || isSubmitting}
           />
           {errors.email && (
-            <p className="text-sm text-red-600 dark:text-red-400">{errors.email.message}</p>
+            <p className="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+              <Circle className="h-3 w-3 fill-current" />
+              {errors.email.message}
+            </p>
           )}
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="password">Password</Label>
+        <div className="space-y-2 mb-4">
+          <Label htmlFor="password" className="text-sm font-medium">
+            Password
+          </Label>
           <Input
             id="password"
             type="password"
             {...register('password')}
-            className={errors.password ? 'border-red-500 focus-visible:ring-red-500' : ''}
+            className={`transition-colors ${
+              errors.password
+                ? 'border-red-500 focus-visible:ring-red-500'
+                : 'focus-visible:ring-blue-500'
+            }`}
             placeholder="Create a secure password"
+            disabled={isLoading || isSubmitting}
           />
           {errors.password && (
-            <p className="text-sm text-red-600 dark:text-red-400">{errors.password.message}</p>
+            <p className="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+              <Circle className="h-3 w-3 fill-current" />
+              {errors.password.message}
+            </p>
           )}
-
-          {password && password.length > 0 && (
-            <div className="space-y-2">
-              <div className="text-xs text-muted-foreground">
-                Password strength: {passwordStrength.label}
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div
-                  className={`h-2 rounded-full transition-all duration-300 ${passwordStrengthColor}`}
-                  style={{ width: `${(passwordStrength.strength / 5) * 100}%` }}
-                />
-              </div>
-            </div>
-          )}
-
-          <div className="text-xs text-muted-foreground space-y-1">
-            <p>Password must contain:</p>
-            <ul className="list-disc list-inside space-y-0.5 text-xs">
-              <li>At least 6 characters</li>
-              <li>One uppercase letter</li>
-              <li>One lowercase letter</li>
-              <li>One number</li>
-            </ul>
-          </div>
         </div>
 
-        <Button type="submit" className="w-full" disabled={isLoading || isSubmitting}>
-          {isLoading || isSubmitting ? 'Creating account...' : 'Create Account'}
+        <div className="space-y-2 mb-4">
+          <Label htmlFor="confirmPassword" className="text-sm font-medium">
+            Confirm Password
+          </Label>
+          <Input
+            id="confirmPassword"
+            type="password"
+            {...register('confirmPassword')}
+            className={`transition-colors ${
+              errors.confirmPassword
+                ? 'border-red-500 focus-visible:ring-red-500'
+                : 'focus-visible:ring-blue-500'
+            }`}
+            placeholder="Confirm your password"
+            disabled={isLoading || isSubmitting}
+          />
+          {errors.confirmPassword && (
+            <p className="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
+              <Circle className="h-3 w-3 fill-current" />
+              {errors.confirmPassword.message}
+            </p>
+          )}
+        </div>
+
+        <Button
+          type="submit"
+          className="w-full h-11 text-base font-medium transition-all duration-200"
+          disabled={isLoading || isSubmitting}
+        >
+          {isLoading || isSubmitting ? (
+            <div className="flex items-center gap-2">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Creating account...
+            </div>
+          ) : (
+            'Create Account'
+          )}
         </Button>
       </form>
     </div>
