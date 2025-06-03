@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { Sidebar } from '@/components/sidebar';
 import { Header } from '@/components/header';
+import { routes } from '@/routes';
 
 export default async function AppLayout({
   children,
@@ -17,7 +18,7 @@ export default async function AppLayout({
   } = await supabase.auth.getUser()
 
   if (error || !user) {
-    redirect("/login")
+    redirect(routes.login);
   }
 
   return (

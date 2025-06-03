@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
+import { routes } from "@/routes"
 
 // Re-define types here or import from a shared file
 interface Course {
@@ -49,7 +50,7 @@ export function VideoPageClient({ video, videoId }: VideoPageClientProps) {
       <div className="flex items-center justify-between">
         <div>
           <Button variant="ghost" size="sm" asChild className="mb-2">
-            <Link href="/learn">
+            <Link href={routes.learn}>
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Videos
             </Link>

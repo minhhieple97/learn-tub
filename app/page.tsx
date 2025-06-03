@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { ThemeToggle } from "@/components/theme-toggle"
 import { BookOpen, Brain, Clock, Users, ArrowRight, Play } from 'lucide-react';
 import Link from 'next/link';
+import { routes } from '@/routes';
 
 export default function LandingPage() {
   return (
@@ -23,13 +24,13 @@ export default function LandingPage() {
                 className="text-neutral-pearl-foreground hover:bg-neutral-stone hover:text-neutral-stone-foreground"
                 asChild
               >
-                <Link href="/login">Login</Link>
+                <Link href={routes.login}>Login</Link>
               </Button>
               <Button
                 className="bg-neutral-sage text-neutral-sage-foreground hover:bg-neutral-sage/90"
                 asChild
               >
-                <Link href="/register">Get Started</Link>
+                <Link href={routes.register}>Get Started</Link>
               </Button>
             </div>
           </nav>
@@ -61,7 +62,7 @@ export default function LandingPage() {
                   className="bg-neutral-sage text-neutral-sage-foreground hover:bg-neutral-sage/90 px-8 py-4 text-lg group"
                   asChild
                 >
-                  <Link href="/register">
+                  <Link href={routes.register}>
                     Start Learning Free
                     <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                   </Link>
@@ -72,7 +73,7 @@ export default function LandingPage() {
                   className="border-neutral-stone bg-neutral-pearl/50 text-neutral-pearl-foreground hover:bg-neutral-stone hover:text-neutral-stone-foreground px-8 py-4 text-lg group"
                   asChild
                 >
-                  <Link href="/demo">
+                  <Link href={routes.demo}>
                     <Play className="mr-2 h-5 w-5 group-hover:scale-110 transition-transform" />
                     Watch Demo
                   </Link>
@@ -204,7 +205,7 @@ export default function LandingPage() {
                   className="bg-primary hover:opacity-90 px-8 py-4 text-lg group"
                   asChild
                 >
-                  <Link href="/register">
+                  <Link href={routes.register}>
                     Create Your Free Account
                     <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                   </Link>

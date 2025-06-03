@@ -10,6 +10,7 @@ import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
 import { GoogleAuthButton } from "./google-auth-button"
 import { useToast } from "@/components/ui/use-toast"
+import { routes } from '@/routes';
 
 export function RegisterForm() {
   const [email, setEmail] = useState("")
@@ -51,7 +52,7 @@ export function RegisterForm() {
           description: "Welcome to LearnTub. You can now start learning.",
         })
 
-        router.push("/dashboard")
+        router.push(routes.learn);
         router.refresh()
       }
     } catch (error) {

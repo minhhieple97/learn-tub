@@ -3,6 +3,7 @@ import { ThemeToggle } from "@/components/theme-toggle"
 import { LogOut, User } from "lucide-react"
 import { createClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
+import { routes } from '@/routes';
 
 interface HeaderProps {
   user: any
@@ -13,7 +14,7 @@ export function Header({ user }: HeaderProps) {
     "use server"
     const supabase = await createClient()
     await supabase.auth.signOut()
-    redirect("/")
+    redirect(routes.home);
   }
 
   return (
