@@ -4,16 +4,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 export function VideoLibrarySkeleton() {
   return (
     <div className="space-y-10">
-      {/* Enhanced Loading Header */}
-      <div className="flex items-center justify-between">
-        <div className="space-y-3">
-          <Skeleton className="h-9 w-64 rounded-xl" />
-          <Skeleton className="h-5 w-48 rounded-lg" />
-        </div>
-        <Skeleton className="h-8 w-24 rounded-full" />
-      </div>
-
-      {/* Enhanced Loading Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
         {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
           <Card

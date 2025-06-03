@@ -1,21 +1,20 @@
 import { createClient } from "@/lib/supabase/server"
 import { notFound } from "next/navigation"
-import { VideoPageClient } from "./video-page-client"
+import { VideoPageClient } from '@/features/videos/components';
 
-// Define types here (ideally in a shared types file)
-interface Course {
-  title: string
-}
+type Course = {
+  title: string;
+};
 
-export interface Video {
-  id: string // Database ID
-  youtube_id: string
-  title: string
-  description?: string | null
-  channel_name?: string | null
-  published_at?: string | null
-  courses?: Course | null // Assuming a video can have one or zero courses
-}
+export type Video = {
+  id: string;
+  youtube_id: string;
+  title: string;
+  description?: string | null;
+  channel_name?: string | null;
+  published_at?: string | null;
+  courses?: Course | null;
+};
 
 type VideoPageProps = {
   params: Promise<{

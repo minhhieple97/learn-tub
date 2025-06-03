@@ -3,7 +3,7 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Clock, BookOpen, Play, Eye, Calendar } from 'lucide-react';
 import { Video } from '../types';
-import { formatDistanceToNow, formatDuration } from '../utils';
+import { formatDistanceToNow, formatDuration } from '@/lib/utils';
 
 type VideoCardProps = {
   video: Video;

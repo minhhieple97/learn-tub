@@ -374,14 +374,6 @@ export function YouTubePlayer({
             <Button variant="ghost" size="icon" onClick={toggleMute}>
               {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
             </Button>
-            <Slider
-              value={[isMuted ? 0 : volume]}
-              min={0}
-              max={100}
-              step={1}
-              onValueChange={handleVolumeChange}
-              className="w-24"
-            />
           </div>
         </div>
       </div>
