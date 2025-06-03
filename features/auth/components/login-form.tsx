@@ -1,47 +1,13 @@
 "use client"
 
-import type React from "react"
-
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { createClient } from "@/lib/supabase/client"
-import { useRouter } from "next/navigation"
-import { GoogleAuthButton } from "./google-auth-button"
-import { routes } from '@/routes';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { GoogleAuthButton } from './google-auth-button';
+import { useLogin } from '@/features/auth/hooks/use-login';
 
 export function LoginForm() {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState("")
-  const router = useRouter()
-  const supabase = createClient()
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError("")
-
-    try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
-
-      if (error) {
-        setError(error.message)
-      } else {
-        router.push(routes.learn);
-        router.refresh()
-      }
-    } catch (error) {
-      setError("An unexpected error occurred")
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  const { register, handleSubmit, errors, isSubmitting, isLoading, onSubmit } = useLogin();
 
   return (
     <div className="space-y-4">
@@ -56,26 +22,39 @@ export function LoginForm() {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
-          <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+          <Input
+            id="email"
+            type="email"
+            {...register('email')}
+            className={errors.email ? 'border-red-500 focus-visible:ring-red-500' : ''}
+            placeholder="Enter your email address"
+          />
+          {errors.email && (
+            <p className="text-sm text-red-600 dark:text-red-400">{errors.email.message}</p>
+          )}
         </div>
+
         <div className="space-y-2">
           <Label htmlFor="password">Password</Label>
           <Input
             id="password"
             type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
+            {...register('password')}
+            className={errors.password ? 'border-red-500 focus-visible:ring-red-500' : ''}
+            placeholder="Enter your password"
           />
+          {errors.password && (
+            <p className="text-sm text-red-600 dark:text-red-400">{errors.password.message}</p>
+          )}
         </div>
-        {error && <p className="text-sm text-red-600">{error}</p>}
-        <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading ? "Signing in..." : "Sign In"}
+
+        <Button type="submit" className="w-full" disabled={isLoading || isSubmitting}>
+          {isLoading || isSubmitting ? 'Signing in...' : 'Sign In'}
         </Button>
       </form>
     </div>
-  )
+  );
 }
