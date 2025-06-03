@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { env } from '@/env.mjs';
+import { routes } from '@/routes';
 
 type UseGoogleAuthReturn = {
   signInWithGoogle: () => Promise<void>;
@@ -21,7 +23,7 @@ export function useGoogleAuth(): UseGoogleAuthReturn {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: `${env.NEXT_PUBLIC_APP_URL}${routes.auth.callback}`,
           queryParams: {
             access_type: 'offline',
             prompt: 'consent',
