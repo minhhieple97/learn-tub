@@ -47,6 +47,31 @@ body {
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Muted Neutral Palette - Light Mode */
+    --neutral-stone: 25 5% 88%;        /* Soft warm grey #E0DDD7 */
+    --neutral-stone-foreground: 25 8% 25%;  /* Deep warm grey #443F39 */
+    
+    --neutral-sage: 120 6% 85%;        /* Gentle sage green #D4D9D0 */
+    --neutral-sage-foreground: 120 8% 30%;  /* Deep sage #484D45 */
+    
+    --neutral-dust: 35 8% 92%;         /* Warm beige #EEEBE6 */
+    --neutral-dust-foreground: 35 12% 28%; /* Warm brown #4A453D */
+    
+    --neutral-mist: 200 8% 90%;        /* Cool blue-grey #E1E6EA */
+    --neutral-mist-foreground: 200 10% 32%; /* Deep blue-grey #4A5258 */
+    
+    --neutral-clay: 15 12% 86%;        /* Soft terracotta #DDD4CE */
+    --neutral-clay-foreground: 15 15% 26%; /* Deep clay #453B34 */
+    
+    --neutral-pearl: 60 5% 94%;        /* Soft pearl #F2F2EF */
+    --neutral-pearl-foreground: 60 8% 22%; /* Deep charcoal #393A35 */
+
+    /* Accent colors from the palette */
+    --accent-primary: var(--neutral-sage);
+    --accent-primary-foreground: var(--neutral-sage-foreground);
+    --accent-secondary: var(--neutral-mist);
+    --accent-secondary-foreground: var(--neutral-mist-foreground);
   }
   .dark {
     --background: 0 0% 3.9%;
@@ -81,6 +106,31 @@ body {
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Muted Neutral Palette - Dark Mode */
+    --neutral-stone: 25 5% 18%;        /* Dark warm grey #2E2B28 */
+    --neutral-stone-foreground: 25 8% 85%;  /* Light warm grey #D9D6D1 */
+    
+    --neutral-sage: 120 6% 20%;        /* Dark sage green #313530 */
+    --neutral-sage-foreground: 120 8% 82%;  /* Light sage #CED3CA */
+    
+    --neutral-dust: 35 8% 15%;         /* Dark warm beige #262420 */
+    --neutral-dust-foreground: 35 12% 88%; /* Light beige #E3E0DB */
+    
+    --neutral-mist: 200 8% 22%;        /* Dark blue-grey #343A3E */
+    --neutral-mist-foreground: 200 10% 80%; /* Light blue-grey #C8CED4 */
+    
+    --neutral-clay: 15 12% 16%;        /* Dark terracotta #2A231F */
+    --neutral-clay-foreground: 15 15% 84%; /* Light clay #D2C9C2 */
+    
+    --neutral-pearl: 60 5% 12%;        /* Dark pearl #1F1F1D */
+    --neutral-pearl-foreground: 60 8% 92%; /* Light pearl #EBEAE7 */
+
+    /* Accent colors from the palette */
+    --accent-primary: var(--neutral-sage);
+    --accent-primary-foreground: var(--neutral-sage-foreground);
+    --accent-secondary: var(--neutral-mist);
+    --accent-secondary-foreground: var(--neutral-mist-foreground);
   }
 }
 
@@ -92,3 +142,55 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+/* Utility classes for the muted neutral palette */
+@layer utilities {
+  .bg-neutral-stone { background-color: hsl(var(--neutral-stone)); }
+  .text-neutral-stone { color: hsl(var(--neutral-stone-foreground)); }
+  .border-neutral-stone { border-color: hsl(var(--neutral-stone)); }
+  
+  .bg-neutral-sage { background-color: hsl(var(--neutral-sage)); }
+  .text-neutral-sage { color: hsl(var(--neutral-sage-foreground)); }
+  .border-neutral-sage { border-color: hsl(var(--neutral-sage)); }
+  
+  .bg-neutral-dust { background-color: hsl(var(--neutral-dust)); }
+  .text-neutral-dust { color: hsl(var(--neutral-dust-foreground)); }
+  .border-neutral-dust { border-color: hsl(var(--neutral-dust)); }
+  
+  .bg-neutral-mist { background-color: hsl(var(--neutral-mist)); }
+  .text-neutral-mist { color: hsl(var(--neutral-mist-foreground)); }
+  .border-neutral-mist { border-color: hsl(var(--neutral-mist)); }
+  
+  .bg-neutral-clay { background-color: hsl(var(--neutral-clay)); }
+  .text-neutral-clay { color: hsl(var(--neutral-clay-foreground)); }
+  .border-neutral-clay { border-color: hsl(var(--neutral-clay)); }
+  
+  .bg-neutral-pearl { background-color: hsl(var(--neutral-pearl)); }
+  .text-neutral-pearl { color: hsl(var(--neutral-pearl-foreground)); }
+  .border-neutral-pearl { border-color: hsl(var(--neutral-pearl)); }
+}
+
+/* Color palette documentation */
+/*
+MUTED NEUTRAL PALETTE
+
+🎨 Color Harmony:
+- Stone: Soft warm grey with beige undertones
+- Sage: Gentle green-grey for subtle accents  
+- Dust: Warm beige with hints of cream
+- Mist: Cool blue-grey for contrast
+- Clay: Soft terracotta earth tone
+- Pearl: Nearly white with warm undertones
+
+📱 Usage Examples:
+- bg-neutral-stone: Background sections
+- bg-neutral-sage: Accent cards, success states
+- bg-neutral-dust: Content areas, sidebars
+- bg-neutral-mist: Info panels, secondary actions
+- bg-neutral-clay: Warning states, emphasis
+- bg-neutral-pearl: Primary backgrounds
+
+🔄 Automatic Dark Mode:
+All colors automatically adapt between light and dark modes
+while maintaining proper contrast ratios (4.5:1 minimum)
+*/

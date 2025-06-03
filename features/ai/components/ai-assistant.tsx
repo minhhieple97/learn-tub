@@ -1,13 +1,10 @@
 "use client"
 
-import { Card, CardContent } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { FileText, Target, Zap } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { FileText, Zap, Sparkles } from 'lucide-react';
 import { useAIAssistant } from '../hooks/useAIAssistant';
-import { AIAssistantHeader } from './AIAssistantHeader';
 import { AnalysisTab } from './tabs/AnalysisTab';
 import { QuizTab } from './tabs/QuizTab';
-import { StudyPlanTab } from './tabs/StudyPlanTab';
 
 interface AIAssistantProps {
   videoId: string;
@@ -19,105 +16,74 @@ export function AIAssistant({ videoId, dbVideoId }: AIAssistantProps) {
     isLoading,
     analysis,
     quiz,
-    studyPlan,
     quizAnswers,
     quizSubmitted,
     quizScore,
     difficulty,
-    learningGoals,
     setDifficulty,
-    setLearningGoals,
     handleAnalyzeNotes,
     handleGenerateQuiz,
-    handleGenerateStudyPlan,
     handleQuizSubmit,
     setQuizAnswer,
     getScoreColor,
   } = useAIAssistant(dbVideoId);
 
   return (
-    <div className="w-full space-y-8 max-w-4xl mx-auto">
-      <AIAssistantHeader />
+    <div className="w-full space-y-6">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+        {/* Notes Analysis Section - Left Side */}
+        <div className="space-y-4">
+          <Card className="border-2 border-neutral-sage bg-neutral-pearl shadow-xl rounded-3xl overflow-hidden">
+            <CardHeader className="bg-neutral-sage text-neutral-sage p-6">
+              <CardTitle className="flex items-center text-xl font-bold">
+                <FileText className="h-6 w-6 mr-3" />
+                Notes Analysis
+              </CardTitle>
+              <p className="text-neutral-sage/80 text-sm mt-2">
+                Get AI-powered insights and analysis of your learning notes
+              </p>
+            </CardHeader>
+            <CardContent className="p-6 bg-neutral-pearl">
+              <AnalysisTab
+                isLoading={isLoading}
+                analysis={analysis}
+                handleAnalyzeNotes={handleAnalyzeNotes}
+                getScoreColor={getScoreColor}
+              />
+            </CardContent>
+          </Card>
+        </div>
 
-      <Card className="border border-slate-200/60 bg-white/80 backdrop-blur-sm shadow-lg rounded-3xl">
-        <CardContent className="p-0">
-          <Tabs defaultValue="analysis" className="w-full">
-            <div className="px-8 pt-8 pb-4 border-b border-slate-100">
-              <TabsList className="grid w-full grid-cols-3 bg-slate-50/80 p-1 rounded-2xl h-14">
-                <TabsTrigger
-                  value="analysis"
-                  className="data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm rounded-xl transition-all duration-200 font-medium text-slate-600 flex items-center justify-center"
-                >
-                  <FileText className="h-4 w-4 mr-2" />
-                  <span className="hidden sm:inline">Analysis</span>
-                  <span className="sm:hidden">Notes</span>
-                </TabsTrigger>
-                <TabsTrigger
-                  value="quiz"
-                  className="data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm rounded-xl transition-all duration-200 font-medium text-slate-600 flex items-center justify-center"
-                >
-                  <Zap className="h-4 w-4 mr-2" />
-                  Quiz
-                </TabsTrigger>
-                <TabsTrigger
-                  value="study-plan"
-                  className="data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm rounded-xl transition-all duration-200 font-medium text-slate-600 flex items-center justify-center"
-                >
-                  <Target className="h-4 w-4 mr-2" />
-                  <span className="hidden sm:inline">Study Plan</span>
-                  <span className="sm:hidden">Plan</span>
-                </TabsTrigger>
-              </TabsList>
-            </div>
-
-            <div className="p-8">
-              <TabsContent
-                value="analysis"
-                className="mt-0 focus-visible:outline-none focus-visible:ring-0"
-              >
-                <AnalysisTab
-                  isLoading={isLoading}
-                  analysis={analysis}
-                  handleAnalyzeNotes={handleAnalyzeNotes}
-                  getScoreColor={getScoreColor}
-                />
-              </TabsContent>
-
-              <TabsContent
-                value="quiz"
-                className="mt-0 focus-visible:outline-none focus-visible:ring-0"
-              >
-                <QuizTab
-                  isLoading={isLoading}
-                  quiz={quiz}
-                  difficulty={difficulty}
-                  quizAnswers={quizAnswers}
-                  quizSubmitted={quizSubmitted}
-                  quizScore={quizScore}
-                  setDifficulty={setDifficulty}
-                  handleGenerateQuiz={handleGenerateQuiz}
-                  handleQuizSubmit={handleQuizSubmit}
-                  setQuizAnswer={setQuizAnswer}
-                  getScoreColor={getScoreColor}
-                />
-              </TabsContent>
-
-              <TabsContent
-                value="study-plan"
-                className="mt-0 focus-visible:outline-none focus-visible:ring-0"
-              >
-                <StudyPlanTab
-                  isLoading={isLoading}
-                  studyPlan={studyPlan}
-                  learningGoals={learningGoals}
-                  setLearningGoals={setLearningGoals}
-                  handleGenerateStudyPlan={handleGenerateStudyPlan}
-                />
-              </TabsContent>
-            </div>
-          </Tabs>
-        </CardContent>
-      </Card>
+        {/* Quiz Section - Right Side */}
+        <div className="space-y-4">
+          <Card className="border-2 border-neutral-mist bg-neutral-pearl shadow-xl rounded-3xl overflow-hidden">
+            <CardHeader className="bg-neutral-mist text-neutral-mist p-6">
+              <CardTitle className="flex items-center text-xl font-bold">
+                <Zap className="h-6 w-6 mr-3" />
+                Knowledge Quiz
+              </CardTitle>
+              <p className="text-neutral-mist/80 text-sm mt-2">
+                Test your understanding with personalized quiz questions
+              </p>
+            </CardHeader>
+            <CardContent className="p-6 bg-neutral-pearl">
+              <QuizTab
+                isLoading={isLoading}
+                quiz={quiz}
+                difficulty={difficulty}
+                quizAnswers={quizAnswers}
+                quizSubmitted={quizSubmitted}
+                quizScore={quizScore}
+                setDifficulty={setDifficulty}
+                handleGenerateQuiz={handleGenerateQuiz}
+                handleQuizSubmit={handleQuizSubmit}
+                setQuizAnswer={setQuizAnswer}
+                getScoreColor={getScoreColor}
+              />
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 }
