@@ -5,11 +5,12 @@ import { BookOpen, Home, Play, Settings } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
+import { routes } from '@/routes';
 
 const navigation = [
-  { name: 'Learn', href: '/learn', icon: Play },
-  { name: 'Dashboard', href: '/dashboard', icon: Home },
-  { name: 'Settings', href: '/settings', icon: Settings },
+  { name: 'Learn', href: routes.learn, icon: Play },
+  { name: 'Dashboard', href: routes.dashboard.root, icon: Home },
+  { name: 'Settings', href: routes.settings.root, icon: Settings },
 ];
 
 export function Sidebar() {

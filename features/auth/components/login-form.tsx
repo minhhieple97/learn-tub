@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label"
 import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
 import { GoogleAuthButton } from "./google-auth-button"
+import { routes } from '@/routes';
 
 export function LoginForm() {
   const [email, setEmail] = useState("")
@@ -32,7 +33,7 @@ export function LoginForm() {
       if (error) {
         setError(error.message)
       } else {
-        router.push("/dashboard")
+        router.push(routes.learn);
         router.refresh()
       }
     } catch (error) {
