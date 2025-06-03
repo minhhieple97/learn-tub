@@ -1,10 +1,7 @@
-import { EnhancedAddVideoForm } from "@/features/videos/components/enhanced-add-video-form"
-import { VideoLibrary } from "@/features/videos/components/video-library"
+import { AddVideoForm, VideoLibrary, HowItWorks } from '@/features/videos/components';
 
-import { HowItWorks } from '@/features/videos/components/how-it-works';
-
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Play, Plus, Library } from "lucide-react"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Play, Plus, Library } from 'lucide-react';
 
 export default function LearnPage() {
   return (
@@ -44,7 +41,7 @@ export default function LearnPage() {
           <TabsContent value="add" className="space-y-4 animate-in fade-in-50 duration-300">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
               <div className="lg:col-span-2">
-                <EnhancedAddVideoForm />
+                <AddVideoForm />
               </div>
 
               <div className="lg:col-span-1 space-y-4">
