@@ -1,56 +1,23 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { createClient } from "@/lib/supabase/client"
-import { useState } from "react"
-import { useToast } from "@/components/ui/use-toast"
+import { useGoogleAuth } from '@/features/auth/hooks/use-google-auth';
 
-interface GoogleAuthButtonProps {
-  mode: "signin" | "signup"
-}
+type GoogleAuthButtonProps = {
+  mode: 'signin' | 'signup';
+};
 
 export function GoogleAuthButton({ mode }: GoogleAuthButtonProps) {
-  const [isLoading, setIsLoading] = useState(false)
-  const supabase = createClient()
-  const { toast } = useToast()
-
-  const handleGoogleAuth = async () => {
-    setIsLoading(true)
-
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
-          queryParams: {
-            access_type: "offline",
-            prompt: "consent",
-          },
-        },
-      })
-
-      if (error) {
-        console.error("Google auth error:", error.message)
-        toast({
-          title: "Authentication Error",
-          description: "Failed to authenticate with Google. Please try again.",
-          variant: "destructive",
-        })
-      }
-    } catch (error) {
-      console.error("Unexpected error:", error)
-      toast({
-        title: "Unexpected Error",
-        description: "An unexpected error occurred. Please try again.",
-        variant: "destructive",
-      })
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  const { signInWithGoogle, isLoading } = useGoogleAuth();
 
   return (
-    <Button type="button" variant="outline" className="w-full" onClick={handleGoogleAuth} disabled={isLoading}>
+    <Button
+      type="button"
+      variant="outline"
+      className="w-full"
+      onClick={signInWithGoogle}
+      disabled={isLoading}
+    >
       <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
         <path
           fill="currentColor"
@@ -69,7 +36,7 @@ export function GoogleAuthButton({ mode }: GoogleAuthButtonProps) {
           d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
         />
       </svg>
-      {isLoading ? "Loading..." : `Continue with Google`}
+      {isLoading ? 'Loading...' : 'Continue with Google'}
     </Button>
-  )
+  );
 }
