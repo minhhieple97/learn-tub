@@ -7,11 +7,10 @@ import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 const navigation = [
-  { name: "Dashboard", href: "/dashboard", icon: Home },
-  { name: "Learn", href: "/learn", icon: Play },
-  { name: "My Courses", href: "/courses", icon: BookOpen },
-  { name: "Settings", href: "/settings", icon: Settings },
-]
+  { name: 'Learn', href: '/learn', icon: Play },
+  { name: 'Dashboard', href: '/dashboard', icon: Home },
+  { name: 'Settings', href: '/settings', icon: Settings },
+];
 
 export function Sidebar() {
   const pathname = usePathname()
@@ -26,7 +25,7 @@ export function Sidebar() {
 
         <nav className="space-y-2">
           {navigation.map((item) => {
-            const isActive = pathname === item.href
+            const isActive = pathname.includes(item.href);
             return (
               <Button
                 key={item.name}
