@@ -17,18 +17,16 @@ export interface Video {
   courses?: Course | null // Assuming a video can have one or zero courses
 }
 
-interface VideoPageProps {
-  params: {
-    videoId: string
-  }
-}
+type VideoPageProps = {
+  params: Promise<{
+    videoId: string;
+  }>;
+};
 
 export default async function VideoPage({ params }: VideoPageProps) {
-  const { videoId } = params;
-  const supabase = await createClient(); // Await the Supabase client initialization
-
-  // Check if video exists in database
-  const { data: videos, error } = await supabase // Now supabase is the client instance
+  const { videoId } = await params;
+  const supabase = await createClient();
+  const { data: videos, error } = await supabase
     .from('videos')
     .select('*, courses(title)')
     .eq('youtube_id', videoId)
@@ -36,7 +34,6 @@ export default async function VideoPage({ params }: VideoPageProps) {
 
   if (error) {
     console.error('Error fetching video:', error);
-    // Optionally, you could redirect to an error page or show a generic error
     notFound();
   }
 

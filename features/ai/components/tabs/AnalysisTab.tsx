@@ -25,22 +25,22 @@ export function AnalysisTab({
   getScoreColor,
 }: AnalysisTabProps) {
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <div className="text-center">
         <Button
           onClick={handleAnalyzeNotes}
           disabled={isLoading}
-          className="bg-slate-900 hover:bg-slate-800 text-white px-8 py-3 text-base font-medium rounded-2xl shadow-lg transition-all duration-200"
-          size="lg"
+          className="bg-primary px-6 py-2.5 text-sm font-medium rounded-xl shadow-lg transition-all duration-200 w-full disabled:opacity-50 disabled:cursor-not-allowed"
+          size="sm"
         >
           {isLoading ? (
             <>
-              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               Analyzing Notes...
             </>
           ) : (
             <>
-              <Sparkles className="mr-2 h-5 w-5" />
+              <Sparkles className="mr-2 h-4 w-4" />
               Analyze My Notes
             </>
           )}
@@ -48,34 +48,37 @@ export function AnalysisTab({
       </div>
 
       {analysis && (
-        <div className="space-y-8">
+        <div className="space-y-5">
           {/* Score Header */}
           <div className="text-center">
-            <div className="inline-flex items-center px-6 py-3 bg-slate-100 rounded-2xl border border-slate-200">
-              <TrendingUp className="h-5 w-5 mr-2 text-slate-600" />
-              <span className="text-lg font-semibold text-slate-800">
+            <div className="inline-flex items-center px-4 py-2 bg-neutral-sage border border-neutral-stone rounded-xl">
+              <TrendingUp className="h-4 w-4 mr-2 text-neutral-sage" />
+              <span className="text-sm font-semibold text-neutral-sage">
                 {analysis.comprehensionScore}% Comprehension
               </span>
             </div>
           </div>
 
           {/* Analysis Cards */}
-          <div className="space-y-6">
-            <AnalysisCard title="Summary" icon={<BookOpen className="h-5 w-5 text-blue-600" />}>
-              <p className="text-slate-700 leading-relaxed text-base">{analysis.summary}</p>
+          <div className="space-y-4">
+            <AnalysisCard title="Summary" icon={<BookOpen className="h-4 w-4 text-neutral-sage" />}>
+              <p className="text-neutral-stone leading-relaxed text-sm">{analysis.summary}</p>
             </AnalysisCard>
 
             <AnalysisCard
               title="Key Points"
-              icon={<CheckCircle className="h-5 w-5 text-emerald-600" />}
+              icon={<CheckCircle className="h-4 w-4 text-neutral-sage" />}
             >
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {analysis.keyPoints.map((point, index) => (
-                  <div key={index} className="flex items-start gap-3 p-4 bg-slate-50 rounded-xl">
-                    <div className="flex-shrink-0 w-6 h-6 bg-emerald-600 text-white rounded-full flex items-center justify-center text-xs font-semibold">
+                  <div
+                    key={index}
+                    className="flex items-start gap-2 p-3 bg-neutral-sage border border-neutral-stone rounded-lg"
+                  >
+                    <div className="flex-shrink-0 w-5 h-5 bg-neutral-mist text-neutral-mist rounded-full flex items-center justify-center text-xs font-semibold">
                       {index + 1}
                     </div>
-                    <span className="text-slate-700 leading-relaxed">{point}</span>
+                    <span className="text-neutral-stone leading-relaxed text-sm">{point}</span>
                   </div>
                 ))}
               </div>
@@ -84,16 +87,16 @@ export function AnalysisTab({
             {analysis.knowledgeGaps.length > 0 && (
               <AnalysisCard
                 title="Knowledge Gaps"
-                icon={<AlertTriangle className="h-5 w-5 text-amber-600" />}
+                icon={<AlertTriangle className="h-4 w-4 text-neutral-clay" />}
               >
-                <div className="space-y-3">
+                <div className="space-y-2">
                   {analysis.knowledgeGaps.map((gap, index) => (
                     <div
                       key={index}
-                      className="flex items-start gap-3 p-4 bg-amber-50 rounded-xl border-l-4 border-amber-400"
+                      className="flex items-start gap-2 p-3 bg-neutral-clay rounded-lg border-l-4 border-neutral-clay"
                     >
-                      <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
-                      <span className="text-slate-700 leading-relaxed">{gap}</span>
+                      <AlertTriangle className="h-4 w-4 text-neutral-clay mt-0.5 flex-shrink-0" />
+                      <span className="text-neutral-clay leading-relaxed text-sm">{gap}</span>
                     </div>
                   ))}
                 </div>
@@ -102,16 +105,16 @@ export function AnalysisTab({
 
             <AnalysisCard
               title="AI Suggestions"
-              icon={<Lightbulb className="h-5 w-5 text-purple-600" />}
+              icon={<Lightbulb className="h-4 w-4 text-neutral-mist" />}
             >
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {analysis.suggestions.map((suggestion, index) => (
                   <div
                     key={index}
-                    className="flex items-start gap-3 p-4 bg-purple-50 rounded-xl border-l-4 border-purple-400"
+                    className="flex items-start gap-2 p-3 bg-neutral-mist rounded-lg border-l-4 border-neutral-mist"
                   >
-                    <Lightbulb className="h-4 w-4 text-purple-600 mt-0.5 flex-shrink-0" />
-                    <span className="text-slate-700 leading-relaxed">{suggestion}</span>
+                    <Lightbulb className="h-4 w-4 text-neutral-mist mt-0.5 flex-shrink-0" />
+                    <span className="text-neutral-mist leading-relaxed text-sm">{suggestion}</span>
                   </div>
                 ))}
               </div>
@@ -131,14 +134,14 @@ interface AnalysisCardProps {
 
 function AnalysisCard({ title, icon, children }: AnalysisCardProps) {
   return (
-    <Card className="border border-slate-200 shadow-sm rounded-2xl">
-      <CardHeader className="pb-4">
-        <CardTitle className="flex items-center text-xl font-semibold text-slate-800">
+    <Card className="border border-neutral-stone bg-neutral-dust shadow-sm rounded-xl">
+      <CardHeader className="pb-3 pt-4 px-4">
+        <CardTitle className="flex items-center text-base font-semibold text-neutral-dust">
           {icon}
           <span className="ml-2">{title}</span>
         </CardTitle>
       </CardHeader>
-      <CardContent className="pt-0">{children}</CardContent>
+      <CardContent className="pt-0 px-4 pb-4">{children}</CardContent>
     </Card>
   );
 }

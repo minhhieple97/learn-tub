@@ -12,13 +12,6 @@ export function AIAssistantHeader() {
             </div>
           </div>
         </div>
-        <CardTitle className="text-3xl font-bold text-slate-800 mb-3">
-          AI Learning Assistant
-        </CardTitle>
-        <CardDescription className="text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
-          Unlock deeper insights with AI-powered analysis, personalized quizzes, and tailored study
-          plans
-        </CardDescription>
       </CardHeader>
     </Card>
   );

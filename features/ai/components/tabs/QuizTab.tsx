@@ -38,32 +38,48 @@ export function QuizTab({
   getScoreColor,
 }: QuizTabProps) {
   return (
-    <div className="space-y-8">
-      <Card className="border border-slate-200 shadow-sm rounded-2xl">
-        <CardContent className="p-6">
-          <div className="flex flex-col gap-6">
-            <div className="flex items-center gap-3">
-              <Zap className="h-5 w-5 text-slate-600" />
-              <span className="font-semibold text-slate-800">Difficulty Level</span>
+    <div className="space-y-6">
+      <Card className="border border-neutral-stone bg-neutral-dust shadow-sm rounded-xl">
+        <CardContent className="p-4">
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center gap-2">
+              <Zap className="h-4 w-4 text-neutral-dust" />
+              <span className="font-semibold text-neutral-dust text-sm">Difficulty Level</span>
             </div>
-            <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex flex-col gap-3">
               <Select
                 value={difficulty}
                 onValueChange={(value: QuizDifficulty) => setDifficulty(value)}
               >
-                <SelectTrigger className="w-full sm:w-40 border-slate-300 rounded-xl">
+                <SelectTrigger className="w-full border-neutral-stone bg-neutral-pearl text-neutral-dust rounded-lg text-sm">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="easy">🟢 Easy</SelectItem>
-                  <SelectItem value="medium">🟡 Medium</SelectItem>
-                  <SelectItem value="hard">🔴 Hard</SelectItem>
+                <SelectContent className="bg-neutral-pearl border-neutral-stone">
+                  <SelectItem
+                    value="easy"
+                    className="text-neutral-dust focus:bg-neutral-sage focus:text-neutral-sage"
+                  >
+                    🟢 Easy
+                  </SelectItem>
+                  <SelectItem
+                    value="medium"
+                    className="text-neutral-dust focus:bg-neutral-sage focus:text-neutral-sage"
+                  >
+                    🟡 Medium
+                  </SelectItem>
+                  <SelectItem
+                    value="hard"
+                    className="text-neutral-dust focus:bg-neutral-sage focus:text-neutral-sage"
+                  >
+                    🔴 Hard
+                  </SelectItem>
                 </SelectContent>
               </Select>
               <Button
                 onClick={handleGenerateQuiz}
                 disabled={isLoading}
-                className="flex-1 bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-xl shadow-lg transition-all duration-200"
+                className="bg-primary px-6 py-2.5 text-sm font-medium rounded-xl shadow-lg transition-all duration-200 w-full disabled:opacity-50 disabled:cursor-not-allowed"
+                size="sm"
               >
                 {isLoading ? (
                   <>
@@ -83,22 +99,20 @@ export function QuizTab({
       </Card>
 
       {quiz && (
-        <div className="space-y-6">
+        <div className="space-y-4">
           {/* Quiz Header */}
           <div className="text-center">
-            <div className="flex flex-col items-center gap-4">
-              <h3 className="text-2xl font-bold text-slate-800">Knowledge Quiz</h3>
-              {quizSubmitted && quizScore !== null && (
-                <div className="inline-flex items-center px-6 py-3 bg-slate-100 rounded-2xl border border-slate-200">
-                  <Award className="h-5 w-5 mr-2 text-slate-600" />
-                  <span className="font-semibold text-slate-800">Score: {quizScore}%</span>
-                </div>
-              )}
-            </div>
+            <h3 className="text-lg font-bold text-neutral-dust">Knowledge Quiz</h3>
+            {quizSubmitted && quizScore !== null && (
+              <div className="inline-flex items-center px-4 py-2 bg-neutral-mist border border-neutral-stone rounded-xl mt-2">
+                <Award className="h-4 w-4 mr-2 text-neutral-mist" />
+                <span className="font-semibold text-neutral-mist text-sm">Score: {quizScore}%</span>
+              </div>
+            )}
           </div>
 
           {/* Quiz Questions */}
-          <div className="space-y-6">
+          <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
             {quiz.questions.map((question, questionIndex) => (
               <QuizQuestionCard
                 key={questionIndex}
@@ -112,11 +126,11 @@ export function QuizTab({
           </div>
 
           {!quizSubmitted && (
-            <div className="text-center">
+            <div className="text-center pt-2">
               <Button
                 onClick={handleQuizSubmit}
                 disabled={Object.keys(quizAnswers).length !== quiz.questions.length}
-                className="bg-slate-900 hover:bg-slate-800 text-white px-8 py-3 text-base font-medium rounded-2xl shadow-lg transition-all duration-200"
+                className="bg-neutral-mist hover:bg-neutral-stone text-neutral-mist px-6 py-2 text-sm font-medium rounded-xl shadow-lg transition-all duration-200 w-full disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Award className="mr-2 h-4 w-4" />
                 Submit Quiz
@@ -145,31 +159,31 @@ function QuizQuestionCard({
   setQuizAnswer,
 }: QuizQuestionCardProps) {
   return (
-    <Card className="border border-slate-200 shadow-sm rounded-2xl">
-      <CardHeader className="bg-slate-50 border-b border-slate-200 rounded-t-2xl">
-        <CardTitle className="flex items-center text-lg font-semibold text-slate-800">
-          <div className="flex-shrink-0 w-8 h-8 bg-slate-900 text-white rounded-full flex items-center justify-center mr-3">
-            <span className="text-sm font-bold">{questionIndex + 1}</span>
+    <Card className="border border-neutral-stone bg-neutral-dust shadow-sm rounded-xl">
+      <CardHeader className="bg-neutral-pearl border-b border-neutral-stone rounded-t-xl p-4">
+        <CardTitle className="flex items-center text-sm font-semibold text-neutral-dust">
+          <div className="flex-shrink-0 w-6 h-6 bg-neutral-stone text-neutral-stone rounded-full flex items-center justify-center mr-2">
+            <span className="text-xs font-bold">{questionIndex + 1}</span>
           </div>
           Question {questionIndex + 1}
         </CardTitle>
-        <CardDescription className="text-base leading-relaxed text-slate-700 mt-2">
+        <CardDescription className="text-sm leading-relaxed text-neutral-dust mt-1">
           {question.question}
         </CardDescription>
       </CardHeader>
-      <CardContent className="p-6">
-        <div className="space-y-4">
+      <CardContent className="p-4">
+        <div className="space-y-3">
           {question.options.map((option, optionIndex) => (
             <div key={optionIndex}>
               <label
-                className={`flex items-start gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ${
+                className={`flex items-start gap-3 p-3 rounded-lg border-2 cursor-pointer transition-all duration-200 ${
                   selectedOption === optionIndex
                     ? isSubmitted
                       ? optionIndex === question.correctAnswer
-                        ? 'border-emerald-500 bg-emerald-50'
-                        : 'border-red-500 bg-red-50'
-                      : 'border-blue-500 bg-blue-50'
-                    : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                        ? 'border-neutral-sage bg-neutral-sage'
+                        : 'border-neutral-clay bg-neutral-clay'
+                      : 'border-neutral-mist bg-neutral-mist'
+                    : 'border-neutral-stone hover:border-neutral-mist hover:bg-neutral-pearl'
                 }`}
               >
                 <input
@@ -179,30 +193,30 @@ function QuizQuestionCard({
                   checked={selectedOption === optionIndex}
                   onChange={() => setQuizAnswer(questionIndex, optionIndex)}
                   disabled={isSubmitted}
-                  className="w-5 h-5 mt-0.5 flex-shrink-0 text-blue-600"
+                  className="w-4 h-4 mt-0.5 flex-shrink-0 text-neutral-mist focus:ring-neutral-mist focus:ring-2 focus:ring-offset-2"
                 />
-                <div className="flex items-start gap-3 flex-1">
+                <div className="flex items-start gap-2 flex-1">
                   {isSubmitted && optionIndex === question.correctAnswer && (
-                    <CheckCircle className="w-5 h-5 text-emerald-600 mt-0.5 flex-shrink-0" />
+                    <CheckCircle className="w-4 h-4 text-neutral-sage mt-0.5 flex-shrink-0" />
                   )}
                   {isSubmitted &&
                     selectedOption === optionIndex &&
                     optionIndex !== question.correctAnswer && (
-                      <XCircle className="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0" />
+                      <XCircle className="w-4 h-4 text-neutral-clay mt-0.5 flex-shrink-0" />
                     )}
-                  <span className="text-slate-700 leading-relaxed">{option}</span>
+                  <span className="text-neutral-stone leading-relaxed text-sm">{option}</span>
                 </div>
               </label>
             </div>
           ))}
         </div>
         {isSubmitted && (
-          <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-xl">
-            <div className="flex items-start gap-3">
-              <Lightbulb className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+          <div className="mt-4 p-3 bg-neutral-mist border border-neutral-stone rounded-lg">
+            <div className="flex items-start gap-2">
+              <Lightbulb className="h-4 w-4 text-neutral-mist mt-0.5 flex-shrink-0" />
               <div>
-                <p className="font-semibold text-blue-900 mb-2">Explanation:</p>
-                <p className="text-blue-800 leading-relaxed">{question.explanation}</p>
+                <p className="font-semibold text-neutral-mist mb-1 text-sm">Explanation:</p>
+                <p className="text-neutral-mist leading-relaxed text-sm">{question.explanation}</p>
               </div>
             </div>
           </div>
