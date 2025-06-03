@@ -1,13 +1,12 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAction } from 'next-safe-action/hooks';
 import { loginSchema } from '../schemas';
 import { loginAction } from '../actions';
 import type { LoginFormData } from '../types';
-import { toast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/use-toast';
 
 type UseLoginReturn = {
   register: ReturnType<typeof useForm<LoginFormData>>['register'];
@@ -19,16 +18,18 @@ type UseLoginReturn = {
 };
 
 export function useLogin(): UseLoginReturn {
-  
+  const { toast } = useToast();
   const { execute, isPending } = useAction(loginAction, {
     onError: ({ error }) => {
+      console.log({ error });
       toast({
         title: 'Error',
         description: error.serverError || 'An unexpected error occurred',
         variant: 'destructive',
       });
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log({ data });
       toast({
         title: 'Success',
         description: 'Successfully signed in!',
