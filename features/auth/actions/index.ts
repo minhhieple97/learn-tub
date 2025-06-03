@@ -20,7 +20,6 @@ export const loginAction = action
     if (error) {
       throw new ActionError(error.message);
     }
-
     revalidatePath(routes.learn, 'layout');
     redirect(routes.learn);
   });
@@ -51,3 +50,9 @@ export const registerAction = action
     revalidatePath(routes.learn, 'layout');
     redirect(routes.learn);
   });
+
+export async function signOutAction() {
+  const supabase = await createClient();
+  await supabase.auth.signOut();
+  redirect(routes.home);
+}

@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server"
-import { notFound } from "next/navigation"
+import { notFound, redirect } from 'next/navigation';
 import { VideoPageClient } from '@/features/videos/components';
+import { routes } from '@/routes';
 
 type Course = {
   title: string;
@@ -25,22 +26,30 @@ type VideoPageProps = {
 export default async function VideoPage({ params }: VideoPageProps) {
   const { videoId } = await params;
   const supabase = await createClient();
-  const { data: videos, error } = await supabase
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    redirect(routes.login);
+  }
+  const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+  if (!profile) {
+    redirect(routes.login);
+  }
+  const { data: video, error } = await supabase
     .from('videos')
     .select('*, courses(title)')
     .eq('youtube_id', videoId)
-    .limit(1);
-
+    .eq('user_id', profile.id)
+    .single();
   if (error) {
     console.error('Error fetching video:', error);
     notFound();
   }
 
-  if (!videos || videos.length === 0) {
+  if (!video) {
     notFound();
   }
-
-  const video: Video = videos[0];
 
   return <VideoPageClient video={video} videoId={videoId} />;
 }

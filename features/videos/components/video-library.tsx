@@ -1,18 +1,14 @@
-"use client"
-
-import { useVideos } from '@/features/videos/hooks/use-videos';
-import { VideoLibrarySkeleton } from './video-library-skeleton';
 import { VideoLibraryError } from './video-library-error';
 import { VideoLibraryEmpty } from './video-library-empty';
 import { VideoGrid } from './video-grid';
+import { Video } from '@/features/videos/types/video';
 
-export function VideoLibrary() {
-  const { videos, loading, error } = useVideos();
+type VideoLibraryProps = {
+  videos: Video[];
+  error: string | null;
+};
 
-  if (loading) {
-    return <VideoLibrarySkeleton />;
-  }
-
+export function VideoLibrary({ videos, error }: VideoLibraryProps) {
   if (error) {
     return <VideoLibraryError error={error} />;
   }

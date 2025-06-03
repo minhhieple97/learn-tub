@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Clock, BookOpen, Play, Eye, Calendar } from 'lucide-react';
 import { Video } from '../types';
 import { formatDistanceToNow, formatDuration } from '@/lib/utils';
+import { routes } from '@/routes';
 
 type VideoCardProps = {
   video: Video;
@@ -11,7 +12,7 @@ type VideoCardProps = {
 
 export function VideoCard({ video }: VideoCardProps) {
   return (
-    <Link href={`/learn/${video.youtube_id}`}>
+    <Link href={`${routes.learn}/${video.youtube_id}`}>
       <Card className="group h-full flex flex-col overflow-hidden border-0 shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.03] hover:-translate-y-2 bg-gradient-to-br from-white via-slate-50/90 to-slate-100/80 dark:from-slate-800/95 dark:via-slate-850/90 dark:to-slate-900/85 hover:from-blue-50/90 hover:via-indigo-50/80 hover:to-purple-50/70 dark:hover:from-slate-700/95 dark:hover:via-slate-750/90 dark:hover:to-slate-800/85 backdrop-blur-sm rounded-2xl">
         <div className="aspect-video relative overflow-hidden rounded-t-2xl flex-shrink-0">
           <img
