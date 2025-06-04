@@ -35,6 +35,10 @@ export type NoteEditorFormProps = {
   currentTimestamp: number;
 };
 
+export type NoteEditorFormRef = {
+  setEditingNote: (note: Note | null) => void;
+};
+
 export type TagsSectionProps = {
   tags: string[];
   tagInput: string;
@@ -49,7 +53,6 @@ export type NotesListProps = {
   onTimestampClick?: (timestamp: number) => void;
   onEditNote: (note: Note) => void;
   onDeleteNote: (noteId: string) => void;
-  formatTimestamp: (seconds: number) => string;
 };
 
 export type NoteCardProps = {
@@ -57,13 +60,11 @@ export type NoteCardProps = {
   onTimestampClick?: (timestamp: number) => void;
   onEditNote: (note: Note) => void;
   onDeleteNote: (noteId: string) => void;
-  formatTimestamp: (seconds: number) => string;
 };
 
 export type TimestampDisplayProps = {
   timestamp: number;
   onClick?: (timestamp: number) => void;
-  formatTimestamp: (seconds: number) => string;
   clickable?: boolean;
 };
 
@@ -115,4 +116,33 @@ export type UseNotesOperationsReturn = {
   updateNote: (id: string, payload: { content: string; tags: string[] }) => Promise<void>;
   deleteNote: (id: string) => Promise<void>;
   isLoading: boolean;
+};
+
+export type UseNoteEditorProps = {
+  videoId: string;
+  currentTimestamp: number;
+};
+
+export type UseNoteEditorReturn = {
+  // Form state
+  content: string;
+  setContent: (content: string) => void;
+  isEditing: boolean;
+  
+  // Tags
+  tags: string[];
+  tagInput: string;
+  setTagInput: (input: string) => void;
+  
+  // Loading states
+  isLoading: boolean;
+  isVideoIdLoading: boolean;
+  
+  // Actions
+  handleSave: () => Promise<void>;
+  handleCancel: () => void;
+  handleAddTag: () => void;
+  handleRemoveTag: (tag: string) => void;
+  handleKeyDown: (e: React.KeyboardEvent) => void;
+  setEditingNote: (note: Note | null) => void;
 };
