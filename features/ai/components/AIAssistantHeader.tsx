@@ -1,7 +1,7 @@
 import { Brain } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 
-export function AIAssistantHeader() {
+export const AIAssistantHeader = () => {
   return (
     <Card className="border border-slate-200/60 bg-white/90 backdrop-blur-sm shadow-lg rounded-3xl">
       <CardHeader className="text-center py-12">
@@ -15,4 +15,4 @@ export function AIAssistantHeader() {
       </CardHeader>
     </Card>
   );
-}
+};

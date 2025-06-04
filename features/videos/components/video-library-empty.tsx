@@ -1,6 +1,6 @@
 import { Video, Sparkles } from 'lucide-react';
 
-export function VideoLibraryEmpty() {
+export const VideoLibraryEmpty = () => {
   return (
     <div className="text-center p-20 rounded-3xl bg-gradient-to-br from-blue-50/90 via-indigo-50/80 to-purple-50/70 dark:from-blue-950/40 dark:via-indigo-950/30 dark:to-purple-950/20 border border-blue-200/50 dark:border-blue-800/30 shadow-2xl backdrop-blur-sm">
       <div className="mx-auto mb-10 flex h-28 w-28 items-center justify-center rounded-3xl bg-gradient-to-br from-blue-100/80 to-indigo-100/80 dark:from-blue-900/60 dark:to-indigo-900/60 shadow-2xl border border-blue-200/50 dark:border-blue-800/40">
@@ -12,4 +12,4 @@ export function VideoLibraryEmpty() {
       </div>
     </div>
   );
-}
+};

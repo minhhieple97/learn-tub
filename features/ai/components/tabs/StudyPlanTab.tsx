@@ -11,13 +11,13 @@ interface StudyPlanTabProps {
   handleGenerateStudyPlan: () => Promise<void>;
 }
 
-export function StudyPlanTab({
+export const StudyPlanTab = ({
   isLoading,
   studyPlan,
   learningGoals,
   setLearningGoals,
   handleGenerateStudyPlan,
-}: StudyPlanTabProps) {
+}: StudyPlanTabProps) => {
   return (
     <div className="space-y-8">
       <Card className="border border-slate-200 shadow-sm rounded-2xl">
@@ -160,4 +160,4 @@ export function StudyPlanTab({
       )}
     </div>
   );
-}
+};

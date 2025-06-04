@@ -9,12 +9,12 @@ type VideoSidebarProps = {
   onTimestampClick: (time: number) => void;
 };
 
-export function VideoSidebar({
+export const VideoSidebar = ({
   videoId,
   dbVideoId,
   currentTimestamp,
   onTimestampClick,
-}: VideoSidebarProps) {
+}: VideoSidebarProps) => {
   return (
     <Tabs defaultValue="notes">
       <TabsList className="w-full">
@@ -37,4 +37,4 @@ export function VideoSidebar({
       </TabsContent>
     </Tabs>
   );
-}
+};

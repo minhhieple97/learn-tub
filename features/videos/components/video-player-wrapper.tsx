@@ -7,12 +7,12 @@ type VideoPlayerWrapperProps = {
   initialTimestamp?: number;
 };
 
-export function VideoPlayerWrapper({
+export const VideoPlayerWrapper = ({
   videoId,
   onTimeUpdate,
   targetSeekTime,
   initialTimestamp = 0,
-}: VideoPlayerWrapperProps) {
+}: VideoPlayerWrapperProps) => {
   return (
     <YouTubePlayer
       videoId={videoId}
@@ -21,4 +21,4 @@ export function VideoPlayerWrapper({
       initialTimestamp={initialTimestamp}
     />
   );
-}
+};

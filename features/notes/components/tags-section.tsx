@@ -7,14 +7,14 @@ import { Input } from '@/components/ui/input';
 import { Plus, X } from 'lucide-react';
 import type { TagsSectionProps } from '../types';
 
-export function TagsSection({
+export const TagsSection = ({
   tags,
   tagInput,
   onTagInputChange,
   onAddTag,
   onRemoveTag,
   onKeyDown,
-}: TagsSectionProps) {
+}: TagsSectionProps) => {
   return (
     <>
       <div className="flex flex-wrap gap-2">
@@ -39,4 +39,4 @@ export function TagsSection({
       </div>
     </>
   );
-}
+};

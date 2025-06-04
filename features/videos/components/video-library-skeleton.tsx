@@ -1,7 +1,7 @@
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 
-export function VideoLibrarySkeleton() {
+export const VideoLibrarySkeleton = () => {
   return (
     <div className="space-y-10">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
@@ -30,4 +30,4 @@ export function VideoLibrarySkeleton() {
       </div>
     </div>
   );
-}
+};

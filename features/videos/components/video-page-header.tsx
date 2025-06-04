@@ -8,7 +8,7 @@ type VideoPageHeaderProps = {
   video: VideoPageData;
 };
 
-export function VideoPageHeader({ video }: VideoPageHeaderProps) {
+export const VideoPageHeader = ({ video }: VideoPageHeaderProps) => {
   return (
     <div className="flex items-center justify-between">
       <div>
@@ -23,4 +23,4 @@ export function VideoPageHeader({ video }: VideoPageHeaderProps) {
       </div>
     </div>
   );
-}
+};

@@ -23,7 +23,7 @@ export interface NoteAnalysis {
 
 export type QuizDifficulty = 'easy' | 'medium' | 'hard';
 
-export function useAIAssistant(dbVideoId: string) {
+export const useAIAssistant = (dbVideoId: string) => {
   const [isLoading, setIsLoading] = useState(false);
   const [analysis, setAnalysis] = useState<NoteAnalysis | null>(null);
   const [quiz, setQuiz] = useState<{ questions: QuizQuestion[] } | null>(null);

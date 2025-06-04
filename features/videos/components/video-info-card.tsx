@@ -5,7 +5,7 @@ type VideoInfoCardProps = {
   video: VideoPageData;
 };
 
-export function VideoInfoCard({ video }: VideoInfoCardProps) {
+export const VideoInfoCard = ({ video }: VideoInfoCardProps) => {
   return (
     <Card className="mt-4">
       <CardHeader>
@@ -25,4 +25,4 @@ export function VideoInfoCard({ video }: VideoInfoCardProps) {
       </CardContent>
     </Card>
   );
-}
+};

@@ -9,7 +9,7 @@ type UseVideosReturn = {
   refetch: () => Promise<void>;
 };
 
-export function useVideos(): UseVideosReturn {
+export const useVideos = (): UseVideosReturn => {
   const [videos, setVideos] = useState<Video[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

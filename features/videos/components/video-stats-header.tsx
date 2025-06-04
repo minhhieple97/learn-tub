@@ -5,7 +5,7 @@ type VideoStatsHeaderProps = {
   videoCount: number;
 };
 
-export function VideoStatsHeader({ videoCount }: VideoStatsHeaderProps) {
+export const VideoStatsHeader = ({ videoCount }: VideoStatsHeaderProps) => {
   return (
     <div className="ml-auto">
       <Badge
@@ -17,4 +17,4 @@ export function VideoStatsHeader({ videoCount }: VideoStatsHeaderProps) {
       </Badge>
     </div>
   );
-}
+};

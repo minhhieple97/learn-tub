@@ -1,7 +1,12 @@
 import { NoteCard } from './note-card';
 import type { NotesListProps } from '../types';
 
-export function NotesList({ notes, onTimestampClick, onEditNote, onDeleteNote }: NotesListProps) {
+export const NotesList = ({
+  notes,
+  onTimestampClick,
+  onEditNote,
+  onDeleteNote,
+}: NotesListProps) => {
   if (notes.length === 0) {
     return (
       <div className="space-y-2">
@@ -25,4 +30,4 @@ export function NotesList({ notes, onTimestampClick, onEditNote, onDeleteNote }:
       ))}
     </div>
   );
-}
+};

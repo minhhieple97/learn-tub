@@ -11,7 +11,7 @@ interface AIAssistantProps {
   dbVideoId: string;
 }
 
-export function AIAssistant({ videoId, dbVideoId }: AIAssistantProps) {
+export const AIAssistant = ({ videoId, dbVideoId }: AIAssistantProps) => {
   const {
     isLoading,
     analysis,
@@ -86,4 +86,4 @@ export function AIAssistant({ videoId, dbVideoId }: AIAssistantProps) {
       </div>
     </div>
   );
-}
+};
