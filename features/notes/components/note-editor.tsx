@@ -5,15 +5,15 @@ import { NotesList } from './notes-list';
 import { useNoteEditor } from '../hooks/use-note-editor';
 import type { NoteEditorProps } from '../types';
 
-export const NoteEditor = ({ videoId, currentTimestamp, onTimestampClick }: NoteEditorProps) => {
+export const NoteEditor = ({ video, currentTimestamp, onTimestampClick }: NoteEditorProps) => {
   const { notes, formRef, handleTimestampClick, handleEditNote, handleDeleteNote } = useNoteEditor({
-    videoId,
+    video,
     onTimestampClick,
   });
 
   return (
     <div className="space-y-4">
-      <NoteEditorForm ref={formRef} videoId={videoId} currentTimestamp={currentTimestamp} />
+      <NoteEditorForm ref={formRef} videoId={video.id} currentTimestamp={currentTimestamp} />
 
       <NotesList
         notes={notes}

@@ -17,20 +17,13 @@ export type NoteEditorFormRef = {
 export const NoteEditorForm = forwardRef<NoteEditorFormRef, NoteEditorFormProps>(
   ({ videoId, currentTimestamp }, ref) => {
     const {
-      // Form state
       content,
       setContent,
       isEditing,
-
-      // Tags
       tags,
       tagInput,
       setTagInput,
-
-      // Loading states
       isLoading,
-
-      // Actions
       handleSave,
       handleCancel,
       handleAddTag,
@@ -39,7 +32,6 @@ export const NoteEditorForm = forwardRef<NoteEditorFormRef, NoteEditorFormProps>
       setEditingNote,
     } = useNoteEditorForm({ videoId, currentTimestamp });
 
-    // Expose setEditingNote to parent components
     useImperativeHandle(
       ref,
       () => ({

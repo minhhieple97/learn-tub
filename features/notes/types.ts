@@ -1,3 +1,5 @@
+import { VideoPageData } from "../videos/types";
+
 export type Note = {
   id: string;
   content: string;
@@ -10,7 +12,7 @@ export type Note = {
 };
 
 export type NoteEditorProps = {
-  videoId: string;
+  video: VideoPageData;
   currentTimestamp: number;
   onTimestampClick?: (time: number) => void;
 };
@@ -80,7 +82,6 @@ export type FormActionsProps = {
   onCancel: () => void;
 };
 
-// Hook Types
 export type UseVideoIdReturn = {
   dbVideoId: string | null;
   isLoading: boolean;
@@ -124,21 +125,16 @@ export type UseNoteEditorProps = {
 };
 
 export type UseNoteEditorReturn = {
-  // Form state
   content: string;
   setContent: (content: string) => void;
   isEditing: boolean;
   
-  // Tags
   tags: string[];
   tagInput: string;
   setTagInput: (input: string) => void;
   
-  // Loading states
   isLoading: boolean;
-  isVideoIdLoading: boolean;
   
-  // Actions
   handleSave: () => Promise<void>;
   handleCancel: () => void;
   handleAddTag: () => void;

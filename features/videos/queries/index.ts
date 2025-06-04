@@ -20,7 +20,7 @@ export const getUserProfile = async (userId: string) => {
     .from('profiles')
     .select('*')
     .eq('id', userId)
-    .single();
+    .maybeSingle();
   
   if (error) {
     throw new Error(`Failed to get user profile: ${error.message}`);
@@ -103,4 +103,32 @@ export async function insertVideo(videoData: VideoData) {
   }
 
   return { success: true, videoId: videoData.youtubeId };
+}
+
+export const getVideoByYoutubeId = async (youtubeId: string, userId: string) => {
+  const supabase = await createClient();
+  const { data: video, error } = await supabase
+    .from('videos')
+    .select('*, courses(title)')
+    .eq('youtube_id', youtubeId)
+    .eq('user_id', userId)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(`Failed to fetch video: ${error.message}`);
+  }
+
+  return video;
+}
+
+export const getVideoPageData = async (videoId: string) => {
+  const { user, profile } = await getUserWithProfile();
+  
+  if (!user || !profile) {
+    return { user: null, profile: null, video: null };
+  }
+
+  const video = await getVideoByYoutubeId(videoId, profile.id);
+  
+  return { user, profile, video };
 }

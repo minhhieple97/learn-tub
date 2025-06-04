@@ -1,20 +1,15 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { NoteEditor } from '@/features/notes/components/note-editor';
 import { AIAssistant } from '@/features/ai/components/ai-assistant';
+import { VideoPageData } from '../types';
 
 type VideoSidebarProps = {
-  videoId: string;
-  dbVideoId: string;
   currentTimestamp: number;
   onTimestampClick: (time: number) => void;
+  video: VideoPageData;
 };
 
-export const VideoSidebar = ({
-  videoId,
-  dbVideoId,
-  currentTimestamp,
-  onTimestampClick,
-}: VideoSidebarProps) => {
+export const VideoSidebar = ({ currentTimestamp, onTimestampClick, video }: VideoSidebarProps) => {
   return (
     <Tabs defaultValue="notes">
       <TabsList className="w-full">
@@ -27,13 +22,13 @@ export const VideoSidebar = ({
       </TabsList>
       <TabsContent value="notes" className="mt-4">
         <NoteEditor
-          videoId={videoId}
+          video={video}
           currentTimestamp={currentTimestamp}
           onTimestampClick={onTimestampClick}
         />
       </TabsContent>
       <TabsContent value="ai" className="mt-4">
-        <AIAssistant videoId={videoId} dbVideoId={dbVideoId} />
+        <AIAssistant videoId={video.id} />
       </TabsContent>
     </Tabs>
   );

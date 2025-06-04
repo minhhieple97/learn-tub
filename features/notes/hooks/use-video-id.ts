@@ -14,14 +14,14 @@ export const useVideoId = (youtubeId: string): UseVideoIdReturn => {
 
     setIsLoading(true);
     try {
-      const { data: videos } = await supabase
+      const { data: video } = await supabase
         .from('videos')
         .select('id')
         .eq('youtube_id', youtubeId)
-        .limit(1);
+        .maybeSingle();
 
-      if (videos && videos.length > 0) {
-        setDbVideoId(videos[0].id);
+      if (video) {
+        setDbVideoId(video.id);
       }
     } catch (error) {
       console.error('Error fetching video ID:', error);

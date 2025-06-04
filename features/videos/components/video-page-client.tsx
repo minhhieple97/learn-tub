@@ -8,10 +8,9 @@ import { VideoPageData } from '../types/video-page';
 
 type VideoPageClientProps = {
   video: VideoPageData;
-  videoId: string;
 };
 
-export const VideoPageClient = ({ video, videoId }: VideoPageClientProps) => {
+export const VideoPageClient = ({ video }: VideoPageClientProps) => {
   const { currentTimestamp, targetSeekTime, handleTimeUpdate, handleNoteTimestampClick } =
     useVideoPlayer();
 
@@ -22,15 +21,12 @@ export const VideoPageClient = ({ video, videoId }: VideoPageClientProps) => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <VideoMainContent
           video={video}
-          videoId={videoId}
           onTimeUpdate={handleTimeUpdate}
           targetSeekTime={targetSeekTime}
         />
-
         <div className="lg:col-span-1">
           <VideoSidebar
-            videoId={videoId}
-            dbVideoId={video.id}
+            video={video}
             currentTimestamp={currentTimestamp}
             onTimestampClick={handleNoteTimestampClick}
           />
