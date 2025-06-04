@@ -1,17 +1,16 @@
-import { VideoLibraryError } from './video-library-error';
+'use client';
+
+import { use } from 'react';
 import { VideoLibraryEmpty } from './video-library-empty';
 import { VideoGrid } from './video-grid';
 import { Video } from '@/features/videos/types/video';
 
 type VideoLibraryProps = {
-  videos: Video[];
-  error: string | null;
+  videosPromise: Promise<Video[]>;
 };
 
-export function VideoLibrary({ videos, error }: VideoLibraryProps) {
-  if (error) {
-    return <VideoLibraryError error={error} />;
-  }
+export const VideoLibrary = ({ videosPromise }: VideoLibraryProps) => {
+  const videos = use(videosPromise);
 
   if (!videos || videos.length === 0) {
     return <VideoLibraryEmpty />;
@@ -22,4 +21,4 @@ export function VideoLibrary({ videos, error }: VideoLibraryProps) {
       <VideoGrid videos={videos} />
     </div>
   );
-}
+};

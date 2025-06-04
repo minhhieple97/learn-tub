@@ -1,4 +1,5 @@
 export { VideoLibrary } from './video-library';
+export { VideoLibraryLoading } from './video-library-loading';
 export { AddVideoForm } from './add-video-form';
 export { HowItWorks } from './how-it-works';
 export { YouTubePlayer } from './youtube-player';
