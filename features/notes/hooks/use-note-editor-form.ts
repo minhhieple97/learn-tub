@@ -43,27 +43,23 @@ export const useNoteEditorForm = ({ videoId, currentTimestamp }: UseNoteEditorPr
     removeTag(tag);
   }, [removeTag]);
 
-  const handleSave = useCallback(async () => {
+  const handleSave = useCallback(() => {
     if (!content.trim()) return;
     
-    try {
-      if (isEditing && editingNoteId) {
-        await updateNote(editingNoteId, { content, tags });
-      } else {
-        await saveNote({ content, tags, timestamp: currentTimestamp });
-      }
-      
-      resetForm();
-      resetTags();
-    } catch (error) {
-      // Error handling is done in the operations hook
-      console.error('Error in handleSave:', error);
+    if (isEditing && editingNoteId) {
+      updateNote({ noteId: editingNoteId, content, tags });
+    } else {
+      saveNote({ videoId, content, tags, timestamp: currentTimestamp });
     }
+    
+    resetForm();
+    resetTags();
   }, [
     content, 
     tags, 
     isEditing, 
     editingNoteId, 
+    videoId,
     currentTimestamp, 
     updateNote, 
     saveNote, 

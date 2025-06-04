@@ -29,4 +29,11 @@ export const TOAST_MESSAGES = {
   VIDEO_EXISTS_ERROR: "You've already added this video",
   INVALID_URL_ERROR: 'Invalid YouTube URL',
   UNEXPECTED_ERROR: 'An unexpected error occurred',
+  NOTE_SAVED_SUCCESS: 'Note saved successfully!',
+  NOTE_UPDATED_SUCCESS: 'Note updated successfully!',
+  NOTE_DELETED_SUCCESS: 'Note deleted successfully!',
+  NOTE_SAVE_ERROR: 'Failed to save note. Please try again.',
+  NOTE_UPDATE_ERROR: 'Failed to update note. Please try again.',
+  NOTE_DELETE_ERROR: 'Failed to delete note. Please try again.',
+  AUTH_ERROR: 'You must be logged in to perform this action',
 } as const;

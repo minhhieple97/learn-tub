@@ -18,7 +18,7 @@ type UseNoteEditorReturn = {
   formRef: React.RefObject<NoteEditorFormRef | null>;  
   handleTimestampClick: (timestamp: number) => void;
   handleEditNote: (note: Note) => void;
-  handleDeleteNote: (noteId: string) => Promise<void>;
+  handleDeleteNote: (noteId: string) => void;
 };
 
 export const useNoteEditor = ({ 
@@ -41,9 +41,9 @@ export const useNoteEditor = ({
   }, []);
 
   const handleDeleteNote = useCallback(
-    async (noteId: string) => {
-      await deleteNote(noteId);
-      await refetch();
+    (noteId: string) => {
+      deleteNote({ noteId });
+      refetch();
     },
     [deleteNote, refetch],
   );

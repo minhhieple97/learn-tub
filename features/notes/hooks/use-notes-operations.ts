@@ -1,113 +1,96 @@
 'use client';
 
-import { useState, useCallback } from 'react';
-import { createClient } from '@/lib/supabase/client';
+import { useAction } from 'next-safe-action/hooks';
 import { useToast } from '@/components/ui/use-toast';
-import type { CreateNotePayload, UpdateNotePayload, UseNotesOperationsReturn } from '../types';
+import { TOAST_MESSAGES } from '@/config/constants';
+import { saveNoteAction, updateNoteAction, deleteNoteAction } from '../actions';
+import type { SaveNoteInput, UpdateNoteInput, DeleteNoteInput, UseNotesOperationsReturn } from '../types';
 
 export const useNotesOperations = (videoId: string | null): UseNotesOperationsReturn => {
-  const [isLoading, setIsLoading] = useState(false);
-  const supabase = createClient();
   const { toast } = useToast();
 
-  const saveNote = useCallback(
-    async (payload: { content: string; tags: string[]; timestamp: number }) => {
-      if (!payload.content.trim() || !videoId) return;
-
-      setIsLoading(true);
-      try {
-        const { data: user } = await supabase.auth.getUser();
-        if (!user.user) {
-          toast({
-            title: 'Authentication Error',
-            description: 'You must be logged in to save notes',
-            variant: 'destructive',
-          });
-          return;
-        }
-
-        const createPayload: CreateNotePayload = {
-          video_id: videoId,
-          user_id: user.user.id,
-          content: payload.content,
-          timestamp_seconds: payload.timestamp,
-          tags: payload.tags,
-        };
-
-        const { error } = await supabase.from('notes').insert(createPayload);
-        if (error) throw error;
-
-        toast({
-          title: 'Note Saved',
-          description: 'Your note has been saved successfully',
-        });
-      } catch (error) {
-        console.error('Error saving note:', error);
-        toast({
-          title: 'Error',
-          description: 'Failed to save note. Please try again.',
-          variant: 'destructive',
-        });
-      } finally {
-        setIsLoading(false);
-      }
+  const { execute: executeSave, isPending: isSavePending } = useAction(saveNoteAction, {
+    onError: ({ error }) => {
+      toast({
+        title: 'Error',
+        description: error.serverError || TOAST_MESSAGES.NOTE_SAVE_ERROR,
+        variant: 'destructive',
+      });
     },
-    [videoId, supabase, toast],
-  );
-
-  const updateNote = useCallback(
-    async (id: string, payload: { content: string; tags: string[] }) => {
-      setIsLoading(true);
-      try {
-        const updatePayload: UpdateNotePayload = {
-          content: payload.content,
-          tags: payload.tags,
-          updated_at: new Date().toISOString(),
-        };
-
-        const { error } = await supabase.from('notes').update(updatePayload).eq('id', id);
-
-        if (error) throw error;
-
+    onSuccess: ({ data }) => {
+      if (data?.success) {
         toast({
-          title: 'Note Updated',
-          description: 'Your note has been updated successfully',
-        });
-      } catch (error) {
-        console.error('Error updating note:', error);
-        toast({
-          title: 'Error',
-          description: 'Failed to update note. Please try again.',
-          variant: 'destructive',
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [supabase, toast],
-  );
-
-  const deleteNote = useCallback(
-    async (id: string) => {
-      try {
-        const { error } = await supabase.from('notes').delete().eq('id', id);
-        if (error) throw error;
-
-        toast({
-          title: 'Note Deleted',
-          description: 'Your note has been deleted successfully',
-        });
-      } catch (error) {
-        console.error('Error deleting note:', error);
-        toast({
-          title: 'Error',
-          description: 'Failed to delete note. Please try again.',
-          variant: 'destructive',
+          title: 'Success',
+          description: TOAST_MESSAGES.NOTE_SAVED_SUCCESS,
         });
       }
     },
-    [supabase, toast],
-  );
+  });
+
+  const { execute: executeUpdate, isPending: isUpdatePending } = useAction(updateNoteAction, {
+    onError: ({ error }) => {
+      console.error('Error updating note:', error);
+      toast({
+        title: 'Error',
+        description: error.serverError || TOAST_MESSAGES.NOTE_UPDATE_ERROR,
+        variant: 'destructive',
+      });
+    },
+    onSuccess: ({ data }) => {
+      if (data?.success) {
+        toast({
+          title: 'Success',
+          description: TOAST_MESSAGES.NOTE_UPDATED_SUCCESS,
+        });
+      }
+    },
+  });
+
+  const { execute: executeDelete, isPending: isDeletePending } = useAction(deleteNoteAction, {
+    onError: ({ error }) => {
+      console.error('Error deleting note:', error);
+      toast({
+        title: 'Error',
+        description: error.serverError || TOAST_MESSAGES.NOTE_DELETE_ERROR,
+        variant: 'destructive',
+      });
+    },
+    onSuccess: ({ data }) => {
+      if (data?.success) {
+        toast({
+          title: 'Success',
+          description: TOAST_MESSAGES.NOTE_DELETED_SUCCESS,
+        });
+      }
+    },
+  });
+
+  const saveNote = (payload: SaveNoteInput) => {
+    if (!payload.content.trim() || !videoId) return;
+    
+    executeSave({
+      videoId,
+      content: payload.content,
+      timestamp: payload.timestamp,
+      tags: payload.tags,
+    });
+  };
+
+  const updateNote = (payload: UpdateNoteInput) => {
+    executeUpdate({
+      noteId: payload.noteId,
+      content: payload.content,
+      tags: payload.tags,
+    });
+  };
+
+  const deleteNote = (payload: DeleteNoteInput) => {
+    executeDelete({
+      noteId: payload.noteId,
+    });
+  };
+
+  const isLoading = isSavePending || isUpdatePending || isDeletePending;
 
   return {
     saveNote,
