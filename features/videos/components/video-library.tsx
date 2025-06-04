@@ -6,7 +6,7 @@ import { VideoGrid } from './video-grid';
 import { Video } from '@/features/videos/types/video';
 
 type VideoLibraryProps = {
-  videosPromise: Promise<Video[]>;
+  videosPromise: Promise<Video[] | null>;
 };
 
 export const VideoLibrary = ({ videosPromise }: VideoLibraryProps) => {

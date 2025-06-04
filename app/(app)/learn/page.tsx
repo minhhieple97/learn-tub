@@ -1,46 +1,23 @@
-import { AddVideoForm, VideoLibrary, HowItWorks } from '@/features/videos/components';
-import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { routes } from '@/routes';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Play, Plus, Library } from 'lucide-react';
-import { Video } from '@/features/videos/types/video';
-import { Suspense } from 'react';
-import { VideoLibraryLoading } from '@/features/videos/components/video-library-loading';
+import { Play } from 'lucide-react';
+import { getLearnPageData } from '@/features/videos/queries';
+import { LearnTabs } from '@/features/videos/components/learn-tabs';
+import { learnPageCache } from '@/features/videos/search-params';
+import type { SearchParams } from 'nuqs/server';
 
-// Create the videos promise function
-async function getVideosPromise(userId: string) {
-  const supabase = await createClient();
-  const { data: videos, error } = await supabase
-    .from('videos')
-    .select('*, notes(count)')
-    .eq('user_id', userId)
-    .order('created_at', { ascending: false });
+type PageProps = {
+  searchParams: Promise<SearchParams>;
+};
 
-  if (error) {
-    throw new Error(error.message);
-  }
+export default async function LearnPage({ searchParams }: PageProps) {
+  const { user, profile, videosPromise } = await getLearnPageData();
 
-  return videos || [];
-}
-
-export default async function LearnPage() {
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect(routes.login);
-  }
-  const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
-  if (!profile) {
+  if (!user || !profile) {
     redirect(routes.login);
   }
 
-  // Create the promise for videos
-  const videosPromise = getVideosPromise(profile.id);
+  const { tab } = await learnPageCache.parse(searchParams);
 
   return (
     <div className="bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/30 dark:from-slate-900 dark:via-blue-950/20 dark:to-indigo-950/20">
@@ -58,42 +35,7 @@ export default async function LearnPage() {
           </div>
         </div>
 
-        <Tabs defaultValue="add" className="space-y-4">
-          <TabsList className="grid w-full max-w-md grid-cols-2 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 rounded-lg p-1">
-            <TabsTrigger
-              value="add"
-              className="flex items-center gap-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white rounded-md transition-all"
-            >
-              <Plus className="h-4 w-4" />
-              Add Video
-            </TabsTrigger>
-            <TabsTrigger
-              value="library"
-              className="flex items-center gap-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white rounded-md transition-all"
-            >
-              <Library className="h-4 w-4" />
-              My Library
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="add" className="space-y-4 animate-in fade-in-50 duration-300">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-              <div className="lg:col-span-2">
-                <AddVideoForm />
-              </div>
-
-              <div className="lg:col-span-1 space-y-4">
-                <HowItWorks />
-              </div>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="library" className="animate-in fade-in-50 duration-300">
-            <Suspense fallback={<VideoLibraryLoading />}>
-              <VideoLibrary videosPromise={videosPromise} />
-            </Suspense>
-          </TabsContent>
-        </Tabs>
+        <LearnTabs videosPromise={videosPromise!} defaultTab={tab} />
       </div>
     </div>
   );
