@@ -64,7 +64,7 @@ export const AddVideoForm = () => {
                 placeholder="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
-                className={`pl-14 h-14 text-lg bg-white/95 backdrop-blur-sm border-0 shadow-lg placeholder:text-gray-500 focus:bg-white focus:ring-2 focus:ring-white/50 ${
+                className={`pl-14 h-14 text-lg text-primary backdrop-blur-sm border-0 shadow-lg placeholder:text-gray-500 focus:bg-white focus:ring-2 focus:ring-white/50 ${
                   url && isValidYouTubeUrl(url)
                     ? 'ring-2 ring-green-400'
                     : url && !isValidYouTubeUrl(url)

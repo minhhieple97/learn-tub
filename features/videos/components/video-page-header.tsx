@@ -3,6 +3,7 @@ import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { routes } from '@/routes';
 import { VideoPageData } from '../types/video-page';
+import { tabValues } from '../search-params';
 
 type VideoPageHeaderProps = {
   video: VideoPageData;
@@ -13,7 +14,7 @@ export const VideoPageHeader = ({ video }: VideoPageHeaderProps) => {
     <div className="flex items-center justify-between">
       <div>
         <Button variant="ghost" size="sm" asChild className="mb-2">
-          <Link href={routes.learn}>
+          <Link href={`${routes.learn}?tab=${tabValues.library}`}>
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Videos
           </Link>
