@@ -8,7 +8,7 @@ type HeaderProps = {
   user: User;
 };
 
-export function Header({ user }: HeaderProps) {
+export const Header = ({ user }: HeaderProps) => {
   return (
     <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
       <div className="flex items-center justify-between">
@@ -29,4 +29,4 @@ export function Header({ user }: HeaderProps) {
       </div>
     </header>
   );
-}
+};

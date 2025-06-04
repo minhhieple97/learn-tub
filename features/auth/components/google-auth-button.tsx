@@ -7,7 +7,7 @@ type GoogleAuthButtonProps = {
   mode: 'signin' | 'signup';
 };
 
-export function GoogleAuthButton({ mode }: GoogleAuthButtonProps) {
+export const GoogleAuthButton = ({ mode }: GoogleAuthButtonProps) => {
   const { signInWithGoogle, isLoading } = useGoogleAuth();
 
   return (
@@ -39,4 +39,4 @@ export function GoogleAuthButton({ mode }: GoogleAuthButtonProps) {
       {isLoading ? 'Loading...' : 'Continue with Google'}
     </Button>
   );
-}
+};

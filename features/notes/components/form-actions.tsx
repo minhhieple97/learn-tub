@@ -2,7 +2,7 @@ import { Button } from '@/components/ui/button';
 import { Save } from 'lucide-react';
 import type { FormActionsProps } from '../types';
 
-export function FormActions({ isLoading, isEditing, onSave, onCancel }: FormActionsProps) {
+export const FormActions = ({ isLoading, isEditing, onSave, onCancel }: FormActionsProps) => {
   return (
     <div className="flex gap-2">
       <Button onClick={onSave} disabled={isLoading} className="flex-1">
@@ -17,4 +17,4 @@ export function FormActions({ isLoading, isEditing, onSave, onCancel }: FormActi
       )}
     </div>
   );
-}
+};

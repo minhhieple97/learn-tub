@@ -11,7 +11,7 @@ type UseGoogleAuthReturn = {
   isLoading: boolean;
 };
 
-export function useGoogleAuth(): UseGoogleAuthReturn {
+export const useGoogleAuth = (): UseGoogleAuthReturn => {
   const [isLoading, setIsLoading] = useState(false);
   const supabase = createClient();
   const { toast } = useToast();

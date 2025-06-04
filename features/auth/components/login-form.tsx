@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { GoogleAuthButton } from './google-auth-button';
 import { useLogin } from '@/features/auth/hooks/use-login';
 
-export function LoginForm() {
+export const LoginForm = () => {
   const { register, handleSubmit, errors, isSubmitting, isLoading, onSubmit } = useLogin();
 
   return (

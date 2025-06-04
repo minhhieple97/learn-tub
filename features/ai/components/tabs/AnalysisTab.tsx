@@ -18,12 +18,12 @@ interface AnalysisTabProps {
   getScoreColor: (score: number) => string;
 }
 
-export function AnalysisTab({
+export const AnalysisTab = ({
   isLoading,
   analysis,
   handleAnalyzeNotes,
   getScoreColor,
-}: AnalysisTabProps) {
+}: AnalysisTabProps) => {
   return (
     <div className="space-y-6">
       <div className="text-center">
@@ -124,7 +124,7 @@ export function AnalysisTab({
       )}
     </div>
   );
-}
+};
 
 interface AnalysisCardProps {
   title: string;

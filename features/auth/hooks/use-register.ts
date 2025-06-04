@@ -22,7 +22,7 @@ type UseRegisterReturn = {
   onSubmit: (data: RegisterFormData) => Promise<void>;
 };
 
-export function useRegister(): UseRegisterReturn {
+export const useRegister = (): UseRegisterReturn => {
   const { toast } = useToast();
 
   const { execute, isPending } = useAction(registerAction, {

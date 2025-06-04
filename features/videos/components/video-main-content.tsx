@@ -9,12 +9,12 @@ type VideoMainContentProps = {
   targetSeekTime?: number;
 };
 
-export function VideoMainContent({
+export const VideoMainContent = ({
   video,
   videoId,
   onTimeUpdate,
   targetSeekTime,
-}: VideoMainContentProps) {
+}: VideoMainContentProps) => {
   return (
     <div className="lg:col-span-2">
       <VideoPlayerWrapper
@@ -26,4 +26,4 @@ export function VideoMainContent({
       <VideoInfoCard video={video} />
     </div>
   );
-}
+};

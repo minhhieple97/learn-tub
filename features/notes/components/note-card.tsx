@@ -4,7 +4,7 @@ import { TimestampDisplay } from './timestamp-display';
 import { NoteActions } from './note-actions';
 import type { NoteCardProps } from '../types';
 
-export function NoteCard({ note, onTimestampClick, onEditNote, onDeleteNote }: NoteCardProps) {
+export const NoteCard = ({ note, onTimestampClick, onEditNote, onDeleteNote }: NoteCardProps) => {
   const handleEdit = () => onEditNote(note);
   const handleDelete = () => onDeleteNote(note.id);
   const handleTimestampClick = (timestamp: number) => onTimestampClick?.(timestamp);
@@ -33,4 +33,4 @@ export function NoteCard({ note, onTimestampClick, onEditNote, onDeleteNote }: N
       </CardContent>
     </Card>
   );
-}
+};

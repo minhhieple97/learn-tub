@@ -7,7 +7,7 @@ import { GoogleAuthButton } from './google-auth-button'
 import { useRegister } from '@/features/auth/hooks/use-register';
 import { CheckCircle2, Circle, Loader2 } from 'lucide-react';
 
-export function RegisterForm() {
+export const RegisterForm = () => {
   const { register, handleSubmit, errors, isSubmitting, isLoading, onSubmit } = useRegister();
 
   return (
@@ -137,4 +137,4 @@ export function RegisterForm() {
       </form>
     </div>
   );
-}
+};

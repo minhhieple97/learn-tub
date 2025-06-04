@@ -17,7 +17,7 @@ type UseLoginReturn = {
   onSubmit: (data: LoginFormData) => Promise<void>;
 };
 
-export function useLogin(): UseLoginReturn {
+export const useLogin = (): UseLoginReturn => {
   const { toast } = useToast();
   const { execute, isPending } = useAction(loginAction, {
     onError: ({ error }) => {

@@ -14,7 +14,7 @@ const navigation = [
   { name: 'Settings', href: routes.settings.root, icon: Settings },
 ];
 
-export function Sidebar() {
+export const Sidebar = () => {
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -84,4 +84,4 @@ export function Sidebar() {
       </div>
     </div>
   );
-}
+};

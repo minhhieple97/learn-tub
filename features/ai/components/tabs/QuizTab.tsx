@@ -10,7 +10,7 @@ import {
 import { Loader2, Sparkles, Zap, Award, CheckCircle, XCircle, Lightbulb } from 'lucide-react';
 import { QuizDifficulty, QuizQuestion } from '../../hooks/useAIAssistant';
 
-interface QuizTabProps {
+type QuizTabProps = {
   isLoading: boolean;
   quiz: { questions: QuizQuestion[] } | null;
   difficulty: QuizDifficulty;
@@ -22,9 +22,9 @@ interface QuizTabProps {
   handleQuizSubmit: () => void;
   setQuizAnswer: (questionIndex: number, optionIndex: number) => void;
   getScoreColor: (score: number) => string;
-}
+};
 
-export function QuizTab({
+export const QuizTab = ({
   isLoading,
   quiz,
   difficulty,
@@ -36,7 +36,7 @@ export function QuizTab({
   handleQuizSubmit,
   setQuizAnswer,
   getScoreColor,
-}: QuizTabProps) {
+}: QuizTabProps) => {
   return (
     <div className="space-y-6">
       <Card className="border border-neutral-stone bg-neutral-dust shadow-sm rounded-xl">
@@ -141,15 +141,15 @@ export function QuizTab({
       )}
     </div>
   );
-}
+};
 
-interface QuizQuestionCardProps {
+type QuizQuestionCardProps = {
   question: QuizQuestion;
   questionIndex: number;
   selectedOption: number | undefined;
   isSubmitted: boolean;
   setQuizAnswer: (questionIndex: number, optionIndex: number) => void;
-}
+};
 
 function QuizQuestionCard({
   question,

@@ -7,12 +7,12 @@ import { Pause, Play, SkipBack, SkipForward, Volume2, VolumeX } from "lucide-rea
 import { Slider } from "@/components/ui/slider"
 import { createClient } from '@/lib/supabase/client';
 
-interface YouTubePlayerProps {
+type YouTubePlayerProps = {
   videoId: string;
   initialTimestamp?: number;
   onTimeUpdate?: (time: number) => void;
   targetSeekTime?: number;
-}
+};
 
 declare global {
   interface Window {
@@ -21,12 +21,12 @@ declare global {
   }
 }
 
-export function YouTubePlayer({
+export const YouTubePlayer = ({
   videoId,
   initialTimestamp = 0,
   onTimeUpdate,
   targetSeekTime,
-}: YouTubePlayerProps) {
+}: YouTubePlayerProps) => {
   const [player, setPlayer] = useState<any>(null);
   const [playerState, setPlayerState] = useState(-1);
   const [currentTime, setCurrentTime] = useState(initialTimestamp);
@@ -379,4 +379,4 @@ export function YouTubePlayer({
       </div>
     </Card>
   );
-}
+};

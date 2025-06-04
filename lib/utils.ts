@@ -37,7 +37,7 @@ export function getPasswordStrengthColor(strength: number): string {
 
 
     // Simple utility to format relative time
-export function formatDistanceToNow(date: Date): string {
+export const formatDistanceToNow = (date: Date): string => {
   const now = new Date();
   const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
@@ -49,7 +49,7 @@ export function formatDistanceToNow(date: Date): string {
 }
 
 // Format duration from seconds to MM:SS or HH:MM:SS
-export function formatDuration(seconds: number): string {
+export const formatDuration = (seconds: number): string => {
   if (!seconds) return '00:00';
 
   const hours = Math.floor(seconds / 3600);
