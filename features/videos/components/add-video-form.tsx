@@ -4,34 +4,12 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { addVideoAction } from '../actions/add-video';
-import { useActionState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
 import { Youtube, Play } from 'lucide-react';
-import { routes } from '@/routes';
-import { dotPatternUrl, isValidYouTubeUrl } from '@/lib/utils';
-import { useToast } from '@/hooks/use-toast';
+import { dotPatternUrl } from '@/lib/utils';
+import { useAddVideoForm } from '../hooks/use-add-video-form';
 
 export const AddVideoForm = () => {
-  const router = useRouter();
-  const { toast } = useToast();
-  const [state, action, isPending] = useActionState(addVideoAction, null);
-  const [url, setUrl] = useState('');
-
-  useEffect(() => {
-    if (state?.success && state.videoId) {
-      router.push(`${routes.learn}/${state.videoId}`);
-    }
-
-    if (state?.error) {
-      toast({
-        title: 'Failed to add video',
-        description: state.error,
-        variant: 'destructive',
-      });
-    }
-  }, [state, router]);
+  const { url, setUrl, isValidUrl, isPending, execute, canSubmit } = useAddVideoForm();
 
   return (
     <Card className="relative overflow-hidden border-0 shadow-xl bg-gradient-to-br from-red-500 via-red-600 to-red-700 dark:from-red-600 dark:via-red-700 dark:to-red-800">
@@ -51,7 +29,13 @@ export const AddVideoForm = () => {
       </CardHeader>
 
       <CardContent className="relative space-y-6 pb-8">
-        <form action={action} className="space-y-6">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            execute({ videoUrl: url });
+          }}
+          className="space-y-6"
+        >
           <div className="space-y-4">
             <Label htmlFor="videoUrl" className="text-lg font-semibold text-white">
               YouTube URL
@@ -65,9 +49,9 @@ export const AddVideoForm = () => {
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 className={`pl-14 h-14 text-lg text-primary backdrop-blur-sm border-0 shadow-lg placeholder:text-gray-500 focus:bg-white focus:ring-2 focus:ring-white/50 ${
-                  url && isValidYouTubeUrl(url)
+                  url && isValidUrl
                     ? 'ring-2 ring-green-400'
-                    : url && !isValidYouTubeUrl(url)
+                    : url && !isValidUrl
                     ? 'ring-2 ring-orange-400'
                     : ''
                 }`}
@@ -81,12 +65,12 @@ export const AddVideoForm = () => {
 
           <Button
             type="submit"
-            disabled={isPending || !url || !isValidYouTubeUrl(url)}
+            disabled={!canSubmit}
             className="w-full h-14 text-lg font-semibold bg-white text-red-600 hover:bg-red-50 hover:text-red-700 shadow-lg transition-all duration-200 transform hover:scale-[1.02] disabled:transform-none disabled:opacity-50"
           >
             {isPending ? (
               <>
-                <div className="mr-3 h-5 w-5 animate-spin rounded-full border-2 border-red-600 border-t-transparent" />
+                <div className="mr-3 h-5 w-5 animate-spin rounded-full border-2 border-gray-300 border-t-red-600" />
                 Importing Video...
               </>
             ) : (

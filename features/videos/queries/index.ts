@@ -1,7 +1,9 @@
 import { createClient } from '@/lib/supabase/server';
 import { Video } from '../types/video';
+import { VideoData } from '../types/video-page';
 
-export async function getCurrentUser() {
+
+export const getCurrentUser = async () => {
   const supabase = await createClient();
   const { data: { user }, error } = await supabase.auth.getUser();
   
@@ -12,7 +14,7 @@ export async function getCurrentUser() {
   return user;
 }
 
-export async function getUserProfile(userId: string) {
+export const getUserProfile = async (userId: string) => {
   const supabase = await createClient();
   const { data: profile, error } = await supabase
     .from('profiles')
@@ -27,7 +29,7 @@ export async function getUserProfile(userId: string) {
   return profile;
 }
 
-export async function getUserVideos(userId: string): Promise<Video[]> {
+export const getUserVideos = async (userId: string): Promise<Video[]> => {
   const supabase = await createClient();
   const { data: videos, error } = await supabase
     .from('videos')
@@ -42,8 +44,7 @@ export async function getUserVideos(userId: string): Promise<Video[]> {
   return videos || [];
 }
 
-
-export async function getUserWithProfile() {
+export const getUserWithProfile = async () => {
   const user = await getCurrentUser();
   
   if (!user) {
@@ -55,8 +56,7 @@ export async function getUserWithProfile() {
   return { user, profile };
 }
 
-
-export async function getLearnPageData() {
+export const getLearnPageData = async () => {
   const { user, profile } = await getUserWithProfile();
   
   if (!user || !profile) {
@@ -66,4 +66,41 @@ export async function getLearnPageData() {
   const videosPromise = getUserVideos(profile.id);
   
   return { user, profile, videosPromise };
+}
+
+export const checkExistingVideo = async (userId: string, youtubeId: string) => {
+  const supabase = await createClient();
+  const { data: existingVideos, error } = await supabase
+    .from('videos')
+    .select('id')
+    .eq('youtube_id', youtubeId)
+    .eq('user_id', userId)
+    .maybeSingle();
+  if (error) {
+    throw new Error(`Failed to check existing video: ${error.message}`);
+  }
+
+  return existingVideos;
+}
+
+
+
+export async function insertVideo(videoData: VideoData) {
+  const supabase = await createClient();
+  const { error } = await supabase.from('videos').insert({
+    user_id: videoData.userId,
+    youtube_id: videoData.youtubeId,
+    title: videoData.title,
+    description: videoData.description,
+    thumbnail_url: videoData.thumbnailUrl,
+    duration: videoData.duration,
+    channel_name: videoData.channelName,
+    published_at: videoData.publishedAt,
+  });
+
+  if (error) {
+    throw new Error(`Failed to insert video: ${error.message}`);
+  }
+
+  return { success: true, videoId: videoData.youtubeId };
 }
