@@ -1,12 +1,12 @@
 import { Clock } from 'lucide-react';
 import type { TimestampDisplayProps } from '../types';
+import { formatTimestamp } from '@/lib/utils';
 
-export function TimestampDisplay({
+export const TimestampDisplay = ({
   timestamp,
   onClick,
-  formatTimestamp,
   clickable = false,
-}: TimestampDisplayProps) {
+}: TimestampDisplayProps) => {
   return (
     <div className="flex items-center space-x-2">
       <Clock className="h-4 w-4" />
@@ -18,4 +18,4 @@ export function TimestampDisplay({
       </span>
     </div>
   );
-}
+};
