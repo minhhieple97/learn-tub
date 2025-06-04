@@ -21,7 +21,6 @@ export const useLogin = (): UseLoginReturn => {
   const { toast } = useToast();
   const { execute, isPending } = useAction(loginAction, {
     onError: ({ error }) => {
-      console.log({ error });
       toast({
         title: 'Error',
         description: error.serverError || 'An unexpected error occurred',
@@ -29,7 +28,6 @@ export const useLogin = (): UseLoginReturn => {
       });
     },
     onSuccess: (data) => {
-      console.log({ data });
       toast({
         title: 'Success',
         description: 'Successfully signed in!',

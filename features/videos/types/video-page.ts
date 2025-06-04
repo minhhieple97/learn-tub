@@ -11,3 +11,15 @@ export type VideoPageData = {
   published_at?: string | null;
   courses?: Course | null;
 };
+
+
+export type VideoData = {
+  userId: string;
+  youtubeId: string;
+  title: string;
+  description: string;
+  thumbnailUrl: string;
+  duration: number;
+  channelName: string;
+  publishedAt: string | null;
+};
