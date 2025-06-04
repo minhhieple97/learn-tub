@@ -31,7 +31,29 @@ export type UpdateNotePayload = {
   updated_at: string;
 };
 
-// Component Props Types
+export type SaveNoteInput = {
+  videoId: string;
+  content: string;
+  timestamp: number;
+  tags: string[];
+};
+
+export type UpdateNoteInput = {
+  noteId: string;
+  content: string;
+  tags: string[];
+};
+
+export type DeleteNoteInput = {
+  noteId: string;
+};
+
+export type NoteActionResult = {
+  success: boolean;
+  noteId?: string;
+  message?: string;
+};
+
 export type NoteEditorFormProps = {
   videoId: string;
   currentTimestamp: number;
@@ -113,9 +135,9 @@ export type UseTagsReturn = {
 };
 
 export type UseNotesOperationsReturn = {
-  saveNote: (payload: { content: string; tags: string[]; timestamp: number }) => Promise<void>;
-  updateNote: (id: string, payload: { content: string; tags: string[] }) => Promise<void>;
-  deleteNote: (id: string) => Promise<void>;
+  saveNote: (payload: SaveNoteInput) => void;
+  updateNote: (payload: UpdateNoteInput) => void;
+  deleteNote: (payload: DeleteNoteInput) => void;
   isLoading: boolean;
 };
 
@@ -135,7 +157,7 @@ export type UseNoteEditorReturn = {
   
   isLoading: boolean;
   
-  handleSave: () => Promise<void>;
+  handleSave: () => void;
   handleCancel: () => void;
   handleAddTag: () => void;
   handleRemoveTag: (tag: string) => void;
