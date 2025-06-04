@@ -5,6 +5,24 @@ import { routes } from '@/routes';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Play, Plus, Library } from 'lucide-react';
 import { Video } from '@/features/videos/types/video';
+import { Suspense } from 'react';
+import { VideoLibraryLoading } from '@/features/videos/components/video-library-loading';
+
+// Create the videos promise function
+async function getVideosPromise(userId: string) {
+  const supabase = await createClient();
+  const { data: videos, error } = await supabase
+    .from('videos')
+    .select('*, notes(count)')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return videos || [];
+}
 
 export default async function LearnPage() {
   const supabase = await createClient();
@@ -20,14 +38,9 @@ export default async function LearnPage() {
   if (!profile) {
     redirect(routes.login);
   }
-  const { data: videos, error } = await supabase
-    .from('videos')
-    .select('*, notes(count)')
-    .eq('user_id', profile.id)
-    .order('created_at', { ascending: false });
 
-  const videosData: Video[] = videos || [];
-  const fetchError = error?.message || null;
+  // Create the promise for videos
+  const videosPromise = getVideosPromise(profile.id);
 
   return (
     <div className="bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/30 dark:from-slate-900 dark:via-blue-950/20 dark:to-indigo-950/20">
@@ -76,7 +89,9 @@ export default async function LearnPage() {
           </TabsContent>
 
           <TabsContent value="library" className="animate-in fade-in-50 duration-300">
-            <VideoLibrary videos={videosData} error={fetchError} />
+            <Suspense fallback={<VideoLibraryLoading />}>
+              <VideoLibrary videosPromise={videosPromise} />
+            </Suspense>
           </TabsContent>
         </Tabs>
       </div>
