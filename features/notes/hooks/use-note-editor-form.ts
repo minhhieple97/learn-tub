@@ -1,17 +1,12 @@
 'use client';
 
 import { useCallback } from 'react';
-import { useVideoId } from './use-video-id';
 import { useNotesForm } from './use-notes-form';
 import { useTags } from './use-tags';
 import { useNotesOperations } from './use-notes-operations';
 import type { Note, UseNoteEditorProps, UseNoteEditorReturn } from '../types';
 
 export const useNoteEditorForm = ({ videoId, currentTimestamp }: UseNoteEditorProps): UseNoteEditorReturn => {
-  // Get database video ID from YouTube ID
-  const { dbVideoId, isLoading: isVideoIdLoading } = useVideoId(videoId);
-  
-  // Form state management
   const { 
     content, 
     setContent, 
@@ -21,7 +16,6 @@ export const useNoteEditorForm = ({ videoId, currentTimestamp }: UseNoteEditorPr
     setEditingNote 
   } = useNotesForm();
   
-  // Tags management
   const { 
     tags, 
     tagInput, 
@@ -32,10 +26,8 @@ export const useNoteEditorForm = ({ videoId, currentTimestamp }: UseNoteEditorPr
     resetTags 
   } = useTags();
   
-  // Note operations
-  const { saveNote, updateNote, isLoading } = useNotesOperations(dbVideoId);
+  const { saveNote, updateNote, isLoading } = useNotesOperations(videoId);
 
-  // Event handlers
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -61,7 +53,6 @@ export const useNoteEditorForm = ({ videoId, currentTimestamp }: UseNoteEditorPr
         await saveNote({ content, tags, timestamp: currentTimestamp });
       }
       
-      // Reset form after successful save
       resetForm();
       resetTags();
     } catch (error) {
@@ -96,21 +87,13 @@ export const useNoteEditorForm = ({ videoId, currentTimestamp }: UseNoteEditorPr
   }, [setEditingNote, setTags]);
 
   return {
-    // Form state
     content,
     setContent,
     isEditing,
-    
-    // Tags
     tags,
     tagInput,
     setTagInput,
-    
-    // Loading states
     isLoading,
-    isVideoIdLoading,
-    
-    // Actions
     handleSave,
     handleCancel,
     handleAddTag,

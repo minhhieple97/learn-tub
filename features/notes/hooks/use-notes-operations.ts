@@ -5,14 +5,14 @@ import { createClient } from '@/lib/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 import type { CreateNotePayload, UpdateNotePayload, UseNotesOperationsReturn } from '../types';
 
-export const useNotesOperations = (dbVideoId: string | null): UseNotesOperationsReturn => {
+export const useNotesOperations = (videoId: string | null): UseNotesOperationsReturn => {
   const [isLoading, setIsLoading] = useState(false);
   const supabase = createClient();
   const { toast } = useToast();
 
   const saveNote = useCallback(
     async (payload: { content: string; tags: string[]; timestamp: number }) => {
-      if (!payload.content.trim() || !dbVideoId) return;
+      if (!payload.content.trim() || !videoId) return;
 
       setIsLoading(true);
       try {
@@ -27,7 +27,7 @@ export const useNotesOperations = (dbVideoId: string | null): UseNotesOperations
         }
 
         const createPayload: CreateNotePayload = {
-          video_id: dbVideoId,
+          video_id: videoId,
           user_id: user.user.id,
           content: payload.content,
           timestamp_seconds: payload.timestamp,
@@ -52,7 +52,7 @@ export const useNotesOperations = (dbVideoId: string | null): UseNotesOperations
         setIsLoading(false);
       }
     },
-    [dbVideoId, supabase, toast],
+    [videoId, supabase, toast],
   );
 
   const updateNote = useCallback(

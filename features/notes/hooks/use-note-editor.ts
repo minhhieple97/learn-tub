@@ -5,33 +5,29 @@ import { useVideoId } from './use-video-id';
 import { useNotesData } from './use-notes-data';
 import { useNotesOperations } from './use-notes-operations';
 import type { Note, NoteEditorFormRef } from '../types';
+import { VideoPageData } from '@/features/videos/types';
 
 type UseNoteEditorProps = {
-  videoId: string;
+  video: VideoPageData;
   onTimestampClick?: (timestamp: number) => void;
 };
 
 type UseNoteEditorReturn = {
   notes: Note[];
   isLoading: boolean;
-  
-  formRef: React.RefObject<NoteEditorFormRef | null>;
-  
-
-  
+  formRef: React.RefObject<NoteEditorFormRef | null>;  
   handleTimestampClick: (timestamp: number) => void;
   handleEditNote: (note: Note) => void;
   handleDeleteNote: (noteId: string) => Promise<void>;
 };
 
 export const useNoteEditor = ({ 
-  videoId, 
+  video, 
   onTimestampClick 
 }: UseNoteEditorProps): UseNoteEditorReturn => {
   const formRef = useRef<NoteEditorFormRef>(null);
-  const { dbVideoId } = useVideoId(videoId);
-  const { notes, refetch, isLoading } = useNotesData(dbVideoId);
-  const { deleteNote } = useNotesOperations(dbVideoId);
+  const { notes, refetch, isLoading } = useNotesData(video.id);
+  const { deleteNote } = useNotesOperations(video.id);
 
   const handleTimestampClick = useCallback(
     (timestamp: number) => {

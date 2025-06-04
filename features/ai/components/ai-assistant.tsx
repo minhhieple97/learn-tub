@@ -6,12 +6,11 @@ import { useAIAssistant } from '../hooks/useAIAssistant';
 import { AnalysisTab } from './tabs/AnalysisTab';
 import { QuizTab } from './tabs/QuizTab';
 
-interface AIAssistantProps {
+type AIAssistantProps = {
   videoId: string;
-  dbVideoId: string;
-}
+};
 
-export const AIAssistant = ({ videoId, dbVideoId }: AIAssistantProps) => {
+export const AIAssistant = ({ videoId }: AIAssistantProps) => {
   const {
     isLoading,
     analysis,
@@ -26,7 +25,7 @@ export const AIAssistant = ({ videoId, dbVideoId }: AIAssistantProps) => {
     handleQuizSubmit,
     setQuizAnswer,
     getScoreColor,
-  } = useAIAssistant(dbVideoId);
+  } = useAIAssistant(videoId);
 
   return (
     <div className="w-full space-y-6">

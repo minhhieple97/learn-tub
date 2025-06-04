@@ -16,6 +16,8 @@ export const useYouTubeAPI = (): UseYouTubeAPIReturn => {
   const [isApiLoaded, setIsApiLoaded] = useState(false);
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     if (!window.YT) {
       const tag = document.createElement('script');
       tag.src = 'https://www.youtube.com/iframe_api';
@@ -32,6 +34,6 @@ export const useYouTubeAPI = (): UseYouTubeAPIReturn => {
 
   return {
     isApiLoaded,
-    YT: window.YT,
+    YT: typeof window !== 'undefined' ? window.YT : null,
   };
 }; 
