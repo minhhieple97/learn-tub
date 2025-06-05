@@ -1,7 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { BookOpen, Home, Play, Settings, ChevronLeft, ChevronRight } from 'lucide-react';
+import { BookOpen, Home, Play, Settings, ChevronLeft, ChevronRight, Menu } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -31,15 +31,49 @@ export const Sidebar = () => {
     >
       <div className={cn('transition-all duration-300', isCollapsed ? 'p-2' : 'p-6')}>
         {!isCollapsed && (
-          <div className="flex items-center space-x-2 mb-8">
-            <BookOpen className="h-8 w-8 text-blue-600" />
-            <span className="text-2xl font-bold text-gray-900 dark:text-white">LearnTub</span>
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center space-x-2">
+              <BookOpen className="h-8 w-8 text-blue-600" />
+              <span className="text-2xl font-bold text-gray-900 dark:text-white">LearnTub</span>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={toggleSidebar}
+              className={cn(
+                'h-8 w-8 p-0 rounded-full transition-all duration-200',
+                'hover:bg-gray-100 dark:hover:bg-gray-700',
+                'border border-gray-200 dark:border-gray-600',
+                'bg-white dark:bg-gray-800 shadow-sm',
+                'hover:shadow-md hover:scale-105',
+                'focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
+              )}
+              title="Collapse sidebar"
+            >
+              <ChevronLeft className="h-4 w-4 text-gray-600 dark:text-gray-300" />
+            </Button>
           </div>
         )}
 
         {isCollapsed && (
-          <div className="flex justify-center mb-6">
+          <div className="flex flex-col items-center space-y-4 mb-6">
             <BookOpen className="h-8 w-8 text-blue-600" />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={toggleSidebar}
+              className={cn(
+                'h-8 w-8 p-0 rounded-full transition-all duration-200',
+                'hover:bg-gray-100 dark:hover:bg-gray-700',
+                'border border-gray-200 dark:border-gray-600',
+                'bg-white dark:bg-gray-800 shadow-sm',
+                'hover:shadow-md hover:scale-105',
+                'focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
+              )}
+              title="Expand sidebar"
+            >
+              <Menu className="h-4 w-4 text-gray-600 dark:text-gray-300" />
+            </Button>
           </div>
         )}
 
@@ -66,21 +100,6 @@ export const Sidebar = () => {
             );
           })}
         </nav>
-      </div>
-
-      <div className="absolute bottom-4 w-full px-2">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={toggleSidebar}
-          className={cn(
-            'transition-all duration-200 hover:bg-gray-100 dark:hover:bg-gray-700',
-            isCollapsed ? 'w-full h-10 p-0' : 'w-full justify-center h-8',
-          )}
-          title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-        >
-          {isCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
-        </Button>
       </div>
     </div>
   );
