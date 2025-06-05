@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import React, { useState, useEffect, useRef } from 'react';
 
 type UseYouTubePlayerProps = {
   youtubeId: string;
@@ -37,7 +38,6 @@ export const useYouTubePlayer = ({
     const onPlayerStateChange = (event: any) => {
       setPlayerState(event.data);
     };
-    console.log({ youtubeId });
     const newPlayer = new window.YT.Player(playerRef.current, {
       videoId: youtubeId,
       playerVars: {

@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import type { AIEvaluationResult, AIProvider } from '../types';
+import { AI_DEFAULTS, AI_PROVIDERS } from '@/config/constants';
 
 export const createAIInteraction = async (
   userId: string,
@@ -9,7 +10,6 @@ export const createAIInteraction = async (
   feedback: Record<string, unknown>,
 ): Promise<{ id: string }> => {
   const supabase = await createClient();
-
   const { data, error } = await supabase
     .from('ai_interactions')
     .insert({
@@ -38,7 +38,6 @@ export const getAIInteractionsByNoteId = async (
   userId: string,
 ): Promise<AIEvaluationResult[]> => {
   const supabase = await createClient();
-
   const { data, error } = await supabase
     .from('ai_interactions')
     .select('*')
@@ -55,8 +54,8 @@ export const getAIInteractionsByNoteId = async (
     id: interaction.id,
     note_id: interaction.note_id,
     user_id: interaction.user_id,
-    provider: interaction.input_data?.provider || 'openai',
-    model: interaction.input_data?.model || 'gpt-4',
+    provider: interaction.input_data?.provider || AI_PROVIDERS.OPENAI,
+    model: interaction.input_data?.model || AI_DEFAULTS.SERVICE_MODEL,
     feedback: interaction.output_data,
     created_at: interaction.created_at,
   }));
