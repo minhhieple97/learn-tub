@@ -2,7 +2,7 @@
 
 import { authAction, ActionError } from '@/lib/safe-action';
 import { checkExistingVideo, insertVideo } from '../queries';
-import { getProfile } from '@/features/profile/queries/profile';
+import { getProfileByUserId } from '@/features/profile/queries/profile';
 import { addVideoSchema } from '../schemas';
 import { 
   fetchYouTubeVideoData, 
@@ -16,7 +16,7 @@ export const addVideoAction = authAction
   .inputSchema(addVideoSchema)
   .action(async ({ parsedInput: { videoUrl }, ctx: { user } }) => {
     try {
-      const profile = await getProfile();
+      const profile = await getProfileByUserId(user.id);
       const videoId = extractYouTubeId(videoUrl);
       if (!videoId) {
         throw new ActionError(TOAST_MESSAGES.INVALID_URL_ERROR);

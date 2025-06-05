@@ -236,8 +236,6 @@ export const useNotesStore = create<NotesState>()(
       performSearch: async (query?: string) => {
         const { searchQuery: storeQuery, currentVideoId } = get();
         const searchQuery = query || storeQuery;
-        console.log('searchQuery', searchQuery);
-        console.log('currentVideoId', currentVideoId);
         if (!currentVideoId) return;
         
         const hasQuery = searchQuery.trim();
@@ -352,9 +350,6 @@ export const useNotesStore = create<NotesState>()(
 
       getDisplayNotes: () => {
         const { notes, searchResults, isSearchActive } = get();
-        console.log('isSearchActive', isSearchActive);
-        console.log('searchResults', searchResults);
-        console.log('notes', notes);
         return isSearchActive ? searchResults : notes;
       },
 
