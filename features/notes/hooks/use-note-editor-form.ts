@@ -78,7 +78,6 @@ export const useNoteEditorForm = () => {
   }, [toast]);
 
   const handleContentChange = useCallback((content: string) => {
-    // Allow typing but don't exceed the limit
     if (content.length <= VALIDATION_LIMITS.NOTE_CONTENT_MAX_LENGTH) {
       setFormContent(content);
     }
@@ -89,12 +88,9 @@ export const useNoteEditorForm = () => {
       setTagInput(input);
     }
   }, [setTagInput, validateTagInput]);
-
   const handleAddTag = useCallback((tag?: string) => {
     const tagToAdd = tag || tagInput;
-    
     if (!tagToAdd.trim()) return;
-    
     if (formTags.length >= VALIDATION_LIMITS.MAX_TAGS_COUNT) {
       showValidationErrors([TOAST_MESSAGES.VALIDATION_TOO_MANY_TAGS]);
       return;
@@ -104,7 +100,6 @@ export const useNoteEditorForm = () => {
       showValidationErrors([TOAST_MESSAGES.VALIDATION_TAG_TOO_LONG]);
       return;
     }
-    
     addTag(tag);
   }, [tagInput, formTags.length, addTag, showValidationErrors]);
 
@@ -118,9 +113,7 @@ export const useNoteEditorForm = () => {
   const handleSave = useCallback(() => {
     const contentValidation = validateContent(formContent);
     const tagsValidation = validateTags(formTags);
-    
     const allErrors = [...contentValidation.errors, ...tagsValidation.errors];
-    
     if (allErrors.length > 0) {
       showValidationErrors(allErrors);
       return;
@@ -150,19 +143,12 @@ export const useNoteEditorForm = () => {
     return contentValidation.isValid && tagsValidation.isValid;
   }, [formContent, formTags, validateContent, validateTags]);
 
-  const getContentCharacterCount = useCallback(() => {
-    return {
-      current: formContent.length,
-      max: VALIDATION_LIMITS.NOTE_CONTENT_MAX_LENGTH,
-      remaining: VALIDATION_LIMITS.NOTE_CONTENT_MAX_LENGTH - formContent.length,
-    };
-  }, [formContent.length]);
+
 
   const isEditing = !!editingNote;
   const isSaveDisabled = isFormLoading || !isFormValid();
 
   return {
-    // Form state
     formContent,
     formTags,
     tagInput,
@@ -172,7 +158,6 @@ export const useNoteEditorForm = () => {
     isEditing,
     isSaveDisabled,
     
-    // Handlers
     handleContentChange,
     handleTagInputChange,
     handleAddTag,
@@ -181,9 +166,7 @@ export const useNoteEditorForm = () => {
     removeTag,
     cancelEditing,
     
-    // Validation
     isFormValid,
-    getContentCharacterCount,
     validateTagInput,
   };
 }; 
