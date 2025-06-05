@@ -1,18 +1,21 @@
 import { createClient } from '@/lib/supabase/server';
 import { Video } from '../types/video';
 import { VideoData } from '../types/video-page';
-
+import { getProfileInSession } from '@/features/profile/queries/profile';
 
 export const getCurrentUser = async () => {
   const supabase = await createClient();
-  const { data: { user }, error } = await supabase.auth.getUser();
-  
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
+
   if (error) {
     throw new Error(`Failed to get user: ${error.message}`);
   }
-  
+
   return user;
-}
+};
 
 export const getUserProfile = async (userId: string) => {
   const supabase = await createClient();
@@ -21,13 +24,13 @@ export const getUserProfile = async (userId: string) => {
     .select('*')
     .eq('id', userId)
     .maybeSingle();
-  
+
   if (error) {
     throw new Error(`Failed to get user profile: ${error.message}`);
   }
-  
+
   return profile;
-}
+};
 
 export const getUserVideos = async (userId: string): Promise<Video[]> => {
   const supabase = await createClient();
@@ -42,31 +45,13 @@ export const getUserVideos = async (userId: string): Promise<Video[]> => {
   }
 
   return videos || [];
-}
-
-export const getUserWithProfile = async () => {
-  const user = await getCurrentUser();
-  
-  if (!user) {
-    return { user: null, profile: null };
-  }
-  
-  const profile = await getUserProfile(user.id);
-  
-  return { user, profile };
-}
+};
 
 export const getLearnPageData = async () => {
-  const { user, profile } = await getUserWithProfile();
-  
-  if (!user || !profile) {
-    return { user: null, profile: null, videosPromise: null };
-  }
-  
+  const profile = await getProfileInSession();
   const videosPromise = getUserVideos(profile.id);
-  
-  return { user, profile, videosPromise };
-}
+  return videosPromise;
+};
 
 export const checkExistingVideo = async (userId: string, youtubeId: string) => {
   const supabase = await createClient();
@@ -81,9 +66,7 @@ export const checkExistingVideo = async (userId: string, youtubeId: string) => {
   }
 
   return existingVideos;
-}
-
-
+};
 
 export async function insertVideo(videoData: VideoData) {
   const supabase = await createClient();
@@ -119,16 +102,28 @@ export const getVideoByYoutubeId = async (youtubeId: string, userId: string) => 
   }
 
   return video;
-}
+};
 
 export const getVideoPageData = async (videoId: string) => {
-  const { user, profile } = await getUserWithProfile();
-  
-  if (!user || !profile) {
-    return { user: null, profile: null, video: null };
-  }
+  const profile = await getProfileInSession();
 
   const video = await getVideoByYoutubeId(videoId, profile.id);
-  
-  return { user, profile, video };
-}
+
+  return video;
+};
+
+export const getVideoById = async (videoId: string, userId: string) => {
+  const supabase = await createClient();
+  const { data: video, error } = await supabase
+    .from('videos')
+    .select('id, title, youtube_id')
+    .eq('id', videoId)
+    .eq('user_id', userId)
+    .single();
+
+  if (error) {
+    throw new Error(`Failed to fetch video: ${error.message}`);
+  }
+
+  return video;
+};

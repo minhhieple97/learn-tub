@@ -11,11 +11,8 @@ type PageProps = {
 };
 
 export default async function LearnPage({ searchParams }: PageProps) {
-  const { user, profile, videosPromise } = await getLearnPageData();
+  const videosPromise = getLearnPageData();
 
-  if (!user || !profile) {
-    redirect(routes.login);
-  }
 
   const { tab } = await learnPageCache.parse(searchParams);
 

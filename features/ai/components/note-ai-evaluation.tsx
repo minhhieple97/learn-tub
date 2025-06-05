@@ -87,7 +87,6 @@ export const NoteAIEvaluation = ({ noteId, disabled }: NoteAIEvaluationProps) =>
         </DialogHeader>
 
         <div className="space-y-4">
-          {/* Settings */}
           {showSettings && (
             <div className="border rounded-lg p-4 space-y-4">
               <h3 className="font-medium text-sm">AI Settings</h3>
@@ -111,7 +110,6 @@ export const NoteAIEvaluation = ({ noteId, disabled }: NoteAIEvaluationProps) =>
             </div>
           )}
 
-          {/* Error Display */}
           {hasError && (
             <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
               <h4 className="font-medium text-destructive mb-2">Evaluation Failed</h4>
@@ -127,17 +125,14 @@ export const NoteAIEvaluation = ({ noteId, disabled }: NoteAIEvaluationProps) =>
             </div>
           )}
 
-          {/* Streaming Content */}
           {(isEvaluating || streamingContent) && (
             <AIEvaluationStreaming content={streamingContent} isEvaluating={isEvaluating} />
           )}
 
-          {/* Final Feedback */}
           {feedback && isCompleted && (
             <AIFeedbackDisplay feedback={feedback} onReset={handleReset} />
           )}
 
-          {/* Initial State */}
           {status === 'idle' && !showSettings && (
             <div className="text-center py-8">
               <Brain className="h-12 w-12 mx-auto text-muted-foreground mb-4" />

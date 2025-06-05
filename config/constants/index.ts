@@ -169,3 +169,23 @@ export const AI_FORMAT = {
   TIMESTAMP_PADDING: 2,
   TIMESTAMP_PAD_CHAR: '0',
 } as const;
+
+export const AI_INTERACTION_TYPES = {
+  NOTE_ANALYSIS: 'note_analysis',
+  QUIZ_GENERATION: 'quiz_generation',
+  STUDY_PLAN: 'study_plan',
+  NOTE_FEEDBACK: 'note_feedback',
+} as const;
+
+export const AI_ACTION_ERRORS = {
+  AUTHENTICATION_REQUIRED: 'Authentication required',
+  VIDEO_NOT_FOUND: 'Video not found',
+  NO_NOTES_FOUND: 'No notes found',
+  NO_NOTES_FOR_ANALYSIS: 'No notes found for analysis',
+  NO_NOTES_FOR_QUIZ: 'No notes found for quiz generation',
+  NO_NOTES_FOR_STUDY_PLAN: 'No notes found for study plan generation',
+  FAILED_TO_ANALYZE: 'Failed to analyze notes',
+  FAILED_TO_GENERATE_QUIZ: 'Failed to generate quiz',
+  FAILED_TO_GENERATE_STUDY_PLAN: 'Failed to generate study plan',
+  FAILED_TO_GET_FEEDBACK: 'Failed to get feedback',
+} as const;

@@ -26,7 +26,6 @@ export const AIModelSelector = ({
 }: AIModelSelectorProps) => {
   const handleProviderChange = (newProvider: AIProvider) => {
     onProviderChange(newProvider);
-    // Reset to first model of new provider
     const firstModel = AI_MODELS[newProvider][0]?.value;
     if (firstModel) {
       onModelChange(firstModel);

@@ -12,11 +12,7 @@ type VideoPageProps = {
 export default async function VideoPage({ params }: VideoPageProps) {
   const { videoId } = await params;
 
-  const { user, profile, video } = await getVideoPageData(videoId);
-
-  if (!user || !profile) {
-    redirect(routes.login);
-  }
+  const video = await getVideoPageData(videoId);
 
   if (!video) {
     notFound();
