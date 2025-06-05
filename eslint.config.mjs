@@ -29,7 +29,7 @@ const config = [
     },
   }),
   ...compat.config({
-    extends: ['plugin:drizzle/all'],
+    extends: ['plugin:drizzle/all', 'plugin:@next/next/recommended'],
   }),
   {
     rules: {
