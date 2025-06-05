@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useNotesSearch } from '../hooks';
+import { SEARCH_CONFIG } from '@/config/constants';
 
 type NotesSearchProps = {
   placeholder?: string;
@@ -35,6 +36,7 @@ export const NotesSearch = ({
           value={inputValue}
           onChange={(e) => handleInputChange(e.target.value)}
           className="pl-8 pr-3"
+          maxLength={SEARCH_CONFIG.MAX_QUERY_LENGTH}
         />
         {inputValue && (
           <Button

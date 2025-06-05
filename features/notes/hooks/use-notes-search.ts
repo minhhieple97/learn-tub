@@ -19,7 +19,8 @@ export const useNotesSearch = () => {
   }, [debouncedSearchQuery, performSearch, clearSearch]);
 
   const handleInputChange = (value: string) => {
-    setInputValue(value);
+    const trimmedValue = value.slice(0, SEARCH_CONFIG.MAX_QUERY_LENGTH);
+    setInputValue(trimmedValue);
   };
 
   const handleClearSearch = () => {

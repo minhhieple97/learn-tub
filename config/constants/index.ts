@@ -26,6 +26,7 @@ export const TIME_UNITS = {
 
 export const SEARCH_CONFIG = {
   DEBOUNCE_DELAY: 300,
+  MAX_QUERY_LENGTH: 32,
 } as const;
 
 export const VALIDATION_LIMITS = {
