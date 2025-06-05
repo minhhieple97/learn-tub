@@ -78,7 +78,7 @@ export async function GET(request: NextRequest) {
             if (value.type === AI_CHUNK_TYPES.COMPLETE && value.content) {
               try {
                 feedback = JSON.parse(value.content) as AIFeedback;
-                await createAIInteraction(user.id, noteId, provider, model, feedback);
+                await createAIInteraction(profile.id, noteId, provider, model, feedback);
               } catch (parseError) {
                 console.error(AI_ERROR_MESSAGES.FAILED_TO_PARSE_AI_FEEDBACK, parseError);
               }
