@@ -216,6 +216,9 @@ importers:
         specifier: ^5.0.5
         version: 5.0.5(@types/react@19.0.0)(react@19.0.0)(use-sync-external-store@1.5.0(react@19.0.0))
     devDependencies:
+      '@next/eslint-plugin-next':
+        specifier: ^15.3.3
+        version: 15.3.3
       '@types/node':
         specifier: ^22
         version: 22.0.0
