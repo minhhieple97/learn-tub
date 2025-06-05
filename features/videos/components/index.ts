@@ -12,7 +12,6 @@ export { VideoLibraryEmpty } from './video-library-empty';
 export { VideoStatsHeader } from './video-stats-header';
 export { VideoPageClient } from './video-page-client';
 export { VideoPageHeader } from './video-page-header';
-export { VideoPlayerWrapper } from './video-player-wrapper';
 export { VideoInfoCard } from './video-info-card';
 export { VideoSidebar } from './video-sidebar';
 export { VideoMainContent } from './video-main-content';

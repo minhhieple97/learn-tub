@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 
 type UseYouTubePlayerProps = {
-  videoId: string;
+  youtubeId: string;
   isApiLoaded: boolean;
   initialTimestamp?: number;
 };
@@ -14,7 +14,7 @@ type UseYouTubePlayerReturn = {
 };
 
 export const useYouTubePlayer = ({
-  videoId,
+  youtubeId,
   isApiLoaded,
   initialTimestamp = 0,
 }: UseYouTubePlayerProps): UseYouTubePlayerReturn => {
@@ -37,9 +37,9 @@ export const useYouTubePlayer = ({
     const onPlayerStateChange = (event: any) => {
       setPlayerState(event.data);
     };
-
+    console.log({ youtubeId });
     const newPlayer = new window.YT.Player(playerRef.current, {
-      videoId,
+      videoId: youtubeId,
       playerVars: {
         autoplay: 0,
         controls: 0,
@@ -61,7 +61,7 @@ export const useYouTubePlayer = ({
       }
       setPlayer(null);
     };
-  }, [isApiLoaded, videoId, initialTimestamp]);
+  }, [isApiLoaded, youtubeId, initialTimestamp]);
 
   return {
     player,
@@ -69,4 +69,4 @@ export const useYouTubePlayer = ({
     duration,
     playerRef,
   };
-}; 
+};
