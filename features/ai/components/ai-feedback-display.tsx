@@ -32,7 +32,12 @@ export const AIFeedbackDisplay = ({ feedback, onCopy, onReset }: AIFeedbackDispl
   };
 
   return (
-    <Card className="mt-4 max-h-[60vh] flex flex-col">
+    <Card
+      className="mt-4 flex flex-col overflow-hidden"
+      style={{
+        maxHeight: '60vh',
+      }}
+    >
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 flex-shrink-0 border-b">
         <CardTitle className="text-lg font-medium">AI Evaluation</CardTitle>
         <div className="flex items-center gap-2">
@@ -53,13 +58,11 @@ export const AIFeedbackDisplay = ({ feedback, onCopy, onReset }: AIFeedbackDispl
         </div>
       </CardHeader>
       <CardContent className="flex-1 overflow-y-auto space-y-4 pt-4">
-        {/* Summary */}
         <div>
           <h4 className="font-medium text-sm text-muted-foreground mb-2">Summary</h4>
           <p className="text-sm">{feedback.summary}</p>
         </div>
 
-        {/* Correct Points */}
         {feedback.correct_points.length > 0 && (
           <div>
             <h4 className="font-medium text-sm text-muted-foreground mb-2 flex items-center gap-2">
@@ -77,7 +80,6 @@ export const AIFeedbackDisplay = ({ feedback, onCopy, onReset }: AIFeedbackDispl
           </div>
         )}
 
-        {/* Incorrect Points */}
         {feedback.incorrect_points.length > 0 && (
           <div>
             <h4 className="font-medium text-sm text-muted-foreground mb-2 flex items-center gap-2">
@@ -95,7 +97,6 @@ export const AIFeedbackDisplay = ({ feedback, onCopy, onReset }: AIFeedbackDispl
           </div>
         )}
 
-        {/* Improvement Suggestions */}
         {feedback.improvement_suggestions.length > 0 && (
           <div>
             <h4 className="font-medium text-sm text-muted-foreground mb-2 flex items-center gap-2">
@@ -113,7 +114,6 @@ export const AIFeedbackDisplay = ({ feedback, onCopy, onReset }: AIFeedbackDispl
           </div>
         )}
 
-        {/* Detailed Analysis */}
         {feedback.detailed_analysis && (
           <div>
             <h4 className="font-medium text-sm text-muted-foreground mb-2">Detailed Analysis</h4>
