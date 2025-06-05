@@ -10,17 +10,13 @@ import {
 } from '../schemas';
 import type { NoteActionResult } from '../types';
 import { routes } from '@/routes';
-import { getProfile } from '@/features/profile/queries/profile';
+import { getProfileByUserId } from '@/features/profile/queries/profile';
 
 export const saveNoteAction = authAction
   .inputSchema(saveNoteInputSchema)
   .action(async ({ parsedInput: { videoId, content, timestamp, tags }, ctx: { user } }) => {
-    console.log('videoId', videoId);
-    console.log('content', content);
-    console.log('timestamp', timestamp);
-    console.log('tags', tags);
     const supabase = await createClient();
-    const profile = await getProfile();
+    const profile = await getProfileByUserId(user.id);
     const { data, error } = await supabase
       .from('notes')
       .insert({
@@ -50,7 +46,7 @@ export const updateNoteAction = authAction
   .inputSchema(updateNoteInputSchema)
   .action(async ({ parsedInput: { noteId, content, tags }, ctx: { user } }) => {
     const supabase = await createClient();
-    const profile = await getProfile();
+    const profile = await getProfileByUserId(user.id);
     const { error } = await supabase
       .from('notes')
       .update({
@@ -78,7 +74,7 @@ export const deleteNoteAction = authAction
   .inputSchema(deleteNoteInputSchema)
   .action(async ({ parsedInput: { noteId }, ctx: { user } }) => {
     const supabase = await createClient();
-    const profile = await getProfile();
+    const profile = await getProfileByUserId(user.id);
     const { error } = await supabase
       .from('notes')
       .delete()

@@ -21,7 +21,6 @@ export const useAddVideoForm = (): UseAddVideoFormReturn => {
   const { toast } = useToast();
   const { execute, isPending } = useAction(addVideoAction, {
     onError: ({ error }) => {
-      console.log({ error });
       if (error.validationErrors?.fieldErrors?.videoUrl) {
         toast({
           title: 'Invalid input',
