@@ -42,7 +42,7 @@ type NotesState = {
   setFormContent: (content: string) => void;
   setFormTags: (tags: string[]) => void;
   setTagInput: (input: string) => void;
-  addTag: (tag?: string) => void;
+  addTag: () => void;
   removeTag: (tag: string) => void;
   startEditing: (note: Note) => void;
   cancelEditing: () => void;
@@ -308,13 +308,12 @@ export const useNotesStore = create<NotesState>()(
         set({ tagInput: input });
       },
 
-      addTag: (tag?: string) => {
+      addTag: () => {
         const { tagInput, formTags } = get();
-        const newTag = (tag || tagInput).trim();
         
-        if (newTag && !formTags.includes(newTag)) {
+        if (tagInput && !formTags.includes(tagInput)) {
           set({ 
-            formTags: [...formTags, newTag],
+            formTags: [...formTags, tagInput],
             tagInput: '' 
           });
         }

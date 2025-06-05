@@ -88,19 +88,18 @@ export const useNoteEditorForm = () => {
       setTagInput(input);
     }
   }, [setTagInput, validateTagInput]);
-  const handleAddTag = useCallback((tag?: string) => {
-    const tagToAdd = tag || tagInput;
-    if (!tagToAdd.trim()) return;
+  const handleAddTag = useCallback(() => {
+    if (!tagInput.trim()) return;
     if (formTags.length >= VALIDATION_LIMITS.MAX_TAGS_COUNT) {
       showValidationErrors([TOAST_MESSAGES.VALIDATION_TOO_MANY_TAGS]);
       return;
     }
     
-    if (tagToAdd.length > VALIDATION_LIMITS.TAG_MAX_LENGTH) {
+    if (tagInput.length > VALIDATION_LIMITS.TAG_MAX_LENGTH) {
       showValidationErrors([TOAST_MESSAGES.VALIDATION_TAG_TOO_LONG]);
       return;
     }
-    addTag(tag);
+    addTag();
   }, [tagInput, formTags.length, addTag, showValidationErrors]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
