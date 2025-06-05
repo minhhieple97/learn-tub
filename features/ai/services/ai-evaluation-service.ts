@@ -12,31 +12,45 @@ import {
   AI_FORMAT,
   AI_ERROR_MESSAGES,
 } from '@/config/constants';
-import type { AIProvider, AIFeedback, AIEvaluationRequest, AIStreamChunk } from '../types';
+import type { AIFeedback, AIEvaluationRequest, AIStreamChunk } from '../types';
 
-export const aiEvaluationService = {
+type StreamController = ReadableStreamDefaultController<AIStreamChunk>;
+type ProviderEvaluator = (model: string, prompt: string) => Promise<ReadableStream<AIStreamChunk>>;
+
+class AIEvaluationService {
   async evaluateNote(request: AIEvaluationRequest): Promise<ReadableStream<AIStreamChunk>> {
     const { provider, model, content, context } = request;
-
     const prompt = this.createEvaluationPrompt(content, context);
 
-    if (provider === AI_PROVIDERS.OPENAI) {
-      return this.evaluateWithOpenAI(model, prompt);
-    } else if (provider === AI_PROVIDERS.GEMINI) {
-      return this.evaluateWithGemini(model, prompt);
-    } else {
+    const evaluator = this.getProviderEvaluator(provider);
+    return evaluator(model, prompt);
+  }
+
+  private getProviderEvaluator(provider: string): ProviderEvaluator {
+    const evaluators: Record<string, ProviderEvaluator> = {
+      [AI_PROVIDERS.OPENAI]: this.evaluateWithOpenAI.bind(this),
+      [AI_PROVIDERS.GEMINI]: this.evaluateWithGemini.bind(this),
+    };
+
+    const evaluator = evaluators[provider];
+    if (!evaluator) {
       throw new Error(`${AI_EVALUATION_ERRORS.UNSUPPORTED_PROVIDER}: ${provider}`);
     }
-  },
 
-  createEvaluationPrompt(content: string, context?: AIEvaluationRequest['context']): string {
-    const basePrompt = `
+    return evaluator;
+  }
+
+  private createEvaluationPrompt(
+    content: string,
+    context?: AIEvaluationRequest['context'],
+  ): string {
+    const contextualInfo = this.buildContextualInfo(context);
+
+    return `
 Please evaluate the following learning note and provide detailed feedback:
 
 Note Content: "${content}"
-${context?.videoTitle ? `Video Title: "${context.videoTitle}"` : ''}
-${context?.videoDescription ? `Video Context: "${context.videoDescription}"` : ''}
-${context?.timestamp ? `Timestamp: ${this.formatTimestamp(context.timestamp)}` : ''}
+${contextualInfo}
 
 Please provide your evaluation in the following JSON format:
 {
@@ -56,31 +70,51 @@ Focus on:
 5. Study effectiveness
 
 Be constructive and educational in your feedback.`;
+  }
 
-    return basePrompt;
-  },
+  private buildContextualInfo(context?: AIEvaluationRequest['context']): string {
+    if (!context) return '';
 
-  formatTimestamp(seconds: number): string {
+    const contextParts: string[] = [];
+
+    if (context.videoTitle) {
+      contextParts.push(`Video Title: "${context.videoTitle}"`);
+    }
+
+    if (context.videoDescription) {
+      contextParts.push(`Video Context: "${context.videoDescription}"`);
+    }
+
+    if (context.timestamp) {
+      contextParts.push(`Timestamp: ${this.formatTimestamp(context.timestamp)}`);
+    }
+
+    return contextParts.join('\n');
+  }
+
+  private formatTimestamp(seconds: number): string {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
 
+    const pad = (num: number) =>
+      num.toString().padStart(AI_FORMAT.TIMESTAMP_PADDING, AI_FORMAT.TIMESTAMP_PAD_CHAR);
+
     if (hours > 0) {
-      return `${hours}:${minutes
-        .toString()
-        .padStart(AI_FORMAT.TIMESTAMP_PADDING, AI_FORMAT.TIMESTAMP_PAD_CHAR)}:${secs
-        .toString()
-        .padStart(AI_FORMAT.TIMESTAMP_PADDING, AI_FORMAT.TIMESTAMP_PAD_CHAR)}`;
+      return `${hours}:${pad(minutes)}:${pad(secs)}`;
     }
 
-    return `${minutes}:${secs
-      .toString()
-      .padStart(AI_FORMAT.TIMESTAMP_PADDING, AI_FORMAT.TIMESTAMP_PAD_CHAR)}`;
-  },
+    return `${minutes}:${pad(secs)}`;
+  }
 
   formatFeedbackForCopy(feedback: AIFeedback, format: 'plain' | 'markdown'): string {
-    if (format === AI_FORMAT.COPY_FORMATS.MARKDOWN) {
-      return `# AI Evaluation Feedback
+    return format === AI_FORMAT.COPY_FORMATS.MARKDOWN
+      ? this.formatAsMarkdown(feedback)
+      : this.formatAsPlainText(feedback);
+  }
+
+  private formatAsMarkdown(feedback: AIFeedback): string {
+    return `# AI Evaluation Feedback
 
 ## Summary
 ${feedback.summary}
@@ -88,18 +122,19 @@ ${feedback.summary}
 ## Overall Score: ${feedback.overall_score}/10
 
 ## ✅ Correct Points
-${feedback.correct_points.map((point) => `- ${point}`).join('\n')}
+${this.formatListItems(feedback.correct_points, '-')}
 
 ## ❌ Points to Review
-${feedback.incorrect_points.map((point) => `- ${point}`).join('\n')}
+${this.formatListItems(feedback.incorrect_points, '-')}
 
 ## 💡 Improvement Suggestions
-${feedback.improvement_suggestions.map((suggestion) => `- ${suggestion}`).join('\n')}
+${this.formatListItems(feedback.improvement_suggestions, '-')}
 
 ## Detailed Analysis
 ${feedback.detailed_analysis}`;
-    }
+  }
 
+  private formatAsPlainText(feedback: AIFeedback): string {
     return `AI Evaluation Feedback
 
 Summary: ${feedback.summary}
@@ -107,19 +142,26 @@ Summary: ${feedback.summary}
 Overall Score: ${feedback.overall_score}/10
 
 Correct Points:
-${feedback.correct_points.map((point) => `• ${point}`).join('\n')}
+${this.formatListItems(feedback.correct_points, '•')}
 
 Points to Review:
-${feedback.incorrect_points.map((point) => `• ${point}`).join('\n')}
+${this.formatListItems(feedback.incorrect_points, '•')}
 
 Improvement Suggestions:
-${feedback.improvement_suggestions.map((suggestion) => `• ${suggestion}`).join('\n')}
+${this.formatListItems(feedback.improvement_suggestions, '•')}
 
 Detailed Analysis:
 ${feedback.detailed_analysis}`;
-  },
+  }
 
-  async evaluateWithOpenAI(model: string, prompt: string): Promise<ReadableStream<AIStreamChunk>> {
+  private formatListItems(items: string[], bullet: string): string {
+    return items.map((item) => `${bullet} ${item}`).join('\n');
+  }
+
+  private async evaluateWithOpenAI(
+    model: string,
+    prompt: string,
+  ): Promise<ReadableStream<AIStreamChunk>> {
     const openai = new OpenAI({
       apiKey: env.OPENAI_API_KEY,
       baseURL: AI_CONFIG.BASE_URL,
@@ -142,11 +184,33 @@ ${feedback.detailed_analysis}`;
       max_tokens: AI_CONFIG.MAX_TOKENS,
     });
 
+    return this.createStreamFromOpenAI(stream);
+  }
+
+  private async evaluateWithGemini(
+    model: string,
+    prompt: string,
+  ): Promise<ReadableStream<AIStreamChunk>> {
+    const genAI = new GoogleGenAI({
+      apiKey: env.GEMINI_API_KEY,
+    });
+
+    const response = await genAI.models.generateContentStream({
+      model: model || AI_DEFAULTS.GEMINI_MODEL,
+      contents: prompt,
+    });
+
+    return this.createStreamFromGemini(response);
+  }
+
+  private createStreamFromOpenAI(
+    stream: AsyncIterable<OpenAI.Chat.Completions.ChatCompletionChunk>,
+  ): ReadableStream<AIStreamChunk> {
     return new ReadableStream<AIStreamChunk>({
       async start(controller) {
-        let fullContent = '';
-
         try {
+          let fullContent = '';
+
           for await (const chunk of stream) {
             const content = chunk.choices[0]?.delta?.content || '';
             fullContent += content;
@@ -158,48 +222,20 @@ ${feedback.detailed_analysis}`;
             });
           }
 
-          try {
-            const feedback = JSON.parse(fullContent) as AIFeedback;
-            controller.enqueue({
-              type: AI_CHUNK_TYPES.COMPLETE,
-              content: JSON.stringify(feedback),
-              finished: true,
-            });
-          } catch (parseError) {
-            controller.enqueue({
-              type: AI_CHUNK_TYPES.ERROR,
-              content: AI_EVALUATION_ERRORS.FAILED_TO_PARSE_RESPONSE,
-              finished: true,
-            });
-          }
+          aiEvaluationService.handleStreamCompletion(controller, fullContent);
         } catch (error) {
-          controller.enqueue({
-            type: AI_CHUNK_TYPES.ERROR,
-            content: `${AI_EVALUATION_ERRORS.EVALUATION_FAILED}: ${
-              error instanceof Error ? error.message : AI_ERROR_MESSAGES.UNKNOWN_ERROR
-            }`,
-            finished: true,
-          });
-        } finally {
-          controller.close();
+          aiEvaluationService.handleStreamError(controller, error);
         }
       },
     });
-  },
+  }
 
-  async evaluateWithGemini(model: string, prompt: string): Promise<ReadableStream<AIStreamChunk>> {
-    const genAI = new GoogleGenAI({
-      apiKey: env.GEMINI_API_KEY,
-    });
-
+  private createStreamFromGemini(
+    response: AsyncIterable<{ text?: string }>,
+  ): ReadableStream<AIStreamChunk> {
     return new ReadableStream<AIStreamChunk>({
       async start(controller) {
         try {
-          const response = await genAI.models.generateContentStream({
-            model: model || AI_DEFAULTS.GEMINI_MODEL,
-            contents: prompt,
-          });
-
           let fullContent = '';
 
           for await (const chunk of response) {
@@ -213,32 +249,44 @@ ${feedback.detailed_analysis}`;
             });
           }
 
-          try {
-            const feedback = JSON.parse(fullContent) as AIFeedback;
-            controller.enqueue({
-              type: AI_CHUNK_TYPES.COMPLETE,
-              content: JSON.stringify(feedback),
-              finished: true,
-            });
-          } catch (parseError) {
-            controller.enqueue({
-              type: AI_CHUNK_TYPES.ERROR,
-              content: AI_EVALUATION_ERRORS.FAILED_TO_PARSE_RESPONSE,
-              finished: true,
-            });
-          }
+          aiEvaluationService.handleStreamCompletion(controller, fullContent);
         } catch (error) {
-          controller.enqueue({
-            type: AI_CHUNK_TYPES.ERROR,
-            content: `${AI_EVALUATION_ERRORS.EVALUATION_FAILED}: ${
-              error instanceof Error ? error.message : AI_ERROR_MESSAGES.UNKNOWN_ERROR
-            }`,
-            finished: true,
-          });
-        } finally {
-          controller.close();
+          aiEvaluationService.handleStreamError(controller, error);
         }
       },
     });
-  },
-};
+  }
+
+  private handleStreamCompletion(controller: StreamController, fullContent: string): void {
+    try {
+      const feedback = JSON.parse(fullContent) as AIFeedback;
+      controller.enqueue({
+        type: AI_CHUNK_TYPES.COMPLETE,
+        content: JSON.stringify(feedback),
+        finished: true,
+      });
+    } catch {
+      controller.enqueue({
+        type: AI_CHUNK_TYPES.ERROR,
+        content: AI_EVALUATION_ERRORS.FAILED_TO_PARSE_RESPONSE,
+        finished: true,
+      });
+    } finally {
+      controller.close();
+    }
+  }
+
+  private handleStreamError(controller: StreamController, error: unknown): void {
+    const errorMessage = error instanceof Error ? error.message : AI_ERROR_MESSAGES.UNKNOWN_ERROR;
+
+    controller.enqueue({
+      type: AI_CHUNK_TYPES.ERROR,
+      content: `${AI_EVALUATION_ERRORS.EVALUATION_FAILED}: ${errorMessage}`,
+      finished: true,
+    });
+
+    controller.close();
+  }
+}
+
+export const aiEvaluationService = new AIEvaluationService();
