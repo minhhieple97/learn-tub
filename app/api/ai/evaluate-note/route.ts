@@ -11,6 +11,7 @@ import {
   AI_CHUNK_TYPES,
 } from '@/config/constants';
 import type { AIEvaluationRequest, AIFeedback, AIStreamChunk } from '@/features/ai/types';
+import { getProfileByUserId } from '@/features/profile/queries/profile';
 
 export async function GET(request: NextRequest) {
   try {
@@ -36,12 +37,12 @@ export async function GET(request: NextRequest) {
     if (authError || !user) {
       return new Response(AI_ERROR_MESSAGES.UNAUTHORIZED, { status: AI_HTTP_STATUS.UNAUTHORIZED });
     }
-
+    const profile = await getProfileByUserId(user.id);
     const { data: note, error: noteError } = await supabase
       .from(AI_DATABASE.NOTES_TABLE)
       .select(AI_DATABASE.NOTES_SELECT_FIELDS)
       .eq('id', noteId)
-      .eq('user_id', user.id)
+      .eq('user_id', profile.id)
       .single();
 
     if (noteError || !note) {
