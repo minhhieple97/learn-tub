@@ -1,79 +1,69 @@
 'use client';
 
 import type React from 'react';
-import { forwardRef, useImperativeHandle } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { TimestampDisplay } from './timestamp-display';
 import { TagsSection } from './tags-section';
-import { FormActions } from './form-actions';
-import { useNoteEditorForm } from '../hooks/use-note-editor-form';
-import type { NoteEditorFormProps, Note } from '../types';
+import { NoteFormActions } from './note-form-actions';
+import { useNoteEditorForm } from '../hooks';
+import { VALIDATION_LIMITS } from '@/config/constants';
 
-export type NoteEditorFormRef = {
-  setEditingNote: (note: Note | null) => void;
-};
+export const NoteEditorForm = () => {
+  const {
+    formContent,
+    formTags,
+    tagInput,
+    currentTimestamp,
+    isEditing,
+    isSaveDisabled,
+    isFormLoading,
+    handleContentChange,
+    handleTagInputChange,
+    handleAddTag,
+    handleKeyDown,
+    handleSave,
+    removeTag,
+    cancelEditing,
+    getContentCharacterCount,
+  } = useNoteEditorForm();
 
-export const NoteEditorForm = forwardRef<NoteEditorFormRef, NoteEditorFormProps>(
-  ({ videoId, currentTimestamp }, ref) => {
-    const {
-      content,
-      setContent,
-      isEditing,
-      tags,
-      tagInput,
-      setTagInput,
-      isLoading,
-      handleSave,
-      handleCancel,
-      handleAddTag,
-      handleRemoveTag,
-      handleKeyDown,
-      setEditingNote,
-    } = useNoteEditorForm({ videoId, currentTimestamp });
+  const characterCount = getContentCharacterCount();
 
-    useImperativeHandle(
-      ref,
-      () => ({
-        setEditingNote,
-      }),
-      [setEditingNote],
-    );
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Take Notes</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <TimestampDisplay timestamp={currentTimestamp} clickable={false} />
 
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Take Notes</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <TimestampDisplay timestamp={currentTimestamp} clickable={false} />
-
+        <div className="space-y-2">
           <Textarea
             placeholder="Write your notes here..."
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
+            value={formContent}
+            onChange={(e) => handleContentChange(e.target.value)}
             className="min-h-[100px]"
           />
+        </div>
 
-          <TagsSection
-            tags={tags}
-            tagInput={tagInput}
-            onTagInputChange={setTagInput}
-            onAddTag={handleAddTag}
-            onRemoveTag={handleRemoveTag}
-            onKeyDown={handleKeyDown}
-          />
+        <TagsSection
+          tags={formTags}
+          tagInput={tagInput}
+          onTagInputChange={handleTagInputChange}
+          onAddTag={handleAddTag}
+          onRemoveTag={removeTag}
+          onKeyDown={handleKeyDown}
+        />
 
-          <FormActions
-            isLoading={isLoading}
-            isEditing={isEditing}
-            onSave={handleSave}
-            onCancel={handleCancel}
-          />
-        </CardContent>
-      </Card>
-    );
-  },
-);
-
-NoteEditorForm.displayName = 'NoteEditorForm';
+        <NoteFormActions
+          isLoading={isFormLoading}
+          isEditing={isEditing}
+          onSave={handleSave}
+          onCancel={cancelEditing}
+          disabled={isSaveDisabled}
+        />
+      </CardContent>
+    </Card>
+  );
+};

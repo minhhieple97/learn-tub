@@ -57,6 +57,8 @@ export type NoteActionResult = {
 export type NoteEditorFormProps = {
   videoId: string;
   currentTimestamp: number;
+  handleSaveNote: (note: Note) => void;
+  handleUpdateNote: (note: Note) => void;
 };
 
 export type NoteEditorFormRef = {
@@ -75,14 +77,14 @@ export type TagsSectionProps = {
 export type NotesListProps = {
   notes: Note[];
   onTimestampClick?: (timestamp: number) => void;
-  onEditNote: (note: Note) => void;
+  onUpdateNote: (note: Note) => void;
   onDeleteNote: (noteId: string) => void;
 };
 
 export type NoteCardProps = {
   note: Note;
   onTimestampClick?: (timestamp: number) => void;
-  onEditNote: (note: Note) => void;
+  onUpdateNote: (note: Note) => void;
   onDeleteNote: (noteId: string) => void;
 };
 
@@ -92,16 +94,18 @@ export type TimestampDisplayProps = {
   clickable?: boolean;
 };
 
-export type NoteActionsProps = {
+export type NoteCardActionsProps = {
   onEdit: () => void;
   onDelete: () => void;
+  noteId: string;
 };
 
-export type FormActionsProps = {
+export type NoteFormActionsProps = {
   isLoading: boolean;
   isEditing: boolean;
   onSave: () => void;
   onCancel: () => void;
+  disabled?: boolean;
 };
 
 export type UseVideoIdReturn = {
@@ -163,4 +167,32 @@ export type UseNoteEditorReturn = {
   handleRemoveTag: (tag: string) => void;
   handleKeyDown: (e: React.KeyboardEvent) => void;
   setEditingNote: (note: Note | null) => void;
+};
+
+export type NotesSearchProps = {
+  videoId?: string | null;
+  onSearchResults?: (results: Note[]) => void;
+  placeholder?: string;
+  className?: string;
+};
+
+export type UseNotesSearchProps = {
+  videoId?: string | null;
+  enabled?: boolean;
+};
+
+export type UseNotesSearchReturn = {
+  searchQuery: string;
+  setSearchQuery: (query: string) => void;
+  searchResults: Note[];
+  isSearching: boolean;
+  clearSearch: () => void;
+  hasResults: boolean;
+  resultCount: number;
+};
+
+export type NotesListWithSearchProps = NotesListProps & {
+  videoId: string;
+  showSearch?: boolean;
+  searchPlaceholder?: string;
 };

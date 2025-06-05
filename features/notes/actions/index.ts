@@ -15,6 +15,10 @@ import { getProfile } from '@/features/profile/queries/profile';
 export const saveNoteAction = authAction
   .inputSchema(saveNoteInputSchema)
   .action(async ({ parsedInput: { videoId, content, timestamp, tags }, ctx: { user } }) => {
+    console.log('videoId', videoId);
+    console.log('content', content);
+    console.log('timestamp', timestamp);
+    console.log('tags', tags);
     const supabase = await createClient();
     const profile = await getProfile();
     const { data, error } = await supabase

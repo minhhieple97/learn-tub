@@ -1,13 +1,23 @@
 import { NoteCard } from './note-card';
-import type { NotesListProps } from '../types';
+import { useNotesStore } from '../store';
 
-export const NotesList = ({
-  notes,
-  onTimestampClick,
-  onEditNote,
-  onDeleteNote,
-}: NotesListProps) => {
-  if (notes.length === 0) {
+type NotesListProps = {
+  onTimestampClick?: (timestamp: number) => void;
+};
+
+export const NotesList = ({ onTimestampClick }: NotesListProps) => {
+  const { isLoading, getDisplayNotes } = useNotesStore((state) => state);
+  const displayNotes = getDisplayNotes();
+  if (isLoading) {
+    return (
+      <div className="space-y-2">
+        <h3 className="text-lg font-medium">Your Notes</h3>
+        <p className="text-sm text-gray-500">Loading notes...</p>
+      </div>
+    );
+  }
+
+  if (displayNotes.length === 0) {
     return (
       <div className="space-y-2">
         <h3 className="text-lg font-medium">Your Notes</h3>
@@ -19,15 +29,11 @@ export const NotesList = ({
   return (
     <div className="space-y-2">
       <h3 className="text-lg font-medium">Your Notes</h3>
-      {notes.map((note) => (
-        <NoteCard
-          key={note.id}
-          note={note}
-          onTimestampClick={onTimestampClick}
-          onEditNote={onEditNote}
-          onDeleteNote={onDeleteNote}
-        />
-      ))}
+      <div className="max-h-96 overflow-y-auto pr-2 space-y-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+        {displayNotes.map((note) => (
+          <NoteCard key={note.id} note={note} onTimestampClick={onTimestampClick} />
+        ))}
+      </div>
     </div>
   );
 };

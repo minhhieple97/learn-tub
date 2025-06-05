@@ -1,100 +1,189 @@
 'use client';
 
 import { useCallback } from 'react';
-import { useNotesForm } from './use-notes-form';
-import { useTags } from './use-tags';
-import { useNotesOperations } from './use-notes-operations';
-import type { Note, UseNoteEditorProps, UseNoteEditorReturn } from '../types';
+import { useNotesStore } from '../store';
+import { VALIDATION_LIMITS, TOAST_MESSAGES } from '@/config/constants';
+import { useToast } from '@/hooks/use-toast';
 
-export const useNoteEditorForm = ({ videoId, currentTimestamp }: UseNoteEditorProps): UseNoteEditorReturn => {
-  const { 
-    content, 
-    setContent, 
-    editingNoteId, 
-    resetForm, 
-    isEditing, 
-    setEditingNote 
-  } = useNotesForm();
-  
-  const { 
-    tags, 
-    tagInput, 
-    setTagInput, 
-    addTag, 
-    removeTag, 
-    setTags, 
-    resetTags 
-  } = useTags();
-  
-  const { saveNote, updateNote, isLoading } = useNotesOperations(videoId);
+type ValidationResult = {
+  isValid: boolean;
+  errors: string[];
+};
+
+export const useNoteEditorForm = () => {
+  const { toast } = useToast();
+  const {
+    formContent,
+    formTags,
+    tagInput,
+    editingNote,
+    isFormLoading,
+    currentTimestamp,
+    setFormContent,
+    setTagInput,
+    addTag,
+    removeTag,
+    cancelEditing,
+    saveNote,
+    updateNote,
+  } = useNotesStore();
+
+  const validateContent = useCallback((content: string): ValidationResult => {
+    const errors: string[] = [];
+    
+    if (!content.trim()) {
+      errors.push(TOAST_MESSAGES.VALIDATION_EMPTY_CONTENT);
+    }
+    
+    if (content.length > VALIDATION_LIMITS.NOTE_CONTENT_MAX_LENGTH) {
+      errors.push(TOAST_MESSAGES.VALIDATION_NOTE_TOO_LONG);
+    }
+
+    return {
+      isValid: errors.length === 0,
+      errors,
+    };
+  }, []);
+
+  const validateTags = useCallback((tags: string[]): ValidationResult => {
+    const errors: string[] = [];
+    
+    if (tags.length > VALIDATION_LIMITS.MAX_TAGS_COUNT) {
+      errors.push(TOAST_MESSAGES.VALIDATION_TOO_MANY_TAGS);
+    }
+
+    const invalidTags = tags.filter(tag => tag.length > VALIDATION_LIMITS.TAG_MAX_LENGTH);
+    if (invalidTags.length > 0) {
+      errors.push(TOAST_MESSAGES.VALIDATION_TAG_TOO_LONG);
+    }
+
+    return {
+      isValid: errors.length === 0,
+      errors,
+    };
+  }, []);
+
+  const validateTagInput = useCallback((tagInput: string): boolean => {
+    return tagInput.length <= VALIDATION_LIMITS.TAG_MAX_LENGTH;
+  }, []);
+
+  const showValidationErrors = useCallback((errors: string[]) => {
+    errors.forEach(error => {
+      toast({
+        title: 'Validation Error',
+        description: error,
+        variant: 'destructive',
+      });
+    });
+  }, [toast]);
+
+  const handleContentChange = useCallback((content: string) => {
+    // Allow typing but don't exceed the limit
+    if (content.length <= VALIDATION_LIMITS.NOTE_CONTENT_MAX_LENGTH) {
+      setFormContent(content);
+    }
+  }, [setFormContent]);
+
+  const handleTagInputChange = useCallback((input: string) => {
+    if (validateTagInput(input)) {
+      setTagInput(input);
+    }
+  }, [setTagInput, validateTagInput]);
+
+  const handleAddTag = useCallback((tag?: string) => {
+    const tagToAdd = tag || tagInput;
+    
+    if (!tagToAdd.trim()) return;
+    
+    if (formTags.length >= VALIDATION_LIMITS.MAX_TAGS_COUNT) {
+      showValidationErrors([TOAST_MESSAGES.VALIDATION_TOO_MANY_TAGS]);
+      return;
+    }
+    
+    if (tagToAdd.length > VALIDATION_LIMITS.TAG_MAX_LENGTH) {
+      showValidationErrors([TOAST_MESSAGES.VALIDATION_TAG_TOO_LONG]);
+      return;
+    }
+    
+    addTag(tag);
+  }, [tagInput, formTags.length, addTag, showValidationErrors]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      addTag();
+      handleAddTag();
     }
-  }, [addTag]);
-
-  const handleAddTag = useCallback(() => {
-    addTag();
-  }, [addTag]);
-
-  const handleRemoveTag = useCallback((tag: string) => {
-    removeTag(tag);
-  }, [removeTag]);
+  }, [handleAddTag]);
 
   const handleSave = useCallback(() => {
-    if (!content.trim()) return;
+    const contentValidation = validateContent(formContent);
+    const tagsValidation = validateTags(formTags);
     
-    if (isEditing && editingNoteId) {
-      updateNote({ noteId: editingNoteId, content, tags });
-    } else {
-      saveNote({ videoId, content, tags, timestamp: currentTimestamp });
+    const allErrors = [...contentValidation.errors, ...tagsValidation.errors];
+    
+    if (allErrors.length > 0) {
+      showValidationErrors(allErrors);
+      return;
     }
-    
-    resetForm();
-    resetTags();
+
+    if (editingNote) {
+      updateNote(editingNote.id, formContent, formTags, toast);
+    } else {
+      saveNote(formContent, formTags, currentTimestamp, toast);
+    }
   }, [
-    content, 
-    tags, 
-    isEditing, 
-    editingNoteId, 
-    videoId,
+    formContent, 
+    formTags, 
+    editingNote, 
     currentTimestamp, 
+    validateContent, 
+    validateTags, 
+    showValidationErrors, 
     updateNote, 
     saveNote, 
-    resetForm, 
-    resetTags
+    toast
   ]);
 
-  const handleCancel = useCallback(() => {
-    resetForm();
-    resetTags();
-  }, [resetForm, resetTags]);
+  const isFormValid = useCallback(() => {
+    const contentValidation = validateContent(formContent);
+    const tagsValidation = validateTags(formTags);
+    return contentValidation.isValid && tagsValidation.isValid;
+  }, [formContent, formTags, validateContent, validateTags]);
 
-  // Enhanced setEditingNote that also sets tags
-  const handleSetEditingNote = useCallback((note: Note | null) => {
-    if (note) {
-      setEditingNote(note);
-      setTags(note.tags || []);
-    } else {
-      setEditingNote(null);
-    }
-  }, [setEditingNote, setTags]);
+  const getContentCharacterCount = useCallback(() => {
+    return {
+      current: formContent.length,
+      max: VALIDATION_LIMITS.NOTE_CONTENT_MAX_LENGTH,
+      remaining: VALIDATION_LIMITS.NOTE_CONTENT_MAX_LENGTH - formContent.length,
+    };
+  }, [formContent.length]);
+
+  const isEditing = !!editingNote;
+  const isSaveDisabled = isFormLoading || !isFormValid();
 
   return {
-    content,
-    setContent,
-    isEditing,
-    tags,
+    // Form state
+    formContent,
+    formTags,
     tagInput,
-    setTagInput,
-    isLoading,
-    handleSave,
-    handleCancel,
+    editingNote,
+    isFormLoading,
+    currentTimestamp,
+    isEditing,
+    isSaveDisabled,
+    
+    // Handlers
+    handleContentChange,
+    handleTagInputChange,
     handleAddTag,
-    handleRemoveTag,
     handleKeyDown,
-    setEditingNote: handleSetEditingNote,
+    handleSave,
+    removeTag,
+    cancelEditing,
+    
+    // Validation
+    isFormValid,
+    getContentCharacterCount,
+    validateTagInput,
   };
 }; 

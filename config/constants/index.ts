@@ -24,6 +24,16 @@ export const TIME_UNITS = {
   DAYS_PER_MONTH: 30,
 } as const;
 
+export const SEARCH_CONFIG = {
+  DEBOUNCE_DELAY: 300,
+} as const;
+
+export const VALIDATION_LIMITS = {
+  NOTE_CONTENT_MAX_LENGTH: 1000,
+  TAG_MAX_LENGTH: 100,
+  MAX_TAGS_COUNT: 10,
+} as const;
+
 export const TOAST_MESSAGES = {
   VIDEO_ADDED_SUCCESS: 'Video added successfully!',
   VIDEO_EXISTS_ERROR: "You've already added this video",
@@ -36,4 +46,8 @@ export const TOAST_MESSAGES = {
   NOTE_UPDATE_ERROR: 'Failed to update note. Please try again.',
   NOTE_DELETE_ERROR: 'Failed to delete note. Please try again.',
   AUTH_ERROR: 'You must be logged in to perform this action',
+  VALIDATION_NOTE_TOO_LONG: 'Note content cannot exceed 1000 characters',
+  VALIDATION_TAG_TOO_LONG: 'Tag cannot exceed 100 characters',
+  VALIDATION_TOO_MANY_TAGS: 'Cannot have more than 10 tags',
+  VALIDATION_EMPTY_CONTENT: 'Note content cannot be empty',
 } as const;
