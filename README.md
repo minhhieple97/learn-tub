@@ -23,6 +23,7 @@ LearnTub is a modern learning platform that transforms passive YouTube video wat
 - **Language:** [TypeScript](https://www.typescriptlang.org/)
 - **Database:** [PostgreSQL](https://www.postgresql.org/) (Vercel/Neon) + [Supabase](https://supabase.com/)
 - **Authentication:** Supabase Auth
+- **AI Integration:** [OpenAI](https://openai.com/) & [Google Gemini](https://ai.google.dev/) for intelligent note evaluation
 - **External APIs:** YouTube Data API v3 for video integration
 - **Environment:** Type-safe environment variables with [@t3-oss/env-nextjs](https://env.t3.gg/)
 - **Styling:** [Tailwind CSS](https://tailwindcss.com/) with custom design system
@@ -45,6 +46,8 @@ LearnTub is a modern learning platform that transforms passive YouTube video wat
 - Docker
 - Supabase account
 - YouTube API key (Google Cloud Console)
+- OpenAI API key (optional, for AI features)
+- Google Gemini API key (optional, for AI features)
 
 ### Setup Instructions
 
@@ -80,6 +83,10 @@ LearnTub is a modern learning platform that transforms passive YouTube video wat
    # YouTube API Configuration
    YOUTUBE_API_KEY=your_youtube_api_key
    
+   # AI Configuration (Optional - for AI evaluation features)
+   OPENAI_API_KEY=your_openai_api_key
+   GEMINI_API_KEY=your_gemini_api_key
+   
    # App Configuration
    NEXT_PUBLIC_APP_URL=http://localhost:3000
    NODE_ENV=development
@@ -112,7 +119,11 @@ learn-tub/
 ├── components/           # Shared UI components
 │   └── ui/               # Shadcn UI components
 ├── features/             # Feature-specific modules (AI, Auth, Notes, Videos)
-│   ├── ai/
+│   ├── ai/               # AI evaluation services, components, and hooks
+│   │   ├── components/   # AI UI components (evaluation, feedback display)
+│   │   ├── hooks/        # AI-related React hooks
+│   │   ├── services/     # AI provider integrations (OpenAI, Gemini)
+│   │   └── types/        # AI-related TypeScript types
 │   ├── auth/
 │   ├── notes/
 │   └── videos/
@@ -195,10 +206,12 @@ We welcome contributions! Please follow these steps:
 ## 📊 Features in Detail
 
 ### 🧠 AI-Powered Learning
-- Intelligent note analysis and feedback
-- Content summarization and insights  
-- Personalized learning recommendations
-- Automated concept extraction
+- **Comprehensive Note Evaluation**: AI analyzes your notes for accuracy, completeness, and understanding
+- **Multiple AI Providers**: Choose between OpenAI GPT-4 and Google Gemini models for evaluation
+- **Real-time Streaming**: Get instant feedback as the AI processes your notes
+- **Structured Feedback**: Receive detailed analysis including correct points, areas for improvement, and specific suggestions
+- **Performance Scoring**: Get numerical ratings (1-10) to track your note-taking quality
+- **Copyable Insights**: Save or share AI feedback for future reference
 
 ### 📝 Smart Note-Taking
 - Real-time synchronization with video timestamps
@@ -220,6 +233,23 @@ We welcome contributions! Please follow these steps:
 - **GDPR Compliant:** Full compliance with data protection regulations
 
 
+## 🤖 AI Features
+
+### AI Note Evaluation
+
+The AI evaluation system provides comprehensive feedback on your learning notes:
+
+- **Multi-Provider Support**: Choose between OpenAI GPT-4 and Google Gemini
+- **Streaming Responses**: Real-time feedback as AI analyzes your notes
+- **Structured Analysis**: Get detailed feedback including:
+  - Overall summary and assessment
+  - Correct points identification
+  - Areas needing improvement
+  - Specific enhancement suggestions
+  - Numerical scoring (1-10 scale)
+  - Detailed analysis breakdown
+
+
 ## 💡 Potential Future Enhancements
 
 * **Courses Feature**: Group videos into courses. (Schema exists)
@@ -227,6 +257,11 @@ We welcome contributions! Please follow these steps:
 * **Spaced Repetition System (SRS)**: For quizzes and key concepts.
 * **Collaborative Note-Taking**: Allow users to share notes or collaborate.
 * **User Profile Customization**: More options for learning preferences.
+* **Enhanced AI Features**: 
+  * Content summarization and insights
+  * Personalized learning recommendations
+  * Automated concept extraction
+  * Quiz generation from notes
 
 ## 🤝 Contributing
 

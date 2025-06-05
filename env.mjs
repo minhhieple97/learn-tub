@@ -13,6 +13,8 @@ export const env = createEnv({
     SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
     POSTGRES_HOST: z.string().min(1),
     NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
+    OPENAI_API_KEY: z.string().min(1),
+    GEMINI_API_KEY: z.string().min(1),
   },
 
   client: {
@@ -35,5 +37,7 @@ export const env = createEnv({
     NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
     NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
+    OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+    GEMINI_API_KEY: process.env.GEMINI_API_KEY,
   },
 });
