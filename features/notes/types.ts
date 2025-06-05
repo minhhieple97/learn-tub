@@ -66,8 +66,6 @@ export type NoteEditorFormRef = {
 };
 
 export type TagsSectionProps = {
-  tags: string[];
-  tagInput: string;
   onTagInputChange: (tagInput: string) => void;
   onAddTag: () => void;
   onRemoveTag: (tag: string) => void;

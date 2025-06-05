@@ -12,8 +12,6 @@ import { VALIDATION_LIMITS } from '@/config/constants';
 export const NoteEditorForm = () => {
   const {
     formContent,
-    formTags,
-    tagInput,
     currentTimestamp,
     isEditing,
     isSaveDisabled,
@@ -25,10 +23,7 @@ export const NoteEditorForm = () => {
     handleSave,
     removeTag,
     cancelEditing,
-    getContentCharacterCount,
   } = useNoteEditorForm();
-
-  const characterCount = getContentCharacterCount();
 
   return (
     <Card>
@@ -48,8 +43,6 @@ export const NoteEditorForm = () => {
         </div>
 
         <TagsSection
-          tags={formTags}
-          tagInput={tagInput}
           onTagInputChange={handleTagInputChange}
           onAddTag={handleAddTag}
           onRemoveTag={removeTag}

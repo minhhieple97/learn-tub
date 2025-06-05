@@ -7,20 +7,15 @@ import { Input } from '@/components/ui/input';
 import { Plus, X } from 'lucide-react';
 import type { TagsSectionProps } from '../types';
 import { VALIDATION_LIMITS } from '@/config/constants';
+import { useNotesStore } from '../store';
 
-export const TagsSection = ({
-  tags,
-  tagInput,
-  onTagInputChange,
-  onAddTag,
-  onRemoveTag,
-  onKeyDown,
-}: TagsSectionProps) => {
+export const TagsSection = ({ onAddTag, onRemoveTag, onKeyDown, onTagInputChange }: TagsSectionProps) => {
+  const { formTags, tagInput } = useNotesStore();
   return (
     <div className="space-y-3">
-      {tags.length > 0 && (
+      {formTags.length > 0 && (
         <div className="flex flex-wrap gap-2">
-          {tags.map((tag) => (
+          {formTags.map((tag) => (
             <Badge key={tag} variant="secondary" className="flex items-center gap-1">
               {tag}
               <X className="h-3 w-3 cursor-pointer" onClick={() => onRemoveTag(tag)} />
@@ -43,9 +38,9 @@ export const TagsSection = ({
             <Plus className="h-4 w-4" />
           </Button>
         </div>
-        {tags.length > 0 && (
+        {formTags.length > 0 && (
           <div className="text-xs text-gray-500">
-            Tags: {tags.length}/{VALIDATION_LIMITS.MAX_TAGS_COUNT}
+            Tags: {formTags.length}/{VALIDATION_LIMITS.MAX_TAGS_COUNT}
           </div>
         )}
       </div>
