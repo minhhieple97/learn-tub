@@ -14,7 +14,7 @@ export const VideoMainContent = ({
   targetSeekTime,
 }: VideoMainContentProps) => {
   return (
-    <div className="lg:col-span-2">
+    <div className="space-y-4">
       <YouTubePlayer
         video={video}
         onTimeUpdate={onTimeUpdate}
