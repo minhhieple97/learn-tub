@@ -2,6 +2,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { TimestampDisplay } from './timestamp-display';
 import { NoteCardActions } from './note-card-actions';
+import { NoteAIEvaluation } from '@/features/ai/components';
 import { useNotesStore } from '../store';
 import type { Note } from '../types';
 
@@ -26,7 +27,10 @@ export const NoteCard = ({ note, onTimestampClick }: NoteCardProps) => {
           onClick={handleTimestampClick}
           clickable={!!onTimestampClick}
         />
-        <NoteCardActions onEdit={handleEdit} onDelete={handleDelete} noteId={note.id} />
+        <div className="flex items-center gap-2">
+          <NoteAIEvaluation noteId={note.id} />
+          <NoteCardActions onEdit={handleEdit} onDelete={handleDelete} noteId={note.id} />
+        </div>
       </div>
       <CardContent className="p-4">
         <p className="whitespace-pre-wrap">{note.content}</p>

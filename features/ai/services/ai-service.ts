@@ -1,6 +1,7 @@
 import { generateText, generateObject } from "ai"
 import { openai } from "@ai-sdk/openai"
 import { z } from "zod"
+import { AI_DEFAULTS } from '@/config/constants';
 
 // Schema for quiz generation
 const QuizSchema = z.object({
@@ -24,11 +25,11 @@ const NoteAnalysisSchema = z.object({
 })
 
 export class AIService {
-  private model = openai("gpt-4o")
+  private model = openai(AI_DEFAULTS.SERVICE_MODEL);
 
   async analyzeNotes(notes: string[], videoTitle: string): Promise<any> {
     try {
-      const notesText = notes.join("\n\n")
+      const notesText = notes.join('\n\n');
 
       const { object } = await generateObject({
         model: this.model,
@@ -47,22 +48,22 @@ export class AIService {
           
           Be constructive and educational in your feedback.
         `,
-      })
+      });
 
-      return object
+      return object;
     } catch (error) {
-      console.error("Error analyzing notes:", error)
-      throw new Error("Failed to analyze notes")
+      console.error('Error analyzing notes:', error);
+      throw new Error('Failed to analyze notes');
     }
   }
 
   async generateQuiz(
     notes: string[],
     videoTitle: string,
-    difficulty: "easy" | "medium" | "hard" = "medium",
+    difficulty: 'easy' | 'medium' | 'hard' = 'medium',
   ): Promise<any> {
     try {
-      const notesText = notes.join("\n\n")
+      const notesText = notes.join('\n\n');
 
       const { object } = await generateObject({
         model: this.model,
@@ -83,19 +84,23 @@ export class AIService {
           
           Difficulty level: ${difficulty}
         `,
-      })
+      });
 
-      return object
+      return object;
     } catch (error) {
-      console.error("Error generating quiz:", error)
-      throw new Error("Failed to generate quiz")
+      console.error('Error generating quiz:', error);
+      throw new Error('Failed to generate quiz');
     }
   }
 
-  async generateStudyPlan(notes: string[], videoTitle: string, learningGoals: string[]): Promise<string> {
+  async generateStudyPlan(
+    notes: string[],
+    videoTitle: string,
+    learningGoals: string[],
+  ): Promise<string> {
     try {
-      const notesText = notes.join("\n\n")
-      const goalsText = learningGoals.join(", ")
+      const notesText = notes.join('\n\n');
+      const goalsText = learningGoals.join(', ');
 
       const { text } = await generateText({
         model: this.model,
@@ -115,12 +120,12 @@ export class AIService {
           
           Make it actionable and specific to the content covered.
         `,
-      })
+      });
 
-      return text
+      return text;
     } catch (error) {
-      console.error("Error generating study plan:", error)
-      throw new Error("Failed to generate study plan")
+      console.error('Error generating study plan:', error);
+      throw new Error('Failed to generate study plan');
     }
   }
 
@@ -141,12 +146,12 @@ export class AIService {
           
           Keep feedback encouraging and educational. Limit to 2-3 sentences.
         `,
-      })
+      });
 
-      return text
+      return text;
     } catch (error) {
-      console.error("Error providing feedback:", error)
-      throw new Error("Failed to provide feedback")
+      console.error('Error providing feedback:', error);
+      throw new Error('Failed to provide feedback');
     }
   }
 }
