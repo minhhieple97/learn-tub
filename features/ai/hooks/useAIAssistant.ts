@@ -23,7 +23,7 @@ export interface NoteAnalysis {
 
 export type QuizDifficulty = 'easy' | 'medium' | 'hard';
 
-export const useAIAssistant = (dbVideoId: string) => {
+export const useAIAssistant = (videoId: string) => {
   const [isLoading, setIsLoading] = useState(false);
   const [analysis, setAnalysis] = useState<NoteAnalysis | null>(null);
   const [quiz, setQuiz] = useState<{ questions: QuizQuestion[] } | null>(null);
@@ -38,21 +38,21 @@ export const useAIAssistant = (dbVideoId: string) => {
   const handleAnalyzeNotes = async () => {
     setIsLoading(true);
     try {
-      const result = await analyzeNotesAction(dbVideoId);
-      if (result.error) {
+      const result = await analyzeNotesAction({ videoId });
+      if (result.serverError) {
         toast({
           title: 'Error',
-          description: result.error,
+          description: result.serverError,
           variant: 'destructive',
         });
       } else {
-        setAnalysis(result.analysis);
+        setAnalysis(result.data?.analysis);
         toast({
           title: 'Analysis Complete',
           description: 'Your notes have been analyzed successfully',
         });
       }
-    } catch (error) {
+    } catch {
       toast({
         title: 'Error',
         description: 'Failed to analyze notes',
@@ -66,15 +66,15 @@ export const useAIAssistant = (dbVideoId: string) => {
   const handleGenerateQuiz = async () => {
     setIsLoading(true);
     try {
-      const result = await generateQuizAction(dbVideoId, difficulty);
-      if (result.error) {
+      const result = await generateQuizAction({ videoId, difficulty });
+      if (result.serverError) {
         toast({
           title: 'Error',
-          description: result.error,
+          description: result.serverError,
           variant: 'destructive',
         });
       } else {
-        setQuiz(result.quiz);
+        setQuiz(result.data?.quiz);
         setQuizAnswers({});
         setQuizSubmitted(false);
         setQuizScore(null);
@@ -83,7 +83,7 @@ export const useAIAssistant = (dbVideoId: string) => {
           description: 'Your personalized quiz is ready',
         });
       }
-    } catch (error) {
+    } catch {
       toast({
         title: 'Error',
         description: 'Failed to generate quiz',
@@ -107,21 +107,21 @@ export const useAIAssistant = (dbVideoId: string) => {
     setIsLoading(true);
     try {
       const goals = learningGoals.split('\n').filter((goal) => goal.trim());
-      const result = await generateStudyPlanAction(dbVideoId, goals);
-      if (result.error) {
+      const result = await generateStudyPlanAction({ videoId, learningGoals: goals });
+      if (result.serverError) {
         toast({
           title: 'Error',
-          description: result.error,
+          description: result.serverError,
           variant: 'destructive',
         });
       } else {
-        setStudyPlan(result.studyPlan || null);
+        setStudyPlan(result.data?.studyPlan || null);
         toast({
           title: 'Study Plan Created',
           description: 'Your personalized study plan is ready',
         });
       }
-    } catch (error) {
+    } catch {
       toast({
         title: 'Error',
         description: 'Failed to generate study plan',
@@ -136,11 +136,11 @@ export const useAIAssistant = (dbVideoId: string) => {
     if (!quiz) return;
 
     let correct = 0;
-    quiz.questions.forEach((question, index) => {
+    for (const [index, question] of quiz.questions.entries()) {
       if (quizAnswers[index] === question.correctAnswer) {
         correct++;
       }
-    });
+    }
 
     const score = Math.round((correct / quiz.questions.length) * 100);
     setQuizScore(score);
@@ -185,4 +185,4 @@ export const useAIAssistant = (dbVideoId: string) => {
     setQuizAnswer,
     getScoreColor,
   };
-}
+};

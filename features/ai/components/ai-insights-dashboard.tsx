@@ -1,40 +1,36 @@
 import { createClient } from "@/lib/supabase/server"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Brain, TrendingUp, Target, Zap } from "lucide-react"
+import { getProfileInSession } from '@/features/profile/queries/profile';
 
 export async function AIInsightsDashboard() {
-  const supabase = await createClient()
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    return null
-  }
+  const supabase = await createClient();
+  const profile = await getProfileInSession();
 
   // Get AI interaction stats
   const { data: interactions } = await supabase
-    .from("ai_interactions")
-    .select("interaction_type, created_at, output_data")
-    .eq("user_id", user.id)
-    .order("created_at", { ascending: false })
-    .limit(10)
+    .from('ai_interactions')
+    .select('interaction_type, created_at, output_data')
+    .eq('user_id', profile.id)
+    .order('created_at', { ascending: false })
+    .limit(10);
 
-  const analysisCount = interactions?.filter((i) => i.interaction_type === "note_analysis").length || 0
-  const quizCount = interactions?.filter((i) => i.interaction_type === "quiz_generation").length || 0
-  const studyPlanCount = interactions?.filter((i) => i.interaction_type === "study_plan").length || 0
+  const analysisCount =
+    interactions?.filter((i) => i.interaction_type === 'note_analysis').length || 0;
+  const quizCount =
+    interactions?.filter((i) => i.interaction_type === 'quiz_generation').length || 0;
+  const studyPlanCount =
+    interactions?.filter((i) => i.interaction_type === 'study_plan').length || 0;
 
-  // Calculate average comprehension score from recent analyses
-  const recentAnalyses = interactions?.filter((i) => i.interaction_type === "note_analysis") || []
+  const recentAnalyses = interactions?.filter((i) => i.interaction_type === 'note_analysis') || [];
   const avgComprehension =
     recentAnalyses.length > 0
       ? Math.round(
           recentAnalyses.reduce((sum, analysis) => {
-            return sum + (analysis.output_data?.comprehensionScore || 0)
+            return sum + (analysis.output_data?.comprehensionScore || 0);
           }, 0) / recentAnalyses.length,
         )
-      : 0
+      : 0;
 
   return (
     <div className="space-y-4">
@@ -102,7 +98,9 @@ export async function AIInsightsDashboard() {
                   <p className="text-sm font-medium">
                     Comprehension Score: {analysis.output_data?.comprehensionScore}%
                   </p>
-                  <p className="text-xs text-muted-foreground">{new Date(analysis.created_at).toLocaleDateString()}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {new Date(analysis.created_at).toLocaleDateString()}
+                  </p>
                   {analysis.output_data?.summary && (
                     <p className="text-sm mt-1 line-clamp-2">{analysis.output_data.summary}</p>
                   )}
@@ -113,5 +111,5 @@ export async function AIInsightsDashboard() {
         </Card>
       )}
     </div>
-  )
+  );
 }

@@ -72,3 +72,21 @@ export type AIEvaluationStatus =
   | typeof AI_STATUS.STREAMING
   | typeof AI_STATUS.COMPLETED
   | typeof AI_STATUS.ERROR;
+
+
+  export type VideoWithNotes = {
+    id: string;
+    title: string;
+    youtube_id: string;
+    notes: Array<{ content: string }>;
+  };
+
+  export type VideoInfo = {
+    id: string;
+    title: string;
+    youtube_id?: string;
+  };
+
+  export type UserNote = {
+    content: string;
+  };

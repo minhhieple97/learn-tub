@@ -1,171 +1,112 @@
 "use server"
 
-import { createClient } from "@/lib/supabase/server"
-import { aiService } from "../services/ai-service"
+import { ActionError, authAction } from '@/lib/safe-action';
+import { aiService } from '../services/ai-service';
+import {
+  AnalyzeNotesSchema,
+  GenerateQuizSchema,
+  GenerateStudyPlanSchema,
+  GetNoteFeedbackSchema,
+} from '../schemas';
+import { getVideoWithNotes, storeAIInteraction } from '../queries';
+import { AI_INTERACTION_TYPES, AI_ACTION_ERRORS } from '@/config/constants';
+import { getProfileByUserId } from '@/features/profile/queries/profile';
 
-export async function analyzeNotesAction(videoId: string) {
-  const supabase = await createClient()
-
-  try {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-    if (!user) {
-      return { error: "Authentication required" }
+export const analyzeNotesAction = authAction
+  .inputSchema(AnalyzeNotesSchema)
+  .action(async ({ parsedInput, ctx }) => {
+    const { videoId } = parsedInput;
+    const profile = await getProfileByUserId(ctx.user.id);
+    const videoWithNotes = await getVideoWithNotes(videoId, profile.id);
+    if (!videoWithNotes) {
+      throw new ActionError(AI_ACTION_ERRORS.VIDEO_NOT_FOUND);
     }
 
-    // Get video info
-    const { data: video } = await supabase
-      .from("videos")
-      .select("title, youtube_id")
-      .eq("id", videoId)
-      .eq("user_id", user.id)
-      .single()
-
-    if (!video) {
-      return { error: "Video not found" }
+    if (videoWithNotes.notes.length === 0) {
+      throw new ActionError(AI_ACTION_ERRORS.NO_NOTES_FOR_ANALYSIS);
     }
 
-    // Get user's notes for this video
-    const { data: notes } = await supabase
-      .from("notes")
-      .select("content")
-      .eq("video_id", videoId)
-      .eq("user_id", user.id)
-      .order("timestamp_seconds")
+    const noteContents = videoWithNotes.notes.map((note) => note.content);
+    const analysis = await aiService.analyzeNotes(noteContents, videoWithNotes.title);
+    await storeAIInteraction(
+      profile.id,
+      AI_INTERACTION_TYPES.NOTE_ANALYSIS,
+      { video_id: videoId, notes_count: videoWithNotes.notes.length },
+      analysis,
+    );
+    return { analysis };
+  });
 
-    if (!notes || notes.length === 0) {
-      return { error: "No notes found for analysis" }
+export const generateQuizAction = authAction
+  .inputSchema(GenerateQuizSchema)
+  .action(async ({ parsedInput, ctx }) => {
+    const { videoId, difficulty } = parsedInput;
+    const { user } = ctx;
+
+    try {
+      const videoWithNotes = await getVideoWithNotes(videoId, user.id);
+
+      if (!videoWithNotes) {
+        throw new ActionError(AI_ACTION_ERRORS.VIDEO_NOT_FOUND);
+      }
+
+      if (videoWithNotes.notes.length === 0) {
+        throw new ActionError(AI_ACTION_ERRORS.NO_NOTES_FOR_QUIZ);
+      }
+
+      const noteContents = videoWithNotes.notes.map((note) => note.content);
+      const quiz = await aiService.generateQuiz(noteContents, videoWithNotes.title, difficulty);
+
+      await storeAIInteraction(
+        user.id,
+        AI_INTERACTION_TYPES.QUIZ_GENERATION,
+        { video_id: videoId, difficulty, notes_count: videoWithNotes.notes.length },
+        quiz,
+      );
+
+      return { quiz };
+    } catch (error) {
+      console.error('Error generating quiz:', error);
+      throw new Error(AI_ACTION_ERRORS.FAILED_TO_GENERATE_QUIZ);
+    }
+  });
+
+export const generateStudyPlanAction = authAction
+  .inputSchema(GenerateStudyPlanSchema)
+  .action(async ({ parsedInput, ctx }) => {
+    const { videoId, learningGoals } = parsedInput;
+    const profile = await getProfileByUserId(ctx.user.id);
+
+    const videoWithNotes = await getVideoWithNotes(videoId, profile.id);
+
+    if (!videoWithNotes) {
+      throw new ActionError(AI_ACTION_ERRORS.VIDEO_NOT_FOUND);
     }
 
-    const noteContents = notes.map((note) => note.content)
-    const analysis = await aiService.analyzeNotes(noteContents, video.title)
-
-    // Store AI interaction
-    await supabase.from("ai_interactions").insert({
-      user_id: user.id,
-      interaction_type: "note_analysis",
-      input_data: { video_id: videoId, notes_count: notes.length },
-      output_data: analysis,
-    })
-
-    return { success: true, analysis }
-  } catch (error) {
-    console.error("Error analyzing notes:", error)
-    return { error: "Failed to analyze notes" }
-  }
-}
-
-export async function generateQuizAction(videoId: string, difficulty: "easy" | "medium" | "hard" = "medium") {
-  const supabase = await createClient()
-
-  try {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-    if (!user) {
-      return { error: "Authentication required" }
+    if (videoWithNotes.notes.length === 0) {
+      throw new ActionError(AI_ACTION_ERRORS.NO_NOTES_FOR_STUDY_PLAN);
     }
 
-    // Get video info
-    const { data: video } = await supabase
-      .from("videos")
-      .select("title")
-      .eq("id", videoId)
-      .eq("user_id", user.id)
-      .single()
+    const noteContents = videoWithNotes.notes.map((note) => note.content);
+    const studyPlan = await aiService.generateStudyPlan(
+      noteContents,
+      videoWithNotes.title,
+      learningGoals,
+    );
+    await storeAIInteraction(
+      profile.id,
+      AI_INTERACTION_TYPES.STUDY_PLAN,
+      { video_id: videoId, learning_goals: learningGoals },
+      { study_plan: studyPlan },
+    );
 
-    if (!video) {
-      return { error: "Video not found" }
-    }
+    return { studyPlan };
+  });
 
-    // Get user's notes for this video
-    const { data: notes } = await supabase
-      .from("notes")
-      .select("content")
-      .eq("video_id", videoId)
-      .eq("user_id", user.id)
-
-    if (!notes || notes.length === 0) {
-      return { error: "No notes found for quiz generation" }
-    }
-
-    const noteContents = notes.map((note) => note.content)
-    const quiz = await aiService.generateQuiz(noteContents, video.title, difficulty)
-
-    // Store AI interaction
-    await supabase.from("ai_interactions").insert({
-      user_id: user.id,
-      interaction_type: "quiz_generation",
-      input_data: { video_id: videoId, difficulty, notes_count: notes.length },
-      output_data: quiz,
-    })
-
-    return { success: true, quiz }
-  } catch (error) {
-    console.error("Error generating quiz:", error)
-    return { error: "Failed to generate quiz" }
-  }
-}
-
-export async function generateStudyPlanAction(videoId: string, learningGoals: string[]) {
-  const supabase = await createClient()
-
-  try {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-    if (!user) {
-      return { error: "Authentication required" }
-    }
-
-    // Get video info
-    const { data: video } = await supabase
-      .from("videos")
-      .select("title")
-      .eq("id", videoId)
-      .eq("user_id", user.id)
-      .single()
-
-    if (!video) {
-      return { error: "Video not found" }
-    }
-
-    // Get user's notes for this video
-    const { data: notes } = await supabase
-      .from("notes")
-      .select("content")
-      .eq("video_id", videoId)
-      .eq("user_id", user.id)
-
-    if (!notes || notes.length === 0) {
-      return { error: "No notes found for study plan generation" }
-    }
-
-    const noteContents = notes.map((note) => note.content)
-    const studyPlan = await aiService.generateStudyPlan(noteContents, video.title, learningGoals)
-
-    // Store AI interaction
-    await supabase.from("ai_interactions").insert({
-      user_id: user.id,
-      interaction_type: "study_plan",
-      input_data: { video_id: videoId, learning_goals: learningGoals },
-      output_data: { study_plan: studyPlan },
-    })
-
-    return { success: true, studyPlan }
-  } catch (error) {
-    console.error("Error generating study plan:", error)
-    return { error: "Failed to generate study plan" }
-  }
-}
-
-export async function getNoteFeedbackAction(noteContent: string, timestamp: number) {
-  try {
-    const feedback = await aiService.provideFeedback(noteContent, timestamp)
-    return { success: true, feedback }
-  } catch (error) {
-    console.error("Error getting note feedback:", error)
-    return { error: "Failed to get feedback" }
-  }
-}
+export const getNoteFeedbackAction = authAction
+  .inputSchema(GetNoteFeedbackSchema)
+  .action(async ({ parsedInput }) => {
+    const { noteContent, timestamp } = parsedInput;
+    const feedback = await aiService.provideFeedback(noteContent, timestamp);
+    return { feedback };
+  });

@@ -27,7 +27,6 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Get user from auth
     const supabase = await createClient();
     const {
       data: { user },
@@ -38,7 +37,6 @@ export async function GET(request: NextRequest) {
       return new Response(AI_ERROR_MESSAGES.UNAUTHORIZED, { status: AI_HTTP_STATUS.UNAUTHORIZED });
     }
 
-    // Get note content
     const { data: note, error: noteError } = await supabase
       .from(AI_DATABASE.NOTES_TABLE)
       .select(AI_DATABASE.NOTES_SELECT_FIELDS)
@@ -50,7 +48,6 @@ export async function GET(request: NextRequest) {
       return new Response(AI_ERROR_MESSAGES.NOTE_NOT_FOUND, { status: AI_HTTP_STATUS.NOT_FOUND });
     }
 
-    // Create AI evaluation request
     const evaluationRequest: AIEvaluationRequest = {
       noteId,
       provider,
@@ -61,10 +58,8 @@ export async function GET(request: NextRequest) {
       },
     };
 
-    // Get AI evaluation stream
     const aiStream = await aiEvaluationService.evaluateNote(evaluationRequest);
 
-    // Transform AI stream to SSE format
     const stream = new ReadableStream<Uint8Array>({
       async start(controller) {
         const encoder = new TextEncoder();
@@ -77,10 +72,8 @@ export async function GET(request: NextRequest) {
             const { done, value } = await reader.read();
             if (done) break;
 
-            // Forward the chunk to the client
             controller.enqueue(encoder.encode(`data: ${JSON.stringify(value)}\n\n`));
 
-            // If this is a complete chunk, save to database
             if (value.type === AI_CHUNK_TYPES.COMPLETE && value.content) {
               try {
                 feedback = JSON.parse(value.content) as AIFeedback;
@@ -111,7 +104,7 @@ export async function GET(request: NextRequest) {
         Connection: AI_RESPONSE_HEADERS.CONNECTION,
       },
     });
-  } catch (error) {
+  } catch {
     return new Response(JSON.stringify({ error: AI_ERROR_MESSAGES.INTERNAL_SERVER_ERROR }), {
       status: AI_HTTP_STATUS.INTERNAL_SERVER_ERROR,
       headers: { 'Content-Type': AI_RESPONSE_HEADERS.JSON_CONTENT_TYPE },

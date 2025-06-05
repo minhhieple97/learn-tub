@@ -6,7 +6,7 @@ export const createAIInteraction = async (
   noteId: string,
   provider: AIProvider,
   model: string,
-  feedback: any,
+  feedback: Record<string, unknown>,
 ): Promise<{ id: string }> => {
   const supabase = await createClient();
 

@@ -1,5 +1,2 @@
-export {
-  createAIInteraction,
-  getAIInteractionsByNoteId,
-  getLatestAIEvaluation,
-} from './ai-interactions';
+export * from './ai-interactions';
+export * from './ai-queries';
