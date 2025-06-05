@@ -1,6 +1,6 @@
-import { VideoPlayerWrapper } from './video-player-wrapper';
 import { VideoInfoCard } from './video-info-card';
 import { VideoPageData } from '../types/video-page';
+import { YouTubePlayer } from './youtube-player';
 
 type VideoMainContentProps = {
   video: VideoPageData;
@@ -15,11 +15,11 @@ export const VideoMainContent = ({
 }: VideoMainContentProps) => {
   return (
     <div className="lg:col-span-2">
-      <VideoPlayerWrapper
+      <YouTubePlayer
+        video={video}
         onTimeUpdate={onTimeUpdate}
         targetSeekTime={targetSeekTime}
         initialTimestamp={0}
-        videoId={video.youtube_id}
       />
       <VideoInfoCard video={video} />
     </div>

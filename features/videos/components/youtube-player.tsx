@@ -8,46 +8,41 @@ import { useYouTubeAPI } from '../hooks/use-youtube-api';
 import { useYouTubePlayer } from '../hooks/use-youtube-player';
 import { useLearningSession } from '../hooks/use-learning-session';
 import { usePlayerControls } from '../hooks/use-player-controls';
+import { VideoPageData } from '../types';
 
 type YouTubePlayerProps = {
-  videoId: string;
+  video: VideoPageData;
   initialTimestamp?: number;
   onTimeUpdate?: (time: number) => void;
   targetSeekTime?: number;
 };
 
 export const YouTubePlayer = ({
-  videoId,
+  video,
   initialTimestamp = 0,
   onTimeUpdate,
   targetSeekTime,
 }: YouTubePlayerProps) => {
-  // Load YouTube API
   const { isApiLoaded, YT } = useYouTubeAPI();
 
-  // Initialize YouTube player
   const { player, playerState, duration, playerRef } = useYouTubePlayer({
-    videoId,
+    youtubeId: video.youtube_id,
     isApiLoaded,
     initialTimestamp,
   });
 
-  // Track learning sessions
   useLearningSession({
     player,
-    videoId,
+    videoId: video.id,
     playerState,
     initialTimestamp,
   });
 
-  // Handle player controls
   const {
     currentTime,
-    volume,
     isMuted,
     handlePlayPause,
     handleSeek,
-    handleVolumeChange,
     toggleMute,
     skipForward,
     skipBackward,
