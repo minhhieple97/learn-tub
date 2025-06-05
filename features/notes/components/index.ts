@@ -1,8 +1,10 @@
 export { NoteEditor } from './note-editor';
 export { NoteEditorForm } from './note-editor-form';
 export { NotesList } from './notes-list';
+export { NotesListWithSearch } from './notes-list-with-search';
+export { NotesSearch } from './notes-search';
 export { NoteCard } from './note-card';
 export { TagsSection } from './tags-section';
 export { TimestampDisplay } from './timestamp-display';
-export { NoteActions } from './note-actions';
-export { FormActions } from './form-actions';
+export { NoteCardActions } from './note-card-actions';
+export { NoteFormActions } from './note-form-actions';

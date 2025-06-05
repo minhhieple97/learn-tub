@@ -78,7 +78,8 @@
     "tailwindcss-animate": "^1.0.7",
     "typescript-eslint": "^8.33.1",
     "vaul": "^0.9.6",
-    "zod": "^3.25.23"
+    "zod": "^3.25.23",
+    "zustand": "^5.0.5"
   },
   "devDependencies": {
     "@types/node": "^22",

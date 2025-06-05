@@ -1,12 +1,21 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { TimestampDisplay } from './timestamp-display';
-import { NoteActions } from './note-actions';
-import type { NoteCardProps } from '../types';
+import { NoteCardActions } from './note-card-actions';
+import { useNotesStore } from '../store';
+import type { Note } from '../types';
 
-export const NoteCard = ({ note, onTimestampClick, onEditNote, onDeleteNote }: NoteCardProps) => {
-  const handleEdit = () => onEditNote(note);
-  const handleDelete = () => onDeleteNote(note.id);
+type NoteCardProps = {
+  note: Note;
+  onTimestampClick?: (timestamp: number) => void;
+};
+
+export const NoteCard = ({ note, onTimestampClick }: NoteCardProps) => {
+  const { startEditing } = useNotesStore((state) => state);
+  const { deleteNote } = useNotesStore((state) => state);
+
+  const handleEdit = () => startEditing(note);
+  const handleDelete = () => deleteNote(note.id);
   const handleTimestampClick = (timestamp: number) => onTimestampClick?.(timestamp);
 
   return (
@@ -17,7 +26,7 @@ export const NoteCard = ({ note, onTimestampClick, onEditNote, onDeleteNote }: N
           onClick={handleTimestampClick}
           clickable={!!onTimestampClick}
         />
-        <NoteActions onEdit={handleEdit} onDelete={handleDelete} />
+        <NoteCardActions onEdit={handleEdit} onDelete={handleDelete} noteId={note.id} />
       </div>
       <CardContent className="p-4">
         <p className="whitespace-pre-wrap">{note.content}</p>
