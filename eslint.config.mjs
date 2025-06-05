@@ -2,7 +2,6 @@ import globals from 'globals';
 import pluginJs from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import pluginReact from 'eslint-plugin-react';
-import eslintPluginUnicorn from 'eslint-plugin-unicorn';
 import tailwind from 'eslint-plugin-tailwindcss';
 import { FlatCompat } from '@eslint/eslintrc';
 
@@ -18,7 +17,6 @@ const config = [
   pluginJs.configs.recommended,
   ...tseslint.configs.recommended,
   pluginReact.configs.flat.recommended,
-  eslintPluginUnicorn.configs['flat/recommended'],
   ...tailwind.configs['flat/recommended'],
   ...compat.config({
     extends: ['next'],
@@ -44,7 +42,6 @@ const config = [
           caughtErrorsIgnorePattern: '^_',
         },
       ],
-      'unicorn/prevent-abbreviations': 'off',
     },
   },
   {
