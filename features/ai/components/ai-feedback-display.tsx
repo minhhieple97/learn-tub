@@ -32,8 +32,8 @@ export const AIFeedbackDisplay = ({ feedback, onCopy, onReset }: AIFeedbackDispl
   };
 
   return (
-    <Card className="mt-4">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+    <Card className="mt-4 max-h-[60vh] flex flex-col">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 flex-shrink-0 border-b">
         <CardTitle className="text-lg font-medium">AI Evaluation</CardTitle>
         <div className="flex items-center gap-2">
           <Badge
@@ -52,7 +52,7 @@ export const AIFeedbackDisplay = ({ feedback, onCopy, onReset }: AIFeedbackDispl
           )}
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="flex-1 overflow-y-auto space-y-4 pt-4">
         {/* Summary */}
         <div>
           <h4 className="font-medium text-sm text-muted-foreground mb-2">Summary</h4>
