@@ -13,6 +13,7 @@ LearnTub is a modern learning platform that transforms passive YouTube video wat
 
 **🌟 Key Features:**
 - 🧠 **AI-Powered Notes** - Get intelligent feedback and insights with advanced AI analysis
+- 🎯 **AI Quiz Assistant** - Test knowledge with auto-generated questions and personalized feedback
 - ⏰ **Timestamp Sync** - Notes automatically sync with video timestamps for seamless navigation
 - 📚 **Smart Organization** - Organize learning with courses, tags, and intelligent categorization
 - 📊 **Progress Tracking** - Monitor your learning progress with detailed analytics and insights
@@ -206,12 +207,23 @@ We welcome contributions! Please follow these steps:
 ## 📊 Features in Detail
 
 ### 🧠 AI-Powered Learning
+
+#### 📝 AI Note Evaluation
 - **Comprehensive Note Evaluation**: AI analyzes your notes for accuracy, completeness, and understanding
-- **Multiple AI Providers**: Choose between OpenAI GPT-4 and Google Gemini models for evaluation
+- **Multiple AI Providers**: Choose between OpenAI and Google Gemini models for evaluation
 - **Real-time Streaming**: Get instant feedback as the AI processes your notes
 - **Structured Feedback**: Receive detailed analysis including correct points, areas for improvement, and specific suggestions
 - **Performance Scoring**: Get numerical ratings (1-10) to track your note-taking quality
 - **Copyable Insights**: Save or share AI feedback for future reference
+
+#### 🎯 AI Quiz Assistant
+- **Smart Question Generation**: AI creates 5-20 multiple-choice questions based on video content
+- **Adaptive Difficulty**: Choose from easy, medium, hard, or mixed difficulty levels
+- **Interactive Quiz Interface**: Beautiful, responsive UI with progress tracking and navigation
+- **Personalized Feedback**: Get detailed performance analysis with strengths and improvement areas
+- **Question Review**: Review each question with explanations and correct answers
+- **Topic-Based Analytics**: Performance breakdown by subject areas and difficulty levels
+- **Customizable Settings**: Adjust question count, difficulty, and AI provider preferences
 
 ### 📝 Smart Note-Taking
 - Real-time synchronization with video timestamps
@@ -239,7 +251,7 @@ We welcome contributions! Please follow these steps:
 
 The AI evaluation system provides comprehensive feedback on your learning notes:
 
-- **Multi-Provider Support**: Choose between OpenAI GPT-4 and Google Gemini
+- **Multi-Provider Support**: Choose between OpenAI and Google Gemini
 - **Streaming Responses**: Real-time feedback as AI analyzes your notes
 - **Structured Analysis**: Get detailed feedback including:
   - Overall summary and assessment
@@ -248,6 +260,30 @@ The AI evaluation system provides comprehensive feedback on your learning notes:
   - Specific enhancement suggestions
   - Numerical scoring (1-10 scale)
   - Detailed analysis breakdown
+
+### AI Quiz Assistant
+
+The AI Quiz Assistant transforms passive video watching into active learning through intelligent testing:
+
+- **Intelligent Question Generation**: AI analyzes video content to create relevant multiple-choice questions
+- **Flexible Configuration**: 
+  - **Question Count**: Generate 5-20 questions per quiz
+  - **Difficulty Levels**: Easy, medium, hard, or mixed difficulty
+  - **AI Provider Choice**: Select between OpenAI GPT models or Google Gemini
+- **Interactive Learning Experience**:
+  - **Progress Tracking**: Visual progress bars and question indicators
+  - **Navigation**: Jump between questions or navigate sequentially
+  - **Answer Validation**: Instant visual feedback for selected answers
+- **Comprehensive Feedback System**:
+  - **Performance Scoring**: Percentage-based scoring with detailed breakdowns
+  - **Personalized Analysis**: AI-generated insights on strengths and weaknesses
+  - **Question-by-Question Review**: Detailed explanations for each answer
+  - **Topic Performance**: Analytics grouped by subject areas
+- **Beautiful UI/UX**:
+  - **Responsive Design**: Works seamlessly on all devices
+  - **Dark/Light Theme**: Full compatibility with theme preferences
+  - **Smooth Animations**: Loading states and transitions for better UX
+  - **Accessibility**: ARIA labels and keyboard navigation support
 
 
 ## 💡 Potential Future Enhancements
@@ -261,7 +297,8 @@ The AI evaluation system provides comprehensive feedback on your learning notes:
   * Content summarization and insights
   * Personalized learning recommendations
   * Automated concept extraction
-  * Quiz generation from notes
+  * Advanced quiz features (timed quizzes, adaptive difficulty)
+  * AI-powered study plans and learning paths
 
 ## 🤝 Contributing
 

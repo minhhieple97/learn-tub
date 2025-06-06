@@ -85,8 +85,8 @@ export const getLatestAIEvaluation = async (
     id: data.id,
     note_id: data.note_id,
     user_id: data.user_id,
-    provider: data.input_data?.provider || 'openai',
-    model: data.input_data?.model || 'gpt-4',
+    provider: data.input_data?.provider || AI_PROVIDERS.OPENAI,
+    model: data.input_data?.model || AI_DEFAULTS.SERVICE_MODEL,
     feedback: data.output_data,
     created_at: data.created_at,
   };

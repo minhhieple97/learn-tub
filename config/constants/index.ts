@@ -57,16 +57,13 @@ export const AI_CONFIG = {
   BASE_URL: 'https://multiappai-api.itmovnteam.com/v1',
   DEFAULT_MODEL: 'gpt-4o-mini',
   TEMPERATURE: 0.7,
-  MAX_TOKENS: 1500,
+  MAX_TOKENS: 5000,
 } as const;
 
 export const AI_MODELS = {
   openai: [
     { value: 'gpt-4o', label: 'GPT-4o' },
     { value: 'gpt-4o-mini', label: 'GPT-4o Mini' },
-    { value: 'gpt-4', label: 'GPT-4' },
-    { value: 'gpt-4-turbo-preview', label: 'GPT-4 Turbo' },
-    { value: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo' },
   ],
   gemini: [
     { value: 'gemini-2.0-flash-exp', label: 'Gemini 2.0 Flash (Experimental)' },
@@ -79,7 +76,7 @@ export const AI_MODELS = {
 export const AI_DEFAULTS = {
   OPENAI_MODEL: 'gpt-4o-mini',
   GEMINI_MODEL: 'gemini-2.0-flash-exp',
-  SERVICE_MODEL: 'gpt-4o',
+  SERVICE_MODEL: 'gpt-4o-mini',
 } as const;
 
 export const AI_EVALUATION = {
@@ -102,6 +99,7 @@ export const AI_API = {
 
 export const AI_CHUNK_TYPES = {
   FEEDBACK: 'feedback',
+  QUESTION: 'question',
   COMPLETE: 'complete',
   ERROR: 'error',
 } as const;
@@ -188,4 +186,92 @@ export const AI_ACTION_ERRORS = {
   FAILED_TO_GENERATE_QUIZ: 'Failed to generate quiz',
   FAILED_TO_GENERATE_STUDY_PLAN: 'Failed to generate study plan',
   FAILED_TO_GET_FEEDBACK: 'Failed to get feedback',
+} as const;
+
+export const AI_QUIZ_CONFIG = {
+  DEFAULT_QUESTION_COUNT: 10,
+  DEFAULT_DIFFICULTY: 'mixed',
+  DEFAULT_QUESTION_ID_PREFIX: 'question_',
+  DEFAULT_TOPIC: 'General',
+  DEFAULT_ANSWER: 'A',
+  DEFAULT_QUIZ_DIFFICULTY: 'medium',
+  MARKDOWN_JSON_START: '```json',
+  MARKDOWN_CODE_START: '```',
+  MARKDOWN_CODE_END: '```',
+  JSON_REGEX_PATTERN: '\\{[\\s\\S]*\\}',
+} as const;
+
+export const AI_QUIZ_ERRORS = {
+  FAILED_TO_GENERATE: 'Failed to generate questions',
+  FAILED_TO_EVALUATE: 'Failed to evaluate quiz',
+  FAILED_TO_PARSE_QUESTIONS: 'Failed to parse questions from AI response',
+  FAILED_TO_PARSE_FEEDBACK: 'Failed to parse feedback from AI response',
+  INVALID_RESPONSE_FORMAT: 'Invalid response format: missing questions array',
+  UNSUPPORTED_PROVIDER: 'Unsupported provider',
+  QUIZ_COMPLETED_FALLBACK: 'Quiz completed. AI feedback parsing failed, showing basic results.',
+  QUIZ_COMPLETED_SUCCESS: 'Quiz completed successfully.',
+} as const;
+
+export const AI_QUIZ_PROMPTS = {
+  GENERATION_INTRO:
+    'Please generate {count} multiple-choice questions based on the following video content:',
+  GENERATION_REQUIREMENTS: `Requirements:
+- {difficulty}
+- Each question should have exactly 4 options (A, B, C, D)
+- Only one correct answer per question
+- Include clear explanations for the correct answers
+- Cover different aspects and key concepts from the video
+- Questions should test understanding, not just memorization
+- Include the topic/subject area for each question`,
+  GENERATION_FORMAT: `Please provide your response in the following JSON format:
+{
+  "questions": [
+    {
+      "id": "unique_id",
+      "question": "Question text here",
+      "options": {
+        "A": "First option",
+        "B": "Second option", 
+        "C": "Third option",
+        "D": "Fourth option"
+      },
+      "correctAnswer": "A|B|C|D",
+      "explanation": "Detailed explanation of why this is correct",
+      "topic": "Topic/subject area",
+      "difficulty": "easy|medium|hard"
+    }
+  ]
+}`,
+  GENERATION_FOOTER: 'Make sure the questions are educational, relevant, and well-structured.',
+  EVALUATION_INTRO: 'Please evaluate the following quiz results and provide detailed feedback:',
+  EVALUATION_FORMAT: `Please analyze the performance and provide feedback in the following JSON format:
+{
+  "totalQuestions": {total},
+  "correctAnswers": number,
+  "score": number (0-100),
+  "overallFeedback": "Comprehensive assessment of overall performance",
+  "areasForImprovement": ["Specific areas that need work"],
+  "strengths": ["Areas where the student performed well"],
+  "performanceByTopic": {
+    "topic_name": {
+      "correct": number,
+      "total": number,
+      "percentage": number
+    }
+  }
+}`,
+  EVALUATION_FOCUS: `Focus on:
+1. Overall knowledge retention
+2. Understanding of key concepts
+3. Areas of strength and weakness
+4. Specific recommendations for improvement
+5. Performance patterns by topic and difficulty
+
+Be constructive and educational in your feedback.`,
+  TOPICS_PREFIX: 'Focus on these topics: ',
+  DIFFICULTY_MIXED: 'Mix of easy, medium, and hard questions',
+  DIFFICULTY_SUFFIX: ' difficulty level',
+  VIDEO_TITLE_PREFIX: 'Video Title: "',
+  VIDEO_DESCRIPTION_PREFIX: 'Video Description: "',
+  QUIZ_RESULTS_PREFIX: 'Quiz Results:',
 } as const;

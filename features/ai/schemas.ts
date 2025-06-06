@@ -61,3 +61,38 @@ export const GetAIFeedbackHistorySchema = z.object({
 export const DeleteAIFeedbackSchema = z.object({
   feedbackId: z.string().uuid('Invalid feedback ID'),
 });
+
+
+export const QuizQuestionSchema = z.object({
+  id: z.string(),
+  question: z.string(),
+  options: z.object({
+    A: z.string(),
+    B: z.string(),
+    C: z.string(),
+    D: z.string(),
+  }),
+  correctAnswer: z.enum(['A', 'B', 'C', 'D']),
+  explanation: z.string(),
+  topic: z.string(),
+  difficulty: z.enum(['easy', 'medium', 'hard']),
+});
+
+export const UserAnswerSchema = z.object({
+  questionId: z.string(),
+  selectedAnswer: z.enum(['A', 'B', 'C', 'D']),
+});
+
+export const EvaluateQuizSchema = z.object({
+  videoId: z.string().min(1, 'Video ID is required'),
+  questions: z.array(QuizQuestionSchema).min(1, 'At least one question is required'),
+  answers: z.array(UserAnswerSchema).min(1, 'At least one answer is required'),
+  videoContext: z
+    .object({
+      title: z.string().optional(),
+      description: z.string().optional(),
+    })
+    .optional(),
+  provider: z.string().min(1, 'AI provider is required'),
+  model: z.string().min(1, 'AI model is required'),
+});
