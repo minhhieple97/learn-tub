@@ -23,14 +23,26 @@ export const useYouTubePlayer = ({
   const [playerState, setPlayerState] = useState(-1);
   const [duration, setDuration] = useState(0);
   const playerRef = useRef<HTMLDivElement>(null);
+  const playerInstanceRef = useRef<any>(null);
 
   useEffect(() => {
-    if (!isApiLoaded || !playerRef.current || player) return;
+    if (!isApiLoaded || !playerRef.current) return;
+
+    if (playerInstanceRef.current) {
+      if (typeof playerInstanceRef.current.destroy === 'function') {
+        playerInstanceRef.current.destroy();
+      }
+      playerInstanceRef.current = null;
+      setPlayer(null);
+    }
 
     const onPlayerReady = (event: any) => {
       setPlayer(event.target);
       setDuration(event.target.getDuration());
-      if (initialTimestamp > 0 && initialTimestamp < event.target.getDuration()) {
+      if (
+        initialTimestamp > 0 &&
+        initialTimestamp < event.target.getDuration()
+      ) {
         event.target.seekTo(initialTimestamp, true);
       }
     };
@@ -38,6 +50,7 @@ export const useYouTubePlayer = ({
     const onPlayerStateChange = (event: any) => {
       setPlayerState(event.data);
     };
+
     const newPlayer = new window.YT.Player(playerRef.current, {
       videoId: youtubeId,
       playerVars: {
@@ -55,10 +68,16 @@ export const useYouTubePlayer = ({
       },
     });
 
+    playerInstanceRef.current = newPlayer;
+
     return () => {
-      if (newPlayer && typeof newPlayer.destroy === 'function') {
-        newPlayer.destroy();
+      if (
+        playerInstanceRef.current &&
+        typeof playerInstanceRef.current.destroy === 'function'
+      ) {
+        playerInstanceRef.current.destroy();
       }
+      playerInstanceRef.current = null;
       setPlayer(null);
     };
   }, [isApiLoaded, youtubeId, initialTimestamp]);
