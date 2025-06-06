@@ -6,6 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "lint": "next lint",
+    "lint:fix": "next lint --fix",
     "db:pull": "npx supabase db pull",
     "db:reset": "npx supabase db reset",
     "db": "npm run db:pull && npm run db:reset"
