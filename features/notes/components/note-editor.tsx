@@ -18,7 +18,7 @@ export const NoteEditor = ({ video, currentTimestamp, onTimestampClick }: NoteEd
   }, [currentTimestamp, setCurrentTimestamp]);
 
   return (
-    <div className="space-y-4">
+    <div className="w-full space-y-6">
       <NoteEditorForm />
       <NotesListWithSearch onTimestampClick={onTimestampClick} />
     </div>

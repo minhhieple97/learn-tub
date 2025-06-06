@@ -11,8 +11,12 @@ export const NoteFormActions = ({
   disabled = false,
 }: NoteFormActionsProps) => {
   return (
-    <div className="flex gap-2">
-      <Button onClick={onSave} disabled={isLoading || disabled} className="flex-1">
+    <div className="flex gap-3">
+      <Button 
+        onClick={onSave} 
+        disabled={isLoading || disabled} 
+        className="flex-1 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white shadow-lg transition-all duration-200 hover:shadow-xl"
+      >
         {isLoading ? (
           <Spinner size="small" className="mr-2 h-4 w-4" />
         ) : (
@@ -22,7 +26,11 @@ export const NoteFormActions = ({
       </Button>
 
       {isEditing && (
-        <Button variant="outline" onClick={onCancel}>
+        <Button 
+          variant="outline" 
+          onClick={onCancel}
+          className="border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200"
+        >
           Cancel
         </Button>
       )}
