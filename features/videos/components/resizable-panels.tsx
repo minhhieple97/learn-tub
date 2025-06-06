@@ -17,27 +17,34 @@ export const ResizablePanels = ({
   minLeftWidth = 30,
   maxLeftWidth = 80,
 }: ResizablePanelsProps) => {
-  const { leftWidth, rightWidth, isDragging, isKeyboardActive, handleMouseDown, handleKeyDown } =
-    useResizablePanels({
-      initialLeftWidth,
-      minLeftWidth,
-      maxLeftWidth,
-    });
+  const {
+    leftWidth,
+    rightWidth,
+    isDragging,
+    isKeyboardActive,
+    handleMouseDown,
+    handleKeyDown,
+  } = useResizablePanels({
+    initialLeftWidth,
+    minLeftWidth,
+    maxLeftWidth,
+  });
 
   return (
-    <div className="flex min-h-0 relative">
-      {/* Left Panel */}
+    <div className="relative flex min-h-0">
       <div
         style={{ width: `${leftWidth}%` }}
         className={`
-          flex-shrink-0 pr-3 transition-all duration-75 ease-out
-          ${isDragging ? '' : 'transition-all duration-200 ease-out'}
+          shrink-0 pr-3 will-change-[width]
+          ${isDragging 
+            ? 'transition-none' 
+            : 'transition-[width] duration-300 ease-out'
+          }
         `}
       >
         {leftPanel}
       </div>
 
-      {/* Resizer */}
       <PanelResizer
         onMouseDown={handleMouseDown}
         onKeyDown={handleKeyDown}
@@ -47,12 +54,14 @@ export const ResizablePanels = ({
         rightWidth={rightWidth}
       />
 
-      {/* Right Panel */}
       <div
         style={{ width: `${rightWidth}%` }}
         className={`
-          flex-shrink-0 pl-3 transition-all duration-75 ease-out
-          ${isDragging ? '' : 'transition-all duration-200 ease-out'}
+          shrink-0 pl-3 will-change-[width]
+          ${isDragging 
+            ? 'transition-none' 
+            : 'transition-[width] duration-300 ease-out'
+          }
         `}
       >
         {rightPanel}

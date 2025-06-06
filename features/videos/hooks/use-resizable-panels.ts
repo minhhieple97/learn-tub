@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 
 type UseResizablePanelsProps = {
   initialLeftWidth?: number;
@@ -29,11 +29,20 @@ export const useResizablePanels = ({
 
   const rightWidth = 100 - leftWidth;
 
+  const animationFrameRef = useRef<number | null>(null);
+  const lastUpdateTimeRef = useRef<number>(0);
+
   const handleMouseMove = useCallback(
     (e: MouseEvent) => {
       if (!isDragging || !containerRef.current) return;
 
-      requestAnimationFrame(() => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+      const now = performance.now();
+      const timeSinceLastUpdate = now - lastUpdateTimeRef.current;
+
+      const updatePosition = () => {
         if (!containerRef.current) return;
 
         const containerRect = containerRef.current.getBoundingClientRect();
@@ -42,10 +51,20 @@ export const useResizablePanels = ({
 
         const percentage = (mouseX / containerWidth) * 100;
 
-        const clampedPercentage = Math.max(minLeftWidth, Math.min(maxLeftWidth, percentage));
+        const clampedPercentage = Math.max(
+          minLeftWidth,
+          Math.min(maxLeftWidth, percentage),
+        );
 
         setLeftWidth(clampedPercentage);
-      });
+        lastUpdateTimeRef.current = now;
+      };
+      if (timeSinceLastUpdate >= 8) {
+        // ~120fps max
+        updatePosition();
+      } else {
+        animationFrameRef.current = requestAnimationFrame(updatePosition);
+      }
     },
     [isDragging, minLeftWidth, maxLeftWidth],
   );
@@ -104,15 +123,26 @@ export const useResizablePanels = ({
 
   useEffect(() => {
     if (isDragging) {
-      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mousemove', handleMouseMove, {
+        passive: true,
+      });
       document.addEventListener('mouseup', handleMouseUp);
       document.body.style.cursor = 'col-resize';
       document.body.style.userSelect = 'none';
+      document.body.style.pointerEvents = 'none';
+      document.body.style.overflow = 'hidden';
     } else {
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
       document.body.style.cursor = '';
       document.body.style.userSelect = '';
+      document.body.style.pointerEvents = '';
+      document.body.style.overflow = '';
+
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      }
     }
 
     return () => {
@@ -120,6 +150,13 @@ export const useResizablePanels = ({
       document.removeEventListener('mouseup', handleMouseUp);
       document.body.style.cursor = '';
       document.body.style.userSelect = '';
+      document.body.style.pointerEvents = '';
+      document.body.style.overflow = '';
+
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      }
     };
   }, [isDragging, handleMouseMove, handleMouseUp]);
 
