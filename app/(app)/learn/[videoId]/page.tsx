@@ -1,6 +1,5 @@
-import { notFound, redirect } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import { VideoPageClient } from '@/features/videos/components';
-import { routes } from '@/routes';
 import { getVideoPageData } from '@/features/videos/queries';
 
 type VideoPageProps = {

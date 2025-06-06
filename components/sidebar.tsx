@@ -1,7 +1,14 @@
-"use client"
+'use client';
 
-import { Button } from "@/components/ui/button"
-import { BookOpen, Home, Play, Settings, ChevronLeft, ChevronRight, Menu } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import {
+  BookOpen,
+  Home,
+  Play,
+  Settings,
+  ChevronLeft,
+  Menu,
+} from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -29,12 +36,19 @@ export const Sidebar = () => {
         isCollapsed ? 'w-16' : 'w-64',
       )}
     >
-      <div className={cn('transition-all duration-300', isCollapsed ? 'p-2' : 'p-6')}>
+      <div
+        className={cn(
+          'transition-all duration-300',
+          isCollapsed ? 'p-2' : 'p-6',
+        )}
+      >
         {!isCollapsed && (
           <div className="mb-8 flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <BookOpen className="size-8 text-blue-600" />
-              <span className="text-2xl font-bold text-gray-900 dark:text-white">LearnTub</span>
+              <span className="text-2xl font-bold text-gray-900 dark:text-white">
+                LearnTub
+              </span>
             </div>
             <Button
               variant="ghost"
@@ -93,7 +107,9 @@ export const Sidebar = () => {
                 title={isCollapsed ? item.name : undefined}
               >
                 <Link href={item.href}>
-                  <item.icon className={cn('h-4 w-4', !isCollapsed && 'mr-2')} />
+                  <item.icon
+                    className={cn('h-4 w-4', !isCollapsed && 'mr-2')}
+                  />
                   {!isCollapsed && item.name}
                 </Link>
               </Button>

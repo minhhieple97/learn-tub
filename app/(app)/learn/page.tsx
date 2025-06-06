@@ -1,5 +1,3 @@
-import { redirect } from 'next/navigation';
-import { routes } from '@/routes';
 import { Play } from 'lucide-react';
 import { getLearnPageData } from '@/features/videos/queries';
 import { LearnTabs } from '@/features/videos/components/learn-tabs';
@@ -13,7 +11,6 @@ type PageProps = {
 export default async function LearnPage({ searchParams }: PageProps) {
   const videosPromise = getLearnPageData();
 
-
   const { tab } = await learnPageCache.parse(searchParams);
 
   return (
@@ -26,8 +23,8 @@ export default async function LearnPage({ searchParams }: PageProps) {
               Learn
             </h2>
             <p className="mt-1 text-base text-slate-600 dark:text-slate-300">
-              Transform YouTube videos into interactive learning experiences with AI-powered
-              insights
+              Transform YouTube videos into interactive learning experiences
+              with AI-powered insights
             </p>
           </div>
         </div>

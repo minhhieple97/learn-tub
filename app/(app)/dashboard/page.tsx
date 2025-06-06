@@ -1,13 +1,23 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { AIInsightsDashboard } from "@/features/ai/components/ai-insights-dashboard"
-import { BookOpen, Clock, TrendingUp, Video } from "lucide-react"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { AIInsightsDashboard } from '@/features/ai/components/ai-insights-dashboard';
+import { BookOpen, Clock, TrendingUp, Video } from 'lucide-react';
 
 export default function DashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Dashboard</h2>
-        <p className="text-gray-600 dark:text-gray-300">Track your learning progress and discover new content</p>
+        <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
+          Dashboard
+        </h2>
+        <p className="text-gray-600 dark:text-gray-300">
+          Track your learning progress and discover new content
+        </p>
       </div>
 
       {/* Stats Grid */}
@@ -57,15 +67,15 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      {/* AI Insights Section */}
       <AIInsightsDashboard />
 
-      {/* Recent Activity */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle>Recent Videos</CardTitle>
-            <CardDescription>Videos you've been watching recently</CardDescription>
+            <CardDescription>
+              Videos you&apos;ve been watching recently
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -73,14 +83,18 @@ export default function DashboardPage() {
                 <div className="h-12 w-16 rounded bg-gray-200 dark:bg-gray-700"></div>
                 <div>
                   <p className="font-medium">React Hooks Tutorial</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">2 hours ago</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    2 hours ago
+                  </p>
                 </div>
               </div>
               <div className="flex items-center space-x-4">
                 <div className="h-12 w-16 rounded bg-gray-200 dark:bg-gray-700"></div>
                 <div>
                   <p className="font-medium">Next.js 15 Features</p>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">1 day ago</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    1 day ago
+                  </p>
                 </div>
               </div>
             </div>
@@ -90,7 +104,9 @@ export default function DashboardPage() {
         <Card>
           <CardHeader>
             <CardTitle>Learning Goals</CardTitle>
-            <CardDescription>Your progress towards weekly goals</CardDescription>
+            <CardDescription>
+              Your progress towards weekly goals
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -100,7 +116,10 @@ export default function DashboardPage() {
                   <span>3/5</span>
                 </div>
                 <div className="h-2 w-full rounded-full bg-gray-200">
-                  <div className="h-2 rounded-full bg-blue-600" style={{ width: "60%" }}></div>
+                  <div
+                    className="h-2 rounded-full bg-blue-600"
+                    style={{ width: '60%' }}
+                  ></div>
                 </div>
               </div>
               <div>
@@ -109,7 +128,10 @@ export default function DashboardPage() {
                   <span>32/50</span>
                 </div>
                 <div className="h-2 w-full rounded-full bg-gray-200">
-                  <div className="h-2 rounded-full bg-green-600" style={{ width: "64%" }}></div>
+                  <div
+                    className="h-2 rounded-full bg-green-600"
+                    style={{ width: '64%' }}
+                  ></div>
                 </div>
               </div>
             </div>
@@ -117,5 +139,5 @@ export default function DashboardPage() {
         </Card>
       </div>
     </div>
-  )
+  );
 }
