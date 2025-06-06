@@ -12,8 +12,8 @@ export default function Loading() {
         <Skeleton className="h-20 w-full" />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 space-y-4">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="space-y-4 lg:col-span-2">
           <Skeleton className="aspect-video w-full rounded-lg" />
 
           <div className="space-y-3">
@@ -25,7 +25,7 @@ export default function Loading() {
           </div>
         </div>
 
-        <div className="lg:col-span-1 space-y-4">
+        <div className="space-y-4 lg:col-span-1">
           <Skeleton className="h-6 w-24" />
 
           <div className="space-y-3">

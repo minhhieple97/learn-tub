@@ -6,19 +6,19 @@ import { routes } from '@/routes';
 
 export default function AuthCodeErrorPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4">
+    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 dark:bg-gray-900">
       <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <Link href={routes.home} className="flex items-center justify-center space-x-2 mb-4">
-            <BookOpen className="h-8 w-8 text-blue-600" />
+        <div className="mb-8 text-center">
+          <Link href={routes.home} className="mb-4 flex items-center justify-center space-x-2">
+            <BookOpen className="size-8 text-blue-600" />
             <span className="text-2xl font-bold text-gray-900 dark:text-white">LearnTub</span>
           </Link>
         </div>
 
         <Card>
           <CardHeader className="text-center">
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
-              <AlertCircle className="h-6 w-6 text-red-600" />
+            <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-full bg-red-100">
+              <AlertCircle className="size-6 text-red-600" />
             </div>
             <CardTitle className="text-red-600">Authentication Error</CardTitle>
             <CardDescription>
@@ -26,7 +26,7 @@ export default function AuthCodeErrorPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-2">
+            <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
               <li>• The authentication request was cancelled</li>
               <li>• Network connectivity issues</li>
               <li>• Temporary service unavailability</li>
