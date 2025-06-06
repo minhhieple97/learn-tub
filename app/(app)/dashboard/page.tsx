@@ -11,11 +11,11 @@ export default function DashboardPage() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Videos</CardTitle>
-            <Video className="h-4 w-4 text-muted-foreground" />
+            <Video className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">12</div>
@@ -26,7 +26,7 @@ export default function DashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Learning Time</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
+            <Clock className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">24h 30m</div>
@@ -37,7 +37,7 @@ export default function DashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Notes Created</CardTitle>
-            <BookOpen className="h-4 w-4 text-muted-foreground" />
+            <BookOpen className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">89</div>
@@ -48,7 +48,7 @@ export default function DashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Streak</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            <TrendingUp className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">7 days</div>
@@ -61,7 +61,7 @@ export default function DashboardPage() {
       <AIInsightsDashboard />
 
       {/* Recent Activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle>Recent Videos</CardTitle>
@@ -70,14 +70,14 @@ export default function DashboardPage() {
           <CardContent>
             <div className="space-y-4">
               <div className="flex items-center space-x-4">
-                <div className="w-16 h-12 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                <div className="h-12 w-16 rounded bg-gray-200 dark:bg-gray-700"></div>
                 <div>
                   <p className="font-medium">React Hooks Tutorial</p>
                   <p className="text-sm text-gray-600 dark:text-gray-400">2 hours ago</p>
                 </div>
               </div>
               <div className="flex items-center space-x-4">
-                <div className="w-16 h-12 bg-gray-200 dark:bg-gray-700 rounded"></div>
+                <div className="h-12 w-16 rounded bg-gray-200 dark:bg-gray-700"></div>
                 <div>
                   <p className="font-medium">Next.js 15 Features</p>
                   <p className="text-sm text-gray-600 dark:text-gray-400">1 day ago</p>
@@ -95,21 +95,21 @@ export default function DashboardPage() {
           <CardContent>
             <div className="space-y-4">
               <div>
-                <div className="flex justify-between text-sm mb-1">
+                <div className="mb-1 flex justify-between text-sm">
                   <span>Watch 5 videos</span>
                   <span>3/5</span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div className="bg-blue-600 h-2 rounded-full" style={{ width: "60%" }}></div>
+                <div className="h-2 w-full rounded-full bg-gray-200">
+                  <div className="h-2 rounded-full bg-blue-600" style={{ width: "60%" }}></div>
                 </div>
               </div>
               <div>
-                <div className="flex justify-between text-sm mb-1">
+                <div className="mb-1 flex justify-between text-sm">
                   <span>Take 50 notes</span>
                   <span>32/50</span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div className="bg-green-600 h-2 rounded-full" style={{ width: "64%" }}></div>
+                <div className="h-2 w-full rounded-full bg-gray-200">
+                  <div className="h-2 rounded-full bg-green-600" style={{ width: "64%" }}></div>
                 </div>
               </div>
             </div>

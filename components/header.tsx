@@ -10,18 +10,18 @@ type HeaderProps = {
 
 export const Header = ({ user }: HeaderProps) => {
   return (
-    <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+    <header className="border-b border-gray-200 bg-white px-6 py-4 dark:border-gray-700 dark:bg-gray-800">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">Welcome back!</h1>
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-2">
-            <UserIcon className="h-4 w-4" />
+            <UserIcon className="size-4" />
             <span className="text-sm text-gray-600 dark:text-gray-300">{user.email}</span>
           </div>
           <ThemeToggle />
           <form action={signOutAction}>
             <Button variant="outline" size="sm">
-              <LogOut className="h-4 w-4 mr-2" />
+              <LogOut className="mr-2 size-4" />
               Sign Out
             </Button>
           </form>

@@ -31,9 +31,9 @@ export const Sidebar = () => {
     >
       <div className={cn('transition-all duration-300', isCollapsed ? 'p-2' : 'p-6')}>
         {!isCollapsed && (
-          <div className="flex items-center justify-between mb-8">
+          <div className="mb-8 flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <BookOpen className="h-8 w-8 text-blue-600" />
+              <BookOpen className="size-8 text-blue-600" />
               <span className="text-2xl font-bold text-gray-900 dark:text-white">LearnTub</span>
             </div>
             <Button
@@ -50,14 +50,14 @@ export const Sidebar = () => {
               )}
               title="Collapse sidebar"
             >
-              <ChevronLeft className="h-4 w-4 text-gray-600 dark:text-gray-300" />
+              <ChevronLeft className="size-4 text-gray-600 dark:text-gray-300" />
             </Button>
           </div>
         )}
 
         {isCollapsed && (
-          <div className="flex flex-col items-center space-y-4 mb-6">
-            <BookOpen className="h-8 w-8 text-blue-600" />
+          <div className="mb-6 flex flex-col items-center space-y-4">
+            <BookOpen className="size-8 text-blue-600" />
             <Button
               variant="ghost"
               size="sm"
@@ -72,7 +72,7 @@ export const Sidebar = () => {
               )}
               title="Expand sidebar"
             >
-              <Menu className="h-4 w-4 text-gray-600 dark:text-gray-300" />
+              <Menu className="size-4 text-gray-600 dark:text-gray-300" />
             </Button>
           </div>
         )}

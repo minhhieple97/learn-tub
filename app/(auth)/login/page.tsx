@@ -16,11 +16,11 @@ export default async function LoginPage() {
     redirect(routes.learn);
   }
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4">
+    <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 dark:bg-gray-900">
       <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <Link href={routes.home} className="flex items-center justify-center space-x-2 mb-4">
-            <BookOpen className="h-8 w-8 text-blue-600" />
+        <div className="mb-8 text-center">
+          <Link href={routes.home} className="mb-4 flex items-center justify-center space-x-2">
+            <BookOpen className="size-8 text-blue-600" />
             <span className="text-2xl font-bold text-gray-900 dark:text-white">LearnTub</span>
           </Link>
         </div>

@@ -17,15 +17,15 @@ export default async function LandingPage() {
     redirect(routes.learn);
   }
   return (
-    <div className="min-h-screen bg-neutral-pearl">
-      <header className="bg-neutral-pearl/80 backdrop-blur-sm border-b border-neutral-stone sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
+    <div className="bg-neutral-pearl min-h-screen">
+      <header className="bg-neutral-pearl/80 border-neutral-stone sticky top-0 z-50 border-b backdrop-blur-sm">
+        <div className="container mx-auto p-4">
           <nav className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-neutral-sage rounded-xl">
-                <BookOpen className="h-6 w-6 text-neutral-sage-foreground" />
+              <div className="bg-neutral-sage rounded-xl p-2">
+                <BookOpen className="text-neutral-sage-foreground size-6" />
               </div>
-              <span className="text-2xl font-bold text-neutral-pearl-foreground">LearnTub</span>
+              <span className="text-neutral-pearl-foreground text-2xl font-bold">LearnTub</span>
             </div>
             <div className="flex items-center space-x-4">
               <ThemeToggle />
@@ -48,61 +48,61 @@ export default async function LandingPage() {
       </header>
 
       <main>
-        <section className="relative bg-gradient-to-br from-neutral-pearl via-neutral-dust to-neutral-stone">
-          <div className="absolute inset-0 bg-gradient-to-r from-neutral-sage/5 to-neutral-mist/5"></div>
-          <div className="relative container mx-auto px-4 py-24 lg:py-32">
-            <div className="text-center max-w-5xl mx-auto">
-              <div className="inline-flex items-center px-4 py-2 bg-neutral-sage/10 border border-neutral-sage/20 rounded-full text-sm text-neutral-sage-foreground mb-8">
-                <span className="w-2 h-2 bg-neutral-sage rounded-full mr-2 animate-pulse"></span>
+        <section className="from-neutral-pearl via-neutral-dust to-neutral-stone relative bg-gradient-to-br">
+          <div className="from-neutral-sage/5 to-neutral-mist/5 absolute inset-0 bg-gradient-to-r"></div>
+          <div className="container relative mx-auto px-4 py-24 lg:py-32">
+            <div className="mx-auto max-w-5xl text-center">
+              <div className="bg-neutral-sage/10 border-neutral-sage/20 text-neutral-sage-foreground mb-8 inline-flex items-center rounded-full border px-4 py-2 text-sm">
+                <span className="bg-neutral-sage mr-2 size-2 animate-pulse rounded-full"></span>
                 Transform your learning experience
               </div>
 
-              <h1 className="text-5xl lg:text-7xl font-bold text-neutral-pearl-foreground mb-8 leading-tight">
+              <h1 className="text-neutral-pearl-foreground mb-8 text-5xl font-bold leading-tight lg:text-7xl">
                 Turn YouTube into Your Learning Platform
               </h1>
 
-              <p className="text-xl lg:text-2xl text-neutral-stone-foreground mb-12 max-w-4xl mx-auto leading-relaxed">
+              <p className="text-neutral-stone-foreground mx-auto mb-12 max-w-4xl text-xl leading-relaxed lg:text-2xl">
                 Take smart notes, get AI-powered insights, and transform passive video watching into
                 active learning experiences that accelerate your growth.
               </p>
 
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
+              <div className="mb-16 flex flex-col items-center justify-center gap-4 sm:flex-row">
                 <Button
                   size="lg"
-                  className="bg-neutral-sage text-neutral-sage-foreground hover:bg-neutral-sage/90 px-8 py-4 text-lg group"
+                  className="bg-neutral-sage text-neutral-sage-foreground hover:bg-neutral-sage/90 group px-8 py-4 text-lg"
                   asChild
                 >
                   <Link href={routes.register}>
                     Start Learning Free
-                    <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                    <ArrowRight className="ml-2 size-5 transition-transform group-hover:translate-x-1" />
                   </Link>
                 </Button>
                 <Button
                   size="lg"
                   variant="outline"
-                  className="border-neutral-stone bg-neutral-pearl/50 text-neutral-pearl-foreground hover:bg-neutral-stone hover:text-neutral-stone-foreground px-8 py-4 text-lg group"
+                  className="border-neutral-stone bg-neutral-pearl/50 text-neutral-pearl-foreground hover:bg-neutral-stone hover:text-neutral-stone-foreground group px-8 py-4 text-lg"
                   asChild
                 >
                   <Link href={routes.demo}>
-                    <Play className="mr-2 h-5 w-5 group-hover:scale-110 transition-transform" />
+                    <Play className="mr-2 size-5 transition-transform group-hover:scale-110" />
                     Watch Demo
                   </Link>
                 </Button>
               </div>
 
-              <div className="flex items-center justify-center space-x-8 text-neutral-stone-foreground">
+              <div className="text-neutral-stone-foreground flex items-center justify-center space-x-8">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-neutral-pearl-foreground">10K+</div>
+                  <div className="text-neutral-pearl-foreground text-2xl font-bold">10K+</div>
                   <div className="text-sm">Active Learners</div>
                 </div>
-                <div className="w-px h-8 bg-neutral-stone"></div>
+                <div className="bg-neutral-stone h-8 w-px"></div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-neutral-pearl-foreground">50K+</div>
+                  <div className="text-neutral-pearl-foreground text-2xl font-bold">50K+</div>
                   <div className="text-sm">Notes Created</div>
                 </div>
-                <div className="w-px h-8 bg-neutral-stone"></div>
+                <div className="bg-neutral-stone h-8 w-px"></div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-neutral-pearl-foreground">95%</div>
+                  <div className="text-neutral-pearl-foreground text-2xl font-bold">95%</div>
                   <div className="text-sm">Satisfaction</div>
                 </div>
               </div>
@@ -110,24 +110,24 @@ export default async function LandingPage() {
           </div>
         </section>
 
-        <section className="py-24 bg-neutral-dust">
+        <section className="bg-neutral-dust py-24">
           <div className="container mx-auto px-4">
-            <div className="text-center mb-16">
-              <h2 className="text-4xl lg:text-5xl font-bold text-neutral-dust-foreground mb-6">
+            <div className="mb-16 text-center">
+              <h2 className="text-neutral-dust-foreground mb-6 text-4xl font-bold lg:text-5xl">
                 Everything you need to learn smarter
               </h2>
-              <p className="text-xl text-neutral-stone-foreground max-w-3xl mx-auto">
+              <p className="text-neutral-stone-foreground mx-auto max-w-3xl text-xl">
                 Powerful features designed to enhance your learning journey and maximize retention.
               </p>
             </div>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-              <Card className="bg-neutral-pearl border-neutral-stone/20 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 group">
+            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+              <Card className="bg-neutral-pearl border-neutral-stone/20 group transition-all duration-300 hover:-translate-y-2 hover:shadow-xl">
                 <CardHeader className="pb-4">
-                  <div className="p-3 bg-gradient-to-br from-neutral-sage to-neutral-sage/80 rounded-xl w-fit mb-4 group-hover:scale-110 transition-transform">
-                    <Brain className="h-8 w-8 text-neutral-sage-foreground" />
+                  <div className="from-neutral-sage to-neutral-sage/80 mb-4 w-fit rounded-xl bg-gradient-to-br p-3 transition-transform group-hover:scale-110">
+                    <Brain className="text-neutral-sage-foreground size-8" />
                   </div>
-                  <CardTitle className="text-xl text-neutral-pearl-foreground">
+                  <CardTitle className="text-neutral-pearl-foreground text-xl">
                     AI-Powered Notes
                   </CardTitle>
                 </CardHeader>
@@ -139,12 +139,12 @@ export default async function LandingPage() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-neutral-pearl border-neutral-stone/20 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 group">
+              <Card className="bg-neutral-pearl border-neutral-stone/20 group transition-all duration-300 hover:-translate-y-2 hover:shadow-xl">
                 <CardHeader className="pb-4">
-                  <div className="p-3 bg-gradient-to-br from-neutral-mist to-neutral-mist/80 rounded-xl w-fit mb-4 group-hover:scale-110 transition-transform">
-                    <Clock className="h-8 w-8 text-neutral-mist-foreground" />
+                  <div className="from-neutral-mist to-neutral-mist/80 mb-4 w-fit rounded-xl bg-gradient-to-br p-3 transition-transform group-hover:scale-110">
+                    <Clock className="text-neutral-mist-foreground size-8" />
                   </div>
-                  <CardTitle className="text-xl text-neutral-pearl-foreground">
+                  <CardTitle className="text-neutral-pearl-foreground text-xl">
                     Timestamp Sync
                   </CardTitle>
                 </CardHeader>
@@ -156,12 +156,12 @@ export default async function LandingPage() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-neutral-pearl border-neutral-stone/20 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 group">
+              <Card className="bg-neutral-pearl border-neutral-stone/20 group transition-all duration-300 hover:-translate-y-2 hover:shadow-xl">
                 <CardHeader className="pb-4">
-                  <div className="p-3 bg-gradient-to-br from-neutral-clay to-neutral-clay/80 rounded-xl w-fit mb-4 group-hover:scale-110 transition-transform">
-                    <BookOpen className="h-8 w-8 text-neutral-clay-foreground" />
+                  <div className="from-neutral-clay to-neutral-clay/80 mb-4 w-fit rounded-xl bg-gradient-to-br p-3 transition-transform group-hover:scale-110">
+                    <BookOpen className="text-neutral-clay-foreground size-8" />
                   </div>
-                  <CardTitle className="text-xl text-neutral-pearl-foreground">
+                  <CardTitle className="text-neutral-pearl-foreground text-xl">
                     Smart Organization
                   </CardTitle>
                 </CardHeader>
@@ -173,12 +173,12 @@ export default async function LandingPage() {
                 </CardContent>
               </Card>
 
-              <Card className="bg-neutral-pearl border-neutral-stone/20 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 group">
+              <Card className="bg-neutral-pearl border-neutral-stone/20 group transition-all duration-300 hover:-translate-y-2 hover:shadow-xl">
                 <CardHeader className="pb-4">
-                  <div className="p-3 bg-gradient-to-br from-neutral-sage to-neutral-mist rounded-xl w-fit mb-4 group-hover:scale-110 transition-transform">
-                    <Users className="h-8 w-8 text-white" />
+                  <div className="from-neutral-sage to-neutral-mist mb-4 w-fit rounded-xl bg-gradient-to-br p-3 transition-transform group-hover:scale-110">
+                    <Users className="size-8 text-white" />
                   </div>
-                  <CardTitle className="text-xl text-neutral-pearl-foreground">
+                  <CardTitle className="text-neutral-pearl-foreground text-xl">
                     Progress Tracking
                   </CardTitle>
                 </CardHeader>
@@ -193,34 +193,34 @@ export default async function LandingPage() {
           </div>
         </section>
 
-        <section className="py-24 bg-gradient-to-r from-neutral-stone to-neutral-mist">
+        <section className="from-neutral-stone to-neutral-mist bg-gradient-to-r py-24">
           <div className="container mx-auto px-4">
-            <div className="text-center bg-neutral-pearl rounded-3xl p-12 lg:p-16 shadow-2xl max-w-4xl mx-auto">
+            <div className="bg-neutral-pearl mx-auto max-w-4xl rounded-3xl p-12 text-center shadow-2xl lg:p-16">
               <div className="mb-8">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-neutral-sage to-neutral-mist rounded-2xl mb-6">
-                  <BookOpen className="h-8 w-8 text-primary" />
+                <div className="from-neutral-sage to-neutral-mist mb-6 inline-flex size-16 items-center justify-center rounded-2xl bg-gradient-to-br">
+                  <BookOpen className="size-8 text-primary" />
                 </div>
-                <h2 className="text-4xl lg:text-5xl font-bold text-neutral-pearl-foreground mb-6">
+                <h2 className="text-neutral-pearl-foreground mb-6 text-4xl font-bold lg:text-5xl">
                   Ready to Start Learning Smarter?
                 </h2>
-                <p className="text-xl text-neutral-stone-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
+                <p className="text-neutral-stone-foreground mx-auto mb-8 max-w-2xl text-xl leading-relaxed">
                   Join thousands of learners who are already transforming their YouTube experience
                   into powerful learning sessions.
                 </p>
               </div>
 
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
                 <Button
                   size="lg"
-                  className="bg-primary hover:opacity-90 px-8 py-4 text-lg group"
+                  className="group bg-primary px-8 py-4 text-lg hover:opacity-90"
                   asChild
                 >
                   <Link href={routes.register}>
                     Create Your Free Account
-                    <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                    <ArrowRight className="ml-2 size-5 transition-transform group-hover:translate-x-1" />
                   </Link>
                 </Button>
-                <p className="text-sm text-neutral-stone-foreground">
+                <p className="text-neutral-stone-foreground text-sm">
                   No credit card required • Free forever plan available
                 </p>
               </div>
