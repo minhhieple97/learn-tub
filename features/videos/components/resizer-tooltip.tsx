@@ -3,29 +3,39 @@ type ResizerTooltipProps = {
   isKeyboardActive: boolean;
 };
 
-export const ResizerTooltip = ({ isDragging, isKeyboardActive }: ResizerTooltipProps) => {
+export const ResizerTooltip = ({
+  isDragging,
+  isKeyboardActive,
+}: ResizerTooltipProps) => {
   return (
     <div
       className={`
-      absolute -top-20 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 group-focus:opacity-100 
-      transition-all duration-300 ease-out pointer-events-none z-20 transform
+      pointer-events-none absolute -top-16 left-1/2 z-30 -translate-x-1/2 transform-gpu 
+      opacity-0 transition-all
+      duration-200 ease-out will-change-[transform,opacity] group-hover:opacity-100 group-focus:opacity-100
       ${
         isDragging || isKeyboardActive
-          ? 'opacity-100 -translate-y-1 scale-105'
-          : 'translate-y-0 scale-100'
+          ? '-translate-y-2 scale-105 opacity-100'
+          : 'translate-y-1 scale-95'
       }
     `}
     >
       <div className="relative">
-        <div className="absolute inset-0 bg-primary/20 rounded-lg blur-md" />
+        {/* Subtle glow */}
+        <div className="absolute inset-0 rounded-lg bg-primary/20 blur-sm will-change-auto" />
 
-        <div className="relative bg-primary/95 border-2 border-primary rounded-lg px-1 text-sm font-medium shadow-xl backdrop-blur-sm">
-          <div className="text-center text-background  font-semibold">
-            {isDragging ? '🔄 Resizing panels...' : '↔️ Drag to resize'}
+        <div className="relative rounded-lg border border-primary/60 bg-primary/90 px-2 py-1.5 text-xs font-medium shadow-lg backdrop-blur-sm will-change-auto">
+          <div className="flex items-center gap-1.5 text-center text-background">
+            <span className="text-sm">{isDragging ? '🔄' : '↔️'}</span>
+            <span className="font-semibold">
+              {isDragging ? 'Resizing...' : 'Resize'}
+            </span>
+            {!isDragging && <span className="text-background/70">← →</span>}
           </div>
 
-          <div className="absolute top-full left-1/2 -translate-x-1/2">
-            <div className="w-0 h-0 border-l-[6px] border-r-[6px] border-t-[6px] border-l-transparent border-r-transparent border-t-primary" />
+          {/* Arrow pointer */}
+          <div className="absolute left-1/2 top-full -translate-x-1/2">
+            <div className="size-0 border-x-4 border-t-4 border-x-transparent border-t-primary/60" />
           </div>
         </div>
       </div>
