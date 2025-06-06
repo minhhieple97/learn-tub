@@ -115,7 +115,7 @@ export const QuizNavigation = ({
         {canGoNext ? (
           <Button
             onClick={onNext}
-            className="flex items-center gap-2 px-6 bg-blue-600 hover:bg-blue-700"
+            className="flex items-center gap-2 px-6 bg-blue-600 hover:bg-blue-700 text-white"
           >
             <span className="hidden sm:inline">Next</span>
             <span className="sm:hidden">Next</span>
