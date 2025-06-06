@@ -1,14 +1,14 @@
-"use server"
+'use server';
 
 import { authAction, ActionError } from '@/lib/safe-action';
 import { checkExistingVideo, insertVideo } from '../queries';
 import { getProfileByUserId } from '@/features/profile/queries/profile';
 import { addVideoSchema } from '../schemas';
-import { 
-  fetchYouTubeVideoData, 
-  parseDuration, 
-  extractYouTubeId, 
-  getYouTubeThumbnailUrl 
+import {
+  fetchYouTubeVideoData,
+  parseDuration,
+  extractYouTubeId,
+  getYouTubeThumbnailUrl,
 } from '@/lib/utils';
 import { VIDEO_DEFAULTS, TOAST_MESSAGES } from '@/config/constants';
 
@@ -29,16 +29,24 @@ export const addVideoAction = authAction
 
       const videoData = await fetchYouTubeVideoData(videoId);
 
+      if (!videoData) {
+        throw new ActionError(TOAST_MESSAGES.VIDEO_NOT_FOUND_ERROR);
+      }
+
       const result = await insertVideo({
         userId: profile.id,
         youtubeId: videoId,
         title: videoData?.snippet?.title || VIDEO_DEFAULTS.TITLE,
-        description: videoData?.snippet?.description || VIDEO_DEFAULTS.DESCRIPTION,
-        thumbnailUrl: videoData?.snippet?.thumbnails?.high?.url || getYouTubeThumbnailUrl(videoId),
+        description:
+          videoData?.snippet?.description || VIDEO_DEFAULTS.DESCRIPTION,
+        thumbnailUrl:
+          videoData?.snippet?.thumbnails?.high?.url ||
+          getYouTubeThumbnailUrl(videoId),
         duration: videoData?.contentDetails?.duration
           ? parseDuration(videoData.contentDetails.duration)
           : VIDEO_DEFAULTS.DURATION,
-        channelName: videoData?.snippet?.channelTitle || VIDEO_DEFAULTS.CHANNEL_NAME,
+        channelName:
+          videoData?.snippet?.channelTitle || VIDEO_DEFAULTS.CHANNEL_NAME,
         publishedAt: videoData?.snippet?.publishedAt || null,
       });
 
