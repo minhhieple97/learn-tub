@@ -27,7 +27,7 @@ const config = [
     },
   }),
   ...compat.config({
-    extends: ['plugin:drizzle/all', 'plugin:@next/next/recommended'],
+    extends: ['plugin:@next/next/recommended'],
   }),
   {
     rules: {
