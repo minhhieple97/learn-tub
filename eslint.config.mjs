@@ -19,7 +19,7 @@ const config = [
   pluginReact.configs.flat.recommended,
   ...tailwind.configs['flat/recommended'],
   ...compat.config({
-    extends: ['next'],
+    extends: ['next', 'prettier'],
     settings: {
       next: {
         rootDir: '.',
