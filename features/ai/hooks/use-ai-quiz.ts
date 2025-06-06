@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useAction } from 'next-safe-action/hooks';
 import { generateQuizQuestionsAction, evaluateQuizAction } from '../actions';
-import type { QuizSettings, QuizState, QuizStreamChunk, QuizQuestion } from '../types';
+import type { QuizSettings, QuizState } from '../types';
 import { AI_DEFAULTS, AI_PROVIDERS, AI_QUIZ_CONFIG } from '@/config/constants';
 
 export const useAIQuiz = (videoId: string) => {
@@ -21,9 +21,8 @@ export const useAIQuiz = (videoId: string) => {
     },
   });
 
-  const { execute: executeGenerate, isExecuting: isGeneratingQuestions } = useAction(
-    generateQuizQuestionsAction,
-    {
+  const { execute: executeGenerate, isExecuting: isGeneratingQuestions } =
+    useAction(generateQuizQuestionsAction, {
       onSuccess: (result) => {
         setState((prev) => ({
           ...prev,
@@ -39,8 +38,7 @@ export const useAIQuiz = (videoId: string) => {
         console.error('Failed to generate questions:', error);
         setState((prev) => ({ ...prev, isGenerating: false }));
       },
-    },
-  );
+    });
 
   const { execute: executeEvaluate, isExecuting: isEvaluatingQuiz } = useAction(
     evaluateQuizAction,
@@ -69,7 +67,7 @@ export const useAIQuiz = (videoId: string) => {
       const settings = { ...state.settings, ...customSettings };
       setState((prev) => ({ ...prev, isGenerating: true, settings }));
 
-      await executeGenerate({
+      executeGenerate({
         videoId,
         videoTitle,
         videoDescription,
@@ -82,97 +80,12 @@ export const useAIQuiz = (videoId: string) => {
     [videoId, state.settings, executeGenerate],
   );
 
-  const generateQuestionsStream = useCallback(
-    async (
-      videoTitle?: string,
-      videoDescription?: string,
-      customSettings?: Partial<QuizSettings>,
-    ) => {
-      const settings = { ...state.settings, ...customSettings };
-      setState((prev) => ({
-        ...prev,
-        isGenerating: true,
-        settings,
-        questions: [],
-        answers: [],
-        currentQuestionIndex: 0,
-        showResults: false,
-        feedback: null,
-      }));
-
-      try {
-        const response = await fetch('/api/ai/generate-quiz-stream', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            videoId,
-            videoTitle,
-            videoDescription,
-            questionCount: settings.questionCount,
-            difficulty: settings.difficulty,
-            provider: settings.provider,
-            model: settings.model,
-          }),
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to start question generation stream');
-        }
-
-        const reader = response.body?.getReader();
-        if (!reader) {
-          throw new Error('Failed to get stream reader');
-        }
-
-        const decoder = new TextDecoder();
-        let buffer = '';
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-
-          buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split('\n');
-          buffer = lines.pop() || '';
-
-          for (const line of lines) {
-            if (line.trim()) {
-              try {
-                const chunk: QuizStreamChunk = JSON.parse(line);
-
-                if (chunk.type === 'complete') {
-                  const questions: QuizQuestion[] = JSON.parse(chunk.content);
-                  setState((prev) => ({
-                    ...prev,
-                    questions,
-                    isGenerating: false,
-                  }));
-                } else if (chunk.type === 'error') {
-                  console.error('Stream error:', chunk.content);
-                  setState((prev) => ({ ...prev, isGenerating: false }));
-                }
-              } catch (parseError) {
-                console.error('Failed to parse chunk:', parseError);
-              }
-            }
-          }
-        }
-      } catch (error) {
-        console.error('Failed to generate questions with streaming:', error);
-        setState((prev) => ({ ...prev, isGenerating: false }));
-        // Fallback to non-streaming
-        return generateQuestions(videoTitle, videoDescription, customSettings);
-      }
-    },
-    [videoId, state.settings, generateQuestions],
-  );
-
   const answerQuestion = useCallback(
     (questionId: string, selectedAnswer: 'A' | 'B' | 'C' | 'D') => {
       setState((prev) => {
-        const existingAnswerIndex = prev.answers.findIndex((a) => a.questionId === questionId);
+        const existingAnswerIndex = prev.answers.findIndex(
+          (a) => a.questionId === questionId,
+        );
         const newAnswers = [...prev.answers];
 
         if (existingAnswerIndex >= 0) {
@@ -193,7 +106,10 @@ export const useAIQuiz = (videoId: string) => {
   const nextQuestion = useCallback(() => {
     setState((prev) => ({
       ...prev,
-      currentQuestionIndex: Math.min(prev.currentQuestionIndex + 1, prev.questions.length - 1),
+      currentQuestionIndex: Math.min(
+        prev.currentQuestionIndex + 1,
+        prev.questions.length - 1,
+      ),
     }));
   }, []);
 
@@ -207,7 +123,10 @@ export const useAIQuiz = (videoId: string) => {
   const goToQuestion = useCallback((index: number) => {
     setState((prev) => ({
       ...prev,
-      currentQuestionIndex: Math.max(0, Math.min(index, prev.questions.length - 1)),
+      currentQuestionIndex: Math.max(
+        0,
+        Math.min(index, prev.questions.length - 1),
+      ),
     }));
   }, []);
 
@@ -219,7 +138,7 @@ export const useAIQuiz = (videoId: string) => {
 
       setState((prev) => ({ ...prev, isEvaluating: true }));
 
-      await executeEvaluate({
+      executeEvaluate({
         videoId,
         questions: state.questions,
         answers: state.answers,
@@ -252,9 +171,10 @@ export const useAIQuiz = (videoId: string) => {
     }));
   }, []);
 
-  // Computed values
   const currentQuestion = state.questions[state.currentQuestionIndex];
-  const currentAnswer = state.answers.find((a) => a.questionId === currentQuestion?.id);
+  const currentAnswer = state.answers.find(
+    (a) => a.questionId === currentQuestion?.id,
+  );
   const hasAnsweredAll = state.answers.length === state.questions.length;
   const canGoNext = state.currentQuestionIndex < state.questions.length - 1;
   const canGoPrevious = state.currentQuestionIndex > 0;
@@ -265,7 +185,6 @@ export const useAIQuiz = (videoId: string) => {
   const answeredCount = state.answers.length;
 
   return {
-    // State
     questions: state.questions,
     answers: state.answers,
     currentQuestionIndex: state.currentQuestionIndex,
@@ -273,24 +192,19 @@ export const useAIQuiz = (videoId: string) => {
     feedback: state.feedback,
     settings: state.settings,
 
-    // Current question data
     currentQuestion,
     currentAnswer,
 
-    // Computed values
     hasAnsweredAll,
     canGoNext,
     canGoPrevious,
     progress,
     answeredCount,
 
-    // Loading states
     isGenerating: isGeneratingQuestions || state.isGenerating,
     isEvaluating: isEvaluatingQuiz || state.isEvaluating,
 
-    // Actions
     generateQuestions,
-    generateQuestionsStream,
     answerQuestion,
     nextQuestion,
     previousQuestion,

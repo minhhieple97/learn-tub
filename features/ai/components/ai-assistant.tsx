@@ -1,6 +1,6 @@
-"use client"
+'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -38,7 +38,11 @@ type AIAssistantProps = {
   videoDescription?: string;
 };
 
-export const AIAssistant = ({ videoId, videoTitle, videoDescription }: AIAssistantProps) => {
+export const AIAssistant = ({
+  videoId,
+  videoTitle,
+  videoDescription,
+}: AIAssistantProps) => {
   const [showSettings, setShowSettings] = useState(false);
 
   const {
@@ -58,7 +62,6 @@ export const AIAssistant = ({ videoId, videoTitle, videoDescription }: AIAssista
     isGenerating,
     isEvaluating,
     generateQuestions,
-    generateQuestionsStream,
     answerQuestion,
     nextQuestion,
     previousQuestion,
@@ -68,52 +71,8 @@ export const AIAssistant = ({ videoId, videoTitle, videoDescription }: AIAssista
     updateSettings,
   } = useAIQuiz(videoId);
 
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (questions.length === 0 || showResults || showSettings) return;
-
-      switch (event.key) {
-        case 'ArrowLeft':
-          event.preventDefault();
-          if (canGoPrevious) previousQuestion();
-          break;
-        case 'ArrowRight':
-          event.preventDefault();
-          if (canGoNext) nextQuestion();
-          else if (hasAnsweredAll) {
-            submitQuiz(videoTitle, videoDescription);
-          }
-          break;
-        case '1':
-        case '2':
-        case '3':
-        case '4':
-          event.preventDefault();
-          const answerMap = { '1': 'A', '2': 'B', '3': 'C', '4': 'D' } as const;
-          const selectedAnswer = answerMap[event.key as keyof typeof answerMap];
-          handleAnswerSelect(selectedAnswer);
-          break;
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [
-    questions.length,
-    showResults,
-    showSettings,
-    canGoPrevious,
-    canGoNext,
-    hasAnsweredAll,
-    previousQuestion,
-    nextQuestion,
-    submitQuiz,
-    videoTitle,
-    videoDescription,
-  ]);
-
   const handleGenerateQuestions = async () => {
-    await generateQuestionsStream(videoTitle, videoDescription);
+    await generateQuestions(videoTitle, videoDescription);
   };
 
   const handleSubmitQuiz = async () => {
@@ -129,19 +88,19 @@ export const AIAssistant = ({ videoId, videoTitle, videoDescription }: AIAssista
   const renderWelcomeScreen = () => (
     <div className="flex flex-col items-center justify-center py-12 text-center">
       <div className="mb-6 rounded-full bg-primary/10 p-6">
-        <Brain className="h-12 w-12 text-primary" />
+        <Brain className="size-12 text-primary" />
       </div>
       <h2 className="mb-4 text-2xl font-bold">AI Quiz Assistant</h2>
       <p className="mb-8 max-w-md text-muted-foreground">
-        Test your knowledge with AI-generated questions based on this video content. Get
-        personalized feedback to improve your understanding.
+        Test your knowledge with AI-generated questions based on this video
+        content. Get personalized feedback to improve your understanding.
       </p>
 
       {showSettings && (
         <Card className="mb-6 w-full max-w-md">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Settings className="h-5 w-5" />
+              <Settings className="size-5" />
               Quiz Settings
             </CardTitle>
           </CardHeader>
@@ -150,7 +109,9 @@ export const AIAssistant = ({ videoId, videoTitle, videoDescription }: AIAssista
               <label className="text-sm font-medium">Number of Questions</label>
               <Select
                 value={settings.questionCount.toString()}
-                onValueChange={(value) => updateSettings({ questionCount: parseInt(value) })}
+                onValueChange={(value) =>
+                  updateSettings({ questionCount: parseInt(value) })
+                }
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -204,15 +165,22 @@ export const AIAssistant = ({ videoId, videoTitle, videoDescription }: AIAssista
       )}
 
       <div className="flex gap-3">
-        <Button variant="outline" onClick={() => setShowSettings(!showSettings)}>
-          <Settings className="mr-2 h-4 w-4" />
+        <Button
+          variant="outline"
+          onClick={() => setShowSettings(!showSettings)}
+        >
+          <Settings className="mr-2 size-4" />
           Settings
         </Button>
-        <Button onClick={handleGenerateQuestions} disabled={isGenerating} size="lg">
+        <Button
+          onClick={handleGenerateQuestions}
+          disabled={isGenerating}
+          size="lg"
+        >
           {isGenerating ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            <Loader2 className="mr-2 size-4 animate-spin" />
           ) : (
-            <Play className="mr-2 h-4 w-4" />
+            <Play className="mr-2 size-4" />
           )}
           Generate Quiz
         </Button>
@@ -253,19 +221,28 @@ export const AIAssistant = ({ videoId, videoTitle, videoDescription }: AIAssista
                 {currentQuestion.difficulty}
               </Badge>
             </div>
-            <CardTitle className="text-lg leading-relaxed">{currentQuestion.question}</CardTitle>
+            <CardTitle className="text-lg leading-relaxed">
+              {currentQuestion.question}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid gap-3">
               {Object.entries(currentQuestion.options).map(([key, value]) => (
                 <Button
                   key={key}
-                  variant={currentAnswer?.selectedAnswer === key ? 'default' : 'outline'}
+                  variant={
+                    currentAnswer?.selectedAnswer === key
+                      ? 'default'
+                      : 'outline'
+                  }
                   className={cn(
                     'justify-start p-4 h-auto text-left whitespace-normal',
-                    currentAnswer?.selectedAnswer === key && 'ring-2 ring-primary',
+                    currentAnswer?.selectedAnswer === key &&
+                      'ring-2 ring-primary',
                   )}
-                  onClick={() => handleAnswerSelect(key as 'A' | 'B' | 'C' | 'D')}
+                  onClick={() =>
+                    handleAnswerSelect(key as 'A' | 'B' | 'C' | 'D')
+                  }
                 >
                   <span className="mr-3 font-semibold">{key}.</span>
                   <span>{value}</span>
@@ -283,32 +260,42 @@ export const AIAssistant = ({ videoId, videoTitle, videoDescription }: AIAssista
               <div className="flex items-center gap-2">
                 <span className="text-sm text-muted-foreground">Progress:</span>
                 <div className="flex items-center gap-1">
-                  <span className="font-medium text-green-600">{answeredCount}</span>
+                  <span className="font-medium text-green-600">
+                    {answeredCount}
+                  </span>
                   <span className="text-muted-foreground">/</span>
                   <span className="font-medium">{questions.length}</span>
                 </div>
               </div>
               <div className="flex items-center gap-1">
-                {Array.from({ length: Math.min(questions.length, 10) }).map((_, index) => {
-                  const questionIndex = Math.floor(
-                    (index * questions.length) / Math.min(questions.length, 10),
-                  );
-                  const isAnswered = answers.some(
-                    (a) => a.questionId === questions[questionIndex]?.id,
-                  );
-                  const isCurrent =
-                    Math.abs(questionIndex - currentQuestionIndex) <= questions.length / 20;
+                {Array.from({ length: Math.min(questions.length, 10) }).map(
+                  (_, index) => {
+                    const questionIndex = Math.floor(
+                      (index * questions.length) /
+                        Math.min(questions.length, 10),
+                    );
+                    const isAnswered = answers.some(
+                      (a) => a.questionId === questions[questionIndex]?.id,
+                    );
+                    const isCurrent =
+                      Math.abs(questionIndex - currentQuestionIndex) <=
+                      questions.length / 20;
 
-                  return (
-                    <div
-                      key={index}
-                      className={cn(
-                        'w-2 h-2 rounded-full transition-colors',
-                        isAnswered ? 'bg-green-500' : isCurrent ? 'bg-primary' : 'bg-muted',
-                      )}
-                    />
-                  );
-                })}
+                    return (
+                      <div
+                        key={index}
+                        className={cn(
+                          'w-2 h-2 rounded-full transition-colors',
+                          isAnswered
+                            ? 'bg-green-500'
+                            : isCurrent
+                            ? 'bg-primary'
+                            : 'bg-muted',
+                        )}
+                      />
+                    );
+                  },
+                )}
               </div>
             </div>
 
@@ -324,14 +311,18 @@ export const AIAssistant = ({ videoId, videoTitle, videoDescription }: AIAssista
               </SelectTrigger>
               <SelectContent className="max-h-[300px]">
                 {questions.map((question, index) => {
-                  const isAnswered = answers.some((a) => a.questionId === question.id);
+                  const isAnswered = answers.some(
+                    (a) => a.questionId === question.id,
+                  );
 
                   return (
                     <SelectItem key={index} value={index.toString()}>
-                      <div className="flex items-center gap-2 w-full">
+                      <div className="flex w-full items-center gap-2">
                         <span className="font-medium">Q{index + 1}</span>
-                        {isAnswered && <CheckCircle className="h-3 w-3 text-green-600" />}
-                        <span className="text-muted-foreground text-xs truncate max-w-[150px]">
+                        {isAnswered && (
+                          <CheckCircle className="size-3 text-green-600" />
+                        )}
+                        <span className="max-w-[150px] truncate text-xs text-muted-foreground">
                           {question.question.slice(0, 30)}...
                         </span>
                       </div>
@@ -350,7 +341,7 @@ export const AIAssistant = ({ videoId, videoTitle, videoDescription }: AIAssista
               disabled={!canGoPrevious}
               className="flex items-center gap-2 px-6"
             >
-              <ChevronLeft className="h-4 w-4" />
+              <ChevronLeft className="size-4" />
               <span className="hidden sm:inline">Previous</span>
               <span className="sm:hidden">Prev</span>
             </Button>
@@ -360,12 +351,14 @@ export const AIAssistant = ({ videoId, videoTitle, videoDescription }: AIAssista
               <div className="flex items-center gap-2 text-lg font-semibold">
                 <span>{currentQuestionIndex + 1}</span>
                 <span className="text-muted-foreground">/</span>
-                <span className="text-muted-foreground">{questions.length}</span>
+                <span className="text-muted-foreground">
+                  {questions.length}
+                </span>
               </div>
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 {currentAnswer ? (
                   <div className="flex items-center gap-1 text-green-600">
-                    <CheckCircle className="h-3 w-3" />
+                    <CheckCircle className="size-3" />
                     <span>Answered</span>
                   </div>
                 ) : (
@@ -375,25 +368,28 @@ export const AIAssistant = ({ videoId, videoTitle, videoDescription }: AIAssista
             </div>
 
             {canGoNext ? (
-              <Button onClick={nextQuestion} className="flex items-center gap-2 px-6">
+              <Button
+                onClick={nextQuestion}
+                className="flex items-center gap-2 px-6"
+              >
                 <span className="hidden sm:inline">Next</span>
                 <span className="sm:hidden">Next</span>
-                <ChevronRight className="h-4 w-4" />
+                <ChevronRight className="size-4" />
               </Button>
             ) : (
               <Button
                 onClick={handleSubmitQuiz}
                 disabled={!hasAnsweredAll || isEvaluating}
-                className="bg-green-600 hover:bg-green-700 flex items-center gap-2 px-6"
+                className="flex items-center gap-2 bg-green-600 px-6 hover:bg-green-700"
               >
                 {isEvaluating ? (
                   <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <Loader2 className="size-4 animate-spin" />
                     <span>Submitting...</span>
                   </>
                 ) : (
                   <>
-                    <CheckCircle className="h-4 w-4" />
+                    <CheckCircle className="size-4" />
                     <span>Submit Quiz</span>
                   </>
                 )}
@@ -413,12 +409,15 @@ export const AIAssistant = ({ videoId, videoTitle, videoDescription }: AIAssista
         <div className="space-y-6">
           <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20">
             <CardHeader className="text-center">
-              <div className="mx-auto mb-4 rounded-full bg-primary/10 p-6 w-fit">
-                <Trophy className="h-12 w-12 text-primary" />
+              <div className="mx-auto mb-4 w-fit rounded-full bg-primary/10 p-6">
+                <Trophy className="size-12 text-primary" />
               </div>
-              <CardTitle className="text-3xl font-bold">{feedback.score}%</CardTitle>
+              <CardTitle className="text-3xl font-bold">
+                {feedback.score}%
+              </CardTitle>
               <p className="text-muted-foreground">
-                {feedback.correctAnswers} out of {feedback.totalQuestions} correct
+                {feedback.correctAnswers} out of {feedback.totalQuestions}{' '}
+                correct
               </p>
             </CardHeader>
           </Card>
@@ -426,7 +425,7 @@ export const AIAssistant = ({ videoId, videoTitle, videoDescription }: AIAssista
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <BookOpen className="h-5 w-5" />
+                <BookOpen className="size-5" />
                 Overall Assessment
               </CardTitle>
             </CardHeader>
@@ -439,7 +438,7 @@ export const AIAssistant = ({ videoId, videoTitle, videoDescription }: AIAssista
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-green-600">
-                  <TrendingUp className="h-5 w-5" />
+                  <TrendingUp className="size-5" />
                   Strengths
                 </CardTitle>
               </CardHeader>
@@ -447,7 +446,7 @@ export const AIAssistant = ({ videoId, videoTitle, videoDescription }: AIAssista
                 <ul className="space-y-2">
                   {feedback.strengths.map((strength, index) => (
                     <li key={index} className="flex items-start gap-2">
-                      <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                      <CheckCircle className="mt-0.5 size-4 shrink-0 text-green-500" />
                       <span>{strength}</span>
                     </li>
                   ))}
@@ -460,7 +459,7 @@ export const AIAssistant = ({ videoId, videoTitle, videoDescription }: AIAssista
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-orange-600">
-                  <Target className="h-5 w-5" />
+                  <Target className="size-5" />
                   Areas for Improvement
                 </CardTitle>
               </CardHeader>
@@ -468,7 +467,7 @@ export const AIAssistant = ({ videoId, videoTitle, videoDescription }: AIAssista
                 <ul className="space-y-2">
                   {feedback.areasForImprovement.map((area, index) => (
                     <li key={index} className="flex items-start gap-2">
-                      <XCircle className="h-4 w-4 text-orange-500 mt-0.5 flex-shrink-0" />
+                      <XCircle className="mt-0.5 size-4 shrink-0 text-orange-500" />
                       <span>{area}</span>
                     </li>
                   ))}
@@ -496,9 +495,9 @@ export const AIAssistant = ({ videoId, videoTitle, videoDescription }: AIAssista
                         )}
                       >
                         {result.isCorrect ? (
-                          <CheckCircle className="h-4 w-4" />
+                          <CheckCircle className="size-4" />
                         ) : (
-                          <XCircle className="h-4 w-4" />
+                          <XCircle className="size-4" />
                         )}
                       </div>
                       <div className="flex-1">
@@ -506,7 +505,9 @@ export const AIAssistant = ({ videoId, videoTitle, videoDescription }: AIAssista
                         <div className="mt-2 text-sm text-muted-foreground">
                           <p>
                             Your answer:{' '}
-                            <span className="font-medium">{result.selectedAnswer}</span>
+                            <span className="font-medium">
+                              {result.selectedAnswer}
+                            </span>
                           </p>
                           <p>
                             Correct answer:{' '}
@@ -528,16 +529,16 @@ export const AIAssistant = ({ videoId, videoTitle, videoDescription }: AIAssista
           </Card>
 
           {/* Action Buttons */}
-          <div className="flex gap-3 justify-center">
+          <div className="flex justify-center gap-3">
             <Button variant="outline" onClick={resetQuiz}>
-              <RotateCcw className="mr-2 h-4 w-4" />
+              <RotateCcw className="mr-2 size-4" />
               Try Again
             </Button>
             <Button onClick={handleGenerateQuestions} disabled={isGenerating}>
               {isGenerating ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="mr-2 size-4 animate-spin" />
               ) : (
-                <Play className="mr-2 h-4 w-4" />
+                <Play className="mr-2 size-4" />
               )}
               New Quiz
             </Button>
