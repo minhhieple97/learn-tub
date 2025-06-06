@@ -19,7 +19,7 @@ export const QuestionCard = ({
 }: QuestionCardProps) => {
   return (
     <Card className="border-slate-200 dark:border-slate-700 shadow-md">
-      <CardHeader className="bg-gradient-to-r from-slate-50 to-blue-50 dark:from-slate-900/50 dark:to-blue-950/30">
+      <CardHeader className="bg-gradient-to-r">
         <div className="flex items-center justify-between">
           <Badge
             variant="secondary"
@@ -47,12 +47,12 @@ export const QuestionCard = ({
             {question.difficulty}
           </Badge>
         </div>
-        <CardTitle className="text-lg leading-relaxed text-slate-800 dark:text-slate-200">
+        <CardTitle className="text-lg text-slate-800">
           {question.question}
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid gap-3">
+        <div className="grid gap-3 mt-2">
           {Object.entries(question.options).map(([key, value]) => (
             <Button
               key={key}

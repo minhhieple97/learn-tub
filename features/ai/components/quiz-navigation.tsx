@@ -44,7 +44,6 @@ export const QuizNavigation = ({
 }: QuizNavigationProps) => {
   return (
     <div className="space-y-4">
-      {/* Question Jump Selector */}
       <div className="flex justify-center">
         <Select
           value={currentQuestionIndex.toString()}
@@ -79,7 +78,6 @@ export const QuizNavigation = ({
         </Select>
       </div>
 
-      {/* Primary Navigation Controls */}
       <div className="flex items-center justify-between">
         <Button
           variant="outline"
@@ -92,7 +90,6 @@ export const QuizNavigation = ({
           <span className="sm:hidden">Prev</span>
         </Button>
 
-        {/* Center Question Info */}
         <div className="flex flex-col items-center gap-1">
           <div className="flex items-center gap-2 text-lg font-semibold text-slate-800 dark:text-slate-200">
             <span>{currentQuestionIndex + 1}</span>
@@ -128,17 +125,17 @@ export const QuizNavigation = ({
           <Button
             onClick={onSubmitQuiz}
             disabled={!hasAnsweredAll || isEvaluating}
-            className="flex items-center gap-2 bg-emerald-600 px-6 hover:bg-emerald-700 shadow-lg"
+            className="flex items-center gap-2 bg-green-600 px-6 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-800 shadow-lg"
           >
             {isEvaluating ? (
               <>
-                <Loader2 className="size-4 animate-spin" />
-                <span>Submitting...</span>
+                <Loader2 className="size-4 animate-spin text-white" />
+                <span className="text-white">Submitting...</span>
               </>
             ) : (
               <>
-                <CheckCircle className="size-4" />
-                <span>Submit Quiz</span>
+                <CheckCircle className="size-4 text-white" />
+                <span className="text-white">Submit Quiz</span>
               </>
             )}
           </Button>
