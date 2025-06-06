@@ -53,3 +53,11 @@ export const GetNoteFeedbackSchema = z.object({
     .max(1000, 'Note content cannot exceed 1000 characters'),
   timestamp: z.number().min(0, 'Timestamp must be non-negative'),
 });
+
+export const GetAIFeedbackHistorySchema = z.object({
+  noteId: z.string().uuid('Invalid note ID'),
+});
+
+export const DeleteAIFeedbackSchema = z.object({
+  feedbackId: z.string().uuid('Invalid feedback ID'),
+});

@@ -43,7 +43,7 @@ export const AIFeedbackDisplay = ({ feedback, onCopy, onReset }: AIFeedbackDispl
         <div className="flex items-center gap-2">
           <Badge
             variant="outline"
-            className={`${getScoreColor(feedback.overall_score)} text-white`}
+            className={`${getScoreColor(feedback.overall_score)} text-white border-0`}
           >
             {feedback.overall_score}/10
           </Badge>
@@ -57,7 +57,7 @@ export const AIFeedbackDisplay = ({ feedback, onCopy, onReset }: AIFeedbackDispl
           )}
         </div>
       </CardHeader>
-      <CardContent className="flex-1 overflow-y-auto space-y-4 pt-4">
+      <CardContent className="flex-1 overflow-y-auto space-y-4 pt-4 pb-6">
         <div>
           <h4 className="font-medium text-sm text-muted-foreground mb-2">Summary</h4>
           <p className="text-sm">{feedback.summary}</p>
