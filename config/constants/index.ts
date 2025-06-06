@@ -5,9 +5,11 @@ export const YOUTUBE_API = {
 } as const;
 
 export const YOUTUBE_PATTERNS = {
-  URL_REGEX: /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
+  URL_REGEX:
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
   DURATION_REGEX: /PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/,
-  VALID_URL_REGEX: /^https?:\/\/(?:www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})(?:[&?][^\s]*)?$/i,
+  VALID_URL_REGEX:
+    /^https?:\/\/(?:www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})(?:[&?][^\s]*)?$/i,
 } as const;
 
 export const VIDEO_DEFAULTS = {
@@ -39,6 +41,7 @@ export const TOAST_MESSAGES = {
   VIDEO_ADDED_SUCCESS: 'Video added successfully!',
   VIDEO_EXISTS_ERROR: "You've already added this video",
   INVALID_URL_ERROR: 'Invalid YouTube URL',
+  VIDEO_NOT_FOUND_ERROR: 'YouTube video not found or is private/unavailable',
   UNEXPECTED_ERROR: 'An unexpected error occurred',
   NOTE_SAVED_SUCCESS: 'Note saved successfully!',
   NOTE_UPDATED_SUCCESS: 'Note updated successfully!',
@@ -208,7 +211,8 @@ export const AI_QUIZ_ERRORS = {
   FAILED_TO_PARSE_FEEDBACK: 'Failed to parse feedback from AI response',
   INVALID_RESPONSE_FORMAT: 'Invalid response format: missing questions array',
   UNSUPPORTED_PROVIDER: 'Unsupported provider',
-  QUIZ_COMPLETED_FALLBACK: 'Quiz completed. AI feedback parsing failed, showing basic results.',
+  QUIZ_COMPLETED_FALLBACK:
+    'Quiz completed. AI feedback parsing failed, showing basic results.',
   QUIZ_COMPLETED_SUCCESS: 'Quiz completed successfully.',
 } as const;
 
@@ -242,8 +246,10 @@ export const AI_QUIZ_PROMPTS = {
     }
   ]
 }`,
-  GENERATION_FOOTER: 'Make sure the questions are educational, relevant, and well-structured.',
-  EVALUATION_INTRO: 'Please evaluate the following quiz results and provide detailed feedback:',
+  GENERATION_FOOTER:
+    'Make sure the questions are educational, relevant, and well-structured.',
+  EVALUATION_INTRO:
+    'Please evaluate the following quiz results and provide detailed feedback:',
   EVALUATION_FORMAT: `Please analyze the performance and provide feedback in the following JSON format:
 {
   "totalQuestions": {total},
