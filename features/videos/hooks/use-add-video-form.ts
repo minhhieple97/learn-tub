@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useAction } from 'next-safe-action/hooks';
 import { useRouter } from 'next/navigation';
-import { useToast } from '@/hooks/use-toast';
+import { toast, useToast } from '@/hooks/use-toast';
 import { addVideoAction } from '../actions/add-video';
 import { routes } from '@/routes';
 import { isValidYouTubeUrl } from '@/lib/utils';
@@ -18,29 +18,27 @@ type UseAddVideoFormReturn = {
 
 export const useAddVideoForm = (): UseAddVideoFormReturn => {
   const router = useRouter();
-  const { toast } = useToast();
   const { execute, isPending } = useAction(addVideoAction, {
     onError: ({ error }) => {
       if (error.validationErrors?.fieldErrors?.videoUrl) {
-        toast({
+        toast.error({
           title: 'Invalid input',
-          description: error.validationErrors.fieldErrors.videoUrl[0] || TOAST_MESSAGES.INVALID_URL_ERROR,
-          variant: 'destructive',
+          description:
+            error.validationErrors.fieldErrors.videoUrl[0] ||
+            TOAST_MESSAGES.INVALID_URL_ERROR,
         });
       } else {
-        toast({
+        toast.error({
           title: 'Failed to add video',
           description: error.serverError || TOAST_MESSAGES.UNEXPECTED_ERROR,
-          variant: 'destructive',
         });
       }
     },
     onSuccess: ({ data }) => {
       if (data?.success && data?.videoId) {
-        toast({
+        toast.success({
           title: 'Success',
           description: TOAST_MESSAGES.VIDEO_ADDED_SUCCESS,
-          variant: 'default',
         });
         router.push(`${routes.learn}/${data.videoId}`);
       }
@@ -64,4 +62,4 @@ export const useAddVideoForm = (): UseAddVideoFormReturn => {
     execute: handleExecute,
     canSubmit,
   };
-}; 
+};

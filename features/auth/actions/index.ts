@@ -38,7 +38,6 @@ export const registerAction = action
         },
       },
     });
-
     if (error) {
       throw new ActionError(error.message);
     }
@@ -46,9 +45,6 @@ export const registerAction = action
     if (!data.user) {
       throw new ActionError('Failed to create user account');
     }
-
-    revalidatePath(routes.learn, 'layout');
-    redirect(routes.learn);
   });
 
 export async function signOutAction() {

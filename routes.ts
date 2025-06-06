@@ -11,6 +11,8 @@ export const routes = {
     root: '/settings',
   },
   auth: {
+    login: '/login',
+    register: '/register',
     confirm: '/auth/confirm',
     authCodeError: '/auth/auth-code-error',
     callback: '/auth/callback',

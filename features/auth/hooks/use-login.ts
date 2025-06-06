@@ -6,7 +6,7 @@ import { useAction } from 'next-safe-action/hooks';
 import { loginSchema } from '../schemas';
 import { loginAction } from '../actions';
 import type { LoginFormData } from '../types';
-import { useToast } from '@/hooks/use-toast';
+import { toast, useToast } from '@/hooks/use-toast';
 
 type UseLoginReturn = {
   register: ReturnType<typeof useForm<LoginFormData>>['register'];
@@ -18,20 +18,17 @@ type UseLoginReturn = {
 };
 
 export const useLogin = (): UseLoginReturn => {
-  const { toast } = useToast();
   const { execute, isPending } = useAction(loginAction, {
     onError: ({ error }) => {
-      toast({
+      toast.error({
         title: 'Error',
         description: error.serverError || 'An unexpected error occurred',
-        variant: 'destructive',
       });
     },
     onSuccess: (data) => {
-      toast({
-        title: 'Success',
+      toast.success({
+        
         description: 'Successfully signed in!',
-        variant: 'default',
       });
     },
   });
@@ -60,4 +57,4 @@ export const useLogin = (): UseLoginReturn => {
     isLoading: isPending,
     onSubmit,
   };
-}
+};
