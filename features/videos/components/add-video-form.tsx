@@ -1,15 +1,22 @@
-"use client"
+'use client';
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Youtube, Play } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Youtube, Play, Loader2 } from 'lucide-react';
 import { dotPatternUrl } from '@/lib/utils';
 import { useAddVideoForm } from '../hooks/use-add-video-form';
 
 export const AddVideoForm = () => {
-  const { url, setUrl, isValidUrl, isPending, execute, canSubmit } = useAddVideoForm();
+  const { url, setUrl, isValidUrl, isPending, execute, canSubmit } =
+    useAddVideoForm();
 
   return (
     <Card className="relative overflow-hidden border-0 shadow-xl bg-gradient-to-br from-red-500 via-red-600 to-red-700 dark:from-red-600 dark:via-red-700 dark:to-red-800">
@@ -22,7 +29,9 @@ export const AddVideoForm = () => {
         <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm border border-white/30 shadow-lg">
           <Youtube className="h-10 w-10 text-white" />
         </div>
-        <CardTitle className="text-3xl font-bold text-white mb-2">Import YouTube Video</CardTitle>
+        <CardTitle className="text-3xl font-bold text-white mb-2">
+          Import YouTube Video
+        </CardTitle>
         <CardDescription className="text-lg text-red-100 max-w-md mx-auto">
           Transform any YouTube video into an interactive learning experience
         </CardDescription>
@@ -37,7 +46,10 @@ export const AddVideoForm = () => {
           className="space-y-6"
         >
           <div className="space-y-4">
-            <Label htmlFor="videoUrl" className="text-lg font-semibold text-white">
+            <Label
+              htmlFor="videoUrl"
+              className="text-lg font-semibold text-white"
+            >
               YouTube URL
             </Label>
             <div className="relative">
@@ -70,7 +82,7 @@ export const AddVideoForm = () => {
           >
             {isPending ? (
               <>
-                <div className="mr-3 h-5 w-5 animate-spin rounded-full border-2 border-gray-300 border-t-red-600" />
+                <Loader2 className="mr-2 size-4 animate-spin" />
                 Importing Video...
               </>
             ) : (
