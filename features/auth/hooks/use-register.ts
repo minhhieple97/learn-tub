@@ -3,10 +3,12 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAction } from 'next-safe-action/hooks';
-import { useToast } from '@/hooks/use-toast';
+import { toast, useToast } from '@/hooks/use-toast';
 import { registerSchema } from '../schemas';
 import { registerAction } from '../actions';
 import type { RegisterFormData } from '../types';
+import { redirect, useRouter } from 'next/navigation';
+import { routes } from '@/routes';
 
 type UseRegisterReturn = {
   register: ReturnType<typeof useForm<RegisterFormData>>['register'];
@@ -23,21 +25,22 @@ type UseRegisterReturn = {
 };
 
 export const useRegister = (): UseRegisterReturn => {
-  const { toast } = useToast();
+  const router = useRouter();
 
   const { execute, isPending } = useAction(registerAction, {
     onError: ({ error }) => {
-      toast({
-        title: 'Error',
-        description: error.serverError || 'An unexpected error occurred during registration',
-        variant: 'destructive',
+      toast.error({
+        description:
+          error.serverError ||
+          'An unexpected error occurred during registration',
       });
     },
     onSuccess: () => {
-      toast({
+      toast.success({
         title: 'Account created successfully!',
         description: 'Welcome to LearnTub. You can now start learning.',
       });
+      router.push(routes.auth.login);
     },
   });
 
@@ -78,4 +81,4 @@ export const useRegister = (): UseRegisterReturn => {
     passwordRequirements,
     onSubmit,
   };
-}
+};

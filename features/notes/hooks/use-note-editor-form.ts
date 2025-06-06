@@ -3,7 +3,7 @@
 import { useCallback } from 'react';
 import { useNotesStore } from '../store';
 import { VALIDATION_LIMITS, TOAST_MESSAGES } from '@/config/constants';
-import { useToast } from '@/hooks/use-toast';
+import { toast, useToast } from '@/hooks/use-toast';
 
 type ValidationResult = {
   isValid: boolean;
@@ -11,7 +11,6 @@ type ValidationResult = {
 };
 
 export const useNoteEditorForm = () => {
-  const { toast } = useToast();
   const {
     formContent,
     formTags,
@@ -30,11 +29,11 @@ export const useNoteEditorForm = () => {
 
   const validateContent = useCallback((content: string): ValidationResult => {
     const errors: string[] = [];
-    
+
     if (!content.trim()) {
       errors.push(TOAST_MESSAGES.VALIDATION_EMPTY_CONTENT);
     }
-    
+
     if (content.length > VALIDATION_LIMITS.NOTE_CONTENT_MAX_LENGTH) {
       errors.push(TOAST_MESSAGES.VALIDATION_NOTE_TOO_LONG);
     }
@@ -47,12 +46,14 @@ export const useNoteEditorForm = () => {
 
   const validateTags = useCallback((tags: string[]): ValidationResult => {
     const errors: string[] = [];
-    
+
     if (tags.length > VALIDATION_LIMITS.MAX_TAGS_COUNT) {
       errors.push(TOAST_MESSAGES.VALIDATION_TOO_MANY_TAGS);
     }
 
-    const invalidTags = tags.filter(tag => tag.length > VALIDATION_LIMITS.TAG_MAX_LENGTH);
+    const invalidTags = tags.filter(
+      (tag) => tag.length > VALIDATION_LIMITS.TAG_MAX_LENGTH,
+    );
     if (invalidTags.length > 0) {
       errors.push(TOAST_MESSAGES.VALIDATION_TAG_TOO_LONG);
     }
@@ -67,34 +68,42 @@ export const useNoteEditorForm = () => {
     return tagInput.length <= VALIDATION_LIMITS.TAG_MAX_LENGTH;
   }, []);
 
-  const showValidationErrors = useCallback((errors: string[]) => {
-    errors.forEach(error => {
-      toast({
-        title: 'Validation Error',
-        description: error,
-        variant: 'destructive',
+  const showValidationErrors = useCallback(
+    (errors: string[]) => {
+      errors.forEach((error) => {
+        toast.error({
+          title: 'Validation Error',
+          description: error,
+        });
       });
-    });
-  }, [toast]);
+    },
+    [toast],
+  );
 
-  const handleContentChange = useCallback((content: string) => {
-    if (content.length <= VALIDATION_LIMITS.NOTE_CONTENT_MAX_LENGTH) {
-      setFormContent(content);
-    }
-  }, [setFormContent]);
+  const handleContentChange = useCallback(
+    (content: string) => {
+      if (content.length <= VALIDATION_LIMITS.NOTE_CONTENT_MAX_LENGTH) {
+        setFormContent(content);
+      }
+    },
+    [setFormContent],
+  );
 
-  const handleTagInputChange = useCallback((input: string) => {
-    if (validateTagInput(input)) {
-      setTagInput(input);
-    }
-  }, [setTagInput, validateTagInput]);
+  const handleTagInputChange = useCallback(
+    (input: string) => {
+      if (validateTagInput(input)) {
+        setTagInput(input);
+      }
+    },
+    [setTagInput, validateTagInput],
+  );
   const handleAddTag = useCallback(() => {
     if (!tagInput.trim()) return;
     if (formTags.length >= VALIDATION_LIMITS.MAX_TAGS_COUNT) {
       showValidationErrors([TOAST_MESSAGES.VALIDATION_TOO_MANY_TAGS]);
       return;
     }
-    
+
     if (tagInput.length > VALIDATION_LIMITS.TAG_MAX_LENGTH) {
       showValidationErrors([TOAST_MESSAGES.VALIDATION_TAG_TOO_LONG]);
       return;
@@ -102,12 +111,15 @@ export const useNoteEditorForm = () => {
     addTag();
   }, [tagInput, formTags.length, addTag, showValidationErrors]);
 
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleAddTag();
-    }
-  }, [handleAddTag]);
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        handleAddTag();
+      }
+    },
+    [handleAddTag],
+  );
 
   const handleSave = useCallback(() => {
     const contentValidation = validateContent(formContent);
@@ -124,16 +136,16 @@ export const useNoteEditorForm = () => {
       saveNote(formContent, formTags, currentTimestamp, toast);
     }
   }, [
-    formContent, 
-    formTags, 
-    editingNote, 
-    currentTimestamp, 
-    validateContent, 
-    validateTags, 
-    showValidationErrors, 
-    updateNote, 
-    saveNote, 
-    toast
+    formContent,
+    formTags,
+    editingNote,
+    currentTimestamp,
+    validateContent,
+    validateTags,
+    showValidationErrors,
+    updateNote,
+    saveNote,
+    toast,
   ]);
 
   const isFormValid = useCallback(() => {
@@ -141,8 +153,6 @@ export const useNoteEditorForm = () => {
     const tagsValidation = validateTags(formTags);
     return contentValidation.isValid && tagsValidation.isValid;
   }, [formContent, formTags, validateContent, validateTags]);
-
-
 
   const isEditing = !!editingNote;
   const isSaveDisabled = isFormLoading || !isFormValid();
@@ -156,7 +166,7 @@ export const useNoteEditorForm = () => {
     currentTimestamp,
     isEditing,
     isSaveDisabled,
-    
+
     handleContentChange,
     handleTagInputChange,
     handleAddTag,
@@ -164,8 +174,8 @@ export const useNoteEditorForm = () => {
     handleSave,
     removeTag,
     cancelEditing,
-    
+
     isFormValid,
     validateTagInput,
   };
-}; 
+};
