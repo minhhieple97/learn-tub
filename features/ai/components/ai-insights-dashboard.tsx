@@ -1,39 +1,33 @@
-import { createClient } from "@/lib/supabase/server"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Brain, TrendingUp, Target, Zap } from "lucide-react"
+import { createClient } from '@/lib/supabase/server';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Brain, TrendingUp, Target, Zap, Trophy, Clock } from 'lucide-react';
 import { getProfileInSession } from '@/features/profile/queries/profile';
+import { getQuizStatistics } from '../queries/quiz-queries';
+import { Badge } from '@/components/ui/badge';
+import { formatDistanceToNow } from 'date-fns';
 
 export async function AIInsightsDashboard() {
   const supabase = await createClient();
   const profile = await getProfileInSession();
 
-  // Get AI interaction stats
-  const { data: interactions } = await supabase
+  const { count: analysisCount } = await supabase
     .from('ai_interactions')
-    .select('interaction_type, created_at, output_data')
+    .select('*', { count: 'exact', head: true })
     .eq('user_id', profile.id)
-    .order('created_at', { ascending: false })
-    .limit(10);
+    .eq('interaction_type', 'note_evaluation');
 
-  const analysisCount =
-    interactions?.filter((i) => i.interaction_type === 'note_analysis').length || 0;
-  const quizCount =
-    interactions?.filter((i) => i.interaction_type === 'quiz_generation').length || 0;
-  const studyPlanCount =
-    interactions?.filter((i) => i.interaction_type === 'study_plan').length || 0;
+  const quizStats = await getQuizStatistics(profile.id);
 
-  const recentAnalyses = interactions?.filter((i) => i.interaction_type === 'note_analysis') || [];
-  const avgComprehension =
-    recentAnalyses.length > 0
-      ? Math.round(
-          recentAnalyses.reduce((sum, analysis) => {
-            return sum + (analysis.output_data?.comprehensionScore || 0);
-          }, 0) / recentAnalyses.length,
-        )
-      : 0;
+  const studyPlanCount = 0;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <h3 className="text-lg font-medium flex items-center gap-2">
         <Brain className="h-5 w-5" />
         AI Learning Insights
@@ -46,66 +40,128 @@ export async function AIInsightsDashboard() {
             <Brain className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{analysisCount}</div>
+            <div className="text-2xl font-bold">{analysisCount || 0}</div>
             <p className="text-xs text-muted-foreground">AI-powered insights</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Quizzes Generated</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Quizzes Generated
+            </CardTitle>
             <Zap className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{quizCount}</div>
-            <p className="text-xs text-muted-foreground">Practice assessments</p>
+            <div className="text-2xl font-bold">{quizStats.totalSessions}</div>
+            <p className="text-xs text-muted-foreground">
+              Practice assessments
+            </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Study Plans</CardTitle>
-            <Target className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Quiz Attempts</CardTitle>
+            <Trophy className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{studyPlanCount}</div>
-            <p className="text-xs text-muted-foreground">Personalized plans</p>
+            <div className="text-2xl font-bold">{quizStats.totalAttempts}</div>
+            <p className="text-xs text-muted-foreground">Total completions</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Avg. Comprehension</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Avg. Quiz Score
+            </CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{avgComprehension}%</div>
-            <p className="text-xs text-muted-foreground">From note analysis</p>
+            <div className="text-2xl font-bold">{quizStats.averageScore}%</div>
+            <p className="text-xs text-muted-foreground">Performance rating</p>
           </CardContent>
         </Card>
       </div>
 
-      {recentAnalyses.length > 0 && (
+      {quizStats.recentAttempts.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Recent AI Insights</CardTitle>
-            <CardDescription>Latest feedback from your learning sessions</CardDescription>
+            <CardTitle className="text-base">Recent Quiz Results</CardTitle>
+            <CardDescription>
+              Your latest quiz performance and scores
+            </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
-              {recentAnalyses.slice(0, 3).map((analysis, index) => (
-                <div key={index} className="border-l-4 border-blue-500 pl-4">
-                  <p className="text-sm font-medium">
-                    Comprehension Score: {analysis.output_data?.comprehensionScore}%
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {new Date(analysis.created_at).toLocaleDateString()}
-                  </p>
-                  {analysis.output_data?.summary && (
-                    <p className="text-sm mt-1 line-clamp-2">{analysis.output_data.summary}</p>
-                  )}
+            <div className="space-y-4">
+              {quizStats.recentAttempts.map((attempt: any) => (
+                <div
+                  key={attempt.id}
+                  className="flex items-center justify-between p-3 border rounded-lg"
+                >
+                  <div className="flex-1">
+                    <div className="font-medium text-sm">
+                      {attempt.quiz_sessions.videos.title}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {attempt.quiz_sessions.title}
+                    </div>
+                    <div className="flex items-center gap-2 mt-1">
+                      <Clock className="h-3 w-3 text-muted-foreground" />
+                      <span className="text-xs text-muted-foreground">
+                        {formatDistanceToNow(new Date(attempt.completed_at), {
+                          addSuffix: true,
+                        })}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="text-right">
+                      <div className="text-sm font-medium">
+                        {attempt.correct_answers}/{attempt.total_questions}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        correct
+                      </div>
+                    </div>
+                    <Badge
+                      variant={
+                        attempt.score >= 80
+                          ? 'default'
+                          : attempt.score >= 60
+                          ? 'secondary'
+                          : 'destructive'
+                      }
+                    >
+                      {attempt.score}%
+                    </Badge>
+                  </div>
                 </div>
               ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {quizStats.totalSessions === 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">
+              Get Started with AI Quizzes
+            </CardTitle>
+            <CardDescription>
+              Generate your first quiz from any video to start tracking your
+              learning progress
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center py-6">
+              <Zap className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-sm text-muted-foreground">
+                Visit any video page and click "Generate Quiz" to create your
+                first practice assessment
+              </p>
             </div>
           </CardContent>
         </Card>

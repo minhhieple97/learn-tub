@@ -230,3 +230,39 @@ export type VideoInfo = {
 export type UserNote = {
   content: string;
 };
+
+export type QuizSession = {
+  id: string;
+  user_id: string;
+  video_id: string;
+  title: string;
+  difficulty: 'easy' | 'medium' | 'hard' | 'mixed';
+  question_count: number;
+  topics: string[];
+  ai_provider: string;
+  ai_model: string;
+  questions: QuizQuestion[];
+  created_at: string;
+  updated_at: string;
+};
+
+export type QuizAttempt = {
+  id: string;
+  quiz_session_id: string;
+  user_id: string;
+  answers: UserAnswer[];
+  score: number;
+  total_questions: number;
+  correct_answers: number;
+  feedback?: QuizFeedback;
+  time_taken_seconds?: number;
+  completed_at: string;
+  created_at: string;
+};
+
+export type QuizSessionWithAttempts = QuizSession & {
+  attempts: QuizAttempt[];
+  latest_attempt?: QuizAttempt;
+  best_score?: number;
+  attempt_count: number;
+}
