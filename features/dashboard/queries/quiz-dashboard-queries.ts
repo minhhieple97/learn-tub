@@ -5,17 +5,18 @@ import type { QuizDashboardData, QuizFilters } from '../types';
 export const getQuizDashboardData = async (
   userId: string,
   filters?: Partial<QuizFilters>,
-  limit = 20,
-  offset = 0,
 ): Promise<QuizDashboardData> => {
   const supabase = await createClient();
+  const limit = filters?.limit || 10;
+  const page = filters?.page || 1;
+  const offset = (page - 1) * limit;
 
   let query = supabase
     .from('quiz_sessions')
     .select(
       `
       *,
-      videos!inner(title, youtube_id),
+      videos!inner(id, title, youtube_id),
       quiz_attempts(
         id,
         score,
@@ -29,13 +30,16 @@ export const getQuizDashboardData = async (
     )
     .eq('user_id', userId);
 
-  // Apply filters
   if (filters?.difficulty && filters.difficulty !== 'all') {
     query = query.eq('difficulty', filters.difficulty);
   }
 
   if (filters?.search) {
     query = query.ilike('title', `%${filters.search}%`);
+  }
+
+  if (filters?.videoId) {
+    query = query.eq('video_id', filters.videoId);
   }
 
   // Apply sorting
@@ -46,10 +50,26 @@ export const getQuizDashboardData = async (
     query = query.order('created_at', { ascending: sortOrder === 'asc' });
   }
 
-  const { data: sessions, error } = await query.range(
-    offset,
-    offset + limit - 1,
-  );
+  // Get total count for pagination
+  let countQuery = supabase
+    .from('quiz_sessions')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', userId);
+
+  if (filters?.difficulty && filters.difficulty !== 'all') {
+    countQuery = countQuery.eq('difficulty', filters.difficulty);
+  }
+  if (filters?.search) {
+    countQuery = countQuery.ilike('title', `%${filters.search}%`);
+  }
+  if (filters?.videoId) {
+    countQuery = countQuery.eq('video_id', filters.videoId);
+  }
+
+  const [{ data: sessions, error }, { count: totalCount }] = await Promise.all([
+    query.range(offset, offset + limit - 1),
+    countQuery,
+  ]);
 
   if (error) {
     throw new Error(`Failed to fetch quiz sessions: ${error.message}`);
@@ -98,12 +118,16 @@ export const getQuizDashboardData = async (
     },
   );
 
+  const totalPages = Math.ceil((totalCount || 0) / limit);
+
   return {
     sessions: processedSessions,
     totalSessions: totalSessions || 0,
     totalAttempts: totalAttempts || 0,
     averageScore,
-    recentAttempts: [], // Will be populated from sessions
+    recentAttempts: [],
+    totalPages,
+    currentPage: page,
   };
 };
 
@@ -125,4 +149,68 @@ export const getQuizSessionForRetake = async (
   }
 
   return session;
+};
+
+export const getQuizSessionDetail = async (
+  sessionId: string,
+  userId: string,
+): Promise<QuizSessionWithAttempts | null> => {
+  const supabase = await createClient();
+
+  const { data: session, error } = await supabase
+    .from('quiz_sessions')
+    .select(
+      `
+      *,
+      videos!inner(id, title, youtube_id),
+      quiz_attempts(
+        id,
+        score,
+        correct_answers,
+        total_questions,
+        completed_at,
+        time_taken_seconds,
+        feedback,
+        answers
+      )
+    `,
+    )
+    .eq('id', sessionId)
+    .eq('user_id', userId)
+    .single();
+
+  if (error || !session) {
+    return null;
+  }
+
+  const attempts = session.quiz_attempts || [];
+  const latestAttempt = attempts.length > 0 ? attempts[0] : undefined;
+  const bestScore =
+    attempts.length > 0
+      ? Math.max(...attempts.map((a: QuizAttempt) => a.score))
+      : undefined;
+
+  return {
+    ...session,
+    attempts,
+    latest_attempt: latestAttempt,
+    best_score: bestScore,
+    attempt_count: attempts.length,
+  };
+};
+
+export const getUserVideos = async (userId: string) => {
+  const supabase = await createClient();
+
+  const { data: videos, error } = await supabase
+    .from('videos')
+    .select('id, title, youtube_id')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    throw new Error(`Failed to fetch videos: ${error.message}`);
+  }
+
+  return videos || [];
 };

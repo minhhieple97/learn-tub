@@ -36,11 +36,16 @@ export type QuizDashboardData = {
   totalAttempts: number;
   averageScore: number;
   recentAttempts: QuizAttempt[];
+  totalPages: number;
+  currentPage: number;
 };
 
 export type QuizFilters = {
   search: string;
   difficulty: 'all' | 'easy' | 'medium' | 'hard' | 'mixed';
+  videoId?: string;
   sortBy: 'created_at' | 'score' | 'attempts';
   sortOrder: 'asc' | 'desc';
+  page: number;
+  limit: number;
 };
