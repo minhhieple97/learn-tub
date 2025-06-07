@@ -6,6 +6,7 @@ export const routes = {
   demo: '/demo',
   dashboard: {
     root: '/dashboard',
+    quizzes: '/dashboard/quizzes',
   },
   settings: {
     root: '/settings',

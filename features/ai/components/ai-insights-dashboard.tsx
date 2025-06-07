@@ -11,6 +11,8 @@ import { getProfileInSession } from '@/features/profile/queries/profile';
 import { getQuizStatistics } from '../queries/quiz-queries';
 import { Badge } from '@/components/ui/badge';
 import { formatDistanceToNow } from 'date-fns';
+import Link from 'next/link';
+import { routes } from '@/routes';
 
 export async function AIInsightsDashboard() {
   const supabase = await createClient();
@@ -45,20 +47,24 @@ export async function AIInsightsDashboard() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              Quizzes Generated
-            </CardTitle>
-            <Zap className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{quizStats.totalSessions}</div>
-            <p className="text-xs text-muted-foreground">
-              Practice assessments
-            </p>
-          </CardContent>
-        </Card>
+        <Link href={routes.dashboard.quizzes}>
+          <Card className="cursor-pointer hover:shadow-md transition-shadow">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Quizzes Generated
+              </CardTitle>
+              <Zap className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {quizStats.totalSessions}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Practice assessments
+              </p>
+            </CardContent>
+          </Card>
+        </Link>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

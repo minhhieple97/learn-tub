@@ -52,7 +52,6 @@ export const QuizNavigation = ({
 }: QuizNavigationProps) => {
   return (
     <div className="space-y-4">
-      {/* Time Display */}
       {formattedTime && (
         <div className="flex justify-center">
           <div className="flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
