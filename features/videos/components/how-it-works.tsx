@@ -1,12 +1,19 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Rocket } from "lucide-react"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Rocket } from 'lucide-react';
 
 export const HowItWorks = () => {
   const steps = [
     {
       number: 1,
       title: 'Import YouTube Video',
-      description: 'Paste any YouTube URL to automatically fetch video details and metadata',
+      description:
+        'Paste any YouTube URL to automatically fetch video details and metadata',
       color: 'from-blue-500 to-blue-600',
     },
     {
@@ -19,7 +26,8 @@ export const HowItWorks = () => {
     {
       number: 3,
       title: 'Get AI Insights',
-      description: 'Receive intelligent feedback, quizzes, and personalized study plans',
+      description:
+        'Receive intelligent feedback, quizzes, and personalized study plans',
       color: 'from-purple-500 to-purple-600',
     },
   ];
@@ -39,19 +47,21 @@ export const HowItWorks = () => {
         {steps.map((step) => (
           <div key={step.number} className="flex items-start space-x-4">
             <div
-              className={`w-10 h-10 bg-gradient-to-br ${step.color} text-white rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 shadow-lg`}
+              className={`w-10 h-10 bg-gradient-to-br ${step.color} text-primary rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 shadow-lg`}
             >
               {step.number}
             </div>
             <div>
               <h4
-                className={`font-semibold text-${step.color.split('-')[0]}-900 dark:text-${
+                className={`font-semibold text-${
                   step.color.split('-')[0]
-                }-100 mb-1`}
+                }-900 dark:text-${step.color.split('-')[0]}-100 mb-1`}
               >
                 {step.title}
               </h4>
-              <p className="text-sm text-slate-600 dark:text-slate-400">{step.description}</p>
+              <p className="text-sm text-slate-600 dark:text-slate-400">
+                {step.description}
+              </p>
             </div>
           </div>
         ))}
