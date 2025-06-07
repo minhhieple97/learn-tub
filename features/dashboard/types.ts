@@ -1,3 +1,5 @@
+import type { QuizSessionWithAttempts, QuizAttempt } from '@/features/ai/types';
+
 export type DashboardStats = {
   totalVideos: number;
   learningTime: string;
@@ -26,4 +28,19 @@ export type LearningGoal = {
   target: number;
   percentage: number;
   color: string;
+};
+
+export type QuizDashboardData = {
+  sessions: QuizSessionWithAttempts[];
+  totalSessions: number;
+  totalAttempts: number;
+  averageScore: number;
+  recentAttempts: QuizAttempt[];
+};
+
+export type QuizFilters = {
+  search: string;
+  difficulty: 'all' | 'easy' | 'medium' | 'hard' | 'mixed';
+  sortBy: 'created_at' | 'score' | 'attempts';
+  sortOrder: 'asc' | 'desc';
 };

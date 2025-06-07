@@ -1,20 +1,10 @@
-export { DashboardContent } from './components/dashboard-content';
-export { DashboardHeader } from './components/dashboard-header';
-export { StatCard } from './components/stat-card';
-export { StatsGrid } from './components/stats-grid';
-export { RecentVideosCard } from './components/recent-videos-card';
-export { LearningGoalsCard } from './components/learning-goals-card';
-
-export {
-  getDashboardStats,
-  getRecentVideos,
-  getLearningGoals,
-} from './queries/dashboard-queries';
-
-// Types
-export type {
-  DashboardStats,
-  StatCard as StatCardType,
-  RecentVideo,
-  LearningGoal,
-} from './types';
+export * from './components/dashboard-content';
+export * from './components/dashboard-header';
+export * from './components/learning-goals-card';
+export * from './components/recent-videos-card';
+export * from './components/stat-card';
+export * from './components/stats-grid';
+export * from './components/quiz-dashboard';
+export * from './queries/dashboard-queries';
+export * from './queries/quiz-dashboard-queries';
+export * from './actions/quiz-dashboard-actions';

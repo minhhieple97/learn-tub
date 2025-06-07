@@ -43,6 +43,7 @@ export const AIAssistant = ({
     submitQuiz,
     resetQuiz,
     updateSettings,
+    formattedTime,
   } = useAIQuiz(videoId);
 
   const handleGenerateQuestions = async () => {
@@ -114,6 +115,7 @@ export const AIAssistant = ({
             onNext={nextQuestion}
             onGoToQuestion={goToQuestion}
             onSubmitQuiz={handleSubmitQuiz}
+            formattedTime={formattedTime}
           />
         </div>
       );

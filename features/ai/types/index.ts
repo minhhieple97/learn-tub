@@ -265,4 +265,8 @@ export type QuizSessionWithAttempts = QuizSession & {
   latest_attempt?: QuizAttempt;
   best_score?: number;
   attempt_count: number;
-}
+  videos?: {
+    title: string;
+    youtube_id: string;
+  };
+};
