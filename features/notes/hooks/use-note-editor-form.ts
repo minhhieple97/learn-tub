@@ -131,9 +131,9 @@ export const useNoteEditorForm = () => {
     }
 
     if (editingNote) {
-      updateNote(editingNote.id, formContent, formTags, toast);
+      updateNote(editingNote.id, formContent, formTags);
     } else {
-      saveNote(formContent, formTags, currentTimestamp, toast);
+      saveNote(formContent, formTags, currentTimestamp);
     }
   }, [
     formContent,
@@ -145,7 +145,6 @@ export const useNoteEditorForm = () => {
     showValidationErrors,
     updateNote,
     saveNote,
-    toast,
   ]);
 
   const isFormValid = useCallback(() => {
