@@ -17,7 +17,8 @@ export const NoteCard = ({ note, onTimestampClick }: NoteCardProps) => {
 
   const handleEdit = () => startEditing(note);
   const handleDelete = () => deleteNote(note.id);
-  const handleTimestampClick = (timestamp: number) => onTimestampClick?.(timestamp);
+  const handleTimestampClick = (timestamp: number) =>
+    onTimestampClick?.(timestamp);
 
   return (
     <Card className="overflow-hidden">
@@ -29,7 +30,11 @@ export const NoteCard = ({ note, onTimestampClick }: NoteCardProps) => {
         />
         <div className="flex items-center gap-2">
           <NoteAIEvaluation noteId={note.id} />
-          <NoteCardActions onEdit={handleEdit} onDelete={handleDelete} noteId={note.id} />
+          <NoteCardActions
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+            noteId={note.id}
+          />
         </div>
       </div>
       <CardContent className="p-4">

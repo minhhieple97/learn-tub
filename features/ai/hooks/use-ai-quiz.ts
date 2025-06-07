@@ -1,11 +1,18 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { useAction } from 'next-safe-action/hooks';
 import { generateQuizQuestionsAction, evaluateQuizAction } from '../actions';
 import type { QuizSettings, QuizState } from '../types';
 import { AI_DEFAULTS, AI_PROVIDERS, AI_QUIZ_CONFIG } from '@/config/constants';
 
+type ExtendedQuizState = QuizState & {
+  startTime: number | null;
+  currentTime: number;
+  timeTakenSeconds: number;
+  sessionId: string | null;
+};
+
 export const useAIQuiz = (videoId: string) => {
-  const [state, setState] = useState<QuizState>({
+  const [state, setState] = useState<ExtendedQuizState>({
     questions: [],
     answers: [],
     currentQuestionIndex: 0,
@@ -13,6 +20,10 @@ export const useAIQuiz = (videoId: string) => {
     feedback: null,
     isGenerating: false,
     isEvaluating: false,
+    startTime: null,
+    currentTime: 0,
+    timeTakenSeconds: 0,
+    sessionId: null,
     settings: {
       questionCount: AI_QUIZ_CONFIG.DEFAULT_QUESTION_COUNT,
       difficulty: AI_QUIZ_CONFIG.DEFAULT_DIFFICULTY,
@@ -20,6 +31,47 @@ export const useAIQuiz = (videoId: string) => {
       model: AI_DEFAULTS.SERVICE_MODEL,
     },
   });
+
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const startTimer = useCallback(() => {
+    const startTime = Date.now();
+    setState((prev) => ({ ...prev, startTime, currentTime: 0 }));
+
+    timerRef.current = setInterval(() => {
+      setState((prev) => {
+        if (prev.startTime) {
+          const currentTime = Math.floor((Date.now() - prev.startTime) / 1000);
+          return { ...prev, currentTime };
+        }
+        return prev;
+      });
+    }, 1000);
+  }, []);
+
+  const stopTimer = useCallback(() => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+    setState((prev) => {
+      if (prev.startTime) {
+        const timeTakenSeconds = Math.floor(
+          (Date.now() - prev.startTime) / 1000,
+        );
+        return { ...prev, timeTakenSeconds };
+      }
+      return prev;
+    });
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
+  }, []);
 
   const { execute: executeGenerate, isExecuting: isGeneratingQuestions } =
     useAction(generateQuizQuestionsAction, {
@@ -32,7 +84,14 @@ export const useAIQuiz = (videoId: string) => {
           showResults: false,
           feedback: null,
           isGenerating: false,
+          startTime: null,
+          currentTime: 0,
+          timeTakenSeconds: 0,
+          sessionId: result.data?.sessionId || null,
         }));
+        if (result.data?.questions && result.data.questions.length > 0) {
+          startTimer();
+        }
       },
       onError: (error) => {
         console.error('Failed to generate questions:', error);
@@ -44,6 +103,7 @@ export const useAIQuiz = (videoId: string) => {
     evaluateQuizAction,
     {
       onSuccess: (result) => {
+        stopTimer();
         setState((prev) => ({
           ...prev,
           feedback: result.data?.feedback || null,
@@ -138,6 +198,10 @@ export const useAIQuiz = (videoId: string) => {
 
       setState((prev) => ({ ...prev, isEvaluating: true }));
 
+      const finalTimeTaken = state.startTime
+        ? Math.floor((Date.now() - state.startTime) / 1000)
+        : state.timeTakenSeconds;
+
       executeEvaluate({
         videoId,
         questions: state.questions,
@@ -148,12 +212,24 @@ export const useAIQuiz = (videoId: string) => {
         },
         provider: state.settings.provider,
         model: state.settings.model,
+        quizSessionId: state.sessionId || '',
+        timeTakenSeconds: finalTimeTaken,
       });
     },
-    [videoId, state.questions, state.answers, state.settings, executeEvaluate],
+    [
+      videoId,
+      state.questions,
+      state.answers,
+      state.settings,
+      state.startTime,
+      state.timeTakenSeconds,
+      state.sessionId,
+      executeEvaluate,
+    ],
   );
 
   const resetQuiz = useCallback(() => {
+    stopTimer();
     setState((prev) => ({
       ...prev,
       questions: [],
@@ -161,14 +237,26 @@ export const useAIQuiz = (videoId: string) => {
       currentQuestionIndex: 0,
       showResults: false,
       feedback: null,
+      startTime: null,
+      currentTime: 0,
+      timeTakenSeconds: 0,
+      sessionId: null,
     }));
-  }, []);
+  }, [stopTimer]);
 
   const updateSettings = useCallback((newSettings: Partial<QuizSettings>) => {
     setState((prev) => ({
       ...prev,
       settings: { ...prev.settings, ...newSettings },
     }));
+  }, []);
+
+  const formatTime = useCallback((seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs
+      .toString()
+      .padStart(2, '0')}`;
   }, []);
 
   const currentQuestion = state.questions[state.currentQuestionIndex];
@@ -191,6 +279,10 @@ export const useAIQuiz = (videoId: string) => {
     showResults: state.showResults,
     feedback: state.feedback,
     settings: state.settings,
+    currentTime: state.currentTime,
+    timeTakenSeconds: state.timeTakenSeconds,
+    formattedTime: formatTime(state.currentTime),
+    formattedTimeTaken: formatTime(state.timeTakenSeconds),
 
     currentQuestion,
     currentAnswer,
@@ -212,5 +304,6 @@ export const useAIQuiz = (videoId: string) => {
     submitQuiz,
     resetQuiz,
     updateSettings,
+    formatTime,
   };
 };
