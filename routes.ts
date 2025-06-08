@@ -7,6 +7,7 @@ export const routes = {
   dashboard: {
     root: '/dashboard',
     quizzes: '/dashboard/quizzes',
+    quizRetake: (quizId: string) => `/dashboard/quizzes/${quizId}/retake`,
   },
   settings: {
     root: '/settings',
