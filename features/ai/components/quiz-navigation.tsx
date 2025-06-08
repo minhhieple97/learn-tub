@@ -144,17 +144,17 @@ export const QuizNavigation = ({
           <Button
             onClick={onSubmitQuiz}
             disabled={!hasAnsweredAll || isEvaluating}
-            className="flex items-center gap-2 bg-green-600 px-6 hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-800 shadow-lg"
+            className="flex items-center gap-2 px-6 bg-green-400 text-primary hover:text-black"
           >
             {isEvaluating ? (
               <>
-                <Loader2 className="size-4 animate-spin text-white" />
-                <span className="text-white">Submitting...</span>
+                <Loader2 className="size-4 animate-spin" />
+                <span>Submitting...</span>
               </>
             ) : (
               <>
-                <CheckCircle className="size-4 text-white" />
-                <span className="text-white">Submit Quiz</span>
+                <CheckCircle className="size-4" />
+                <span>Submit Quiz</span>
               </>
             )}
           </Button>

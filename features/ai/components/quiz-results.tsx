@@ -171,18 +171,6 @@ export const QuizResults = ({
             <RotateCcw className="mr-2 size-4" />
             Try Again
           </Button>
-          <Button
-            onClick={onGenerateNewQuiz}
-            disabled={isGenerating}
-            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg"
-          >
-            {isGenerating ? (
-              <Loader2 className="mr-2 size-4 animate-spin" />
-            ) : (
-              <Play className="mr-2 size-4" />
-            )}
-            New Quiz
-          </Button>
         </div>
       </div>
     </ScrollArea>

@@ -90,7 +90,7 @@ export const getUserQuizSessions = async (
     .select(
       `
       *,
-      videos!inner(title, youtube_id),
+      videos!inner(title, youtube_id,description),
       quiz_attempts(
         id,
         score,

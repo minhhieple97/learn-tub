@@ -1,13 +1,11 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Clock, Target, Trophy, RotateCcw } from 'lucide-react';
+import { Clock, Target, Trophy } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { QuizSessionWithAttempts } from '@/features/ai';
-import { useAction } from 'next-safe-action/hooks';
-import { retakeQuizAction } from '../../actions/quiz-dashboard-actions';
+import { QuizRetakeButton } from './quiz-retake-button';
 
 type QuizInfoCardProps = {
   quizSession: QuizSessionWithAttempts;
@@ -29,13 +27,6 @@ const getDifficultyColor = (difficulty: string) => {
 };
 
 export const QuizInfoCard = ({ quizSession }: QuizInfoCardProps) => {
-  const { execute: executeRetake, isExecuting: isRetaking } =
-    useAction(retakeQuizAction);
-
-  const handleRetakeQuiz = async () => {
-    executeRetake({ sessionId: quizSession.id });
-  };
-
   return (
     <Card className="border-border/50 shadow-sm">
       <CardHeader className="pb-4">
@@ -99,14 +90,7 @@ export const QuizInfoCard = ({ quizSession }: QuizInfoCardProps) => {
             </div>
           </div>
 
-          <Button
-            onClick={handleRetakeQuiz}
-            disabled={isRetaking}
-            className="w-full sm:w-auto gap-2 bg-primary hover:bg-primary/90 text-primary-foreground"
-          >
-            <RotateCcw className="h-4 w-4" />
-            {isRetaking ? 'Starting Quiz...' : 'Retake Quiz'}
-          </Button>
+          <QuizRetakeButton quizSession={quizSession} />
         </div>
       </CardContent>
     </Card>

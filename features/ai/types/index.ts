@@ -268,5 +268,6 @@ export type QuizSessionWithAttempts = QuizSession & {
   videos?: {
     title: string;
     youtube_id: string;
+    description: string;
   };
 };
