@@ -1,4 +1,4 @@
-import { AIInsightsDashboard } from '@/features/ai/components/ai-insights-dashboard';
+import { InsightsDashboard } from '@/features/dashboard/components/insights-dashboard';
 import { DashboardHeader } from './dashboard-header';
 import { StatsGrid } from './stats-grid';
 import { RecentVideosCard } from './recent-videos-card';
@@ -25,7 +25,7 @@ export const DashboardContent = ({
 
       <StatsGrid stats={stats} />
 
-      <AIInsightsDashboard />
+      <InsightsDashboard />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <RecentVideosCard videos={recentVideos} />

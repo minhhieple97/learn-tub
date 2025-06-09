@@ -1,4 +1,5 @@
 import { env } from '@/env.mjs';
+import { routes } from '@/routes';
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
@@ -43,7 +44,7 @@ export const updateSession = async (request: NextRequest) => {
 
     if (!user) {
       const url = request.nextUrl.clone();
-      url.pathname = '/login';
+      url.pathname = routes.login;
       return NextResponse.redirect(url);
     }
   }
