@@ -35,7 +35,7 @@ export const deleteAIFeedbackAction = authAction
     const profile = await getProfileByUserId(user.id);
     // eslint-disable-next-line drizzle/enforce-delete-with-where
     const { error } = await supabase
-      .from('ai_interactions')
+      .from('note_interactions')
       .delete()
       .eq('id', feedbackId)
       .eq('user_id', profile.id);

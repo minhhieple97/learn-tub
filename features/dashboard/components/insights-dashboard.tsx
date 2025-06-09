@@ -19,7 +19,7 @@ export async function InsightsDashboard() {
   const profile = await getProfileInSession();
 
   const { count: analysisCount } = await supabase
-    .from('ai_interactions')
+    .from('note_interactions')
     .select('*', { count: 'exact', head: true })
     .eq('user_id', profile.id)
     .eq('interaction_type', 'note_evaluation');

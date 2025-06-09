@@ -11,7 +11,7 @@ export const createAIInteraction = async (
 ): Promise<{ id: string }> => {
   const supabase = await createClient();
   const { data, error } = await supabase
-    .from('ai_interactions')
+    .from('note_interactions')
     .insert({
       user_id: userId,
       note_id: noteId,
@@ -39,7 +39,7 @@ export const getAIInteractionsByNoteId = async (
 ): Promise<AIEvaluationResult[]> => {
   const supabase = await createClient();
   const { data, error } = await supabase
-    .from('ai_interactions')
+    .from('note_interactions')
     .select('*')
     .eq('note_id', noteId)
     .eq('user_id', userId)
@@ -68,7 +68,7 @@ export const getLatestAIEvaluation = async (
   const supabase = await createClient();
 
   const { data, error } = await supabase
-    .from('ai_interactions')
+    .from('note_interactions')
     .select('*')
     .eq('note_id', noteId)
     .eq('user_id', userId)
