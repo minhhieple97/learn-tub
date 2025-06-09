@@ -168,7 +168,7 @@ export type AIEvaluationRequest = {
   context?: {
     videoTitle?: string;
     videoDescription?: string;
-    timestamp?: number;
+    timestamp: number | null;
   };
 };
 
