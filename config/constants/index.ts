@@ -95,7 +95,7 @@ export const AI_PROVIDERS = {
 } as const;
 
 export const AI_API = {
-  EVALUATE_NOTE_PATH: '/api/ai/evaluate-note',
+  EVALUATE_NOTE_PATH: '/api/evaluate-note',
   SSE_DATA_PREFIX: 'data: ',
   SSE_DATA_PREFIX_LENGTH: 6,
 } as const;

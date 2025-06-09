@@ -1,7 +1,7 @@
 import { getQuizSessionDetail } from '@/features/dashboard/queries/quiz-dashboard-queries';
 import { getProfileInSession } from '@/features/profile/queries/profile';
 import { notFound } from 'next/navigation';
-import { QuizRetakeContent } from '@/features/ai/components/quiz-retake-content';
+import { QuizRetakeContent } from '@/features/quizzes/components/quiz-retake-content';
 
 type QuizRetakePageProps = {
   params: Promise<{ quizId: string }>;

@@ -1,6 +1,6 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { NoteEditor } from '@/features/notes/components/note-editor';
-import { AIAssistant } from '@/features/ai/components/ai-assistant';
+import { QuizzTab } from '@/features/quizzes/components/quizz-tab';
 import { VideoPageData } from '../types';
 
 type VideoSidebarProps = {
@@ -9,7 +9,11 @@ type VideoSidebarProps = {
   video: VideoPageData;
 };
 
-export const VideoSidebar = ({ currentTimestamp, onTimestampClick, video }: VideoSidebarProps) => {
+export const VideoSidebar = ({
+  currentTimestamp,
+  onTimestampClick,
+  video,
+}: VideoSidebarProps) => {
   return (
     <Tabs defaultValue="notes">
       <TabsList className="w-full">
@@ -28,7 +32,7 @@ export const VideoSidebar = ({ currentTimestamp, onTimestampClick, video }: Vide
         />
       </TabsContent>
       <TabsContent value="ai" className="mt-4">
-        <AIAssistant videoId={video.id} />
+        <QuizzTab videoId={video.id} />
       </TabsContent>
     </Tabs>
   );

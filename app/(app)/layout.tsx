@@ -1,21 +1,21 @@
-import type React from "react"
-import { createClient } from "@/lib/supabase/server"
-import { redirect } from "next/navigation"
-import { Sidebar } from '@/components/sidebar';
-import { Header } from '@/components/header';
+import type React from 'react';
+import { createClient } from '@/lib/supabase/server';
+import { redirect } from 'next/navigation';
+import { Sidebar } from '@/components/shared/sidebar';
+import { Header } from '@/components/shared/header';
 import { routes } from '@/routes';
 
 export default async function AppLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
-  const supabase = await createClient()
+  const supabase = await createClient();
 
   const {
     data: { user },
     error,
-  } = await supabase.auth.getUser()
+  } = await supabase.auth.getUser();
 
   if (error || !user) {
     redirect(routes.login);
