@@ -4,6 +4,7 @@ import {
   getUserVideos,
 } from '@/features/dashboard/queries/quiz-dashboard-queries';
 import { getProfileInSession } from '@/features/profile/queries/profile';
+import type { QuizFilters } from '@/features/dashboard/types';
 
 type SearchParams = Promise<{
   search?: string;
@@ -24,12 +25,12 @@ const QuizDashboardContent = async ({
   const params = await searchParams;
   const profile = await getProfileInSession();
 
-  const filters = {
+  const filters: Partial<QuizFilters> = {
     search: params.search || '',
-    difficulty: params.difficulty || 'all',
+    difficulty: (params.difficulty || 'all') as QuizFilters['difficulty'],
     videoId: params.videoId,
-    sortBy: params.sortBy || 'created_at',
-    sortOrder: params.sortOrder || 'desc',
+    sortBy: (params.sortBy || 'created_at') as QuizFilters['sortBy'],
+    sortOrder: (params.sortOrder || 'desc') as QuizFilters['sortOrder'],
     page: parseInt(params.page || '1'),
     limit: 10,
   };
@@ -39,7 +40,9 @@ const QuizDashboardContent = async ({
     getUserVideos(profile.id),
   ]);
 
-  return <QuizDashboard initialData={data} videos={videos} />;
+  return (
+    <QuizDashboard initialData={data} videos={videos} userId={profile.id} />
+  );
 };
 
 export default function QuizDashboardPage({

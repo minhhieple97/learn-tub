@@ -1,3 +1,4 @@
+'use server';
 import { createClient } from '@/lib/supabase/server';
 import type { QuizSessionWithAttempts, QuizAttempt } from '@/features/ai/types';
 import type { QuizDashboardData, QuizFilters } from '../types';

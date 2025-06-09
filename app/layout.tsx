@@ -5,14 +5,14 @@ import './globals.css';
 import { ThemeProvider } from '@/components/theme-provider';
 import { Toaster } from '@/components/ui/toaster';
 import { NuqsAdapter } from 'nuqs/adapters/next/app';
-
+import { ReactQueryProvider } from '@/components/shared/react-query';
+import NextTopLoader from 'nextjs-toploader';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: 'LearnTub - YouTube Learning Platform',
   description:
     'Transform your YouTube watching into active learning with AI-powered notes and insights',
-  generator: 'v0.dev',
 };
 
 export default function RootLayout({
@@ -29,8 +29,11 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <NuqsAdapter>{children}</NuqsAdapter>
-          <Toaster />
+          <ReactQueryProvider>
+            <NextTopLoader showSpinner={false} />
+            <NuqsAdapter>{children}</NuqsAdapter>
+            <Toaster />
+          </ReactQueryProvider>
         </ThemeProvider>
       </body>
     </html>
