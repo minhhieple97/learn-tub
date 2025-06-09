@@ -144,7 +144,8 @@ export const QuizNavigation = ({
           <Button
             onClick={onSubmitQuiz}
             disabled={!hasAnsweredAll || isEvaluating}
-            className="flex items-center gap-2 px-6 bg-green-400 text-primary hover:text-black"
+            variant="success"
+            className="flex items-center gap-2 px-6"
           >
             {isEvaluating ? (
               <>

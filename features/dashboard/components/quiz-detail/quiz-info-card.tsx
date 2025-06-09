@@ -6,24 +6,10 @@ import { Clock, Target, Trophy } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { QuizSessionWithAttempts } from '@/features/ai';
 import { QuizRetakeButton } from './quiz-retake-button';
+import { DifficultyBadge } from '@/components/ui/difficulty-badge';
 
 type QuizInfoCardProps = {
   quizSession: QuizSessionWithAttempts;
-};
-
-const getDifficultyColor = (difficulty: string) => {
-  switch (difficulty) {
-    case 'easy':
-      return 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800/50';
-    case 'medium':
-      return 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-300 dark:border-yellow-800/50';
-    case 'hard':
-      return 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800/50';
-    case 'mixed':
-      return 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800/50';
-    default:
-      return 'bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-800/50 dark:text-gray-300 dark:border-gray-700/50';
-  }
 };
 
 export const QuizInfoCard = ({ quizSession }: QuizInfoCardProps) => {
@@ -46,11 +32,7 @@ export const QuizInfoCard = ({ quizSession }: QuizInfoCardProps) => {
             </div>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
-            <Badge
-              className={`${getDifficultyColor(quizSession.difficulty)} border`}
-            >
-              {quizSession.difficulty}
-            </Badge>
+            <DifficultyBadge difficulty={quizSession.difficulty} />
             <Badge variant="outline" className="border-border">
               {quizSession.question_count} questions
             </Badge>
@@ -90,7 +72,7 @@ export const QuizInfoCard = ({ quizSession }: QuizInfoCardProps) => {
             </div>
           </div>
 
-          <QuizRetakeButton quizSession={quizSession} />
+          <QuizRetakeButton quizSessionId={quizSession.id} />
         </div>
       </CardContent>
     </Card>

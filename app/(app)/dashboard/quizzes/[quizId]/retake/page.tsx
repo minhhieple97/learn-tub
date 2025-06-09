@@ -10,20 +10,13 @@ type QuizRetakePageProps = {
 export default async function QuizRetakePage({ params }: QuizRetakePageProps) {
   const { quizId } = await params;
   const profile = await getProfileInSession();
-
-  try {
-    const quizSession = await getQuizSessionDetail(quizId, profile.id);
-
-    if (!quizSession) {
-      notFound();
-    }
-
-    return (
-      <div className="container mx-auto py-6">
-        <QuizRetakeContent quizSession={quizSession} />
-      </div>
-    );
-  } catch (error) {
+  const quizSession = await getQuizSessionDetail(quizId, profile.id);
+  if (!quizSession) {
     notFound();
   }
+  return (
+    <div className="container mx-auto">
+      <QuizRetakeContent quizSession={quizSession} />
+    </div>
+  );
 }

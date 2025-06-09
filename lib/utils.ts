@@ -1,11 +1,15 @@
-import { clsx, type ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
+import { clsx, type ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 import { env } from '@/env.mjs';
-import { YOUTUBE_API, YOUTUBE_PATTERNS, VIDEO_DEFAULTS } from '@/config/constants';
+import {
+  YOUTUBE_API,
+  YOUTUBE_PATTERNS,
+  VIDEO_DEFAULTS,
+} from '@/config/constants';
 
 export const cn = (...inputs: ClassValue[]) => {
-  return twMerge(clsx(inputs))
-}
+  return twMerge(clsx(inputs));
+};
 
 export const getPasswordStrength = (password: string) => {
   if (!password) return { strength: 0, label: '' };
@@ -19,14 +23,14 @@ export const getPasswordStrength = (password: string) => {
 
   const labels = ['Very Weak', 'Weak', 'Fair', 'Good', 'Strong'];
   return { strength, label: labels[strength - 1] || '' };
-}
+};
 
 export const getPasswordStrengthColor = (strength: number): string => {
   if (strength <= 1) return 'bg-red-500';
   if (strength <= 2) return 'bg-yellow-500';
   if (strength <= 3) return 'bg-blue-500';
   return 'bg-green-500';
-}
+};
 
 export const isValidYouTubeUrl = (url: string): boolean => {
   return YOUTUBE_PATTERNS.VALID_URL_REGEX.test(url);
@@ -41,11 +45,14 @@ export const formatDistanceToNow = (date: Date): string => {
   const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
   if (diffInSeconds < 60) return 'just now';
-  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes ago`;
-  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
-  if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)} days ago`;
+  if (diffInSeconds < 3600)
+    return `${Math.floor(diffInSeconds / 60)} minutes ago`;
+  if (diffInSeconds < 86400)
+    return `${Math.floor(diffInSeconds / 3600)} hours ago`;
+  if (diffInSeconds < 2592000)
+    return `${Math.floor(diffInSeconds / 86400)} days ago`;
   return `${Math.floor(diffInSeconds / 2592000)} months ago`;
-}
+};
 
 // Format duration from seconds to MM:SS or HH:MM:SS
 export const formatDuration = (seconds: number): string => {
@@ -56,11 +63,13 @@ export const formatDuration = (seconds: number): string => {
   const secs = Math.floor(seconds % 60);
 
   if (hours > 0) {
-    return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    return `${hours}:${minutes.toString().padStart(2, '0')}:${secs
+      .toString()
+      .padStart(2, '0')}`;
   }
 
   return `${minutes}:${secs.toString().padStart(2, '0')}`;
-}
+};
 
 export const formatTimestamp = (seconds: number) => {
   const mins = Math.floor(seconds / 60);
@@ -86,9 +95,11 @@ type YouTubeVideoData = {
   };
 };
 
-export const fetchYouTubeVideoData = async (videoId: string): Promise<YouTubeVideoData | null> => {
+export const fetchYouTubeVideoData = async (
+  videoId: string,
+): Promise<YouTubeVideoData | null> => {
   const apiKey = env.YOUTUBE_API_KEY;
-  
+
   if (!apiKey) {
     return null;
   }
@@ -107,24 +118,24 @@ export const fetchYouTubeVideoData = async (videoId: string): Promise<YouTubeVid
   }
 
   return null;
-}
+};
 
 export const parseDuration = (duration: string): number => {
   const match = duration.match(YOUTUBE_PATTERNS.DURATION_REGEX);
   if (!match) return VIDEO_DEFAULTS.DURATION;
-  
+
   const hours = Number.parseInt(match[1] || '0');
   const minutes = Number.parseInt(match[2] || '0');
   const seconds = Number.parseInt(match[3] || '0');
-  
+
   return hours * 3600 + minutes * 60 + seconds;
-}
+};
 
 export const extractYouTubeId = (url: string): string | null => {
   const match = url.match(YOUTUBE_PATTERNS.URL_REGEX);
   return match ? match[1] : null;
-}
+};
 
 export const getYouTubeThumbnailUrl = (videoId: string): string => {
   return `${YOUTUBE_API.THUMBNAIL_URL}/${videoId}/hqdefault.jpg`;
-}
+};
