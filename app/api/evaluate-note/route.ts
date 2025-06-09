@@ -9,14 +9,11 @@ import {
   AI_DATABASE,
   AI_CHUNK_TYPES,
 } from '@/config/constants';
-import type {
-  AIEvaluationRequest,
-  AIFeedback,
-  AIStreamChunk,
-} from '@/features/ai/types';
+
 import { getProfileByUserId } from '@/features/profile/queries/profile';
 import { aiEvaluationService } from '@/features/quizzes/services';
 import { createAIInteraction } from '@/features/quizzes/queries';
+import { AIEvaluationRequest, AIFeedback, AIStreamChunk } from '@/features/quizzes/types';
 
 export async function GET(request: NextRequest) {
   try {
