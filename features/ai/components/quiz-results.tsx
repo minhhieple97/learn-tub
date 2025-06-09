@@ -22,15 +22,9 @@ type QuizResultsProps = {
   feedback: QuizFeedback;
   isGenerating: boolean;
   onResetQuiz: () => void;
-  onGenerateNewQuiz: () => void;
 };
 
-export const QuizResults = ({
-  feedback,
-  isGenerating,
-  onResetQuiz,
-  onGenerateNewQuiz,
-}: QuizResultsProps) => {
+export const QuizResults = ({ feedback, onResetQuiz }: QuizResultsProps) => {
   return (
     <ScrollArea className="h-[600px] pr-4">
       <div className="space-y-6">

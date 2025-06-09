@@ -67,7 +67,6 @@ export const AIAssistant = ({
           feedback={feedback}
           isGenerating={isGenerating}
           onResetQuiz={resetQuiz}
-          onGenerateNewQuiz={handleGenerateQuestions}
         />
       );
     }

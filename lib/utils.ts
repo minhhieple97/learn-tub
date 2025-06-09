@@ -5,7 +5,9 @@ import {
   YOUTUBE_API,
   YOUTUBE_PATTERNS,
   VIDEO_DEFAULTS,
+  AI_EVALUATION,
 } from '@/config/constants';
+import { AIFeedback } from '@/features/ai';
 
 export const cn = (...inputs: ClassValue[]) => {
   return twMerge(clsx(inputs));
@@ -138,4 +140,32 @@ export const extractYouTubeId = (url: string): string | null => {
 
 export const getYouTubeThumbnailUrl = (videoId: string): string => {
   return `${YOUTUBE_API.THUMBNAIL_URL}/${videoId}/hqdefault.jpg`;
+};
+
+export const formatFeedbackForCopy = (feedback: AIFeedback): string => {
+  return `AI Evaluation Feedback
+
+Summary: ${feedback.summary}
+
+Overall Score: ${feedback.overall_score}/10
+
+Correct Points:
+${feedback.correct_points.map((point) => `• ${point}`).join('\n')}
+
+Points to Review:
+${feedback.incorrect_points.map((point) => `• ${point}`).join('\n')}
+
+Improvement Suggestions:
+${feedback.improvement_suggestions
+  .map((suggestion) => `• ${suggestion}`)
+  .join('\n')}
+
+Detailed Analysis:
+${feedback.detailed_analysis}`;
+};
+
+export const getScoreColor = (score: number) => {
+  if (score >= AI_EVALUATION.SCORE_EXCELLENT_THRESHOLD) return 'bg-green-500';
+  if (score >= AI_EVALUATION.SCORE_GOOD_THRESHOLD) return 'bg-yellow-500';
+  return 'bg-red-500';
 };

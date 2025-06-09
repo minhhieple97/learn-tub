@@ -17,6 +17,7 @@ type ExtendedQuizState = QuizState & {
 export const useAIQuizRetake = (
   videoId: string,
   existingSession?: QuizSession,
+  hasStarted?: boolean,
 ) => {
   const [state, setState] = useState<ExtendedQuizState>(() => {
     if (existingSession) {
@@ -41,7 +42,6 @@ export const useAIQuizRetake = (
         },
       };
     }
-
     return {
       questions: [],
       answers: [],
@@ -63,13 +63,10 @@ export const useAIQuizRetake = (
       },
     };
   });
-
   const timerRef = useRef<NodeJS.Timeout | null>(null);
-
   const startTimer = useCallback(() => {
     const startTime = Date.now();
     setState((prev) => ({ ...prev, startTime, currentTime: 0 }));
-
     timerRef.current = setInterval(() => {
       setState((prev) => {
         if (prev.startTime) {
@@ -96,19 +93,6 @@ export const useAIQuizRetake = (
       return prev;
     });
   }, []);
-
-  // Auto-start timer if we have questions (retake mode)
-  useEffect(() => {
-    if (state.questions.length > 0 && !state.startTime && !state.showResults) {
-      startTimer();
-    }
-
-    return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
-    };
-  }, [state.questions.length, state.startTime, state.showResults, startTimer]);
 
   const { execute: executeEvaluate, isExecuting: isEvaluatingQuiz } = useAction(
     evaluateQuizAction,
@@ -273,7 +257,7 @@ export const useAIQuizRetake = (
     progress,
     answeredCount,
 
-    isGenerating: false, // No generation needed for retakes
+    isGenerating: false,
     isEvaluating: isEvaluatingQuiz || state.isEvaluating,
 
     answerQuestion,
@@ -283,5 +267,6 @@ export const useAIQuizRetake = (
     submitQuiz,
     resetQuiz,
     formatTime,
+    startTimer,
   };
 };
