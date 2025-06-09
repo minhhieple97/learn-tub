@@ -20,7 +20,6 @@ type QuizRetakeContentProps = {
 export const QuizRetakeContent = ({ quizSession }: QuizRetakeContentProps) => {
   const router = useRouter();
   const [hasStarted, setHasStarted] = useState(false);
-
   const {
     questions,
     answers,
@@ -42,10 +41,12 @@ export const QuizRetakeContent = ({ quizSession }: QuizRetakeContentProps) => {
     goToQuestion,
     submitQuiz,
     resetQuiz,
+    startTimer,
   } = useAIQuizRetake(quizSession.video_id, quizSession);
 
   const handleStartRetake = () => {
     setHasStarted(true);
+    startTimer();
   };
 
   const handleBackToDashboard = () => {
@@ -62,10 +63,6 @@ export const QuizRetakeContent = ({ quizSession }: QuizRetakeContentProps) => {
   const handleResetQuiz = () => {
     resetQuiz();
     setHasStarted(false);
-  };
-
-  const handleGenerateNewQuiz = () => {
-    router.push(`${routes.learn}/${quizSession.video_id}?tab=ai-assistant`);
   };
 
   if (showResults && feedback) {
@@ -96,7 +93,6 @@ export const QuizRetakeContent = ({ quizSession }: QuizRetakeContentProps) => {
               feedback={feedback}
               isGenerating={false}
               onResetQuiz={handleResetQuiz}
-              onGenerateNewQuiz={handleGenerateNewQuiz}
             />
           </CardContent>
         </Card>

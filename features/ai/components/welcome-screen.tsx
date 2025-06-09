@@ -50,7 +50,6 @@ export const WelcomeScreen = ({
         <Button
           onClick={onGenerateQuestions}
           disabled={isGenerating}
-          size="lg"
           className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg"
         >
           {isGenerating ? (

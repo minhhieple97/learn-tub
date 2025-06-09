@@ -6,7 +6,10 @@ type AIEvaluationStreamingProps = {
   isEvaluating: boolean;
 };
 
-export const AIEvaluationStreaming = ({ content, isEvaluating }: AIEvaluationStreamingProps) => {
+export const AIEvaluationStreaming = ({
+  content,
+  isEvaluating,
+}: AIEvaluationStreamingProps) => {
   return (
     <Card className="mt-4">
       <CardHeader className="flex flex-row items-center space-y-0 pb-4">
@@ -22,7 +25,9 @@ export const AIEvaluationStreaming = ({ content, isEvaluating }: AIEvaluationStr
             {isEvaluating && <span className="animate-pulse">|</span>}
           </div>
           {isEvaluating && (
-            <div className="mt-2 text-xs text-muted-foreground">AI is analyzing your note...</div>
+            <div className="mt-2 text-xs text-muted-foreground">
+              AI is analyzing your note...
+            </div>
           )}
         </div>
       </CardContent>
