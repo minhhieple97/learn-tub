@@ -12,6 +12,7 @@
 LearnTub is a modern learning platform that transforms passive YouTube video watching into active learning experiences. Take smart notes, get AI-powered insights, and organize your learning journey with intelligent features designed to accelerate your growth.
 
 **🌟 Key Features:**
+
 - 🧠 **AI-Powered Notes** - Get intelligent feedback and insights with advanced AI analysis
 - 🎯 **AI Quiz Assistant** - Test knowledge with auto-generated questions and personalized feedback
 - ⏰ **Timestamp Sync** - Notes automatically sync with video timestamps for seamless navigation
@@ -36,13 +37,13 @@ LearnTub is a modern learning platform that transforms passive YouTube video wat
 
 ## 🎯 Live Demo
 
-**🔗 [View Live Application](https://vercel.com/minh-hiep-les-projects/v0-learn-tub)**
+**🔗 [View Live Application](learn-tub.vercel.app)**
 
 ## 📦 Installation
 
 ### Prerequisites
 
-- Node.js 20+ 
+- Node.js 20+
 - pnpm 10+
 - Docker
 - Supabase account
@@ -53,19 +54,22 @@ LearnTub is a modern learning platform that transforms passive YouTube video wat
 ### Setup Instructions
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/minhhieple97/learn-tub.git
    cd learn-tub
    ```
 
 2. **Install dependencies**
+
    ```bash
    pnpm install
    ```
 
 3. **Environment Setup**
-   
+
    Create a `.env` file in the root directory:
+
    ```env
    # Database Configuration (Vercel/Neon PostgreSQL)
    POSTGRES_URL=your_postgres_url
@@ -75,34 +79,36 @@ LearnTub is a modern learning platform that transforms passive YouTube video wat
    POSTGRES_PASSWORD=your_postgres_password
    POSTGRES_DATABASE=your_postgres_database
    POSTGRES_HOST=your_postgres_host
-   
+
    # Supabase Configuration
    NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
    NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
    SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
-   
+
    # YouTube API Configuration
    YOUTUBE_API_KEY=your_youtube_api_key
-   
+
    # AI Configuration (Optional - for AI evaluation features)
    OPENAI_API_KEY=your_openai_api_key
    GEMINI_API_KEY=your_gemini_api_key
-   
+
    # App Configuration
    NEXT_PUBLIC_APP_URL=http://localhost:3000
    NODE_ENV=development
    ```
 
 4. **Database Setup**
+
    ```bash
    # Pull latest schema from Supabase
    npm run db:pull
-   
+
    # Reset database (if needed)
    npm run db:reset
    ```
 
 5. **Run the development server**
+
    ```bash
    npm run dev
    ```
@@ -209,6 +215,7 @@ We welcome contributions! Please follow these steps:
 ### 🧠 AI-Powered Learning
 
 #### 📝 AI Note Evaluation
+
 - **Comprehensive Note Evaluation**: AI analyzes your notes for accuracy, completeness, and understanding
 - **Multiple AI Providers**: Choose between OpenAI and Google Gemini models for evaluation
 - **Real-time Streaming**: Get instant feedback as the AI processes your notes
@@ -217,6 +224,7 @@ We welcome contributions! Please follow these steps:
 - **Copyable Insights**: Save or share AI feedback for future reference
 
 #### 🎯 AI Quiz Assistant
+
 - **Smart Question Generation**: AI creates 5-20 multiple-choice questions based on video content
 - **Adaptive Difficulty**: Choose from easy, medium, hard, or mixed difficulty levels
 - **Interactive Quiz Interface**: Beautiful, responsive UI with progress tracking and navigation
@@ -226,12 +234,14 @@ We welcome contributions! Please follow these steps:
 - **Customizable Settings**: Adjust question count, difficulty, and AI provider preferences
 
 ### 📝 Smart Note-Taking
+
 - Real-time synchronization with video timestamps
 - Rich text formatting and organization
 - Tag-based categorization system
 - Search and filter capabilities
 
 ### 📈 Progress Analytics
+
 - Learning streak tracking
 - Time spent analysis
 - Completion rates and milestones
@@ -243,7 +253,6 @@ We welcome contributions! Please follow these steps:
 - **Data Protection:** All user data encrypted and stored securely
 - **Privacy First:** No tracking, no ads, user data stays private
 - **GDPR Compliant:** Full compliance with data protection regulations
-
 
 ## 🤖 AI Features
 
@@ -266,7 +275,7 @@ The AI evaluation system provides comprehensive feedback on your learning notes:
 The AI Quiz Assistant transforms passive video watching into active learning through intelligent testing:
 
 - **Intelligent Question Generation**: AI analyzes video content to create relevant multiple-choice questions
-- **Flexible Configuration**: 
+- **Flexible Configuration**:
   - **Question Count**: Generate 5-20 questions per quiz
   - **Difficulty Levels**: Easy, medium, hard, or mixed difficulty
   - **AI Provider Choice**: Select between OpenAI GPT models or Google Gemini
@@ -285,20 +294,19 @@ The AI Quiz Assistant transforms passive video watching into active learning thr
   - **Smooth Animations**: Loading states and transitions for better UX
   - **Accessibility**: ARIA labels and keyboard navigation support
 
-
 ## 💡 Potential Future Enhancements
 
-* **Courses Feature**: Group videos into courses. (Schema exists)
-* **Advanced Search & Filtering**: For notes and videos.
-* **Spaced Repetition System (SRS)**: For quizzes and key concepts.
-* **Collaborative Note-Taking**: Allow users to share notes or collaborate.
-* **User Profile Customization**: More options for learning preferences.
-* **Enhanced AI Features**: 
-  * Content summarization and insights
-  * Personalized learning recommendations
-  * Automated concept extraction
-  * Advanced quiz features (timed quizzes, adaptive difficulty)
-  * AI-powered study plans and learning paths
+- **Courses Feature**: Group videos into courses. (Schema exists)
+- **Advanced Search & Filtering**: For notes and videos.
+- **Spaced Repetition System (SRS)**: For quizzes and key concepts.
+- **Collaborative Note-Taking**: Allow users to share notes or collaborate.
+- **User Profile Customization**: More options for learning preferences.
+- **Enhanced AI Features**:
+  - Content summarization and insights
+  - Personalized learning recommendations
+  - Automated concept extraction
+  - Advanced quiz features (timed quizzes, adaptive difficulty)
+  - AI-powered study plans and learning paths
 
 ## 🤝 Contributing
 
