@@ -83,7 +83,7 @@ export const storeAIInteraction = async (
 ) => {
   const supabase = await createClient();
 
-  const { error } = await supabase.from('ai_interactions').insert({
+  const { error } = await supabase.from('note_interactions').insert({
     user_id: userId,
     interaction_type: interactionType,
     input_data: inputData,
