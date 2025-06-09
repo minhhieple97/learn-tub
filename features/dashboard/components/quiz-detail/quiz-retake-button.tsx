@@ -7,14 +7,14 @@ import { routes } from '@/routes';
 import type { QuizSessionWithAttempts } from '@/features/ai/types';
 
 type QuizRetakeButtonProps = {
-  quizSession: QuizSessionWithAttempts;
+  quizSessionId: string;
 };
 
-export const QuizRetakeButton = ({ quizSession }: QuizRetakeButtonProps) => {
+export const QuizRetakeButton = ({ quizSessionId }: QuizRetakeButtonProps) => {
   const router = useRouter();
 
   const handleRetake = () => {
-    router.push(routes.dashboard.quizRetake(quizSession.id));
+    router.push(routes.dashboard.quizRetake(quizSessionId));
   };
 
   return (

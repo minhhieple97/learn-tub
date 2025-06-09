@@ -10,20 +10,13 @@ type QuizDetailPageProps = {
 export default async function QuizDetailPage({ params }: QuizDetailPageProps) {
   const { quizId } = await params;
   const profile = await getProfileInSession();
-
-  try {
-    const quizSession = await getQuizSessionDetail(quizId, profile.id);
-
-    if (!quizSession) {
-      notFound();
-    }
-
-    return (
-      <div className="container mx-auto py-6">
-        <QuizDetailContent quizSession={quizSession} />
-      </div>
-    );
-  } catch (error) {
+  const quizSession = await getQuizSessionDetail(quizId, profile.id);
+  if (!quizSession) {
     notFound();
   }
+  return (
+    <div className="container mx-auto">
+      <QuizDetailContent quizSession={quizSession} />
+    </div>
+  );
 }

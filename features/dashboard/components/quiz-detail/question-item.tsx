@@ -6,26 +6,12 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { ChevronDown, ChevronUp, CheckCircle, Eye, EyeOff } from 'lucide-react';
 import { QuizQuestion } from '@/features/ai';
+import { DifficultyBadge } from '@/components/ui/difficulty-badge';
 
 type QuestionItemProps = {
   question: QuizQuestion;
   index: number;
   isLast: boolean;
-};
-
-const getDifficultyColor = (difficulty: string) => {
-  switch (difficulty) {
-    case 'easy':
-      return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300';
-    case 'medium':
-      return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300';
-    case 'hard':
-      return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300';
-    case 'mixed':
-      return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300';
-    default:
-      return 'bg-gray-100 text-gray-800 dark:bg-gray-800/50 dark:text-gray-300';
-  }
 };
 
 export const QuestionItem = ({
@@ -113,9 +99,7 @@ export const QuestionItem = ({
             </div>
 
             <div className="flex items-center gap-3">
-              <Badge className={getDifficultyColor(question.difficulty)}>
-                {question.difficulty}
-              </Badge>
+              <DifficultyBadge difficulty={question.difficulty} />
               <Badge
                 variant="outline"
                 className="border-border/60 text-foreground bg-background/50"

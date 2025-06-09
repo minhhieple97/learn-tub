@@ -27,7 +27,6 @@ export const QuizRetakeContent = ({ quizSession }: QuizRetakeContentProps) => {
     currentQuestionIndex,
     showResults,
     feedback,
-    currentTime,
     formattedTime,
     currentQuestion,
     currentAnswer,
@@ -176,7 +175,7 @@ export const QuizRetakeContent = ({ quizSession }: QuizRetakeContentProps) => {
             {quizSession.videos?.title}
           </p>
         </div>
-        <div className="w-24" /> {/* Spacer for centering */}
+        <div className="w-24" />
       </div>
 
       <QuizProgress

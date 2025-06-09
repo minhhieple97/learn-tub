@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { QuizSessionWithAttempts } from '@/features/ai';
+import { routes } from '@/routes';
 
 type QuizHeaderProps = {
   quizSession: QuizSessionWithAttempts;
@@ -12,7 +13,7 @@ type QuizHeaderProps = {
 export const QuizHeader = ({ quizSession }: QuizHeaderProps) => {
   return (
     <div className="flex items-center gap-4">
-      <Link href="/dashboard/quizzes">
+      <Link href={routes.dashboard.quizzes}>
         <Button variant="outline" size="sm" className="gap-2">
           <ArrowLeft className="h-4 w-4" />
           Back to Quizzes
