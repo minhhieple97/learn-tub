@@ -3,8 +3,8 @@
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
-import { QuizSessionWithAttempts } from '@/features/ai';
 import { routes } from '@/routes';
+import { QuizSessionWithAttempts } from '@/features/quizzes/types';
 
 type QuizHeaderProps = {
   quizSession: QuizSessionWithAttempts;

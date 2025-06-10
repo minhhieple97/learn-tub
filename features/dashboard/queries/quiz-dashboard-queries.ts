@@ -1,11 +1,15 @@
 'use server';
 import { createClient } from '@/lib/supabase/server';
-import type { QuizSessionWithAttempts, QuizAttempt } from '@/features/ai/types';
-import type { QuizDashboardData, QuizFilters } from '../types';
+import { IQuizFilters, QuizDashboardData } from '../types';
+import {
+  QuizAttempt,
+  QuizQuestion,
+  QuizSessionWithAttempts,
+} from '@/features/quizzes/types';
 
 export const getQuizDashboardData = async (
   userId: string,
-  filters?: Partial<QuizFilters>,
+  filters?: Partial<IQuizFilters>,
 ): Promise<QuizDashboardData> => {
   const supabase = await createClient();
   const limit = filters?.limit || 10;
@@ -20,10 +24,14 @@ export const getQuizDashboardData = async (
       videos!inner(id, title, youtube_id),
       quiz_attempts(
         id,
+        quiz_session_id,
+        user_id,
+        answers,
         score,
         correct_answers,
         total_questions,
         completed_at,
+        created_at,
         time_taken_seconds,
         feedback
       )
@@ -99,18 +107,18 @@ export const getQuizDashboardData = async (
       )
     : 0;
 
-  // Process sessions data
   const processedSessions: QuizSessionWithAttempts[] = sessions.map(
     (session) => {
       const attempts = session.quiz_attempts || [];
       const latestAttempt = attempts.length > 0 ? attempts[0] : undefined;
       const bestScore =
         attempts.length > 0
-          ? Math.max(...attempts.map((a: QuizAttempt) => a.score))
+          ? Math.max(...attempts.map((a) => a.score))
           : undefined;
 
       return {
         ...session,
+        difficulty: session.difficulty as 'easy' | 'medium' | 'hard' | 'mixed',
         attempts,
         latest_attempt: latestAttempt,
         best_score: bestScore,
@@ -163,16 +171,19 @@ export const getQuizSessionDetail = async (
     .select(
       `
       *,
-      videos!inner(id, title, youtube_id),
+      videos!inner(id, title, youtube_id, description),
       quiz_attempts(
         id,
+        quiz_session_id,
+        user_id,
+        answers,
         score,
         correct_answers,
         total_questions,
         completed_at,
+        created_at,
         time_taken_seconds,
-        feedback,
-        answers
+        feedback
       )
     `,
     )
@@ -187,12 +198,13 @@ export const getQuizSessionDetail = async (
   const attempts = session.quiz_attempts || [];
   const latestAttempt = attempts.length > 0 ? attempts[0] : undefined;
   const bestScore =
-    attempts.length > 0
-      ? Math.max(...attempts.map((a: QuizAttempt) => a.score))
-      : undefined;
+    attempts.length > 0 ? Math.max(...attempts.map((a) => a.score)) : undefined;
 
   return {
     ...session,
+    difficulty: session.difficulty as 'easy' | 'medium' | 'hard' | 'mixed',
+    topics: session.topics || [],
+    questions: (session.questions as QuizQuestion[]) || [],
     attempts,
     latest_attempt: latestAttempt,
     best_score: bestScore,

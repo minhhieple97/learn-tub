@@ -7,7 +7,7 @@ import {
   VIDEO_DEFAULTS,
   AI_EVALUATION,
 } from '@/config/constants';
-import { AIFeedback } from '@/features/ai';
+import { IFeedback, IYouTubeVideo } from '@/types';
 
 export const cn = (...inputs: ClassValue[]) => {
   return twMerge(clsx(inputs));
@@ -79,27 +79,9 @@ export const formatTimestamp = (seconds: number) => {
   return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
 };
 
-type YouTubeVideoData = {
-  id: string;
-  snippet: {
-    title: string;
-    description: string;
-    channelTitle: string;
-    publishedAt: string;
-    thumbnails: {
-      high: {
-        url: string;
-      };
-    };
-  };
-  contentDetails: {
-    duration: string;
-  };
-};
-
 export const fetchYouTubeVideoData = async (
   videoId: string,
-): Promise<YouTubeVideoData | null> => {
+): Promise<IYouTubeVideo | null> => {
   const apiKey = env.YOUTUBE_API_KEY;
 
   if (!apiKey) {
@@ -142,7 +124,7 @@ export const getYouTubeThumbnailUrl = (videoId: string): string => {
   return `${YOUTUBE_API.THUMBNAIL_URL}/${videoId}/hqdefault.jpg`;
 };
 
-export const formatFeedbackForCopy = (feedback: AIFeedback): string => {
+export const formatFeedbackForCopy = (feedback: IFeedback): string => {
   return `AI Evaluation Feedback
 
 Summary: ${feedback.summary}

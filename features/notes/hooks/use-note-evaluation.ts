@@ -3,15 +3,18 @@ import {
   AI_PROVIDERS,
   AI_CONFIG,
   AI_API,
-  AI_STATUS,
-  AI_CHUNK_TYPES,
-  AI_ERROR_MESSAGES,
+  CHUNK_TYPES,
+  ERROR_MESSAGES,
+  STATUS_STREAMING,
 } from '@/config/constants';
-import type { AIFeedback, AIProvider, AIEvaluationStatus } from '../../ai/types';
+import { AIProvider, Feedback } from '@/types';
+import { NoteEvaluationStatus } from '../types';
 
 export const useNoteEvaluation = () => {
-  const [status, setStatus] = useState<AIEvaluationStatus>(AI_STATUS.IDLE);
-  const [feedback, setFeedback] = useState<AIFeedback | null>(null);
+  const [status, setStatus] = useState<NoteEvaluationStatus>(
+    STATUS_STREAMING.IDLE,
+  );
+  const [feedback, setFeedback] = useState<Feedback | null>(null);
   const [streamingContent, setStreamingContent] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
 
@@ -22,7 +25,7 @@ export const useNoteEvaluation = () => {
       model: string = AI_CONFIG.DEFAULT_MODEL,
     ) => {
       try {
-        setStatus(AI_STATUS.EVALUATING);
+        setStatus(STATUS_STREAMING.EVALUATING);
         setError(null);
         setFeedback(null);
         setStreamingContent('');
@@ -33,15 +36,15 @@ export const useNoteEvaluation = () => {
 
         if (!response.ok) {
           throw new Error(
-            `${AI_ERROR_MESSAGES.FAILED_TO_EVALUATE_NOTE}: ${response.statusText}`,
+            `${ERROR_MESSAGES.FAILED_TO_EVALUATE_NOTE}: ${response.statusText}`,
           );
         }
 
         if (!response.body) {
-          throw new Error(AI_ERROR_MESSAGES.NO_RESPONSE_BODY);
+          throw new Error(ERROR_MESSAGES.NO_RESPONSE_BODY);
         }
 
-        setStatus(AI_STATUS.STREAMING);
+        setStatus(STATUS_STREAMING.STREAMING);
 
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
@@ -63,34 +66,29 @@ export const useNoteEvaluation = () => {
                   line.slice(AI_API.SSE_DATA_PREFIX_LENGTH),
                 );
 
-                if (chunk.type === AI_CHUNK_TYPES.FEEDBACK) {
+                if (chunk.type === CHUNK_TYPES.FEEDBACK) {
                   setStreamingContent((prev) => prev + chunk.content);
-                } else if (chunk.type === AI_CHUNK_TYPES.COMPLETE) {
-                  const completeFeedback: AIFeedback = JSON.parse(
-                    chunk.content,
-                  );
+                } else if (chunk.type === CHUNK_TYPES.COMPLETE) {
+                  const completeFeedback: Feedback = JSON.parse(chunk.content);
                   setFeedback(completeFeedback);
-                  setStatus(AI_STATUS.COMPLETED);
+                  setStatus(STATUS_STREAMING.COMPLETED);
                   setStreamingContent('');
-                } else if (chunk.type === AI_CHUNK_TYPES.ERROR) {
+                } else if (chunk.type === CHUNK_TYPES.ERROR) {
                   setError(chunk.content);
-                  setStatus(AI_STATUS.ERROR);
+                  setStatus(STATUS_STREAMING.ERROR);
                   setStreamingContent('');
                 }
               } catch (parseError) {
-                console.error(
-                  AI_ERROR_MESSAGES.FAILED_TO_PARSE_CHUNK,
-                  parseError,
-                );
+                console.error(ERROR_MESSAGES.FAILED_TO_PARSE_CHUNK, parseError);
               }
             }
           }
         }
       } catch (err) {
         setError(
-          err instanceof Error ? err.message : AI_ERROR_MESSAGES.UNKNOWN_ERROR,
+          err instanceof Error ? err.message : ERROR_MESSAGES.UNKNOWN_ERROR,
         );
-        setStatus(AI_STATUS.ERROR);
+        setStatus(STATUS_STREAMING.ERROR);
         setStreamingContent('');
       }
     },
@@ -98,7 +96,7 @@ export const useNoteEvaluation = () => {
   );
 
   const reset = useCallback(() => {
-    setStatus(AI_STATUS.IDLE);
+    setStatus(STATUS_STREAMING.IDLE);
     setFeedback(null);
     setStreamingContent('');
     setError(null);
@@ -112,8 +110,9 @@ export const useNoteEvaluation = () => {
     evaluateNote,
     reset,
     isEvaluating:
-      status === AI_STATUS.EVALUATING || status === AI_STATUS.STREAMING,
-    isCompleted: status === AI_STATUS.COMPLETED,
-    hasError: status === AI_STATUS.ERROR,
+      status === STATUS_STREAMING.EVALUATING ||
+      status === STATUS_STREAMING.STREAMING,
+    isCompleted: status === STATUS_STREAMING.COMPLETED,
+    hasError: status === STATUS_STREAMING.ERROR,
   };
 };

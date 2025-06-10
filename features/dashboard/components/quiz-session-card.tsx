@@ -10,12 +10,12 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Eye, Clock } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
-import { QuizSessionWithAttempts } from '@/features/ai';
 import { memo } from 'react';
 import Link from 'next/link';
 import { QuizRetakeButton } from './quiz-detail/quiz-retake-button';
 import { DifficultyBadge } from '@/components/ui/difficulty-badge';
 import { routes } from '@/routes';
+import { QuizSessionWithAttempts } from '@/features/quizzes/types';
 
 type QuizSessionCardProps = {
   session: QuizSessionWithAttempts;
@@ -44,9 +44,10 @@ const QuizSessionCardComponent = ({ session }: QuizSessionCardProps) => {
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Clock className="h-3 w-3" />
               Created{' '}
-              {formatDistanceToNow(new Date(session.created_at), {
-                addSuffix: true,
-              })}
+              {session.created_at &&
+                formatDistanceToNow(new Date(session.created_at), {
+                  addSuffix: true,
+                })}
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -79,15 +80,16 @@ const QuizSessionCardComponent = ({ session }: QuizSessionCardProps) => {
                   </strong>
                 </span>
               )}
-              {session.latest_attempt && (
-                <span className="font-medium text-muted-foreground">
-                  Last Attempt:{' '}
-                  {formatDistanceToNow(
-                    new Date(session.latest_attempt.completed_at),
-                    { addSuffix: true },
-                  )}
-                </span>
-              )}
+              {session.latest_attempt &&
+                session.latest_attempt.completed_at && (
+                  <span className="font-medium text-muted-foreground">
+                    Last Attempt:{' '}
+                    {formatDistanceToNow(
+                      new Date(session.latest_attempt.completed_at),
+                      { addSuffix: true },
+                    )}
+                  </span>
+                )}
             </div>
 
             <div className="flex items-center gap-2 flex-shrink-0">
@@ -132,9 +134,10 @@ const QuizSessionCardComponent = ({ session }: QuizSessionCardProps) => {
                       )}
                     </div>
                     <span className="text-xs text-muted-foreground font-medium">
-                      {formatDistanceToNow(new Date(attempt.completed_at), {
-                        addSuffix: true,
-                      })}
+                      {attempt.completed_at &&
+                        formatDistanceToNow(new Date(attempt.completed_at), {
+                          addSuffix: true,
+                        })}
                     </span>
                   </div>
                 ))}

@@ -1,9 +1,9 @@
+import { IVideoPageData } from '../types';
 import { VideoInfoCard } from './video-info-card';
-import { VideoPageData } from '../types/video-page';
 import { YouTubePlayer } from './youtube-player';
 
 type VideoMainContentProps = {
-  video: VideoPageData;
+  video: IVideoPageData;
   onTimeUpdate: (time: number) => void;
   targetSeekTime?: number;
 };

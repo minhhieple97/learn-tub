@@ -5,15 +5,19 @@ import { VideoPageHeader } from './video-page-header';
 import { VideoMainContent } from './video-main-content';
 import { VideoSidebar } from './video-sidebar';
 import { ResizablePanels } from './resizable-panels';
-import { VideoPageData } from '../types/video-page';
+import { IVideoPageData } from '../types';
 
 type VideoPageClientProps = {
-  video: VideoPageData;
+  video: IVideoPageData;
 };
 
 export const VideoPageClient = ({ video }: VideoPageClientProps) => {
-  const { currentTimestamp, targetSeekTime, handleTimeUpdate, handleNoteTimestampClick } =
-    useVideoPlayer();
+  const {
+    currentTimestamp,
+    targetSeekTime,
+    handleTimeUpdate,
+    handleNoteTimestampClick,
+  } = useVideoPlayer();
 
   const leftPanel = (
     <VideoMainContent

@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Clock, Target } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
-import { QuizAttempt } from '@/features/ai';
+import { QuizAttempt } from '@/features/quizzes/types';
 
 type AttemptHistoryProps = {
   attempts: QuizAttempt[];
@@ -73,9 +73,10 @@ export const AttemptHistory = ({ attempts }: AttemptHistoryProps) => {
               </div>
               <div className="text-right">
                 <span className="text-xs text-muted-foreground">
-                  {formatDistanceToNow(new Date(attempt.completed_at), {
-                    addSuffix: true,
-                  })}
+                  {attempt.completed_at &&
+                    formatDistanceToNow(new Date(attempt.completed_at), {
+                      addSuffix: true,
+                    })}
                 </span>
               </div>
             </div>

@@ -2,11 +2,11 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { routes } from '@/routes';
-import { VideoPageData } from '../types/video-page';
 import { tabValues } from '../search-params';
+import { IVideoPageData } from '../types';
 
 type VideoPageHeaderProps = {
-  video: VideoPageData;
+  video: IVideoPageData;
 };
 
 export const VideoPageHeader = ({ video }: VideoPageHeaderProps) => {
@@ -20,7 +20,9 @@ export const VideoPageHeader = ({ video }: VideoPageHeaderProps) => {
           </Link>
         </Button>
         <h1 className="text-2xl font-bold">{video.title}</h1>
-        {video.courses && <p className="text-muted-foreground">Course: {video.courses.title}</p>}
+        {video.courses && (
+          <p className="text-muted-foreground">Course: {video.courses.title}</p>
+        )}
       </div>
     </div>
   );

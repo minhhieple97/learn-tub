@@ -1,22 +1,14 @@
 import { useState } from 'react';
 import { useAction } from 'next-safe-action/hooks';
 import { useRouter } from 'next/navigation';
-import { toast, useToast } from '@/hooks/use-toast';
+import { toast } from '@/hooks/use-toast';
 import { addVideoAction } from '../actions/add-video';
 import { routes } from '@/routes';
 import { isValidYouTubeUrl } from '@/lib/utils';
 import { TOAST_MESSAGES } from '@/config/constants';
+import { IUseAddVideoFormReturn } from '../types';
 
-type UseAddVideoFormReturn = {
-  url: string;
-  setUrl: (url: string) => void;
-  isValidUrl: boolean;
-  isPending: boolean;
-  execute: (input: { videoUrl: string }) => void;
-  canSubmit: boolean;
-};
-
-export const useAddVideoForm = (): UseAddVideoFormReturn => {
+export const useAddVideoForm = (): IUseAddVideoFormReturn => {
   const router = useRouter();
   const { execute, isPending } = useAction(addVideoAction, {
     onError: ({ error }) => {
@@ -37,7 +29,6 @@ export const useAddVideoForm = (): UseAddVideoFormReturn => {
     onSuccess: ({ data }) => {
       if (data?.success && data?.videoId) {
         toast.success({
-          title: 'Success',
           description: TOAST_MESSAGES.VIDEO_ADDED_SUCCESS,
         });
         router.push(`${routes.learn}/${data.videoId}`);
