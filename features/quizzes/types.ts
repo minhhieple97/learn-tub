@@ -1,9 +1,6 @@
-import {
-  AI_PROVIDERS,
-  AI_CHUNK_TYPES,
-  AI_STATUS,
-  AI_FORMAT,
-} from '@/config/constants';
+import { AI_FORMAT } from '@/config/constants';
+import { Json } from '@/database.types';
+import { AIProvider, IFeedback } from '@/types';
 export type QuizSettingsType = {
   questionCount: number;
   difficulty: 'easy' | 'medium' | 'hard' | 'mixed';
@@ -137,61 +134,14 @@ export type QuizState = {
   settings: QuizSettings;
 };
 
-export type AIProvider =
-  | typeof AI_PROVIDERS.OPENAI
-  | typeof AI_PROVIDERS.GEMINI;
-
 export type AIEvaluationResult = {
   id: string;
   note_id: string;
   user_id: string;
   provider: AIProvider;
   model: string;
-  feedback: AIFeedback;
+  feedback: IFeedback;
   created_at: string;
-};
-
-export type AIFeedback = {
-  summary: string;
-  correct_points: string[];
-  incorrect_points: string[];
-  improvement_suggestions: string[];
-  overall_score: number; // 1-10
-  detailed_analysis: string;
-};
-
-export type AIEvaluationRequest = {
-  noteId: string;
-  content: string;
-  provider: AIProvider;
-  model: string;
-  context?: {
-    videoTitle?: string;
-    videoDescription?: string;
-    timestamp: number | null;
-  };
-};
-
-export type AIEvaluationResponse = {
-  success: boolean;
-  data?: AIEvaluationResult;
-  error?: string;
-};
-
-export type AIStreamChunk = {
-  type:
-    | typeof AI_CHUNK_TYPES.FEEDBACK
-    | typeof AI_CHUNK_TYPES.COMPLETE
-    | typeof AI_CHUNK_TYPES.ERROR;
-  content: string;
-  finished?: boolean;
-};
-
-export type AIEvaluationSettings = {
-  provider: AIProvider;
-  model: string;
-  temperature: number;
-  max_tokens: number;
 };
 
 export type CreateAIEvaluationInput = {
@@ -201,18 +151,11 @@ export type CreateAIEvaluationInput = {
 };
 
 export type CopyFeedbackInput = {
-  feedback: AIFeedback;
+  feedback: IFeedback;
   format:
     | typeof AI_FORMAT.COPY_FORMATS.PLAIN
     | typeof AI_FORMAT.COPY_FORMATS.MARKDOWN;
 };
-
-export type AIEvaluationStatus =
-  | typeof AI_STATUS.IDLE
-  | typeof AI_STATUS.EVALUATING
-  | typeof AI_STATUS.STREAMING
-  | typeof AI_STATUS.COMPLETED
-  | typeof AI_STATUS.ERROR;
 
 export type VideoWithNotes = {
   id: string;
@@ -238,26 +181,26 @@ export type QuizSession = {
   title: string;
   difficulty: 'easy' | 'medium' | 'hard' | 'mixed';
   question_count: number;
-  topics: string[];
+  topics: string[] | null;
   ai_provider: string;
   ai_model: string;
-  questions: QuizQuestion[];
-  created_at: string;
-  updated_at: string;
+  questions: Json; // Change to Json to match database
+  created_at: string | null;
+  updated_at: string | null;
 };
 
 export type QuizAttempt = {
   id: string;
   quiz_session_id: string;
   user_id: string;
-  answers: UserAnswer[];
+  answers: Json; // Use Json type to match database
   score: number;
   total_questions: number;
   correct_answers: number;
-  feedback?: QuizFeedback;
-  time_taken_seconds?: number;
-  completed_at: string;
-  created_at: string;
+  feedback?: Json | null; // Use Json type to match database
+  time_taken_seconds?: number | null;
+  completed_at: string | null; // Allow null to match database
+  created_at: string | null; // Allow null to match database
 };
 
 export type QuizSessionWithAttempts = QuizSession & {
@@ -270,4 +213,34 @@ export type QuizSessionWithAttempts = QuizSession & {
     youtube_id: string;
     description: string;
   };
+};
+
+// Add these types for database compatibility
+export type DatabaseQuizSession = {
+  id: string;
+  user_id: string;
+  video_id: string;
+  title: string;
+  difficulty: string; // Database stores as string
+  question_count: number;
+  topics: string[] | null;
+  ai_provider: string;
+  ai_model: string;
+  questions: Json;
+  created_at: string | null;
+  updated_at: string | null;
+};
+
+export type DatabaseQuizAttempt = {
+  id: string;
+  quiz_session_id: string;
+  user_id: string;
+  answers: Json; // Database stores as Json
+  score: number;
+  total_questions: number;
+  correct_answers: number;
+  feedback?: Json | null;
+  time_taken_seconds?: number | null;
+  completed_at: string | null;
+  created_at: string | null;
 };

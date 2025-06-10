@@ -54,6 +54,8 @@ export const TOAST_MESSAGES = {
   VALIDATION_TAG_TOO_LONG: 'Tag cannot exceed 100 characters',
   VALIDATION_TOO_MANY_TAGS: 'Cannot have more than 10 tags',
   VALIDATION_EMPTY_CONTENT: 'Note content cannot be empty',
+  FEEDBACK_COPY_SUCCESS: 'Feedback copied to clipboard',
+  FEEDBACK_COPY_ERROR: 'Failed to copy feedback',
 } as const;
 
 export const AI_CONFIG = {
@@ -85,8 +87,6 @@ export const AI_DEFAULTS = {
 export const AI_EVALUATION = {
   SCORE_EXCELLENT_THRESHOLD: 8,
   SCORE_GOOD_THRESHOLD: 6,
-  FEEDBACK_COPY_SUCCESS: 'Feedback copied to clipboard',
-  FEEDBACK_COPY_ERROR: 'Failed to copy feedback',
 } as const;
 
 export const AI_PROVIDERS = {
@@ -100,36 +100,28 @@ export const AI_API = {
   SSE_DATA_PREFIX_LENGTH: 6,
 } as const;
 
-export const AI_CHUNK_TYPES = {
+export const CHUNK_TYPES = {
   FEEDBACK: 'feedback',
   QUESTION: 'question',
   COMPLETE: 'complete',
   ERROR: 'error',
 } as const;
 
-export const AI_STATUS = {
-  IDLE: 'idle',
-  EVALUATING: 'evaluating',
-  STREAMING: 'streaming',
-  COMPLETED: 'completed',
-  ERROR: 'error',
-} as const;
-
-export const AI_RESPONSE_HEADERS = {
+export const RESPONSE_HEADERS = {
   SSE_CONTENT_TYPE: 'text/plain; charset=utf-8',
   JSON_CONTENT_TYPE: 'application/json',
   CACHE_CONTROL: 'no-cache',
   CONNECTION: 'keep-alive',
 } as const;
 
-export const AI_HTTP_STATUS = {
+export const HTTP_STATUS = {
   BAD_REQUEST: 400,
   UNAUTHORIZED: 401,
   NOT_FOUND: 404,
   INTERNAL_SERVER_ERROR: 500,
 } as const;
 
-export const AI_ERROR_MESSAGES = {
+export const ERROR_MESSAGES = {
   MISSING_REQUIRED_PARAMETERS: 'Missing required parameters',
   UNAUTHORIZED: 'Unauthorized',
   NOTE_NOT_FOUND: 'Note not found',
@@ -139,11 +131,6 @@ export const AI_ERROR_MESSAGES = {
   UNKNOWN_ERROR: 'Unknown error',
   FAILED_TO_PARSE_CHUNK: 'Failed to parse chunk',
   FAILED_TO_PARSE_AI_FEEDBACK: 'Failed to parse AI feedback for database save',
-} as const;
-
-export const AI_DATABASE = {
-  NOTES_TABLE: 'notes',
-  NOTES_SELECT_FIELDS: 'content, timestamp_seconds',
 } as const;
 
 export const AI_CHAT_ROLES = {
@@ -156,7 +143,7 @@ export const AI_SYSTEM_MESSAGES = {
     'You are an expert educational assistant who provides constructive feedback on learning notes. Always respond with valid JSON matching the requested format.',
 } as const;
 
-export const AI_EVALUATION_ERRORS = {
+export const EVALUATION_ERRORS = {
   FAILED_TO_PARSE_RESPONSE: 'Failed to parse AI response. Please try again.',
   EVALUATION_FAILED: 'AI evaluation failed',
   UNSUPPORTED_PROVIDER: 'Unsupported provider',
@@ -169,26 +156,6 @@ export const AI_FORMAT = {
   },
   TIMESTAMP_PADDING: 2,
   TIMESTAMP_PAD_CHAR: '0',
-} as const;
-
-export const AI_INTERACTION_TYPES = {
-  NOTE_ANALYSIS: 'note_analysis',
-  QUIZ_GENERATION: 'quiz_generation',
-  STUDY_PLAN: 'study_plan',
-  NOTE_FEEDBACK: 'note_feedback',
-} as const;
-
-export const AI_ACTION_ERRORS = {
-  AUTHENTICATION_REQUIRED: 'Authentication required',
-  VIDEO_NOT_FOUND: 'Video not found',
-  NO_NOTES_FOUND: 'No notes found',
-  NO_NOTES_FOR_ANALYSIS: 'No notes found for analysis',
-  NO_NOTES_FOR_QUIZ: 'No notes found for quiz generation',
-  NO_NOTES_FOR_STUDY_PLAN: 'No notes found for study plan generation',
-  FAILED_TO_ANALYZE: 'Failed to analyze notes',
-  FAILED_TO_GENERATE_QUIZ: 'Failed to generate quiz',
-  FAILED_TO_GENERATE_STUDY_PLAN: 'Failed to generate study plan',
-  FAILED_TO_GET_FEEDBACK: 'Failed to get feedback',
 } as const;
 
 export const AI_QUIZ_CONFIG = {
@@ -280,4 +247,12 @@ Be constructive and educational in your feedback.`,
   VIDEO_TITLE_PREFIX: 'Video Title: "',
   VIDEO_DESCRIPTION_PREFIX: 'Video Description: "',
   QUIZ_RESULTS_PREFIX: 'Quiz Results:',
+} as const;
+
+export const STATUS_STREAMING = {
+  IDLE: 'idle',
+  EVALUATING: 'evaluating',
+  STREAMING: 'streaming',
+  COMPLETED: 'completed',
+  ERROR: 'error',
 } as const;

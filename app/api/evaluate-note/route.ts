@@ -3,17 +3,17 @@ import { createClient } from '@/lib/supabase/server';
 
 import {
   AI_PROVIDERS,
-  AI_HTTP_STATUS,
-  AI_ERROR_MESSAGES,
-  AI_RESPONSE_HEADERS,
-  AI_DATABASE,
-  AI_CHUNK_TYPES,
+  RESPONSE_HEADERS,
+  CHUNK_TYPES,
+  ERROR_MESSAGES,
+  HTTP_STATUS,
 } from '@/config/constants';
 
 import { getProfileByUserId } from '@/features/profile/queries/profile';
 import { aiEvaluationService } from '@/features/quizzes/services';
 import { createAIInteraction } from '@/features/quizzes/queries';
-import { AIEvaluationRequest, AIFeedback, AIStreamChunk } from '@/features/quizzes/types';
+import { NoteEvaluationRequest } from '@/features/notes/types';
+import { IFeedback, StreamChunk } from '@/types';
 
 export async function GET(request: NextRequest) {
   try {
@@ -25,8 +25,8 @@ export async function GET(request: NextRequest) {
     const model = searchParams.get('model');
 
     if (!noteId || !provider || !model) {
-      return new Response(AI_ERROR_MESSAGES.MISSING_REQUIRED_PARAMETERS, {
-        status: AI_HTTP_STATUS.BAD_REQUEST,
+      return new Response(ERROR_MESSAGES.MISSING_REQUIRED_PARAMETERS, {
+        status: HTTP_STATUS.BAD_REQUEST,
       });
     }
 
@@ -37,25 +37,25 @@ export async function GET(request: NextRequest) {
     } = await supabase.auth.getUser();
 
     if (authError || !user) {
-      return new Response(AI_ERROR_MESSAGES.UNAUTHORIZED, {
-        status: AI_HTTP_STATUS.UNAUTHORIZED,
+      return new Response(ERROR_MESSAGES.UNAUTHORIZED, {
+        status: HTTP_STATUS.UNAUTHORIZED,
       });
     }
     const profile = await getProfileByUserId(user.id);
     const { data: note, error: noteError } = await supabase
-      .from(AI_DATABASE.NOTES_TABLE)
-      .select(AI_DATABASE.NOTES_SELECT_FIELDS)
+      .from('notes')
+      .select('content, timestamp_seconds')
       .eq('id', noteId)
       .eq('user_id', profile.id)
       .single();
 
     if (noteError || !note) {
-      return new Response(AI_ERROR_MESSAGES.NOTE_NOT_FOUND, {
-        status: AI_HTTP_STATUS.NOT_FOUND,
+      return new Response(ERROR_MESSAGES.NOTE_NOT_FOUND, {
+        status: HTTP_STATUS.NOT_FOUND,
       });
     }
 
-    const evaluationRequest: AIEvaluationRequest = {
+    const evaluationRequest: NoteEvaluationRequest = {
       noteId,
       provider,
       model,
@@ -73,7 +73,7 @@ export async function GET(request: NextRequest) {
         const reader = aiStream.getReader();
 
         try {
-          let feedback: AIFeedback | null = null;
+          let feedback: IFeedback | null = null;
 
           while (true) {
             const { done, value } = await reader.read();
@@ -83,9 +83,9 @@ export async function GET(request: NextRequest) {
               encoder.encode(`data: ${JSON.stringify(value)}\n\n`),
             );
 
-            if (value.type === AI_CHUNK_TYPES.COMPLETE && value.content) {
+            if (value.type === CHUNK_TYPES.COMPLETE && value.content) {
               try {
-                feedback = JSON.parse(value.content) as AIFeedback;
+                feedback = JSON.parse(value.content) as IFeedback;
                 await createAIInteraction(
                   profile.id,
                   noteId,
@@ -95,19 +95,19 @@ export async function GET(request: NextRequest) {
                 );
               } catch (parseError) {
                 console.error(
-                  AI_ERROR_MESSAGES.FAILED_TO_PARSE_AI_FEEDBACK,
+                  ERROR_MESSAGES.FAILED_TO_PARSE_AI_FEEDBACK,
                   parseError,
                 );
               }
             }
           }
         } catch (error) {
-          const errorChunk: AIStreamChunk = {
-            type: AI_CHUNK_TYPES.ERROR,
+          const errorChunk: StreamChunk = {
+            type: CHUNK_TYPES.ERROR,
             content:
               error instanceof Error
                 ? error.message
-                : AI_ERROR_MESSAGES.UNKNOWN_ERROR,
+                : ERROR_MESSAGES.UNKNOWN_ERROR,
             finished: true,
           };
 
@@ -122,17 +122,17 @@ export async function GET(request: NextRequest) {
 
     return new Response(stream, {
       headers: {
-        'Content-Type': AI_RESPONSE_HEADERS.SSE_CONTENT_TYPE,
-        'Cache-Control': AI_RESPONSE_HEADERS.CACHE_CONTROL,
-        Connection: AI_RESPONSE_HEADERS.CONNECTION,
+        'Content-Type': RESPONSE_HEADERS.SSE_CONTENT_TYPE,
+        'Cache-Control': RESPONSE_HEADERS.CACHE_CONTROL,
+        Connection: RESPONSE_HEADERS.CONNECTION,
       },
     });
   } catch {
     return new Response(
-      JSON.stringify({ error: AI_ERROR_MESSAGES.INTERNAL_SERVER_ERROR }),
+      JSON.stringify({ error: ERROR_MESSAGES.INTERNAL_SERVER_ERROR }),
       {
-        status: AI_HTTP_STATUS.INTERNAL_SERVER_ERROR,
-        headers: { 'Content-Type': AI_RESPONSE_HEADERS.JSON_CONTENT_TYPE },
+        status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+        headers: { 'Content-Type': RESPONSE_HEADERS.JSON_CONTENT_TYPE },
       },
     );
   }

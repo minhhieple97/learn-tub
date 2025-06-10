@@ -1,17 +1,24 @@
-"use client"
+'use client';
 
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Pause, Play, SkipBack, SkipForward, Volume2, VolumeX } from 'lucide-react';
+import {
+  Pause,
+  Play,
+  SkipBack,
+  SkipForward,
+  Volume2,
+  VolumeX,
+} from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { useYouTubeAPI } from '../hooks/use-youtube-api';
 import { useYouTubePlayer } from '../hooks/use-youtube-player';
 import { useLearningSession } from '../hooks/use-learning-session';
 import { usePlayerControls } from '../hooks/use-player-controls';
-import { VideoPageData } from '../types';
+import { IVideoPageData } from '../types';
 
 type YouTubePlayerProps = {
-  video: VideoPageData;
+  video: IVideoPageData;
   initialTimestamp?: number;
   onTimeUpdate?: (time: number) => void;
   targetSeekTime?: number;
@@ -60,7 +67,8 @@ export const YouTubePlayer = ({
     return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   };
 
-  const isPlaying = typeof window !== 'undefined' && playerState === YT?.PlayerState?.PLAYING;
+  const isPlaying =
+    typeof window !== 'undefined' && playerState === YT?.PlayerState?.PLAYING;
 
   return (
     <Card className="w-full overflow-hidden">
@@ -86,7 +94,11 @@ export const YouTubePlayer = ({
               <SkipBack className="h-4 w-4" />
             </Button>
             <Button variant="outline" size="icon" onClick={handlePlayPause}>
-              {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+              {isPlaying ? (
+                <Pause className="h-4 w-4" />
+              ) : (
+                <Play className="h-4 w-4" />
+              )}
             </Button>
             <Button variant="ghost" size="icon" onClick={skipForward}>
               <SkipForward className="h-4 w-4" />
@@ -94,7 +106,11 @@ export const YouTubePlayer = ({
           </div>
           <div className="flex items-center space-x-2">
             <Button variant="ghost" size="icon" onClick={toggleMute}>
-              {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+              {isMuted ? (
+                <VolumeX className="h-4 w-4" />
+              ) : (
+                <Volume2 className="h-4 w-4" />
+              )}
             </Button>
           </div>
         </div>

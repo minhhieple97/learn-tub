@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAction } from 'next-safe-action/hooks';
 import { retakeQuizAction } from '../actions/quiz-dashboard-actions';
-import { QuizSessionWithAttempts } from '@/features/ai';
 import { QuizDashboardStats } from './quiz-dashboard-stats';
 import { QuizDashboardFilters } from './quiz-dashboard-filters';
 import { QuizSessionCard } from './quiz-session-card';
@@ -13,7 +12,8 @@ import { QuizPagination } from './quiz-pagination';
 import { useQueryState, parseAsString, parseAsInteger } from 'nuqs';
 import { useQuery } from '@tanstack/react-query';
 import { getQuizDashboardData } from '../queries/quiz-dashboard-queries';
-import type { QuizFilters } from '../types';
+import { QuizSessionWithAttempts } from '@/features/quizzes/types';
+import { IQuizFilters } from '../types';
 
 type Video = {
   id: string;
@@ -55,12 +55,12 @@ export const QuizDashboard = ({
   );
   const [page] = useQueryState('page', parseAsInteger.withDefault(1));
 
-  const filters: Partial<QuizFilters> = {
+  const filters: Partial<IQuizFilters> = {
     search,
-    difficulty: difficulty as QuizFilters['difficulty'],
+    difficulty: difficulty as IQuizFilters['difficulty'],
     videoId: videoId === 'all' ? undefined : videoId,
-    sortBy: sortBy as QuizFilters['sortBy'],
-    sortOrder: sortOrder as QuizFilters['sortOrder'],
+    sortBy: sortBy as IQuizFilters['sortBy'],
+    sortOrder: sortOrder as IQuizFilters['sortOrder'],
     page,
     limit: 10,
   };

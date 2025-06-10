@@ -5,20 +5,27 @@ import {
   AI_CONFIG,
   AI_DEFAULTS,
   AI_PROVIDERS,
-  AI_CHUNK_TYPES,
+  CHUNK_TYPES,
   AI_CHAT_ROLES,
   AI_SYSTEM_MESSAGES,
-  AI_EVALUATION_ERRORS,
   AI_FORMAT,
-  AI_ERROR_MESSAGES,
+  ERROR_MESSAGES,
+  EVALUATION_ERRORS,
 } from '@/config/constants';
-import type { AIFeedback, AIEvaluationRequest, AIStreamChunk } from '../types';
+import type { AIFeedback } from '../types';
+import { NoteEvaluationRequest } from '@/features/notes/types';
+import { StreamChunk } from '@/types';
 
-type StreamController = ReadableStreamDefaultController<AIStreamChunk>;
-type ProviderEvaluator = (model: string, prompt: string) => Promise<ReadableStream<AIStreamChunk>>;
+type StreamController = ReadableStreamDefaultController<StreamChunk>;
+type ProviderEvaluator = (
+  model: string,
+  prompt: string,
+) => Promise<ReadableStream<StreamChunk>>;
 
 class AIEvaluationService {
-  async evaluateNote(request: AIEvaluationRequest): Promise<ReadableStream<AIStreamChunk>> {
+  async evaluateNote(
+    request: NoteEvaluationRequest,
+  ): Promise<ReadableStream<StreamChunk>> {
     const { provider, model, content, context } = request;
     const prompt = this.createEvaluationPrompt(content, context);
 
@@ -34,7 +41,7 @@ class AIEvaluationService {
 
     const evaluator = evaluators[provider];
     if (!evaluator) {
-      throw new Error(`${AI_EVALUATION_ERRORS.UNSUPPORTED_PROVIDER}: ${provider}`);
+      throw new Error(`${EVALUATION_ERRORS.UNSUPPORTED_PROVIDER}: ${provider}`);
     }
 
     return evaluator;
@@ -42,7 +49,7 @@ class AIEvaluationService {
 
   private createEvaluationPrompt(
     content: string,
-    context?: AIEvaluationRequest['context'],
+    context?: NoteEvaluationRequest['context'],
   ): string {
     const contextualInfo = this.buildContextualInfo(context);
 
@@ -72,7 +79,9 @@ Focus on:
 Be constructive and educational in your feedback.`;
   }
 
-  private buildContextualInfo(context?: AIEvaluationRequest['context']): string {
+  private buildContextualInfo(
+    context?: NoteEvaluationRequest['context'],
+  ): string {
     if (!context) return '';
 
     const contextParts: string[] = [];
@@ -86,7 +95,9 @@ Be constructive and educational in your feedback.`;
     }
 
     if (context.timestamp) {
-      contextParts.push(`Timestamp: ${this.formatTimestamp(context.timestamp)}`);
+      contextParts.push(
+        `Timestamp: ${this.formatTimestamp(context.timestamp)}`,
+      );
     }
 
     return contextParts.join('\n');
@@ -98,7 +109,9 @@ Be constructive and educational in your feedback.`;
     const secs = seconds % 60;
 
     const pad = (num: number) =>
-      num.toString().padStart(AI_FORMAT.TIMESTAMP_PADDING, AI_FORMAT.TIMESTAMP_PAD_CHAR);
+      num
+        .toString()
+        .padStart(AI_FORMAT.TIMESTAMP_PADDING, AI_FORMAT.TIMESTAMP_PAD_CHAR);
 
     if (hours > 0) {
       return `${hours}:${pad(minutes)}:${pad(secs)}`;
@@ -107,7 +120,10 @@ Be constructive and educational in your feedback.`;
     return `${minutes}:${pad(secs)}`;
   }
 
-  formatFeedbackForCopy(feedback: AIFeedback, format: 'plain' | 'markdown'): string {
+  formatFeedbackForCopy(
+    feedback: AIFeedback,
+    format: 'plain' | 'markdown',
+  ): string {
     return format === AI_FORMAT.COPY_FORMATS.MARKDOWN
       ? this.formatAsMarkdown(feedback)
       : this.formatAsPlainText(feedback);
@@ -161,7 +177,7 @@ ${feedback.detailed_analysis}`;
   private async evaluateWithOpenAI(
     model: string,
     prompt: string,
-  ): Promise<ReadableStream<AIStreamChunk>> {
+  ): Promise<ReadableStream<StreamChunk>> {
     const openai = new OpenAI({
       apiKey: env.OPENAI_API_KEY,
       baseURL: AI_CONFIG.BASE_URL,
@@ -190,7 +206,7 @@ ${feedback.detailed_analysis}`;
   private async evaluateWithGemini(
     model: string,
     prompt: string,
-  ): Promise<ReadableStream<AIStreamChunk>> {
+  ): Promise<ReadableStream<StreamChunk>> {
     const genAI = new GoogleGenAI({
       apiKey: env.GEMINI_API_KEY,
     });
@@ -205,8 +221,8 @@ ${feedback.detailed_analysis}`;
 
   private createStreamFromOpenAI(
     stream: AsyncIterable<OpenAI.Chat.Completions.ChatCompletionChunk>,
-  ): ReadableStream<AIStreamChunk> {
-    return new ReadableStream<AIStreamChunk>({
+  ): ReadableStream<StreamChunk> {
+    return new ReadableStream<StreamChunk>({
       async start(controller) {
         try {
           let fullContent = '';
@@ -216,7 +232,7 @@ ${feedback.detailed_analysis}`;
             fullContent += content;
 
             controller.enqueue({
-              type: AI_CHUNK_TYPES.FEEDBACK,
+              type: CHUNK_TYPES.FEEDBACK,
               content,
               finished: false,
             });
@@ -232,8 +248,8 @@ ${feedback.detailed_analysis}`;
 
   private createStreamFromGemini(
     response: AsyncIterable<{ text?: string }>,
-  ): ReadableStream<AIStreamChunk> {
-    return new ReadableStream<AIStreamChunk>({
+  ): ReadableStream<StreamChunk> {
+    return new ReadableStream<StreamChunk>({
       async start(controller) {
         try {
           let fullContent = '';
@@ -243,7 +259,7 @@ ${feedback.detailed_analysis}`;
             fullContent += content;
 
             controller.enqueue({
-              type: AI_CHUNK_TYPES.FEEDBACK,
+              type: CHUNK_TYPES.FEEDBACK,
               content,
               finished: false,
             });
@@ -257,18 +273,21 @@ ${feedback.detailed_analysis}`;
     });
   }
 
-  private handleStreamCompletion(controller: StreamController, fullContent: string): void {
+  private handleStreamCompletion(
+    controller: StreamController,
+    fullContent: string,
+  ): void {
     try {
       const feedback = JSON.parse(fullContent) as AIFeedback;
       controller.enqueue({
-        type: AI_CHUNK_TYPES.COMPLETE,
+        type: CHUNK_TYPES.COMPLETE,
         content: JSON.stringify(feedback),
         finished: true,
       });
     } catch {
       controller.enqueue({
-        type: AI_CHUNK_TYPES.ERROR,
-        content: AI_EVALUATION_ERRORS.FAILED_TO_PARSE_RESPONSE,
+        type: CHUNK_TYPES.ERROR,
+        content: EVALUATION_ERRORS.FAILED_TO_PARSE_RESPONSE,
         finished: true,
       });
     } finally {
@@ -276,12 +295,16 @@ ${feedback.detailed_analysis}`;
     }
   }
 
-  private handleStreamError(controller: StreamController, error: unknown): void {
-    const errorMessage = error instanceof Error ? error.message : AI_ERROR_MESSAGES.UNKNOWN_ERROR;
+  private handleStreamError(
+    controller: StreamController,
+    error: unknown,
+  ): void {
+    const errorMessage =
+      error instanceof Error ? error.message : ERROR_MESSAGES.UNKNOWN_ERROR;
 
     controller.enqueue({
-      type: AI_CHUNK_TYPES.ERROR,
-      content: `${AI_EVALUATION_ERRORS.EVALUATION_FAILED}: ${errorMessage}`,
+      type: CHUNK_TYPES.ERROR,
+      content: `${EVALUATION_ERRORS.EVALUATION_FAILED}: ${errorMessage}`,
       finished: true,
     });
 

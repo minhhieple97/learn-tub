@@ -1,11 +1,11 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { QuizSessionWithAttempts } from '@/features/ai';
 import { QuizHeader } from './quiz-detail/quiz-header';
 import { QuizInfoCard } from './quiz-detail/quiz-info-card';
 import { QuestionItem } from './quiz-detail/question-item';
 import { AttemptHistory } from './quiz-detail/attempt-history';
+import { QuizSessionWithAttempts } from '@/features/quizzes/types';
 
 type QuizDetailContentProps = {
   quizSession: QuizSessionWithAttempts;

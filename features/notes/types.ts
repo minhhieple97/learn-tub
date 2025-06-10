@@ -1,4 +1,6 @@
-import { VideoPageData } from "../videos/types";
+import { AIProvider, IFeedback } from '@/types';
+import { STATUS_STREAMING } from '@/config/constants';
+import { IVideoPageData } from '../videos/types';
 
 export type Note = {
   id: string;
@@ -12,7 +14,7 @@ export type Note = {
 };
 
 export type NoteEditorProps = {
-  video: VideoPageData;
+  video: IVideoPageData;
   currentTimestamp: number;
   onTimestampClick?: (time: number) => void;
 };
@@ -152,13 +154,13 @@ export type UseNoteEditorReturn = {
   content: string;
   setContent: (content: string) => void;
   isEditing: boolean;
-  
+
   tags: string[];
   tagInput: string;
   setTagInput: (input: string) => void;
-  
+
   isLoading: boolean;
-  
+
   handleSave: () => void;
   handleCancel: () => void;
   handleAddTag: () => void;
@@ -194,3 +196,38 @@ export type NotesListWithSearchProps = NotesListProps & {
   showSearch?: boolean;
   searchPlaceholder?: string;
 };
+
+export type NoteEvaluationRequest = {
+  noteId: string;
+  content: string;
+  provider: AIProvider;
+  model: string;
+  context?: {
+    videoTitle?: string;
+    videoDescription?: string;
+    timestamp: number | null;
+  };
+};
+
+export type NoteEvaluationResult = {
+  id: string;
+  note_id: string;
+  user_id: string;
+  provider: AIProvider;
+  model: string;
+  feedback: IFeedback;
+  created_at: string;
+};
+
+export type NoteEvaluationResponse = {
+  success: boolean;
+  data?: NoteEvaluationResult;
+  error?: string;
+};
+
+export type NoteEvaluationStatus =
+  | typeof STATUS_STREAMING.IDLE
+  | typeof STATUS_STREAMING.EVALUATING
+  | typeof STATUS_STREAMING.STREAMING
+  | typeof STATUS_STREAMING.COMPLETED
+  | typeof STATUS_STREAMING.ERROR;
