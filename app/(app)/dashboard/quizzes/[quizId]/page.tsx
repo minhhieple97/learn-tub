@@ -1,13 +1,13 @@
 import { QuizDetailContent } from '@/features/dashboard/components/quiz-detail';
 import { getQuizSessionDetail } from '@/features/dashboard/queries/quiz-dashboard-queries';
-import { getProfileInSession } from '@/features/profile/queries/profile';
+import { getProfileInSession } from '@/features/profile/queries';
 import { notFound } from 'next/navigation';
 
-type QuizDetailPageProps = {
+type IQuizDetailPageProps = {
   params: Promise<{ quizId: string }>;
 };
 
-export default async function QuizDetailPage({ params }: QuizDetailPageProps) {
+export default async function QuizDetailPage({ params }: IQuizDetailPageProps) {
   const { quizId } = await params;
   const profile = await getProfileInSession();
   const quizSession = await getQuizSessionDetail(quizId, profile.id);

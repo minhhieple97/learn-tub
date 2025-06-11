@@ -1,8 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { VideoPageData } from '../types/video-page';
+import { IVideoPageData } from '../types';
 
 type VideoInfoCardProps = {
-  video: VideoPageData;
+  video: IVideoPageData;
 };
 
 export const VideoInfoCard = ({ video }: VideoInfoCardProps) => {
@@ -12,7 +12,9 @@ export const VideoInfoCard = ({ video }: VideoInfoCardProps) => {
         <CardTitle>Video Information</CardTitle>
       </CardHeader>
       <CardContent>
-        <p className="text-sm">{video.description || 'No description available.'}</p>
+        <p className="text-sm">
+          {video.description || 'No description available.'}
+        </p>
         <div className="mt-4 text-sm text-muted-foreground">
           <p>Channel: {video.channel_name || 'Unknown'}</p>
           <p>

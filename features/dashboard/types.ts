@@ -1,4 +1,5 @@
-import type { QuizSessionWithAttempts, QuizAttempt } from '@/features/ai/types';
+import { IQuizAttempt, IQuizDifficultyFilter, IQuizSessionWithAttempts } from '../quizzes/types';
+import { Tables } from '@/database.types';
 
 export type DashboardStats = {
   totalVideos: number;
@@ -31,18 +32,37 @@ export type LearningGoal = {
 };
 
 export type QuizDashboardData = {
-  sessions: QuizSessionWithAttempts[];
+  sessions: IQuizSessionWithAttempts[];
   totalSessions: number;
   totalAttempts: number;
   averageScore: number;
-  recentAttempts: QuizAttempt[];
+  recentAttempts: IQuizAttempt[];
   totalPages: number;
   currentPage: number;
 };
 
-export type QuizFilters = {
+export type InsightsData = {
+  analysisCount: number;
+  quizStats: {
+    totalSessions: number;
+    totalAttempts: number;
+    averageScore: number;
+    recentAttempts: (Tables<'quiz_attempts'> & {
+      quiz_sessions: {
+        title: string;
+        videos: {
+          title: string;
+          youtube_id: string;
+        };
+      };
+    })[];
+  };
+  studyPlanCount: number;
+};
+
+export type IQuizFilters = {
   search: string;
-  difficulty: 'all' | 'easy' | 'medium' | 'hard' | 'mixed';
+  difficulty: IQuizDifficultyFilter;
   videoId?: string;
   sortBy: 'created_at' | 'score' | 'attempts';
   sortOrder: 'asc' | 'desc';

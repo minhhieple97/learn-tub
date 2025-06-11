@@ -3,14 +3,14 @@
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
-import { QuizSessionWithAttempts } from '@/features/ai';
 import { routes } from '@/routes';
+import { IQuizSessionWithAttempts } from '@/features/quizzes/types';
 
-type QuizHeaderProps = {
-  quizSession: QuizSessionWithAttempts;
+type IQuizHeaderProps = {
+  quizSession: IQuizSessionWithAttempts;
 };
 
-export const QuizHeader = ({ quizSession }: QuizHeaderProps) => {
+export const QuizHeader = ({ quizSession }: IQuizHeaderProps) => {
   return (
     <div className="flex items-center gap-4">
       <Link href={routes.dashboard.quizzes}>
@@ -20,9 +20,7 @@ export const QuizHeader = ({ quizSession }: QuizHeaderProps) => {
         </Button>
       </Link>
       <div className="space-y-1">
-        <h1 className="text-2xl font-bold text-foreground">
-          {quizSession.title}
-        </h1>
+        <h1 className="text-2xl font-bold text-foreground">{quizSession.title}</h1>
         <p className="text-sm text-muted-foreground">
           {quizSession.videos?.title || 'Video not found'}
         </p>

@@ -2,14 +2,14 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { routes } from '@/routes';
-import { VideoPageData } from '../types/video-page';
 import { tabValues } from '../search-params';
+import { IVideoPageData } from '../types';
 
-type VideoPageHeaderProps = {
-  video: VideoPageData;
+type IVideoPageHeaderProps = {
+  video: IVideoPageData;
 };
 
-export const VideoPageHeader = ({ video }: VideoPageHeaderProps) => {
+export const VideoPageHeader = ({ video }: IVideoPageHeaderProps) => {
   return (
     <div className="flex items-center justify-between">
       <div>

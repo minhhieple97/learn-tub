@@ -2,13 +2,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { CheckCircle, XCircle, Lightbulb, Copy, RotateCcw } from 'lucide-react';
-import { AI_EVALUATION } from '@/config/constants';
-import type { AIFeedback } from '../../ai/types';
+import { TOAST_MESSAGES } from '@/config/constants';
 import { toast } from '@/hooks/use-toast';
 import { formatFeedbackForCopy, getScoreColor } from '@/lib/utils';
+import { IFeedback } from '@/types';
 
 type NoteFeedbackDisplayProps = {
-  feedback: AIFeedback;
+  feedback: IFeedback;
   onCopy?: () => void;
   onReset?: () => void;
 };
@@ -23,10 +23,10 @@ export const NoteFeedbackDisplay = ({
 
     try {
       await navigator.clipboard.writeText(formattedFeedback);
-      toast.success({ description: AI_EVALUATION.FEEDBACK_COPY_SUCCESS });
+      toast.success({ description: TOAST_MESSAGES.FEEDBACK_COPY_SUCCESS });
       onCopy?.();
     } catch (error) {
-      toast.error({ description: AI_EVALUATION.FEEDBACK_COPY_ERROR });
+      toast.error({ description: TOAST_MESSAGES.FEEDBACK_COPY_ERROR });
     }
   };
 

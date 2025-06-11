@@ -24,7 +24,7 @@ import { NoteEvaluationStreaming } from './note-evaluation-streaming';
 import { AIModelSelector } from './ai-model-selector';
 import { AIFeedbackHistory } from './note-feedback-history';
 import { useNoteEvaluation } from '../hooks/use-note-evaluation';
-import { AIProvider } from '@/features/quizzes/types';
+import { AIProvider } from '@/types';
 
 type NoteEvaluationProps = {
   noteId: string;

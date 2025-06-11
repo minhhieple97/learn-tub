@@ -1,38 +1,9 @@
 import { createClient } from '@/lib/supabase/server';
-import { Video } from '../types/video';
-import { VideoData } from '../types/video-page';
-import { getProfileInSession } from '@/features/profile/queries/profile';
 
-export const getCurrentUser = async () => {
-  const supabase = await createClient();
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser();
+import { getProfileInSession } from '@/features/profile/queries';
+import { IVideo, IVideoData } from '../types';
 
-  if (error) {
-    throw new Error(`Failed to get user: ${error.message}`);
-  }
-
-  return user;
-};
-
-export const getUserProfile = async (userId: string) => {
-  const supabase = await createClient();
-  const { data: profile, error } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', userId)
-    .maybeSingle();
-
-  if (error) {
-    throw new Error(`Failed to get user profile: ${error.message}`);
-  }
-
-  return profile;
-};
-
-export const getUserVideos = async (userId: string): Promise<Video[]> => {
+export const getUserVideos = async (userId: string): Promise<IVideo[]> => {
   const supabase = await createClient();
   const { data: videos, error } = await supabase
     .from('videos')
@@ -44,7 +15,7 @@ export const getUserVideos = async (userId: string): Promise<Video[]> => {
     throw new Error(`Failed to get user videos: ${error.message}`);
   }
 
-  return videos || [];
+  return videos;
 };
 
 export const getLearnPageData = async () => {
@@ -68,7 +39,7 @@ export const checkExistingVideo = async (userId: string, youtubeId: string) => {
   return existingVideos;
 };
 
-export async function insertVideo(videoData: VideoData) {
+export const insertVideo = async (videoData: IVideoData) => {
   const supabase = await createClient();
   const { error } = await supabase.from('videos').insert({
     user_id: videoData.userId,
@@ -86,9 +57,12 @@ export async function insertVideo(videoData: VideoData) {
   }
 
   return { success: true, videoId: videoData.youtubeId };
-}
+};
 
-export const getVideoByYoutubeId = async (youtubeId: string, userId: string) => {
+export const getVideoByYoutubeId = async (
+  youtubeId: string,
+  userId: string,
+) => {
   const supabase = await createClient();
   const { data: video, error } = await supabase
     .from('videos')

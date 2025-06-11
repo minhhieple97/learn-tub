@@ -1,17 +1,24 @@
-"use client"
+'use client';
 
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Pause, Play, SkipBack, SkipForward, Volume2, VolumeX } from 'lucide-react';
+import {
+  Pause,
+  Play,
+  SkipBack,
+  SkipForward,
+  Volume2,
+  VolumeX,
+} from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 import { useYouTubeAPI } from '../hooks/use-youtube-api';
 import { useYouTubePlayer } from '../hooks/use-youtube-player';
 import { useLearningSession } from '../hooks/use-learning-session';
 import { usePlayerControls } from '../hooks/use-player-controls';
-import { VideoPageData } from '../types';
+import { IVideoPageData } from '../types';
 
-type YouTubePlayerProps = {
-  video: VideoPageData;
+type IYouTubePlayerProps = {
+  video: IVideoPageData;
   initialTimestamp?: number;
   onTimeUpdate?: (time: number) => void;
   targetSeekTime?: number;
@@ -22,7 +29,7 @@ export const YouTubePlayer = ({
   initialTimestamp = 0,
   onTimeUpdate,
   targetSeekTime,
-}: YouTubePlayerProps) => {
+}: IYouTubePlayerProps) => {
   const { isApiLoaded, YT } = useYouTubeAPI();
 
   const { player, playerState, duration, playerRef } = useYouTubePlayer({

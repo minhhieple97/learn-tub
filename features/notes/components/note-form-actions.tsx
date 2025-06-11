@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Save } from 'lucide-react';
-import type { NoteFormActionsProps } from '../types';
+import type { INoteFormActionsProps } from '../types';
 import { Spinner } from '@/components/ui/spinner';
 
 export const NoteFormActions = ({
@@ -9,12 +9,12 @@ export const NoteFormActions = ({
   onSave,
   onCancel,
   disabled = false,
-}: NoteFormActionsProps) => {
+}: INoteFormActionsProps) => {
   return (
     <div className="flex gap-3">
-      <Button 
-        onClick={onSave} 
-        disabled={isLoading || disabled} 
+      <Button
+        onClick={onSave}
+        disabled={isLoading || disabled}
         className="flex-1 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white shadow-lg transition-all duration-200 hover:shadow-xl"
       >
         {isLoading ? (
@@ -26,8 +26,8 @@ export const NoteFormActions = ({
       </Button>
 
       {isEditing && (
-        <Button 
-          variant="outline" 
+        <Button
+          variant="outline"
           onClick={onCancel}
           className="border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200"
         >

@@ -1,23 +1,33 @@
-import { VideoPageData } from "../videos/types";
+import {
+  AIProvider,
+  IFeedback,
+  IApiResponse,
+  IActionResult,
+  IAsyncHookReturn,
+  IAsyncOperationHook,
+  ISearchHookReturn,
+} from '@/types';
+import { STATUS_STREAMING } from '@/config/constants';
+import { IVideoPageData } from '../videos/types';
 
-export type Note = {
+export type INote = {
   id: string;
   content: string;
-  timestamp_seconds: number;
-  tags: string[];
-  created_at: string;
-  updated_at: string;
-  video_id?: string;
-  user_id?: string;
+  timestamp_seconds: number | null;
+  tags: string[] | null;
+  created_at: string | null;
+  updated_at: string | null;
+  video_id: string | null;
+  user_id: string | null;
 };
 
-export type NoteEditorProps = {
-  video: VideoPageData;
+export type INoteEditorProps = {
+  video: IVideoPageData;
   currentTimestamp: number;
   onTimestampClick?: (time: number) => void;
 };
 
-export type CreateNotePayload = {
+export type ICreateNotePayload = {
   video_id: string;
   user_id: string;
   content: string;
@@ -25,80 +35,76 @@ export type CreateNotePayload = {
   tags: string[];
 };
 
-export type UpdateNotePayload = {
+export type IUpdateNotePayload = {
   content: string;
   tags: string[];
   updated_at: string;
 };
 
-export type SaveNoteInput = {
+export type ISaveNoteInput = {
   videoId: string;
   content: string;
   timestamp: number;
   tags: string[];
 };
 
-export type UpdateNoteInput = {
+export type IUpdateNoteInput = {
   noteId: string;
   content: string;
   tags: string[];
 };
 
-export type DeleteNoteInput = {
+export type IDeleteNoteInput = {
   noteId: string;
 };
 
-export type NoteActionResult = {
-  success: boolean;
-  noteId?: string;
-  message?: string;
-};
+export type INoteActionResult = IActionResult<string>;
 
-export type NoteEditorFormProps = {
+export type INoteEditorFormProps = {
   videoId: string;
   currentTimestamp: number;
-  handleSaveNote: (note: Note) => void;
-  handleUpdateNote: (note: Note) => void;
+  handleSaveNote: (note: INote) => void;
+  handleUpdateNote: (note: INote) => void;
 };
 
-export type NoteEditorFormRef = {
-  setEditingNote: (note: Note | null) => void;
+export type INoteEditorFormRef = {
+  setEditingNote: (note: INote | null) => void;
 };
 
-export type TagsSectionProps = {
+export type ITagsSectionProps = {
   onTagInputChange: (tagInput: string) => void;
   onAddTag: () => void;
   onRemoveTag: (tag: string) => void;
   onKeyDown: (e: React.KeyboardEvent) => void;
 };
 
-export type NotesListProps = {
-  notes: Note[];
+export type INotesListProps = {
+  notes: INote[];
   onTimestampClick?: (timestamp: number) => void;
-  onUpdateNote: (note: Note) => void;
+  onUpdateNote: (note: INote) => void;
   onDeleteNote: (noteId: string) => void;
 };
 
-export type NoteCardProps = {
-  note: Note;
+export type INoteCardProps = {
+  note: INote;
   onTimestampClick?: (timestamp: number) => void;
-  onUpdateNote: (note: Note) => void;
+  onUpdateNote: (note: INote) => void;
   onDeleteNote: (noteId: string) => void;
 };
 
-export type TimestampDisplayProps = {
-  timestamp: number;
+export type ITimestampDisplayProps = {
+  timestamp: number | null;
   onClick?: (timestamp: number) => void;
   clickable?: boolean;
 };
 
-export type NoteCardActionsProps = {
+export type INoteCardActionsProps = {
   onEdit: () => void;
   onDelete: () => void;
   noteId: string;
 };
 
-export type NoteFormActionsProps = {
+export type INoteFormActionsProps = {
   isLoading: boolean;
   isEditing: boolean;
   onSave: () => void;
@@ -106,27 +112,24 @@ export type NoteFormActionsProps = {
   disabled?: boolean;
 };
 
-export type UseVideoIdReturn = {
-  dbVideoId: string | null;
-  isLoading: boolean;
-};
+export type IUseVideoIdReturn = IAsyncHookReturn<string | null>;
 
-export type UseNotesDataReturn = {
-  notes: Note[];
+export type IUseNotesDataReturn = {
+  notes: INote[];
   isLoading: boolean;
   refetch: () => Promise<void>;
 };
 
-export type UseNotesFormReturn = {
+export type IUseNotesFormReturn = {
   content: string;
   setContent: (content: string) => void;
   editingNoteId: string | null;
-  setEditingNote: (note: Note | null) => void;
+  setEditingNote: (note: INote | null) => void;
   resetForm: () => void;
   isEditing: boolean;
 };
 
-export type UseTagsReturn = {
+export type IUseTagsReturn = {
   tags: string[];
   tagInput: string;
   setTagInput: (input: string) => void;
@@ -136,61 +139,83 @@ export type UseTagsReturn = {
   resetTags: () => void;
 };
 
-export type UseNotesOperationsReturn = {
-  saveNote: (payload: SaveNoteInput) => void;
-  updateNote: (payload: UpdateNoteInput) => void;
-  deleteNote: (payload: DeleteNoteInput) => void;
-  isLoading: boolean;
+export type IUseNotesOperationsReturn = IAsyncOperationHook & {
+  saveNote: (payload: ISaveNoteInput) => void;
+  updateNote: (payload: IUpdateNoteInput) => void;
+  deleteNote: (payload: IDeleteNoteInput) => void;
 };
 
-export type UseNoteEditorProps = {
+export type IUseNoteEditorProps = {
   videoId: string;
   currentTimestamp: number;
 };
 
-export type UseNoteEditorReturn = {
+export type IUseNoteEditorReturn = {
   content: string;
   setContent: (content: string) => void;
   isEditing: boolean;
-  
+
   tags: string[];
   tagInput: string;
   setTagInput: (input: string) => void;
-  
+
   isLoading: boolean;
-  
+
   handleSave: () => void;
   handleCancel: () => void;
   handleAddTag: () => void;
   handleRemoveTag: (tag: string) => void;
   handleKeyDown: (e: React.KeyboardEvent) => void;
-  setEditingNote: (note: Note | null) => void;
+  setEditingNote: (note: INote | null) => void;
 };
 
-export type NotesSearchProps = {
+export type INotesSearchProps = {
   videoId?: string | null;
-  onSearchResults?: (results: Note[]) => void;
+  onSearchResults?: (results: INote[]) => void;
   placeholder?: string;
   className?: string;
 };
 
-export type UseNotesSearchProps = {
+export type IUseNotesSearchProps = {
   videoId?: string | null;
   enabled?: boolean;
 };
 
-export type UseNotesSearchReturn = {
-  searchQuery: string;
-  setSearchQuery: (query: string) => void;
-  searchResults: Note[];
-  isSearching: boolean;
-  clearSearch: () => void;
-  hasResults: boolean;
-  resultCount: number;
-};
+export type IUseNotesSearchReturn = ISearchHookReturn<INote>;
 
-export type NotesListWithSearchProps = NotesListProps & {
+export type INotesListWithSearchProps = INotesListProps & {
   videoId: string;
   showSearch?: boolean;
   searchPlaceholder?: string;
 };
+
+export type INoteEvaluationRequest = {
+  noteId: string;
+  content: string;
+  provider: AIProvider;
+  model: string;
+  context?: {
+    videoTitle?: string;
+    videoDescription?: string;
+    timestamp: number | null;
+  };
+};
+
+export type INoteEvaluationResult = {
+  id: string;
+  note_id: string;
+  user_id: string;
+  provider: AIProvider;
+  model: string;
+  feedback: IFeedback;
+  created_at: string;
+};
+
+export type INoteEvaluationResponse = IApiResponse<INoteEvaluationResult>;
+
+export type INoteEvaluationStatus =
+  | typeof STATUS_STREAMING.IDLE
+  | typeof STATUS_STREAMING.EVALUATING
+  | typeof STATUS_STREAMING.STREAMING
+  | typeof STATUS_STREAMING.COMPLETED
+  | typeof STATUS_STREAMING.ERROR;

@@ -4,15 +4,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Clock, Target, Trophy } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
-import { QuizSessionWithAttempts } from '@/features/ai';
 import { QuizRetakeButton } from './quiz-retake-button';
 import { DifficultyBadge } from '@/components/ui/difficulty-badge';
+import { IQuizSessionWithAttempts } from '@/features/quizzes/types';
 
-type QuizInfoCardProps = {
-  quizSession: QuizSessionWithAttempts;
+type IQuizInfoCardProps = {
+  quizSession: IQuizSessionWithAttempts;
 };
 
-export const QuizInfoCard = ({ quizSession }: QuizInfoCardProps) => {
+export const QuizInfoCard = ({ quizSession }: IQuizInfoCardProps) => {
   return (
     <Card className="border-border/50 shadow-sm">
       <CardHeader className="pb-4">
@@ -25,9 +25,11 @@ export const QuizInfoCard = ({ quizSession }: QuizInfoCardProps) => {
               <Clock className="h-3.5 w-3.5" />
               <span>
                 Created{' '}
-                {formatDistanceToNow(new Date(quizSession.created_at), {
-                  addSuffix: true,
-                })}
+                {quizSession.created_at
+                  ? formatDistanceToNow(new Date(quizSession.created_at), {
+                      addSuffix: true,
+                    })
+                  : 'N/A'}
               </span>
             </div>
           </div>
@@ -65,9 +67,7 @@ export const QuizInfoCard = ({ quizSession }: QuizInfoCardProps) => {
             <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30 border border-border/30">
               <div className="text-sm">
                 <span className="text-muted-foreground">AI Model:</span>
-                <span className="ml-1 font-medium text-foreground">
-                  {quizSession.ai_model}
-                </span>
+                <span className="ml-1 font-medium text-foreground">{quizSession.ai_model}</span>
               </div>
             </div>
           </div>
