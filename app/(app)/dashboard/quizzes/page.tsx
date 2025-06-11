@@ -16,13 +16,11 @@ type SearchParams = Promise<{
   page?: string;
 }>;
 
-type QuizDashboardPageProps = {
+type IQuizDashboardPageProps = {
   searchParams: SearchParams;
 };
 
-export default async function QuizDashboardPage({
-  searchParams,
-}: QuizDashboardPageProps) {
+export default async function QuizDashboardPage({ searchParams }: IQuizDashboardPageProps) {
   const params = await searchParams;
   const profile = await getProfileInSession();
 

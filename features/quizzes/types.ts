@@ -1,6 +1,6 @@
 import { AI_FORMAT } from '@/config/constants';
 import { Json } from '@/database.types';
-import { AIProvider, IFeedback } from '@/types';
+import { AIProvider, IFeedback, IApiResponse, IAsyncOperationHook } from '@/types';
 
 export type IQuizDifficulty = 'easy' | 'medium' | 'hard' | 'mixed';
 
@@ -103,22 +103,14 @@ export type IEvaluateQuizRequest = {
   model: string;
 };
 
-export type IQuizGenerationResponse = {
-  success: boolean;
-  questions?: IQuizQuestion[];
-  error?: string;
-};
+// Use common generic response types
+export type IQuizGenerationResponse = IApiResponse<IQuizQuestion[]>;
+export type IQuizEvaluationResponse = IApiResponse<IQuizFeedback>;
 
 export type IQuizStreamChunk = {
   type: 'question' | 'complete' | 'error';
   content: string;
   finished: boolean;
-};
-
-export type IQuizEvaluationResponse = {
-  success: boolean;
-  feedback?: IQuizFeedback;
-  error?: string;
 };
 
 export type IQuizSettings = {

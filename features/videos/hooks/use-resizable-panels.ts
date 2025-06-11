@@ -1,12 +1,12 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 
-type UseResizablePanelsProps = {
+type IUseResizablePanelsProps = {
   initialLeftWidth?: number;
   minLeftWidth?: number;
   maxLeftWidth?: number;
 };
 
-type UseResizablePanelsReturn = {
+type IUseResizablePanelsReturn = {
   leftWidth: number;
   rightWidth: number;
   isDragging: boolean;
@@ -20,7 +20,7 @@ export const useResizablePanels = ({
   initialLeftWidth = 66.666667,
   minLeftWidth = 30,
   maxLeftWidth = 80,
-}: UseResizablePanelsProps = {}): UseResizablePanelsReturn => {
+}: IUseResizablePanelsProps = {}): IUseResizablePanelsReturn => {
   const [leftWidth, setLeftWidth] = useState(initialLeftWidth);
   const [isDragging, setIsDragging] = useState(false);
   const [isKeyboardActive, setIsKeyboardActive] = useState(false);
@@ -51,10 +51,7 @@ export const useResizablePanels = ({
 
         const percentage = (mouseX / containerWidth) * 100;
 
-        const clampedPercentage = Math.max(
-          minLeftWidth,
-          Math.min(maxLeftWidth, percentage),
-        );
+        const clampedPercentage = Math.max(minLeftWidth, Math.min(maxLeftWidth, percentage));
 
         setLeftWidth(clampedPercentage);
         lastUpdateTimeRef.current = now;

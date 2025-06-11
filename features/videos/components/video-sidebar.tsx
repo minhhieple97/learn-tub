@@ -3,17 +3,13 @@ import { NoteEditor } from '@/features/notes/components/note-editor';
 import { QuizzTab } from '@/features/quizzes/components/quizz-tab';
 import { IVideoPageData } from '../types';
 
-type VideoSidebarProps = {
+type IVideoSidebarProps = {
   currentTimestamp: number;
   onTimestampClick: (time: number) => void;
   video: IVideoPageData;
 };
 
-export const VideoSidebar = ({
-  currentTimestamp,
-  onTimestampClick,
-  video,
-}: VideoSidebarProps) => {
+export const VideoSidebar = ({ currentTimestamp, onTimestampClick, video }: IVideoSidebarProps) => {
   return (
     <Tabs defaultValue="notes">
       <TabsList className="w-full">

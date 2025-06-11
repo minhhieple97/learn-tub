@@ -1,4 +1,12 @@
-import { AIProvider, IFeedback } from '@/types';
+import {
+  AIProvider,
+  IFeedback,
+  IApiResponse,
+  IActionResult,
+  IAsyncHookReturn,
+  IAsyncOperationHook,
+  ISearchHookReturn,
+} from '@/types';
 import { STATUS_STREAMING } from '@/config/constants';
 import { IVideoPageData } from '../videos/types';
 
@@ -50,11 +58,7 @@ export type IDeleteNoteInput = {
   noteId: string;
 };
 
-export type INoteActionResult = {
-  success: boolean;
-  noteId?: string;
-  message?: string;
-};
+export type INoteActionResult = IActionResult<string>;
 
 export type INoteEditorFormProps = {
   videoId: string;
@@ -108,10 +112,7 @@ export type INoteFormActionsProps = {
   disabled?: boolean;
 };
 
-export type IUseVideoIdReturn = {
-  dbVideoId: string | null;
-  isLoading: boolean;
-};
+export type IUseVideoIdReturn = IAsyncHookReturn<string | null>;
 
 export type IUseNotesDataReturn = {
   notes: INote[];
@@ -138,11 +139,10 @@ export type IUseTagsReturn = {
   resetTags: () => void;
 };
 
-export type IUseNotesOperationsReturn = {
+export type IUseNotesOperationsReturn = IAsyncOperationHook & {
   saveNote: (payload: ISaveNoteInput) => void;
   updateNote: (payload: IUpdateNoteInput) => void;
   deleteNote: (payload: IDeleteNoteInput) => void;
-  isLoading: boolean;
 };
 
 export type IUseNoteEditorProps = {
@@ -181,15 +181,7 @@ export type IUseNotesSearchProps = {
   enabled?: boolean;
 };
 
-export type IUseNotesSearchReturn = {
-  searchQuery: string;
-  setSearchQuery: (query: string) => void;
-  searchResults: INote[];
-  isSearching: boolean;
-  clearSearch: () => void;
-  hasResults: boolean;
-  resultCount: number;
-};
+export type IUseNotesSearchReturn = ISearchHookReturn<INote>;
 
 export type INotesListWithSearchProps = INotesListProps & {
   videoId: string;
@@ -219,11 +211,7 @@ export type INoteEvaluationResult = {
   created_at: string;
 };
 
-export type INoteEvaluationResponse = {
-  success: boolean;
-  data?: INoteEvaluationResult;
-  error?: string;
-};
+export type INoteEvaluationResponse = IApiResponse<INoteEvaluationResult>;
 
 export type INoteEvaluationStatus =
   | typeof STATUS_STREAMING.IDLE
