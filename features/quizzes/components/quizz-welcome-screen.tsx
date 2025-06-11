@@ -4,9 +4,9 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Brain, Play, Settings, Loader2 } from 'lucide-react';
 import { QuizSettings } from './quiz-settings';
-import type { QuizSettingsType } from '../../ai/types';
+import { QuizSettingsType } from '../types';
 
-type QuizzWelcomeScreen = {
+type IQuizzWelcomeScreen = {
   isGenerating: boolean;
   settings: QuizSettingsType;
   onGenerateQuestions: () => void;
@@ -18,7 +18,7 @@ export const QuizzWelcomeScreen = ({
   settings,
   onGenerateQuestions,
   onUpdateSettings,
-}: QuizzWelcomeScreen) => {
+}: IQuizzWelcomeScreen) => {
   const [showSettings, setShowSettings] = useState(false);
 
   return (
@@ -30,13 +30,11 @@ export const QuizzWelcomeScreen = ({
         AI Quiz Assistant
       </h2>
       <p className="mb-8 max-w-md text-slate-600 dark:text-slate-300 leading-relaxed">
-        Test your knowledge with AI-generated questions based on this video
-        content. Get personalized feedback to improve your understanding.
+        Test your knowledge with AI-generated questions based on this video content. Get
+        personalized feedback to improve your understanding.
       </p>
 
-      {showSettings && (
-        <QuizSettings settings={settings} onUpdateSettings={onUpdateSettings} />
-      )}
+      {showSettings && <QuizSettings settings={settings} onUpdateSettings={onUpdateSettings} />}
 
       <div className="flex gap-3">
         <Button

@@ -5,7 +5,7 @@ import { QuizHeader } from './quiz-detail/quiz-header';
 import { QuizInfoCard } from './quiz-detail/quiz-info-card';
 import { QuestionItem } from './quiz-detail/question-item';
 import { AttemptHistory } from './quiz-detail/attempt-history';
-import { QuizSessionWithAttempts } from '@/features/quizzes/types';
+import { QuizSessionWithAttempts, QuizQuestion } from '@/features/quizzes/types';
 
 type QuizDetailContentProps = {
   quizSession: QuizSessionWithAttempts;
@@ -26,12 +26,12 @@ export const QuizDetailContent = ({ quizSession }: QuizDetailContentProps) => {
         </CardHeader>
         <CardContent className="pt-0">
           <div className="space-y-6">
-            {quizSession.questions.map((question, index) => (
+            {((quizSession.questions as QuizQuestion[]) ?? []).map((question, index) => (
               <QuestionItem
                 key={question.id}
                 question={question}
                 index={index}
-                isLast={index === quizSession.questions.length - 1}
+                isLast={index === ((quizSession.questions as QuizQuestion[]) ?? []).length - 1}
               />
             ))}
           </div>

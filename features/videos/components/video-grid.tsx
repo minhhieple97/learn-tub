@@ -1,8 +1,8 @@
-import { Video } from '../types';
+import { IVideo } from '../types';
 import { VideoCard } from './video-card';
 
 type VideoGridProps = {
-  videos: Video[];
+  videos: IVideo[];
 };
 
 export const VideoGrid = ({ videos }: VideoGridProps) => {

@@ -7,14 +7,12 @@ import {
   ERROR_MESSAGES,
   STATUS_STREAMING,
 } from '@/config/constants';
-import { AIProvider, Feedback } from '@/types';
+import { AIProvider, IFeedback } from '@/types';
 import { NoteEvaluationStatus } from '../types';
 
 export const useNoteEvaluation = () => {
-  const [status, setStatus] = useState<NoteEvaluationStatus>(
-    STATUS_STREAMING.IDLE,
-  );
-  const [feedback, setFeedback] = useState<Feedback | null>(null);
+  const [status, setStatus] = useState<NoteEvaluationStatus>(STATUS_STREAMING.IDLE);
+  const [feedback, setFeedback] = useState<IFeedback | null>(null);
   const [streamingContent, setStreamingContent] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
 
@@ -35,9 +33,7 @@ export const useNoteEvaluation = () => {
         const response = await fetch(streamUrl);
 
         if (!response.ok) {
-          throw new Error(
-            `${ERROR_MESSAGES.FAILED_TO_EVALUATE_NOTE}: ${response.statusText}`,
-          );
+          throw new Error(`${ERROR_MESSAGES.FAILED_TO_EVALUATE_NOTE}: ${response.statusText}`);
         }
 
         if (!response.body) {
@@ -62,14 +58,12 @@ export const useNoteEvaluation = () => {
           for (const line of lines) {
             if (line.startsWith(AI_API.SSE_DATA_PREFIX)) {
               try {
-                const chunk = JSON.parse(
-                  line.slice(AI_API.SSE_DATA_PREFIX_LENGTH),
-                );
+                const chunk = JSON.parse(line.slice(AI_API.SSE_DATA_PREFIX_LENGTH));
 
                 if (chunk.type === CHUNK_TYPES.FEEDBACK) {
                   setStreamingContent((prev) => prev + chunk.content);
                 } else if (chunk.type === CHUNK_TYPES.COMPLETE) {
-                  const completeFeedback: Feedback = JSON.parse(chunk.content);
+                  const completeFeedback: IFeedback = JSON.parse(chunk.content);
                   setFeedback(completeFeedback);
                   setStatus(STATUS_STREAMING.COMPLETED);
                   setStreamingContent('');
@@ -85,9 +79,7 @@ export const useNoteEvaluation = () => {
           }
         }
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : ERROR_MESSAGES.UNKNOWN_ERROR,
-        );
+        setError(err instanceof Error ? err.message : ERROR_MESSAGES.UNKNOWN_ERROR);
         setStatus(STATUS_STREAMING.ERROR);
         setStreamingContent('');
       }
@@ -109,9 +101,7 @@ export const useNoteEvaluation = () => {
     error,
     evaluateNote,
     reset,
-    isEvaluating:
-      status === STATUS_STREAMING.EVALUATING ||
-      status === STATUS_STREAMING.STREAMING,
+    isEvaluating: status === STATUS_STREAMING.EVALUATING || status === STATUS_STREAMING.STREAMING,
     isCompleted: status === STATUS_STREAMING.COMPLETED,
     hasError: status === STATUS_STREAMING.ERROR,
   };

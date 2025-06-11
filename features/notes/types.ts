@@ -2,15 +2,15 @@ import { AIProvider, IFeedback } from '@/types';
 import { STATUS_STREAMING } from '@/config/constants';
 import { IVideoPageData } from '../videos/types';
 
-export type Note = {
+export type INote = {
   id: string;
   content: string;
-  timestamp_seconds: number;
-  tags: string[];
-  created_at: string;
-  updated_at: string;
-  video_id?: string;
-  user_id?: string;
+  timestamp_seconds: number | null;
+  tags: string[] | null;
+  created_at: string | null;
+  updated_at: string | null;
+  video_id: string | null;
+  user_id: string | null;
 };
 
 export type NoteEditorProps = {
@@ -59,12 +59,12 @@ export type NoteActionResult = {
 export type NoteEditorFormProps = {
   videoId: string;
   currentTimestamp: number;
-  handleSaveNote: (note: Note) => void;
-  handleUpdateNote: (note: Note) => void;
+  handleSaveNote: (note: INote) => void;
+  handleUpdateNote: (note: INote) => void;
 };
 
 export type NoteEditorFormRef = {
-  setEditingNote: (note: Note | null) => void;
+  setEditingNote: (note: INote | null) => void;
 };
 
 export type TagsSectionProps = {
@@ -75,21 +75,21 @@ export type TagsSectionProps = {
 };
 
 export type NotesListProps = {
-  notes: Note[];
+  notes: INote[];
   onTimestampClick?: (timestamp: number) => void;
-  onUpdateNote: (note: Note) => void;
+  onUpdateNote: (note: INote) => void;
   onDeleteNote: (noteId: string) => void;
 };
 
 export type NoteCardProps = {
-  note: Note;
+  note: INote;
   onTimestampClick?: (timestamp: number) => void;
-  onUpdateNote: (note: Note) => void;
+  onUpdateNote: (note: INote) => void;
   onDeleteNote: (noteId: string) => void;
 };
 
-export type TimestampDisplayProps = {
-  timestamp: number;
+export type ITimestampDisplayProps = {
+  timestamp: number | null;
   onClick?: (timestamp: number) => void;
   clickable?: boolean;
 };
@@ -114,7 +114,7 @@ export type UseVideoIdReturn = {
 };
 
 export type UseNotesDataReturn = {
-  notes: Note[];
+  notes: INote[];
   isLoading: boolean;
   refetch: () => Promise<void>;
 };
@@ -123,7 +123,7 @@ export type UseNotesFormReturn = {
   content: string;
   setContent: (content: string) => void;
   editingNoteId: string | null;
-  setEditingNote: (note: Note | null) => void;
+  setEditingNote: (note: INote | null) => void;
   resetForm: () => void;
   isEditing: boolean;
 };
@@ -166,12 +166,12 @@ export type UseNoteEditorReturn = {
   handleAddTag: () => void;
   handleRemoveTag: (tag: string) => void;
   handleKeyDown: (e: React.KeyboardEvent) => void;
-  setEditingNote: (note: Note | null) => void;
+  setEditingNote: (note: INote | null) => void;
 };
 
 export type NotesSearchProps = {
   videoId?: string | null;
-  onSearchResults?: (results: Note[]) => void;
+  onSearchResults?: (results: INote[]) => void;
   placeholder?: string;
   className?: string;
 };
@@ -184,7 +184,7 @@ export type UseNotesSearchProps = {
 export type UseNotesSearchReturn = {
   searchQuery: string;
   setSearchQuery: (query: string) => void;
-  searchResults: Note[];
+  searchResults: INote[];
   isSearching: boolean;
   clearSearch: () => void;
   hasResults: boolean;

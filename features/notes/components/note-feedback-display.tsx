@@ -5,10 +5,10 @@ import { CheckCircle, XCircle, Lightbulb, Copy, RotateCcw } from 'lucide-react';
 import { TOAST_MESSAGES } from '@/config/constants';
 import { toast } from '@/hooks/use-toast';
 import { formatFeedbackForCopy, getScoreColor } from '@/lib/utils';
-import { Feedback } from '@/types';
+import { IFeedback } from '@/types';
 
 type NoteFeedbackDisplayProps = {
-  feedback: Feedback;
+  feedback: IFeedback;
   onCopy?: () => void;
   onReset?: () => void;
 };

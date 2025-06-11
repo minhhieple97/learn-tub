@@ -7,6 +7,7 @@ import { QuestionCard } from './question-card';
 import { QuizNavigation } from './quiz-navigation';
 import { QuizResults } from './quiz-results';
 import { useQuiz } from '../hooks/use-quiz';
+import { AIProvider } from '@/types';
 
 type QuizzTabProps = {
   videoId: string;
@@ -14,11 +15,7 @@ type QuizzTabProps = {
   videoDescription?: string;
 };
 
-export const QuizzTab = ({
-  videoId,
-  videoTitle,
-  videoDescription,
-}: QuizzTabProps) => {
+export const QuizzTab = ({ videoId, videoTitle, videoDescription }: QuizzTabProps) => {
   const {
     questions,
     answers,
@@ -63,11 +60,7 @@ export const QuizzTab = ({
   const renderContent = () => {
     if (showResults && feedback) {
       return (
-        <QuizResults
-          feedback={feedback}
-          isGenerating={isGenerating}
-          onResetQuiz={resetQuiz}
-        />
+        <QuizResults feedback={feedback} isGenerating={isGenerating} onResetQuiz={resetQuiz} />
       );
     }
 

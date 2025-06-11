@@ -1,13 +1,16 @@
 import { AI_FORMAT } from '@/config/constants';
 import { Json } from '@/database.types';
 import { AIProvider, IFeedback } from '@/types';
+
+export type IQuizDifficulty = 'easy' | 'medium' | 'hard' | 'mixed';
+
 export type QuizSettingsType = {
   questionCount: number;
-  difficulty: 'easy' | 'medium' | 'hard' | 'mixed';
-  provider: string;
+  difficulty: IQuizDifficulty;
+  provider: AIProvider;
 };
 
-export type Question = {
+export type IQuestion = {
   id: string;
   question: string;
   options: {
@@ -21,7 +24,7 @@ export type Question = {
   difficulty: 'easy' | 'medium' | 'hard';
 };
 
-export type Answer = {
+export type IAnswer = {
   questionId: string;
   selectedAnswer: 'A' | 'B' | 'C' | 'D';
 };
@@ -80,7 +83,7 @@ export type GenerateQuestionsRequest = {
   videoTitle?: string;
   videoDescription?: string;
   questionCount?: number;
-  difficulty?: 'easy' | 'medium' | 'hard' | 'mixed';
+  difficulty?: IQuizDifficulty;
   topics?: string[];
   provider: string;
   model: string;
@@ -118,8 +121,8 @@ export type QuizEvaluationResponse = {
 
 export type QuizSettings = {
   questionCount: number;
-  difficulty: 'easy' | 'medium' | 'hard' | 'mixed';
-  provider: string;
+  difficulty: IQuizDifficulty;
+  provider: AIProvider;
   model: string;
 };
 
@@ -140,7 +143,7 @@ export type AIEvaluationResult = {
   user_id: string;
   provider: AIProvider;
   model: string;
-  feedback: IFeedback;
+  feedback: Json;
   created_at: string;
 };
 
@@ -152,9 +155,7 @@ export type CreateAIEvaluationInput = {
 
 export type CopyFeedbackInput = {
   feedback: IFeedback;
-  format:
-    | typeof AI_FORMAT.COPY_FORMATS.PLAIN
-    | typeof AI_FORMAT.COPY_FORMATS.MARKDOWN;
+  format: typeof AI_FORMAT.COPY_FORMATS.PLAIN | typeof AI_FORMAT.COPY_FORMATS.MARKDOWN;
 };
 
 export type VideoWithNotes = {
@@ -179,12 +180,12 @@ export type QuizSession = {
   user_id: string;
   video_id: string;
   title: string;
-  difficulty: 'easy' | 'medium' | 'hard' | 'mixed';
+  difficulty: IQuizDifficulty;
   question_count: number;
   topics: string[] | null;
   ai_provider: string;
   ai_model: string;
-  questions: Json; // Change to Json to match database
+  questions: Json;
   created_at: string | null;
   updated_at: string | null;
 };

@@ -18,18 +18,16 @@ import { NoteFeedbackDisplay } from './note-feedback-display';
 import { formatDistanceToNow } from 'date-fns';
 import { useState } from 'react';
 import { useNoteFeedbackHistory } from '../hooks/use-note-feedback-history';
-import { AIEvaluationResult, AIFeedback } from '@/features/quizzes/types';
+import { AIEvaluationResult } from '@/features/quizzes/types';
+import { IFeedback } from '@/types';
 
 type AIFeedbackHistoryProps = {
   noteId: string;
 };
 
 export const AIFeedbackHistory = ({ noteId }: AIFeedbackHistoryProps) => {
-  const [selectedFeedback, setSelectedFeedback] = useState<AIFeedback | null>(
-    null,
-  );
-  const { history, isLoading, error, fetchHistory, hasHistory } =
-    useNoteFeedbackHistory();
+  const [selectedFeedback, setSelectedFeedback] = useState<IFeedback | null>(null);
+  const { history, isLoading, error, fetchHistory, hasHistory } = useNoteFeedbackHistory();
 
   useEffect(() => {
     if (noteId) {
@@ -38,7 +36,7 @@ export const AIFeedbackHistory = ({ noteId }: AIFeedbackHistoryProps) => {
   }, [noteId, fetchHistory]);
 
   const handleViewFeedback = (result: AIEvaluationResult) => {
-    setSelectedFeedback(result.feedback as AIFeedback);
+    setSelectedFeedback(result.feedback as IFeedback);
   };
 
   const getScoreColor = (score: number) => {
@@ -62,9 +60,7 @@ export const AIFeedbackHistory = ({ noteId }: AIFeedbackHistoryProps) => {
     return (
       <div className="flex flex-col h-full space-y-6">
         <div className="flex items-center justify-between px-1">
-          <h3 className="text-lg font-semibold text-foreground">
-            Feedback Details
-          </h3>
+          <h3 className="text-lg font-semibold text-foreground">Feedback Details</h3>
           <Button
             variant="outline"
             size="sm"
@@ -88,9 +84,7 @@ export const AIFeedbackHistory = ({ noteId }: AIFeedbackHistoryProps) => {
     return (
       <div className="flex flex-col h-full space-y-6">
         <div className="flex items-center justify-between px-1">
-          <h3 className="text-lg font-semibold text-foreground">
-            AI Feedback History
-          </h3>
+          <h3 className="text-lg font-semibold text-foreground">AI Feedback History</h3>
           <Skeleton className="h-6 w-24 rounded-full" />
         </div>
         <div className="flex-1 space-y-4 overflow-y-auto pr-2 pb-6">
@@ -135,9 +129,7 @@ export const AIFeedbackHistory = ({ noteId }: AIFeedbackHistoryProps) => {
     return (
       <div className="flex flex-col h-full space-y-6">
         <div className="flex items-center justify-between px-1">
-          <h3 className="text-lg font-semibold text-foreground">
-            AI Feedback History
-          </h3>
+          <h3 className="text-lg font-semibold text-foreground">AI Feedback History</h3>
           <Badge
             variant="outline"
             className="text-xs font-medium px-2 py-1 border-red-200 text-red-700"
@@ -156,9 +148,7 @@ export const AIFeedbackHistory = ({ noteId }: AIFeedbackHistoryProps) => {
                   <h4 className="font-semibold text-red-900 dark:text-red-100">
                     Failed to Load History
                   </h4>
-                  <p className="text-sm text-red-700 dark:text-red-300 leading-relaxed">
-                    {error}
-                  </p>
+                  <p className="text-sm text-red-700 dark:text-red-300 leading-relaxed">{error}</p>
                 </div>
                 <Button
                   variant="outline"
@@ -180,9 +170,7 @@ export const AIFeedbackHistory = ({ noteId }: AIFeedbackHistoryProps) => {
     return (
       <div className="flex flex-col h-full space-y-6">
         <div className="flex items-center justify-between px-1">
-          <h3 className="text-lg font-semibold text-foreground">
-            AI Feedback History
-          </h3>
+          <h3 className="text-lg font-semibold text-foreground">AI Feedback History</h3>
           <Badge variant="outline" className="text-xs font-medium px-2 py-1">
             0 evaluations
           </Badge>
@@ -195,13 +183,10 @@ export const AIFeedbackHistory = ({ noteId }: AIFeedbackHistoryProps) => {
                   <Clock className="h-8 w-8 text-muted-foreground" />
                 </div>
                 <div className="space-y-2">
-                  <h3 className="text-lg font-semibold text-foreground">
-                    No History Yet
-                  </h3>
+                  <h3 className="text-lg font-semibold text-foreground">No History Yet</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">
-                    Your AI feedback history will appear here after you run
-                    evaluations. Start analyzing your notes to see insights and
-                    track your progress.
+                    Your AI feedback history will appear here after you run evaluations. Start
+                    analyzing your notes to see insights and track your progress.
                   </p>
                 </div>
               </div>
@@ -215,9 +200,7 @@ export const AIFeedbackHistory = ({ noteId }: AIFeedbackHistoryProps) => {
   return (
     <div className="flex flex-col h-full space-y-6">
       <div className="flex items-center justify-between px-1">
-        <h3 className="text-lg font-semibold text-foreground">
-          AI Feedback History
-        </h3>
+        <h3 className="text-lg font-semibold text-foreground">AI Feedback History</h3>
         <Badge variant="outline" className="text-xs font-medium px-2 py-1">
           {history.length} {history.length === 1 ? 'evaluation' : 'evaluations'}
         </Badge>
@@ -232,7 +215,7 @@ export const AIFeedbackHistory = ({ noteId }: AIFeedbackHistoryProps) => {
         }}
       >
         {history.map((result, index) => {
-          const feedback = result.feedback as AIFeedback;
+          const feedback = result.feedback as IFeedback;
           const createdAt = new Date(result.created_at);
 
           return (
@@ -323,9 +306,7 @@ export const AIFeedbackHistory = ({ noteId }: AIFeedbackHistoryProps) => {
                   </div>
 
                   {/* Card number indicator */}
-                  <div className="text-xs text-muted-foreground/70 font-medium">
-                    #{index + 1}
-                  </div>
+                  <div className="text-xs text-muted-foreground/70 font-medium">#{index + 1}</div>
                 </div>
               </CardContent>
             </Card>

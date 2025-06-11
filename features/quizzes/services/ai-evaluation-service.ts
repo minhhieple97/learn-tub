@@ -12,20 +12,14 @@ import {
   ERROR_MESSAGES,
   EVALUATION_ERRORS,
 } from '@/config/constants';
-import type { AIFeedback } from '../types';
 import { NoteEvaluationRequest } from '@/features/notes/types';
-import { StreamChunk } from '@/types';
+import { IFeedback, StreamChunk } from '@/types';
 
 type StreamController = ReadableStreamDefaultController<StreamChunk>;
-type ProviderEvaluator = (
-  model: string,
-  prompt: string,
-) => Promise<ReadableStream<StreamChunk>>;
+type ProviderEvaluator = (model: string, prompt: string) => Promise<ReadableStream<StreamChunk>>;
 
 class AIEvaluationService {
-  async evaluateNote(
-    request: NoteEvaluationRequest,
-  ): Promise<ReadableStream<StreamChunk>> {
+  async evaluateNote(request: NoteEvaluationRequest): Promise<ReadableStream<StreamChunk>> {
     const { provider, model, content, context } = request;
     const prompt = this.createEvaluationPrompt(content, context);
 
@@ -79,9 +73,7 @@ Focus on:
 Be constructive and educational in your feedback.`;
   }
 
-  private buildContextualInfo(
-    context?: NoteEvaluationRequest['context'],
-  ): string {
+  private buildContextualInfo(context?: NoteEvaluationRequest['context']): string {
     if (!context) return '';
 
     const contextParts: string[] = [];
@@ -95,9 +87,7 @@ Be constructive and educational in your feedback.`;
     }
 
     if (context.timestamp) {
-      contextParts.push(
-        `Timestamp: ${this.formatTimestamp(context.timestamp)}`,
-      );
+      contextParts.push(`Timestamp: ${this.formatTimestamp(context.timestamp)}`);
     }
 
     return contextParts.join('\n');
@@ -109,9 +99,7 @@ Be constructive and educational in your feedback.`;
     const secs = seconds % 60;
 
     const pad = (num: number) =>
-      num
-        .toString()
-        .padStart(AI_FORMAT.TIMESTAMP_PADDING, AI_FORMAT.TIMESTAMP_PAD_CHAR);
+      num.toString().padStart(AI_FORMAT.TIMESTAMP_PADDING, AI_FORMAT.TIMESTAMP_PAD_CHAR);
 
     if (hours > 0) {
       return `${hours}:${pad(minutes)}:${pad(secs)}`;
@@ -120,16 +108,13 @@ Be constructive and educational in your feedback.`;
     return `${minutes}:${pad(secs)}`;
   }
 
-  formatFeedbackForCopy(
-    feedback: AIFeedback,
-    format: 'plain' | 'markdown',
-  ): string {
+  formatFeedbackForCopy(feedback: IFeedback, format: 'plain' | 'markdown'): string {
     return format === AI_FORMAT.COPY_FORMATS.MARKDOWN
       ? this.formatAsMarkdown(feedback)
       : this.formatAsPlainText(feedback);
   }
 
-  private formatAsMarkdown(feedback: AIFeedback): string {
+  private formatAsMarkdown(feedback: IFeedback): string {
     return `# AI Evaluation Feedback
 
 ## Summary
@@ -150,7 +135,7 @@ ${this.formatListItems(feedback.improvement_suggestions, '-')}
 ${feedback.detailed_analysis}`;
   }
 
-  private formatAsPlainText(feedback: AIFeedback): string {
+  private formatAsPlainText(feedback: IFeedback): string {
     return `AI Evaluation Feedback
 
 Summary: ${feedback.summary}
@@ -273,12 +258,9 @@ ${feedback.detailed_analysis}`;
     });
   }
 
-  private handleStreamCompletion(
-    controller: StreamController,
-    fullContent: string,
-  ): void {
+  private handleStreamCompletion(controller: StreamController, fullContent: string): void {
     try {
-      const feedback = JSON.parse(fullContent) as AIFeedback;
+      const feedback = JSON.parse(fullContent) as IFeedback;
       controller.enqueue({
         type: CHUNK_TYPES.COMPLETE,
         content: JSON.stringify(feedback),
@@ -295,12 +277,8 @@ ${feedback.detailed_analysis}`;
     }
   }
 
-  private handleStreamError(
-    controller: StreamController,
-    error: unknown,
-  ): void {
-    const errorMessage =
-      error instanceof Error ? error.message : ERROR_MESSAGES.UNKNOWN_ERROR;
+  private handleStreamError(controller: StreamController, error: unknown): void {
+    const errorMessage = error instanceof Error ? error.message : ERROR_MESSAGES.UNKNOWN_ERROR;
 
     controller.enqueue({
       type: CHUNK_TYPES.ERROR,

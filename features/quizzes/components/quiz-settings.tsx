@@ -9,17 +9,16 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Settings } from 'lucide-react';
-import type { QuizSettingsType } from '../../ai/types';
+import { AIProvider } from '@/types';
+import { IQuizDifficulty, QuizSettingsType } from '../types';
+import { AI_PROVIDERS } from '@/config/constants';
 
 type QuizSettingsProps = {
   settings: QuizSettingsType;
   onUpdateSettings: (settings: Partial<QuizSettingsType>) => void;
 };
 
-export const QuizSettings = ({
-  settings,
-  onUpdateSettings,
-}: QuizSettingsProps) => {
+export const QuizSettings = ({ settings, onUpdateSettings }: QuizSettingsProps) => {
   return (
     <Card className="mb-6 w-full max-w-md border-blue-200 dark:border-blue-800 shadow-md">
       <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/50 dark:to-indigo-950/50">
@@ -35,9 +34,7 @@ export const QuizSettings = ({
           </label>
           <Select
             value={settings.questionCount.toString()}
-            onValueChange={(value) =>
-              onUpdateSettings({ questionCount: parseInt(value) })
-            }
+            onValueChange={(value) => onUpdateSettings({ questionCount: parseInt(value) })}
           >
             <SelectTrigger className="border-slate-300 dark:border-slate-600 focus:border-blue-500 focus:ring-blue-500">
               <SelectValue />
@@ -57,9 +54,7 @@ export const QuizSettings = ({
           </label>
           <Select
             value={settings.difficulty}
-            onValueChange={(value: 'easy' | 'medium' | 'hard' | 'mixed') =>
-              onUpdateSettings({ difficulty: value })
-            }
+            onValueChange={(value: IQuizDifficulty) => onUpdateSettings({ difficulty: value })}
           >
             <SelectTrigger className="border-slate-300 dark:border-slate-600 focus:border-blue-500 focus:ring-blue-500">
               <SelectValue />
@@ -79,14 +74,14 @@ export const QuizSettings = ({
           </label>
           <Select
             value={settings.provider}
-            onValueChange={(value) => onUpdateSettings({ provider: value })}
+            onValueChange={(value) => onUpdateSettings({ provider: value as AIProvider })}
           >
             <SelectTrigger className="border-slate-300 dark:border-slate-600 focus:border-blue-500 focus:ring-blue-500">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="openai">OpenAI</SelectItem>
-              <SelectItem value="gemini">Google Gemini</SelectItem>
+              <SelectItem value={AI_PROVIDERS.OPENAI}>OpenAI</SelectItem>
+              <SelectItem value={AI_PROVIDERS.GEMINI}>Google Gemini</SelectItem>
             </SelectContent>
           </Select>
         </div>

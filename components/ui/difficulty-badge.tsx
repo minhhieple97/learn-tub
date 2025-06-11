@@ -1,15 +1,14 @@
 import * as React from 'react';
 import { Badge } from './badge';
 import { cn } from '@/lib/utils';
+import { IQuizDifficulty } from '@/features/quizzes/types';
 
-type Difficulty = 'easy' | 'medium' | 'hard' | 'mixed';
-
-interface DifficultyBadgeProps extends React.HTMLAttributes<HTMLDivElement> {
-  difficulty: Difficulty;
+type DifficultyBadgeProps = React.HTMLAttributes<HTMLDivElement> & {
+  difficulty: IQuizDifficulty;
   children?: React.ReactNode;
-}
+};
 
-const getDifficultyStyles = (difficulty: Difficulty): string => {
+const getDifficultyStyles = (difficulty: IQuizDifficulty): string => {
   switch (difficulty) {
     case 'easy':
       return 'bg-green-50 text-green-700 border border-green-200 hover:bg-green-100 dark:bg-green-950 dark:text-green-300 dark:border-green-800 dark:hover:bg-green-900';
