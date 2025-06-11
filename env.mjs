@@ -12,12 +12,15 @@ export const env = createEnv({
     POSTGRES_DATABASE: z.string().min(1),
     SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
     POSTGRES_HOST: z.string().min(1),
-    NODE_ENV: z
-      .enum(['development', 'test', 'production'])
-      .default('development'),
+    NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
     OPENAI_API_KEY: z.string().min(1),
     GEMINI_API_KEY: z.string().min(1),
     SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
+    QSTASH_CURRENT_SIGNING_KEY: z.string().min(1),
+    QSTASH_NEXT_SIGNING_KEY: z.string().min(1),
+    QSTASH_TOKEN: z.string().min(1),
+    UPSTASH_REDIS_REST_URL: z.string().min(1),
+    UPSTASH_REDIS_REST_TOKEN: z.string().min(1),
   },
 
   client: {
@@ -43,5 +46,10 @@ export const env = createEnv({
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
     GEMINI_API_KEY: process.env.GEMINI_API_KEY,
     SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
+    QSTASH_CURRENT_SIGNING_KEY: process.env.QSTASH_CURRENT_SIGNING_KEY,
+    QSTASH_NEXT_SIGNING_KEY: process.env.QSTASH_NEXT_SIGNING_KEY,
+    QSTASH_TOKEN: process.env.QSTASH_TOKEN,
+    UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
+    UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
   },
 });

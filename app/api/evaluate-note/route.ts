@@ -16,6 +16,8 @@ import { INoteEvaluationRequest } from '@/features/notes/types';
 import { IFeedback, StreamChunk } from '@/types';
 import { createNoteInteraction } from '@/features/notes/queries';
 import { noteService } from '@/features/notes/services/note-service';
+import { ActionError } from '@/lib/safe-action';
+import { RateLimiter } from '@/lib/rate-limiter';
 
 const EvaluateNoteQuerySchema = z.object({
   noteId: z.string().uuid('Invalid note ID format'),
@@ -69,7 +71,13 @@ export async function GET(request: NextRequest) {
         status: HTTP_STATUS.UNAUTHORIZED,
       });
     }
+    const rateLimitResult = await RateLimiter.checkRateLimit(user.id);
 
+    if (!rateLimitResult.allowed) {
+      throw new ActionError(
+        `Rate limit exceeded. Try again in a minute. Remaining: ${rateLimitResult.remaining}`,
+      );
+    }
     const profile = await getProfileByUserId(user.id);
     const { data: note, error: noteError } = await supabase
       .from('notes')
