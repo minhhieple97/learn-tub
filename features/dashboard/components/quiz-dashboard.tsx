@@ -12,8 +12,8 @@ import { QuizPagination } from './quiz-pagination';
 import { useQueryState, parseAsString, parseAsInteger } from 'nuqs';
 import { useQuery } from '@tanstack/react-query';
 import { getQuizDashboardData } from '../queries/quiz-dashboard-queries';
-import { QuizSessionWithAttempts } from '@/features/quizzes/types';
 import { IQuizFilters } from '../types';
+import { IQuizSessionWithAttempts } from '@/features/quizzes/types';
 
 type Video = {
   id: string;
@@ -23,7 +23,7 @@ type Video = {
 
 type QuizDashboardProps = {
   initialData: {
-    sessions: QuizSessionWithAttempts[];
+    sessions: IQuizSessionWithAttempts[];
     totalSessions: number;
     totalAttempts: number;
     averageScore: number;

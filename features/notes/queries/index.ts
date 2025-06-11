@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { INote } from '../types';
 import { AIProvider } from '@/types';
 import { Json } from '@/database.types';
-import { AIEvaluationResult } from '@/features/quizzes/types';
+import { INoteEvaluationResult } from '@/features/quizzes/types';
 import { AI_DEFAULTS, AI_PROVIDERS } from '@/config/constants';
 
 export async function getNotesByVideoId(videoId: string, userId: string): Promise<INote[]> {
@@ -132,7 +132,7 @@ export const createNoteInteraction = async (
 export const getNoteInteractionsByNoteId = async (
   noteId: string,
   userId: string,
-): Promise<AIEvaluationResult[]> => {
+): Promise<INoteEvaluationResult[]> => {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from('note_interactions')
@@ -171,7 +171,7 @@ export const getNoteInteractionsByNoteId = async (
 export const getLatestAIEvaluation = async (
   noteId: string,
   userId: string,
-): Promise<AIEvaluationResult | null> => {
+): Promise<INoteEvaluationResult | null> => {
   const supabase = await createClient();
 
   const { data, error } = await supabase

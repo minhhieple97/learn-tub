@@ -2,7 +2,7 @@
 
 import { authAction, ActionError } from '@/lib/safe-action';
 import { checkExistingVideo, insertVideo } from '../queries';
-import { getProfileByUserId } from '@/features/profile/queries/profile';
+import { getProfileByUserId } from '@/features/profile/queries';
 import { addVideoSchema } from '../schemas';
 import {
   fetchYouTubeVideoData,

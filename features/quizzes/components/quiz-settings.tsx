@@ -10,12 +10,12 @@ import {
 } from '@/components/ui/select';
 import { Settings } from 'lucide-react';
 import { AIProvider } from '@/types';
-import { IQuizDifficulty, QuizSettingsType } from '../types';
+import { IQuizDifficulty, IQuizSettingsType } from '../types';
 import { AI_PROVIDERS } from '@/config/constants';
 
 type QuizSettingsProps = {
-  settings: QuizSettingsType;
-  onUpdateSettings: (settings: Partial<QuizSettingsType>) => void;
+  settings: IQuizSettingsType;
+  onUpdateSettings: (settings: Partial<IQuizSettingsType>) => void;
 };
 
 export const QuizSettings = ({ settings, onUpdateSettings }: QuizSettingsProps) => {

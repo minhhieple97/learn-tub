@@ -1,4 +1,4 @@
-import { QuizAttempt, QuizSessionWithAttempts } from '../quizzes/types';
+import { IQuizAttempt, IQuizSessionWithAttempts } from '../quizzes/types';
 import { Tables } from '@/database.types';
 
 export type DashboardStats = {
@@ -32,11 +32,11 @@ export type LearningGoal = {
 };
 
 export type QuizDashboardData = {
-  sessions: QuizSessionWithAttempts[];
+  sessions: IQuizSessionWithAttempts[];
   totalSessions: number;
   totalAttempts: number;
   averageScore: number;
-  recentAttempts: QuizAttempt[];
+  recentAttempts: IQuizAttempt[];
   totalPages: number;
   currentPage: number;
 };

@@ -6,7 +6,7 @@ import {
   getQuizDashboardData,
   getQuizSessionForRetake,
 } from '../queries/quiz-dashboard-queries';
-import { getProfileByUserId } from '@/features/profile/queries/profile';
+import { getProfileByUserId } from '@/features/profile/queries';
 import { revalidatePath } from 'next/cache';
 import { routes } from '@/routes';
 

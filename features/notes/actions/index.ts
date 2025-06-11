@@ -10,7 +10,7 @@ import {
 } from '../schemas';
 import type { NoteActionResult } from '../types';
 import { routes } from '@/routes';
-import { getProfileByUserId } from '@/features/profile/queries/profile';
+import { getProfileByUserId } from '@/features/profile/queries';
 
 export const saveNoteAction = authAction
   .inputSchema(saveNoteInputSchema)

@@ -4,7 +4,9 @@ import { AIProvider, IFeedback } from '@/types';
 
 export type IQuizDifficulty = 'easy' | 'medium' | 'hard' | 'mixed';
 
-export type QuizSettingsType = {
+export type IQuizDifficultyFilter = 'all' | IQuizDifficulty;
+
+export type IQuizSettingsType = {
   questionCount: number;
   difficulty: IQuizDifficulty;
   provider: AIProvider;
@@ -29,7 +31,7 @@ export type IAnswer = {
   selectedAnswer: 'A' | 'B' | 'C' | 'D';
 };
 
-export type QuizQuestion = {
+export type IQuizQuestion = {
   id: string;
   question: string;
   options: {
@@ -44,12 +46,12 @@ export type QuizQuestion = {
   difficulty: 'easy' | 'medium' | 'hard';
 };
 
-export type UserAnswer = {
+export type IUserAnswer = {
   questionId: string;
   selectedAnswer: 'A' | 'B' | 'C' | 'D';
 };
 
-export type QuizResult = {
+export type IQuizResult = {
   questionId: string;
   question: string;
   selectedAnswer: 'A' | 'B' | 'C' | 'D';
@@ -60,11 +62,11 @@ export type QuizResult = {
   difficulty: 'easy' | 'medium' | 'hard';
 };
 
-export type QuizFeedback = {
+export type IQuizFeedback = {
   totalQuestions: number;
   correctAnswers: number;
   score: number;
-  results: QuizResult[];
+  results: IQuizResult[];
   overallFeedback: string;
   areasForImprovement: string[];
   strengths: string[];
@@ -78,7 +80,7 @@ export type QuizFeedback = {
   >;
 };
 
-export type GenerateQuestionsRequest = {
+export type IGenerateQuestionsRequest = {
   videoId: string;
   videoTitle?: string;
   videoDescription?: string;
@@ -89,10 +91,10 @@ export type GenerateQuestionsRequest = {
   model: string;
 };
 
-export type EvaluateQuizRequest = {
+export type IEvaluateQuizRequest = {
   videoId: string;
-  questions: QuizQuestion[];
-  answers: UserAnswer[];
+  questions: IQuizQuestion[];
+  answers: IUserAnswer[];
   videoContext?: {
     title?: string;
     description?: string;
@@ -101,43 +103,43 @@ export type EvaluateQuizRequest = {
   model: string;
 };
 
-export type QuizGenerationResponse = {
+export type IQuizGenerationResponse = {
   success: boolean;
-  questions?: QuizQuestion[];
+  questions?: IQuizQuestion[];
   error?: string;
 };
 
-export type QuizStreamChunk = {
+export type IQuizStreamChunk = {
   type: 'question' | 'complete' | 'error';
   content: string;
   finished: boolean;
 };
 
-export type QuizEvaluationResponse = {
+export type IQuizEvaluationResponse = {
   success: boolean;
-  feedback?: QuizFeedback;
+  feedback?: IQuizFeedback;
   error?: string;
 };
 
-export type QuizSettings = {
+export type IQuizSettings = {
   questionCount: number;
   difficulty: IQuizDifficulty;
   provider: AIProvider;
   model: string;
 };
 
-export type QuizState = {
-  questions: QuizQuestion[];
-  answers: UserAnswer[];
+export type IQuizState = {
+  questions: IQuizQuestion[];
+  answers: IUserAnswer[];
   currentQuestionIndex: number;
   showResults: boolean;
-  feedback: QuizFeedback | null;
+  feedback: IQuizFeedback | null;
   isGenerating: boolean;
   isEvaluating: boolean;
-  settings: QuizSettings;
+  settings: IQuizSettings;
 };
 
-export type AIEvaluationResult = {
+export type INoteEvaluationResult = {
   id: string;
   note_id: string;
   user_id: string;
@@ -147,35 +149,35 @@ export type AIEvaluationResult = {
   created_at: string;
 };
 
-export type CreateAIEvaluationInput = {
+export type ICreateAIEvaluationInput = {
   noteId: string;
   provider: AIProvider;
   model: string;
 };
 
-export type CopyFeedbackInput = {
+export type ICopyFeedbackInput = {
   feedback: IFeedback;
   format: typeof AI_FORMAT.COPY_FORMATS.PLAIN | typeof AI_FORMAT.COPY_FORMATS.MARKDOWN;
 };
 
-export type VideoWithNotes = {
+export type IVideoWithNotes = {
   id: string;
   title: string;
   youtube_id: string;
   notes: Array<{ content: string }>;
 };
 
-export type VideoInfo = {
+export type IVideoInfo = {
   id: string;
   title: string;
   youtube_id?: string;
 };
 
-export type UserNote = {
+export type IUserNote = {
   content: string;
 };
 
-export type QuizSession = {
+export type IQuizSession = {
   id: string;
   user_id: string;
   video_id: string;
@@ -190,7 +192,7 @@ export type QuizSession = {
   updated_at: string | null;
 };
 
-export type QuizAttempt = {
+export type IQuizAttempt = {
   id: string;
   quiz_session_id: string;
   user_id: string;
@@ -204,9 +206,9 @@ export type QuizAttempt = {
   created_at: string | null; // Allow null to match database
 };
 
-export type QuizSessionWithAttempts = QuizSession & {
-  attempts: QuizAttempt[];
-  latest_attempt?: QuizAttempt;
+export type IQuizSessionWithAttempts = IQuizSession & {
+  attempts: IQuizAttempt[];
+  latest_attempt?: IQuizAttempt;
   best_score?: number;
   attempt_count: number;
   videos?: {
@@ -217,7 +219,7 @@ export type QuizSessionWithAttempts = QuizSession & {
 };
 
 // Add these types for database compatibility
-export type DatabaseQuizSession = {
+export type IDatabaseQuizSession = {
   id: string;
   user_id: string;
   video_id: string;
@@ -232,7 +234,7 @@ export type DatabaseQuizSession = {
   updated_at: string | null;
 };
 
-export type DatabaseQuizAttempt = {
+export type IDatabaseQuizAttempt = {
   id: string;
   quiz_session_id: string;
   user_id: string;

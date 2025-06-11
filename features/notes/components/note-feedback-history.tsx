@@ -18,7 +18,7 @@ import { NoteFeedbackDisplay } from './note-feedback-display';
 import { formatDistanceToNow } from 'date-fns';
 import { useState } from 'react';
 import { useNoteFeedbackHistory } from '../hooks/use-note-feedback-history';
-import { AIEvaluationResult } from '@/features/quizzes/types';
+import { INoteEvaluationResult } from '@/features/quizzes/types';
 import { IFeedback } from '@/types';
 
 type AIFeedbackHistoryProps = {
@@ -35,7 +35,7 @@ export const AIFeedbackHistory = ({ noteId }: AIFeedbackHistoryProps) => {
     }
   }, [noteId, fetchHistory]);
 
-  const handleViewFeedback = (result: AIEvaluationResult) => {
+  const handleViewFeedback = (result: INoteEvaluationResult) => {
     setSelectedFeedback(result.feedback as IFeedback);
   };
 

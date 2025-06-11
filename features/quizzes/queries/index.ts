@@ -1,16 +1,15 @@
 import { createClient } from '@/lib/supabase/server';
-import type {
-  QuizQuestion,
-  QuizFeedback,
-  UserAnswer,
-  QuizSession,
-  QuizAttempt,
-  QuizSessionWithAttempts,
+import {
+  IDatabaseQuizSession,
+  IQuizAttempt,
   IQuizDifficulty,
-  DatabaseQuizSession,
+  IQuizFeedback,
+  IUserAnswer,
 } from '../types';
+import { IQuizQuestion } from '../types';
+import { IQuizSession, IQuizSessionWithAttempts } from '../types';
 
-const convertDatabaseToQuizSession = (dbSession: DatabaseQuizSession): QuizSession => ({
+const convertDatabaseToQuizSession = (dbSession: IDatabaseQuizSession): IQuizSession => ({
   ...dbSession,
   difficulty: dbSession.difficulty as IQuizDifficulty,
 });
@@ -24,8 +23,8 @@ export const createQuizSession = async (data: {
   topics?: string[];
   aiProvider: string;
   aiModel: string;
-  questions: QuizQuestion[];
-}): Promise<QuizSession> => {
+  questions: IQuizQuestion[];
+}): Promise<IQuizSession> => {
   const supabase = await createClient();
 
   const { data: session, error } = await supabase
@@ -57,13 +56,13 @@ export const createQuizSession = async (data: {
 export const saveQuizAttempt = async (data: {
   quizSessionId: string;
   userId: string;
-  answers: UserAnswer[];
+  answers: IUserAnswer[];
   score: number;
   totalQuestions: number;
   correctAnswers: number;
-  feedback?: QuizFeedback;
+  feedback?: IQuizFeedback;
   timeTakenSeconds?: number;
-}): Promise<QuizAttempt> => {
+}): Promise<IQuizAttempt> => {
   const supabase = await createClient();
 
   const { data: attempt, error } = await supabase
@@ -92,7 +91,7 @@ export const getUserQuizSessions = async (
   userId: string,
   limit = 10,
   offset = 0,
-): Promise<QuizSessionWithAttempts[]> => {
+): Promise<IQuizSessionWithAttempts[]> => {
   const supabase = await createClient();
 
   const { data: sessions, error } = await supabase
@@ -149,7 +148,7 @@ export const getUserQuizSessions = async (
 export const getVideoQuizSessions = async (
   videoId: string,
   userId: string,
-): Promise<QuizSessionWithAttempts[]> => {
+): Promise<IQuizSessionWithAttempts[]> => {
   const supabase = await createClient();
 
   const { data: sessions, error } = await supabase
@@ -199,7 +198,7 @@ export const getVideoQuizSessions = async (
 export const getQuizSessionById = async (
   sessionId: string,
   userId: string,
-): Promise<QuizSession | null> => {
+): Promise<IQuizSession | null> => {
   const supabase = await createClient();
 
   const { data: session, error } = await supabase
@@ -225,7 +224,7 @@ export const getQuizSessionById = async (
 export const getQuizAttemptById = async (
   attemptId: string,
   userId: string,
-): Promise<QuizAttempt | null> => {
+): Promise<IQuizAttempt | null> => {
   const supabase = await createClient();
 
   const { data: attempt, error } = await supabase
@@ -254,9 +253,7 @@ export const getQuizStatistics = async (userId: string) => {
     .eq('user_id', userId);
 
   if (sessionsError) {
-    throw new Error(
-      `Failed to fetch quiz sessions count: ${sessionsError.message}`,
-    );
+    throw new Error(`Failed to fetch quiz sessions count: ${sessionsError.message}`);
   }
 
   const { count: totalAttempts, error: attemptsError } = await supabase
@@ -265,9 +262,7 @@ export const getQuizStatistics = async (userId: string) => {
     .eq('user_id', userId);
 
   if (attemptsError) {
-    throw new Error(
-      `Failed to fetch quiz attempts count: ${attemptsError.message}`,
-    );
+    throw new Error(`Failed to fetch quiz attempts count: ${attemptsError.message}`);
   }
 
   const { data: avgData, error: avgError } = await supabase
@@ -281,10 +276,7 @@ export const getQuizStatistics = async (userId: string) => {
 
   const averageScore =
     avgData.length > 0
-      ? Math.round(
-          avgData.reduce((sum, attempt) => sum + attempt.score, 0) /
-            avgData.length,
-        )
+      ? Math.round(avgData.reduce((sum, attempt) => sum + attempt.score, 0) / avgData.length)
       : 0;
 
   const { data: recentAttempts, error: recentError } = await supabase
@@ -314,10 +306,7 @@ export const getQuizStatistics = async (userId: string) => {
   };
 };
 
-export const deleteQuizSession = async (
-  sessionId: string,
-  userId: string,
-): Promise<void> => {
+export const deleteQuizSession = async (sessionId: string, userId: string): Promise<void> => {
   const supabase = await createClient();
 
   const { error } = await supabase

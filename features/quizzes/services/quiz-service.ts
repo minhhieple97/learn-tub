@@ -12,19 +12,19 @@ import {
   AI_QUIZ_PROMPTS,
 } from '@/config/constants';
 import type {
-  QuizQuestion,
-  GenerateQuestionsRequest,
-  EvaluateQuizRequest,
-  QuizFeedback,
-  QuizGenerationResponse,
-  QuizEvaluationResponse,
-  QuizStreamChunk,
+  IEvaluateQuizRequest,
+  IGenerateQuestionsRequest,
+  IQuizEvaluationResponse,
+  IQuizFeedback,
+  IQuizGenerationResponse,
+  IQuizQuestion,
+  IQuizStreamChunk,
 } from '../types';
 
-type StreamController = ReadableStreamDefaultController<QuizStreamChunk>;
+type StreamController = ReadableStreamDefaultController<IQuizStreamChunk>;
 
 class QuizService {
-  async generateQuestions(request: GenerateQuestionsRequest): Promise<QuizGenerationResponse> {
+  async generateQuestions(request: IGenerateQuestionsRequest): Promise<IQuizGenerationResponse> {
     try {
       const {
         provider,
@@ -60,7 +60,7 @@ class QuizService {
   }
 
   async generateQuestionsStream(
-    request: GenerateQuestionsRequest,
+    request: IGenerateQuestionsRequest,
   ): Promise<ReadableStream<Uint8Array>> {
     const {
       provider,
@@ -83,7 +83,7 @@ class QuizService {
     return this.callAIProviderStreamForAPI(provider, model, prompt);
   }
 
-  async evaluateQuiz(request: EvaluateQuizRequest): Promise<QuizEvaluationResponse> {
+  async evaluateQuiz(request: IEvaluateQuizRequest): Promise<IQuizEvaluationResponse> {
     try {
       const { provider, model, questions, answers, videoContext } = request;
       const prompt = this.createEvaluationPrompt(questions, answers, videoContext);
@@ -133,7 +133,7 @@ ${AI_QUIZ_PROMPTS.GENERATION_FOOTER}`;
   }
 
   private createEvaluationPrompt(
-    questions: QuizQuestion[],
+    questions: IQuizQuestion[],
     answers: Array<{ questionId: string; selectedAnswer: 'A' | 'B' | 'C' | 'D' }>,
     videoContext?: { title?: string; description?: string },
   ): string {
@@ -194,7 +194,7 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
     provider: string,
     model: string,
     prompt: string,
-  ): Promise<ReadableStream<QuizStreamChunk>> {
+  ): Promise<ReadableStream<IQuizStreamChunk>> {
     if (provider === AI_PROVIDERS.OPENAI) {
       return this.callOpenAIStream(model, prompt);
     } else if (provider === AI_PROVIDERS.GEMINI) {
@@ -259,7 +259,7 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
   private async callOpenAIStream(
     model: string,
     prompt: string,
-  ): Promise<ReadableStream<QuizStreamChunk>> {
+  ): Promise<ReadableStream<IQuizStreamChunk>> {
     const openai = new OpenAI({
       apiKey: env.OPENAI_API_KEY,
       baseURL: AI_CONFIG.BASE_URL,
@@ -288,7 +288,7 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
   private async callGeminiStream(
     model: string,
     prompt: string,
-  ): Promise<ReadableStream<QuizStreamChunk>> {
+  ): Promise<ReadableStream<IQuizStreamChunk>> {
     const genAI = new GoogleGenAI({
       apiKey: env.GEMINI_API_KEY,
     });
@@ -346,7 +346,7 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
     return this.createAPIStreamFromGemini(response);
   }
 
-  private parseQuestionsFromResponse(responseText: string): QuizQuestion[] {
+  private parseQuestionsFromResponse(responseText: string): IQuizQuestion[] {
     try {
       let cleanedText = responseText.trim();
       if (cleanedText.startsWith(AI_QUIZ_CONFIG.MARKDOWN_JSON_START)) {
@@ -404,9 +404,9 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
 
   private parseFeedbackFromResponse(
     responseText: string,
-    questions: QuizQuestion[],
+    questions: IQuizQuestion[],
     answers: Array<{ questionId: string; selectedAnswer: 'A' | 'B' | 'C' | 'D' }>,
-  ): QuizFeedback {
+  ): IQuizFeedback {
     try {
       let cleanedText = responseText.trim();
 
@@ -501,8 +501,8 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
 
   private createStreamFromOpenAI(
     stream: AsyncIterable<OpenAI.Chat.Completions.ChatCompletionChunk>,
-  ): ReadableStream<QuizStreamChunk> {
-    return new ReadableStream<QuizStreamChunk>({
+  ): ReadableStream<IQuizStreamChunk> {
+    return new ReadableStream<IQuizStreamChunk>({
       async start(controller) {
         try {
           let fullContent = '';
@@ -528,8 +528,8 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
 
   private createStreamFromGemini(
     response: AsyncIterable<{ text?: string }>,
-  ): ReadableStream<QuizStreamChunk> {
-    return new ReadableStream<QuizStreamChunk>({
+  ): ReadableStream<IQuizStreamChunk> {
+    return new ReadableStream<IQuizStreamChunk>({
       async start(controller) {
         try {
           let fullContent = '';

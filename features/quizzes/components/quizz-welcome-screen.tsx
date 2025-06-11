@@ -4,13 +4,13 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Brain, Play, Settings, Loader2 } from 'lucide-react';
 import { QuizSettings } from './quiz-settings';
-import { QuizSettingsType } from '../types';
+import { IQuizSettingsType } from '../types';
 
 type IQuizzWelcomeScreen = {
   isGenerating: boolean;
-  settings: QuizSettingsType;
+  settings: IQuizSettingsType;
   onGenerateQuestions: () => void;
-  onUpdateSettings: (settings: Partial<QuizSettingsType>) => void;
+  onUpdateSettings: (settings: Partial<IQuizSettingsType>) => void;
 };
 
 export const QuizzWelcomeScreen = ({
