@@ -1,4 +1,4 @@
-import { IQuizAttempt, IQuizSessionWithAttempts } from '../quizzes/types';
+import { IQuizAttempt, IQuizDifficultyFilter, IQuizSessionWithAttempts } from '../quizzes/types';
 import { Tables } from '@/database.types';
 
 export type DashboardStats = {
@@ -62,7 +62,7 @@ export type InsightsData = {
 
 export type IQuizFilters = {
   search: string;
-  difficulty: 'all' | 'easy' | 'medium' | 'hard' | 'mixed';
+  difficulty: IQuizDifficultyFilter;
   videoId?: string;
   sortBy: 'created_at' | 'score' | 'attempts';
   sortOrder: 'asc' | 'desc';

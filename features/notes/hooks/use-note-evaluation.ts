@@ -8,10 +8,10 @@ import {
   STATUS_STREAMING,
 } from '@/config/constants';
 import { AIProvider, IFeedback } from '@/types';
-import { NoteEvaluationStatus } from '../types';
+import { INoteEvaluationStatus } from '../types';
 
 export const useNoteEvaluation = () => {
-  const [status, setStatus] = useState<NoteEvaluationStatus>(STATUS_STREAMING.IDLE);
+  const [status, setStatus] = useState<INoteEvaluationStatus>(STATUS_STREAMING.IDLE);
   const [feedback, setFeedback] = useState<IFeedback | null>(null);
   const [streamingContent, setStreamingContent] = useState<string>('');
   const [error, setError] = useState<string | null>(null);

@@ -1,17 +1,17 @@
 import type { z } from 'zod';
 import type { loginSchema, registerSchema } from './schemas';
 
-export type LoginFormData = z.infer<typeof loginSchema>;
-export type RegisterFormData = z.infer<typeof registerSchema>;
+export type ILoginFormData = z.infer<typeof loginSchema>;
+export type IRegisterFormData = z.infer<typeof registerSchema>;
 
-export type AuthMode = 'signin' | 'signup';
+export type IAuthMode = 'signin' | 'signup';
 
-export type AuthError = {
+export type IAuthError = {
   message: string;
   field?: string;
 };
 
-export type AuthResponse = {
+export type IAuthResponse = {
   success: boolean;
-  error?: AuthError;
+  error?: IAuthError;
 };

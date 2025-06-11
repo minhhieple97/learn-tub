@@ -8,7 +8,7 @@ import {
   updateNoteInputSchema, 
   deleteNoteInputSchema 
 } from '../schemas';
-import type { NoteActionResult } from '../types';
+import type { INoteActionResult } from '../types';
 import { routes } from '@/routes';
 import { getProfileByUserId } from '@/features/profile/queries';
 
@@ -39,7 +39,7 @@ export const saveNoteAction = authAction
       success: true,
       noteId: data.id,
       message: 'Note saved successfully',
-    } satisfies NoteActionResult;
+    } satisfies INoteActionResult;
   });
 
 export const updateNoteAction = authAction
@@ -67,7 +67,7 @@ export const updateNoteAction = authAction
       success: true,
       noteId,
       message: 'Note updated successfully',
-    } satisfies NoteActionResult;
+    } satisfies INoteActionResult;
   });
 
 export const deleteNoteAction = authAction
@@ -91,5 +91,5 @@ export const deleteNoteAction = authAction
       success: true,
       noteId,
       message: 'Note deleted successfully',
-    } satisfies NoteActionResult;
+    } satisfies INoteActionResult;
   });

@@ -12,14 +12,14 @@ import {
   ERROR_MESSAGES,
   EVALUATION_ERRORS,
 } from '@/config/constants';
-import { NoteEvaluationRequest } from '@/features/notes/types';
+import { INoteEvaluationRequest } from '@/features/notes/types';
 import { IFeedback, StreamChunk } from '@/types';
 
 type StreamController = ReadableStreamDefaultController<StreamChunk>;
 type ProviderEvaluator = (model: string, prompt: string) => Promise<ReadableStream<StreamChunk>>;
 
 class NoteService {
-  async evaluateNote(request: NoteEvaluationRequest): Promise<ReadableStream<StreamChunk>> {
+  async evaluateNote(request: INoteEvaluationRequest): Promise<ReadableStream<StreamChunk>> {
     const { provider, model, content, context } = request;
     const prompt = this.createEvaluationPrompt(content, context);
 
@@ -43,7 +43,7 @@ class NoteService {
 
   private createEvaluationPrompt(
     content: string,
-    context?: NoteEvaluationRequest['context'],
+    context?: INoteEvaluationRequest['context'],
   ): string {
     const contextualInfo = this.buildContextualInfo(context);
 
@@ -73,7 +73,7 @@ Focus on:
 Be constructive and educational in your feedback.`;
   }
 
-  private buildContextualInfo(context?: NoteEvaluationRequest['context']): string {
+  private buildContextualInfo(context?: INoteEvaluationRequest['context']): string {
     if (!context) return '';
 
     const contextParts: string[] = [];

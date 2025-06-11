@@ -5,16 +5,16 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useAction } from 'next-safe-action/hooks';
 import { loginSchema } from '../schemas';
 import { loginAction } from '../actions';
-import type { LoginFormData } from '../types';
+import type { ILoginFormData } from '../types';
 import { toast, useToast } from '@/hooks/use-toast';
 
 type UseLoginReturn = {
-  register: ReturnType<typeof useForm<LoginFormData>>['register'];
-  handleSubmit: ReturnType<typeof useForm<LoginFormData>>['handleSubmit'];
-  errors: ReturnType<typeof useForm<LoginFormData>>['formState']['errors'];
+  register: ReturnType<typeof useForm<ILoginFormData>>['register'];
+  handleSubmit: ReturnType<typeof useForm<ILoginFormData>>['handleSubmit'];
+  errors: ReturnType<typeof useForm<ILoginFormData>>['formState']['errors'];
   isSubmitting: boolean;
   isLoading: boolean;
-  onSubmit: (data: LoginFormData) => Promise<void>;
+  onSubmit: (data: ILoginFormData) => Promise<void>;
 };
 
 export const useLogin = (): UseLoginReturn => {
@@ -27,7 +27,6 @@ export const useLogin = (): UseLoginReturn => {
     },
     onSuccess: (data) => {
       toast.success({
-        
         description: 'Successfully signed in!',
       });
     },
@@ -37,7 +36,7 @@ export const useLogin = (): UseLoginReturn => {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<LoginFormData>({
+  } = useForm<ILoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
       email: '',
@@ -45,7 +44,7 @@ export const useLogin = (): UseLoginReturn => {
     },
   });
 
-  const onSubmit = async (data: LoginFormData) => {
+  const onSubmit = async (data: ILoginFormData) => {
     execute(data);
   };
 

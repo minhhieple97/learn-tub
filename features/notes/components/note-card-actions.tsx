@@ -1,9 +1,9 @@
 import { Button } from '@/components/ui/button';
 import { Pencil, Trash2 } from 'lucide-react';
-import type { NoteCardActionsProps } from '../types';
+import type { INoteCardActionsProps } from '../types';
 import { useNotesStore } from '../store';
 
-export const NoteCardActions = ({ onEdit, onDelete, noteId }: NoteCardActionsProps) => {
+export const NoteCardActions = ({ onEdit, onDelete, noteId }: INoteCardActionsProps) => {
   const { editingNote } = useNotesStore((state) => state);
   return (
     <div className="flex space-x-2">
