@@ -12,7 +12,7 @@ import {
 import { getProfileByUserId } from '@/features/profile/queries';
 
 
-import { NoteEvaluationRequest } from '@/features/notes/types';
+import { INoteEvaluationRequest } from '@/features/notes/types';
 import { IFeedback, StreamChunk } from '@/types';
 import { createNoteInteraction } from '@/features/notes/queries';
 import { noteService } from '@/features/notes/services/note-service';
@@ -57,7 +57,7 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    const evaluationRequest: NoteEvaluationRequest = {
+    const evaluationRequest: INoteEvaluationRequest = {
       noteId,
       provider,
       model,
