@@ -1,9 +1,10 @@
 'use server';
-import { authAction } from '@/lib/safe-action';
+import { ActionError, authAction } from '@/lib/safe-action';
 import { z } from 'zod';
 import { quizService } from '../services/quiz-service';
 import { createQuizSession } from '../queries';
 import { getProfileByUserId } from '@/features/profile/queries';
+import { RateLimiter } from '@/lib/rate-limiter';
 
 const GenerateQuizQuestionsSchema = z.object({
   videoId: z.string().min(1, 'Video ID is required'),
@@ -19,6 +20,14 @@ const GenerateQuizQuestionsSchema = z.object({
 export const generateQuizQuestionsAction = authAction
   .inputSchema(GenerateQuizQuestionsSchema)
   .action(async ({ parsedInput: data, ctx: { user } }) => {
+    const rateLimitResult = await RateLimiter.checkRateLimit(user.id);
+
+    if (!rateLimitResult.allowed) {
+      throw new ActionError(
+        `Rate limit exceeded. Try again in a minute. Remaining: ${rateLimitResult.remaining}`,
+      );
+    }
+
     const profile = await getProfileByUserId(user.id);
 
     const response = await quizService.generateQuestions(data);

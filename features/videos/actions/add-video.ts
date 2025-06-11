@@ -11,11 +11,19 @@ import {
   getYouTubeThumbnailUrl,
 } from '@/lib/utils';
 import { VIDEO_DEFAULTS, TOAST_MESSAGES } from '@/config/constants';
+import { RateLimiter } from '@/lib/rate-limiter';
 
 export const addVideoAction = authAction
   .inputSchema(addVideoSchema)
   .action(async ({ parsedInput: { videoUrl }, ctx: { user } }) => {
     try {
+      const rateLimitResult = await RateLimiter.checkRateLimit(user.id);
+
+      if (!rateLimitResult.allowed) {
+        throw new ActionError(
+          `Rate limit exceeded. Try again in a minute. Remaining: ${rateLimitResult.remaining}`,
+        );
+      }
       const profile = await getProfileByUserId(user.id);
       const videoId = extractYouTubeId(videoUrl);
       if (!videoId) {
@@ -37,16 +45,12 @@ export const addVideoAction = authAction
         userId: profile.id,
         youtubeId: videoId,
         title: videoData?.snippet?.title || VIDEO_DEFAULTS.TITLE,
-        description:
-          videoData?.snippet?.description || VIDEO_DEFAULTS.DESCRIPTION,
-        thumbnailUrl:
-          videoData?.snippet?.thumbnails?.high?.url ||
-          getYouTubeThumbnailUrl(videoId),
+        description: videoData?.snippet?.description || VIDEO_DEFAULTS.DESCRIPTION,
+        thumbnailUrl: videoData?.snippet?.thumbnails?.high?.url || getYouTubeThumbnailUrl(videoId),
         duration: videoData?.contentDetails?.duration
           ? parseDuration(videoData.contentDetails.duration)
           : VIDEO_DEFAULTS.DURATION,
-        channelName:
-          videoData?.snippet?.channelTitle || VIDEO_DEFAULTS.CHANNEL_NAME,
+        channelName: videoData?.snippet?.channelTitle || VIDEO_DEFAULTS.CHANNEL_NAME,
         publishedAt: videoData?.snippet?.publishedAt || null,
       });
 
