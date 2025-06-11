@@ -31,6 +31,7 @@ class QuizService {
         model,
         videoTitle,
         videoDescription,
+        videoTutorial,
         questionCount = AI_QUIZ_CONFIG.DEFAULT_QUESTION_COUNT,
         difficulty = AI_QUIZ_CONFIG.DEFAULT_DIFFICULTY,
         topics,
@@ -38,6 +39,7 @@ class QuizService {
       const prompt = this.createQuestionGenerationPrompt({
         videoTitle,
         videoDescription,
+        videoTutorial,
         questionCount,
         difficulty,
         topics,
@@ -67,6 +69,7 @@ class QuizService {
       model,
       videoTitle,
       videoDescription,
+      videoTutorial,
       questionCount = AI_QUIZ_CONFIG.DEFAULT_QUESTION_COUNT,
       difficulty = AI_QUIZ_CONFIG.DEFAULT_DIFFICULTY,
       topics,
@@ -75,6 +78,7 @@ class QuizService {
     const prompt = this.createQuestionGenerationPrompt({
       videoTitle,
       videoDescription,
+      videoTutorial,
       questionCount,
       difficulty,
       topics,
@@ -106,13 +110,15 @@ class QuizService {
   private createQuestionGenerationPrompt(params: {
     videoTitle?: string;
     videoDescription?: string;
+    videoTutorial?: string;
     questionCount: number;
     difficulty: string;
     topics?: string[];
   }): string {
-    const { videoTitle, videoDescription, questionCount, difficulty, topics } = params;
+    const { videoTitle, videoDescription, videoTutorial, questionCount, difficulty, topics } =
+      params;
 
-    const contextInfo = this.buildVideoContext({ videoTitle, videoDescription });
+    const contextInfo = this.buildVideoContext({ videoTitle, videoDescription, videoTutorial });
     const topicsInfo = topics?.length ? `${AI_QUIZ_PROMPTS.TOPICS_PREFIX}${topics.join(', ')}` : '';
     const difficultyInfo =
       difficulty === AI_QUIZ_CONFIG.DEFAULT_DIFFICULTY
@@ -135,11 +141,12 @@ ${AI_QUIZ_PROMPTS.GENERATION_FOOTER}`;
   private createEvaluationPrompt(
     questions: IQuizQuestion[],
     answers: Array<{ questionId: string; selectedAnswer: 'A' | 'B' | 'C' | 'D' }>,
-    videoContext?: { title?: string; description?: string },
+    videoContext?: { title?: string; description?: string; tutorial?: string },
   ): string {
     const contextInfo = this.buildVideoContext({
       videoTitle: videoContext?.title,
       videoDescription: videoContext?.description,
+      videoTutorial: videoContext?.tutorial,
     });
 
     const questionsWithAnswers = questions.map((q) => {
@@ -166,7 +173,11 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FORMAT.replace('{total}', questions.length.toString
 ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
   }
 
-  private buildVideoContext(context?: { videoTitle?: string; videoDescription?: string }): string {
+  private buildVideoContext(context?: {
+    videoTitle?: string;
+    videoDescription?: string;
+    videoTutorial?: string;
+  }): string {
     if (!context) return '';
 
     const parts: string[] = [];
@@ -175,6 +186,9 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
     }
     if (context.videoDescription) {
       parts.push(`${AI_QUIZ_PROMPTS.VIDEO_DESCRIPTION_PREFIX}${context.videoDescription}"`);
+    }
+    if (context.videoTutorial) {
+      parts.push(`${AI_QUIZ_PROMPTS.VIDEO_TUTORIAL_PREFIX}${context.videoTutorial}"`);
     }
 
     return parts.join('\n');

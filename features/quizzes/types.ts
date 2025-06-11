@@ -84,6 +84,7 @@ export type IGenerateQuestionsRequest = {
   videoId: string;
   videoTitle?: string;
   videoDescription?: string;
+  videoTutorial?: string;
   questionCount?: number;
   difficulty?: IQuizDifficulty;
   topics?: string[];
@@ -98,6 +99,7 @@ export type IEvaluateQuizRequest = {
   videoContext?: {
     title?: string;
     description?: string;
+    tutorial?: string;
   };
   provider: string;
   model: string;

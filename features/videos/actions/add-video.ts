@@ -15,7 +15,7 @@ import { RateLimiter } from '@/lib/rate-limiter';
 
 export const addVideoAction = authAction
   .inputSchema(addVideoSchema)
-  .action(async ({ parsedInput: { videoUrl }, ctx: { user } }) => {
+  .action(async ({ parsedInput: { videoUrl, tutorial }, ctx: { user } }) => {
     try {
       const rateLimitResult = await RateLimiter.checkRateLimit(user.id);
 
@@ -52,6 +52,7 @@ export const addVideoAction = authAction
           : VIDEO_DEFAULTS.DURATION,
         channelName: videoData?.snippet?.channelTitle || VIDEO_DEFAULTS.CHANNEL_NAME,
         publishedAt: videoData?.snippet?.publishedAt || null,
+        tutorial: tutorial || null,
       });
 
       return result;

@@ -50,6 +50,7 @@ export const insertVideo = async (videoData: IVideoData) => {
     duration: videoData.duration,
     channel_name: videoData.channelName,
     published_at: videoData.publishedAt,
+    tutorial: videoData.tutorial,
   });
 
   if (error) {
@@ -59,10 +60,7 @@ export const insertVideo = async (videoData: IVideoData) => {
   return { success: true, videoId: videoData.youtubeId };
 };
 
-export const getVideoByYoutubeId = async (
-  youtubeId: string,
-  userId: string,
-) => {
+export const getVideoByYoutubeId = async (youtubeId: string, userId: string) => {
   const supabase = await createClient();
   const { data: video, error } = await supabase
     .from('videos')
@@ -90,7 +88,7 @@ export const getVideoById = async (videoId: string, userId: string) => {
   const supabase = await createClient();
   const { data: video, error } = await supabase
     .from('videos')
-    .select('id, title, youtube_id')
+    .select('id, title, youtube_id, description, tutorial')
     .eq('id', videoId)
     .eq('user_id', userId)
     .single();
