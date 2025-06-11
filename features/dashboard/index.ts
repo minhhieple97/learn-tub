@@ -8,4 +8,4 @@ export * from './components/quiz-dashboard';
 export * from './components/quiz-detail';
 
 export * from './queries/quiz-dashboard-queries';
-export * from './actions/quiz-dashboard-actions';
+export * from './actions/quiz-actions';

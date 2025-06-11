@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { z } from 'zod';
 
 import {
   AI_PROVIDERS,
@@ -11,26 +12,51 @@ import {
 
 import { getProfileByUserId } from '@/features/profile/queries';
 
-
 import { INoteEvaluationRequest } from '@/features/notes/types';
 import { IFeedback, StreamChunk } from '@/types';
 import { createNoteInteraction } from '@/features/notes/queries';
 import { noteService } from '@/features/notes/services/note-service';
 
+const EvaluateNoteQuerySchema = z.object({
+  noteId: z.string().uuid('Invalid note ID format'),
+  provider: z.enum([AI_PROVIDERS.OPENAI, AI_PROVIDERS.GEMINI], {
+    errorMap: () => ({
+      message: `Provider must be either '${AI_PROVIDERS.OPENAI}' or '${AI_PROVIDERS.GEMINI}'`,
+    }),
+  }),
+  model: z.string().min(1, 'Model is required and cannot be empty'),
+});
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
-    const noteId = searchParams.get('noteId');
-    const provider = searchParams.get('provider') as
-      | typeof AI_PROVIDERS.OPENAI
-      | typeof AI_PROVIDERS.GEMINI;
-    const model = searchParams.get('model');
 
-    if (!noteId || !provider || !model) {
-      return new Response(ERROR_MESSAGES.MISSING_REQUIRED_PARAMETERS, {
-        status: HTTP_STATUS.BAD_REQUEST,
-      });
+    const queryParams = {
+      noteId: searchParams.get('noteId'),
+      provider: searchParams.get('provider'),
+      model: searchParams.get('model'),
+    };
+
+    const validationResult = EvaluateNoteQuerySchema.safeParse(queryParams);
+
+    if (!validationResult.success) {
+      const errorMessage = validationResult.error.errors
+        .map((err) => `${err.path.join('.')}: ${err.message}`)
+        .join(', ');
+
+      return new Response(
+        JSON.stringify({
+          error: 'Validation failed',
+          details: errorMessage,
+        }),
+        {
+          status: HTTP_STATUS.BAD_REQUEST,
+          headers: { 'Content-Type': RESPONSE_HEADERS.JSON_CONTENT_TYPE },
+        },
+      );
     }
+
+    const { noteId, provider, model } = validationResult.data;
 
     const supabase = await createClient();
     const {
@@ -43,6 +69,7 @@ export async function GET(request: NextRequest) {
         status: HTTP_STATUS.UNAUTHORIZED,
       });
     }
+
     const profile = await getProfileByUserId(user.id);
     const { data: note, error: noteError } = await supabase
       .from('notes')
