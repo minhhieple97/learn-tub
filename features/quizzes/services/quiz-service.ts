@@ -48,7 +48,7 @@ class QuizService {
 
       return {
         success: true,
-        questions,
+        data: questions,
       };
     } catch (error) {
       console.error(error);
@@ -93,7 +93,7 @@ class QuizService {
 
       return {
         success: true,
-        feedback,
+        data: feedback,
       };
     } catch (error) {
       return {

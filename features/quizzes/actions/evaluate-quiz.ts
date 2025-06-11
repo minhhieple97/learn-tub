@@ -26,16 +26,16 @@ export const evaluateQuizAction = authAction
       quizSessionId: data.quizSessionId,
       userId: profile.id,
       answers: data.answers,
-      score: response.feedback?.score || 0,
-      totalQuestions: response.feedback?.totalQuestions || data.questions.length,
-      correctAnswers: response.feedback?.correctAnswers || 0,
-      feedback: response.feedback,
+      score: response.data?.score || 0,
+      totalQuestions: response.data?.totalQuestions || data.questions.length,
+      correctAnswers: response.data?.correctAnswers || 0,
+      feedback: response.data,
       timeTakenSeconds: data.timeTakenSeconds,
     });
 
     return {
       success: true,
-      feedback: response.feedback,
+      feedback: response.data,
       attemptId: attempt.id,
     };
   });

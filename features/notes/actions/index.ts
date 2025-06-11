@@ -3,12 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { ActionError, authAction } from '@/lib/safe-action';
 import { createClient } from '@/lib/supabase/server';
-import { 
-  saveNoteInputSchema, 
-  updateNoteInputSchema, 
-  deleteNoteInputSchema 
-} from '../schemas';
-import type { INoteActionResult } from '../types';
+import { saveNoteInputSchema, updateNoteInputSchema, deleteNoteInputSchema } from '../schemas';
 import { routes } from '@/routes';
 import { getProfileByUserId } from '@/features/profile/queries';
 
@@ -39,7 +34,7 @@ export const saveNoteAction = authAction
       success: true,
       noteId: data.id,
       message: 'Note saved successfully',
-    } satisfies INoteActionResult;
+    };
   });
 
 export const updateNoteAction = authAction
@@ -67,7 +62,7 @@ export const updateNoteAction = authAction
       success: true,
       noteId,
       message: 'Note updated successfully',
-    } satisfies INoteActionResult;
+    };
   });
 
 export const deleteNoteAction = authAction
@@ -91,5 +86,5 @@ export const deleteNoteAction = authAction
       success: true,
       noteId,
       message: 'Note deleted successfully',
-    } satisfies INoteActionResult;
+    };
   });

@@ -36,12 +36,12 @@ export const generateQuizQuestionsAction = authAction
       topics: data.topics,
       aiProvider: data.provider,
       aiModel: data.model,
-      questions: response.questions || [],
+      questions: response.data || [],
     });
 
     return {
       success: true,
-      questions: response.questions || [],
+      questions: response.data || [],
       sessionId: quizSession.id,
     };
   });

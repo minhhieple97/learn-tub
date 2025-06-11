@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 
-type UseLearningSessionProps = {
+type IUseLearningSessionProps = {
   player: any;
   videoId: string;
   playerState: number;
@@ -13,7 +13,7 @@ export const useLearningSession = ({
   videoId,
   playerState,
   initialTimestamp,
-}: UseLearningSessionProps) => {
+}: IUseLearningSessionProps) => {
   const supabase = createClient();
 
   useEffect(() => {

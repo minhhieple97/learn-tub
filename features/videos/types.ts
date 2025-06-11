@@ -1,3 +1,5 @@
+import { IYouTubeVideo, IAsyncOperationHook } from '@/types';
+
 export type ICourse = {
   title: string;
 };
@@ -35,23 +37,7 @@ export type IVideo = {
   notes?: Array<{ count: number }>;
 };
 
-export type IYouTubeVideoData = {
-  id: string;
-  snippet: {
-    title: string;
-    description: string;
-    channelTitle: string;
-    publishedAt: string;
-    thumbnails: {
-      high: {
-        url: string;
-      };
-    };
-  };
-  contentDetails: {
-    duration: string;
-  };
-};
+export type { IYouTubeVideo as IYouTubeVideoData } from '@/types';
 
 export type IUseAddVideoFormReturn = {
   url: string;

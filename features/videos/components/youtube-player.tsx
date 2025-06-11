@@ -17,7 +17,7 @@ import { useLearningSession } from '../hooks/use-learning-session';
 import { usePlayerControls } from '../hooks/use-player-controls';
 import { IVideoPageData } from '../types';
 
-type YouTubePlayerProps = {
+type IYouTubePlayerProps = {
   video: IVideoPageData;
   initialTimestamp?: number;
   onTimeUpdate?: (time: number) => void;
@@ -29,7 +29,7 @@ export const YouTubePlayer = ({
   initialTimestamp = 0,
   onTimeUpdate,
   targetSeekTime,
-}: YouTubePlayerProps) => {
+}: IYouTubePlayerProps) => {
   const { isApiLoaded, YT } = useYouTubeAPI();
 
   const { player, playerState, duration, playerRef } = useYouTubePlayer({
@@ -67,8 +67,7 @@ export const YouTubePlayer = ({
     return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   };
 
-  const isPlaying =
-    typeof window !== 'undefined' && playerState === YT?.PlayerState?.PLAYING;
+  const isPlaying = typeof window !== 'undefined' && playerState === YT?.PlayerState?.PLAYING;
 
   return (
     <Card className="w-full overflow-hidden">
@@ -94,11 +93,7 @@ export const YouTubePlayer = ({
               <SkipBack className="h-4 w-4" />
             </Button>
             <Button variant="outline" size="icon" onClick={handlePlayPause}>
-              {isPlaying ? (
-                <Pause className="h-4 w-4" />
-              ) : (
-                <Play className="h-4 w-4" />
-              )}
+              {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
             </Button>
             <Button variant="ghost" size="icon" onClick={skipForward}>
               <SkipForward className="h-4 w-4" />
@@ -106,11 +101,7 @@ export const YouTubePlayer = ({
           </div>
           <div className="flex items-center space-x-2">
             <Button variant="ghost" size="icon" onClick={toggleMute}>
-              {isMuted ? (
-                <VolumeX className="h-4 w-4" />
-              ) : (
-                <Volume2 className="h-4 w-4" />
-              )}
+              {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
             </Button>
           </div>
         </div>

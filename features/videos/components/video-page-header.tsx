@@ -5,11 +5,11 @@ import { routes } from '@/routes';
 import { tabValues } from '../search-params';
 import { IVideoPageData } from '../types';
 
-type VideoPageHeaderProps = {
+type IVideoPageHeaderProps = {
   video: IVideoPageData;
 };
 
-export const VideoPageHeader = ({ video }: VideoPageHeaderProps) => {
+export const VideoPageHeader = ({ video }: IVideoPageHeaderProps) => {
   return (
     <div className="flex items-center justify-between">
       <div>
@@ -20,9 +20,7 @@ export const VideoPageHeader = ({ video }: VideoPageHeaderProps) => {
           </Link>
         </Button>
         <h1 className="text-2xl font-bold">{video.title}</h1>
-        {video.courses && (
-          <p className="text-muted-foreground">Course: {video.courses.title}</p>
-        )}
+        {video.courses && <p className="text-muted-foreground">Course: {video.courses.title}</p>}
       </div>
     </div>
   );
