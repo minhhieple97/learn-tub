@@ -23,7 +23,7 @@ import type {
 
 type StreamController = ReadableStreamDefaultController<QuizStreamChunk>;
 
-class AIQuizService {
+class QuizService {
   async generateQuestions(request: GenerateQuestionsRequest): Promise<QuizGenerationResponse> {
     try {
       const {
@@ -518,9 +518,9 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
             });
           }
 
-          aiQuizService.handleStreamCompletion(controller, fullContent);
+          quizService.handleStreamCompletion(controller, fullContent);
         } catch (error) {
-          aiQuizService.handleStreamError(controller, error);
+          quizService.handleStreamError(controller, error);
         }
       },
     });
@@ -545,9 +545,9 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
             });
           }
 
-          aiQuizService.handleStreamCompletion(controller, fullContent);
+          quizService.handleStreamCompletion(controller, fullContent);
         } catch (error) {
-          aiQuizService.handleStreamError(controller, error);
+          quizService.handleStreamError(controller, error);
         }
       },
     });
@@ -609,7 +609,7 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
           }
 
           try {
-            const questions = aiQuizService.parseQuestionsFromResponse(fullContent);
+            const questions = quizService.parseQuestionsFromResponse(fullContent);
             const completeData =
               JSON.stringify({
                 type: 'complete',
@@ -671,7 +671,7 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
           }
 
           try {
-            const questions = aiQuizService.parseQuestionsFromResponse(fullContent);
+            const questions = quizService.parseQuestionsFromResponse(fullContent);
             const completeData =
               JSON.stringify({
                 type: 'complete',
@@ -709,4 +709,4 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
   }
 }
 
-export const aiQuizService = new AIQuizService();
+export const quizService = new QuizService();

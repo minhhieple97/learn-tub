@@ -1,6 +1,6 @@
 'use server';
 import { authAction, ActionError } from '@/lib/safe-action';
-import { aiQuizService } from '../services/ai-quiz-service';
+import { quizService } from '../services/quiz-service';
 import { saveQuizAttempt } from '../queries/quiz-queries';
 import { getProfileByUserId } from '@/features/profile/queries/profile';
 import { z } from 'zod';
@@ -16,7 +16,7 @@ export const evaluateQuizAction = authAction
   .action(async ({ parsedInput: data, ctx: { user } }) => {
     const profile = await getProfileByUserId(user.id);
 
-    const response = await aiQuizService.evaluateQuiz(data);
+    const response = await quizService.evaluateQuiz(data);
 
     if (!response.success) {
       throw new ActionError(response.error || 'Failed to evaluate quiz');
@@ -27,8 +27,7 @@ export const evaluateQuizAction = authAction
       userId: profile.id,
       answers: data.answers,
       score: response.feedback?.score || 0,
-      totalQuestions:
-        response.feedback?.totalQuestions || data.questions.length,
+      totalQuestions: response.feedback?.totalQuestions || data.questions.length,
       correctAnswers: response.feedback?.correctAnswers || 0,
       feedback: response.feedback,
       timeTakenSeconds: data.timeTakenSeconds,
