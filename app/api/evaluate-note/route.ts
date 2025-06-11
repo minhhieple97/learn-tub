@@ -11,9 +11,10 @@ import {
 
 import { getProfileByUserId } from '@/features/profile/queries/profile';
 import { aiEvaluationService } from '@/features/quizzes/services';
-import { createAIInteraction } from '@/features/quizzes/queries';
+
 import { NoteEvaluationRequest } from '@/features/notes/types';
 import { IFeedback, StreamChunk } from '@/types';
+import { createNoteInteraction } from '@/features/notes/queries';
 
 export async function GET(request: NextRequest) {
   try {
@@ -79,41 +80,25 @@ export async function GET(request: NextRequest) {
             const { done, value } = await reader.read();
             if (done) break;
 
-            controller.enqueue(
-              encoder.encode(`data: ${JSON.stringify(value)}\n\n`),
-            );
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify(value)}\n\n`));
 
             if (value.type === CHUNK_TYPES.COMPLETE && value.content) {
               try {
                 feedback = JSON.parse(value.content) as IFeedback;
-                await createAIInteraction(
-                  profile.id,
-                  noteId,
-                  provider,
-                  model,
-                  feedback,
-                );
+                await createNoteInteraction(profile.id, noteId, provider, model, feedback);
               } catch (parseError) {
-                console.error(
-                  ERROR_MESSAGES.FAILED_TO_PARSE_AI_FEEDBACK,
-                  parseError,
-                );
+                console.error(ERROR_MESSAGES.FAILED_TO_PARSE_AI_FEEDBACK, parseError);
               }
             }
           }
         } catch (error) {
           const errorChunk: StreamChunk = {
             type: CHUNK_TYPES.ERROR,
-            content:
-              error instanceof Error
-                ? error.message
-                : ERROR_MESSAGES.UNKNOWN_ERROR,
+            content: error instanceof Error ? error.message : ERROR_MESSAGES.UNKNOWN_ERROR,
             finished: true,
           };
 
-          controller.enqueue(
-            encoder.encode(`data: ${JSON.stringify(errorChunk)}\n\n`),
-          );
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify(errorChunk)}\n\n`));
         } finally {
           controller.close();
         }
@@ -128,12 +113,9 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch {
-    return new Response(
-      JSON.stringify({ error: ERROR_MESSAGES.INTERNAL_SERVER_ERROR }),
-      {
-        status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
-        headers: { 'Content-Type': RESPONSE_HEADERS.JSON_CONTENT_TYPE },
-      },
-    );
+    return new Response(JSON.stringify({ error: ERROR_MESSAGES.INTERNAL_SERVER_ERROR }), {
+      status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+      headers: { 'Content-Type': RESPONSE_HEADERS.JSON_CONTENT_TYPE },
+    });
   }
 }

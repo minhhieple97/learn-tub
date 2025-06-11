@@ -9,10 +9,10 @@ import { HowItWorks } from './how-it-works';
 import { VideoLibrary } from './video-library';
 import { VideoLibraryLoading } from './video-library-loading';
 import { learnPageParsers, type TabValue } from '../search-params';
-import type { Video } from '../types/video';
+import { IVideo } from '../types';
 
 type LearnTabsProps = {
-  videosPromise: Promise<Video[]>;
+  videosPromise: Promise<IVideo[]>;
   defaultTab: TabValue;
 };
 

@@ -6,13 +6,20 @@ import type {
   QuizSession,
   QuizAttempt,
   QuizSessionWithAttempts,
+  IQuizDifficulty,
+  DatabaseQuizSession,
 } from '../types';
+
+const convertDatabaseToQuizSession = (dbSession: DatabaseQuizSession): QuizSession => ({
+  ...dbSession,
+  difficulty: dbSession.difficulty as IQuizDifficulty,
+});
 
 export const createQuizSession = async (data: {
   userId: string;
   videoId: string;
   title: string;
-  difficulty: 'easy' | 'medium' | 'hard' | 'mixed';
+  difficulty: IQuizDifficulty;
   questionCount: number;
   topics?: string[];
   aiProvider: string;
@@ -41,7 +48,10 @@ export const createQuizSession = async (data: {
     throw new Error(`Failed to create quiz session: ${error.message}`);
   }
 
-  return session;
+  return {
+    ...session,
+    difficulty: session.difficulty as IQuizDifficulty,
+  };
 };
 
 export const saveQuizAttempt = async (data: {
@@ -90,14 +100,19 @@ export const getUserQuizSessions = async (
     .select(
       `
       *,
-      videos!inner(title, youtube_id,description),
+      videos!inner(title, youtube_id, description),
       quiz_attempts(
         id,
+        quiz_session_id,
+        user_id,
+        answers,
         score,
         correct_answers,
         total_questions,
         completed_at,
-        time_taken_seconds
+        created_at,
+        time_taken_seconds,
+        feedback
       )
     `,
     )
@@ -112,17 +127,21 @@ export const getUserQuizSessions = async (
   return sessions.map((session) => {
     const attempts = session.quiz_attempts || [];
     const latestAttempt = attempts.length > 0 ? attempts[0] : undefined;
-    const bestScore =
-      attempts.length > 0
-        ? Math.max(...attempts.map((a: QuizAttempt) => a.score))
-        : undefined;
+    const bestScore = attempts.length > 0 ? Math.max(...attempts.map((a) => a.score)) : undefined;
 
     return {
       ...session,
+      difficulty: session.difficulty as IQuizDifficulty,
       attempts,
       latest_attempt: latestAttempt,
       best_score: bestScore,
       attempt_count: attempts.length,
+      videos: session.videos
+        ? {
+            ...session.videos,
+            description: session.videos.description || '',
+          }
+        : undefined,
     };
   });
 };
@@ -140,11 +159,16 @@ export const getVideoQuizSessions = async (
       *,
       quiz_attempts(
         id,
+        quiz_session_id,
+        user_id,
+        answers,
         score,
         correct_answers,
         total_questions,
         completed_at,
-        time_taken_seconds
+        created_at,
+        time_taken_seconds,
+        feedback
       )
     `,
     )
@@ -159,13 +183,11 @@ export const getVideoQuizSessions = async (
   return sessions.map((session) => {
     const attempts = session.quiz_attempts || [];
     const latestAttempt = attempts.length > 0 ? attempts[0] : undefined;
-    const bestScore =
-      attempts.length > 0
-        ? Math.max(...attempts.map((a: QuizAttempt) => a.score))
-        : undefined;
+    const bestScore = attempts.length > 0 ? Math.max(...attempts.map((a) => a.score)) : undefined;
 
     return {
       ...session,
+      difficulty: session.difficulty as IQuizDifficulty,
       attempts,
       latest_attempt: latestAttempt,
       best_score: bestScore,
@@ -194,7 +216,10 @@ export const getQuizSessionById = async (
     throw new Error(`Failed to fetch quiz session: ${error.message}`);
   }
 
-  return session;
+  return {
+    ...session,
+    difficulty: session.difficulty as IQuizDifficulty,
+  };
 };
 
 export const getQuizAttemptById = async (

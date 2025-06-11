@@ -1,16 +1,15 @@
 import { createClient } from '@/lib/supabase/client';
 import { useEffect, useState } from 'react';
-import { Video } from '@/features/videos/types/video';
-
+import { IVideo } from '../types';
 type UseVideosReturn = {
-  videos: Video[] | null;
+  videos: IVideo[] | null;
   loading: boolean;
   error: string | null;
   refetch: () => Promise<void>;
 };
 
 export const useVideos = (): UseVideosReturn => {
-  const [videos, setVideos] = useState<Video[] | null>(null);
+  const [videos, setVideos] = useState<IVideo[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const supabase = createClient();
@@ -56,4 +55,4 @@ export const useVideos = (): UseVideosReturn => {
     error,
     refetch: fetchVideos,
   };
-}
+};

@@ -4,12 +4,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import type { Question, Answer } from '../../ai/types';
 import { DifficultyBadge } from '@/components/ui/difficulty-badge';
+import { IQuestion, IAnswer } from '../types';
 
 type QuestionCardProps = {
-  question: Question;
-  currentAnswer?: Answer;
+  question: IQuestion;
+  currentAnswer?: IAnswer;
   onAnswerSelect: (selectedAnswer: 'A' | 'B' | 'C' | 'D') => void;
 };
 

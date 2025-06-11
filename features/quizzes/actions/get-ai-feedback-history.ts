@@ -2,16 +2,17 @@
 
 import { authAction } from '@/lib/safe-action';
 
-import { getAIInteractionsByNoteId } from '../queries/ai-interactions';
+
 import { createClient } from '@/lib/supabase/server';
 import { getProfileByUserId } from '@/features/profile/queries/profile';
 import { DeleteAIFeedbackSchema, GetAIFeedbackHistorySchema } from '../schema';
+import { getNoteInteractionsByNoteId } from '@/features/notes/queries';
 
 export const getAIFeedbackHistoryAction = authAction
   .inputSchema(GetAIFeedbackHistorySchema)
   .action(async ({ parsedInput: { noteId }, ctx: { user } }) => {
     try {
-      const history = await getAIInteractionsByNoteId(noteId, user.id);
+      const history = await getNoteInteractionsByNoteId(noteId, user.id);
 
       return {
         success: true,
@@ -20,10 +21,7 @@ export const getAIFeedbackHistoryAction = authAction
     } catch (error) {
       return {
         success: false,
-        error:
-          error instanceof Error
-            ? error.message
-            : 'Failed to fetch AI feedback history',
+        error: error instanceof Error ? error.message : 'Failed to fetch AI feedback history',
       };
     }
   });
