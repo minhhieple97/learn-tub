@@ -1,7 +1,7 @@
 'use server';
 import { authAction } from '@/lib/safe-action';
 import { z } from 'zod';
-import { aiQuizService } from '../services/ai-quiz-service';
+import { quizService } from '../services/quiz-service';
 import { createQuizSession } from '../queries/quiz-queries';
 import { getProfileByUserId } from '@/features/profile/queries/profile';
 
@@ -21,7 +21,7 @@ export const generateQuizQuestionsAction = authAction
   .action(async ({ parsedInput: data, ctx: { user } }) => {
     const profile = await getProfileByUserId(user.id);
 
-    const response = await aiQuizService.generateQuestions(data);
+    const response = await quizService.generateQuestions(data);
 
     if (!response.success) {
       throw new Error(response.error || 'Failed to generate quiz questions');

@@ -18,7 +18,7 @@ import { IFeedback, StreamChunk } from '@/types';
 type StreamController = ReadableStreamDefaultController<StreamChunk>;
 type ProviderEvaluator = (model: string, prompt: string) => Promise<ReadableStream<StreamChunk>>;
 
-class AIEvaluationService {
+class NoteService {
   async evaluateNote(request: NoteEvaluationRequest): Promise<ReadableStream<StreamChunk>> {
     const { provider, model, content, context } = request;
     const prompt = this.createEvaluationPrompt(content, context);
@@ -223,9 +223,9 @@ ${feedback.detailed_analysis}`;
             });
           }
 
-          aiEvaluationService.handleStreamCompletion(controller, fullContent);
+          noteService.handleStreamCompletion(controller, fullContent);
         } catch (error) {
-          aiEvaluationService.handleStreamError(controller, error);
+          noteService.handleStreamError(controller, error);
         }
       },
     });
@@ -250,9 +250,9 @@ ${feedback.detailed_analysis}`;
             });
           }
 
-          aiEvaluationService.handleStreamCompletion(controller, fullContent);
+          noteService.handleStreamCompletion(controller, fullContent);
         } catch (error) {
-          aiEvaluationService.handleStreamError(controller, error);
+          noteService.handleStreamError(controller, error);
         }
       },
     });
@@ -290,4 +290,4 @@ ${feedback.detailed_analysis}`;
   }
 }
 
-export const aiEvaluationService = new AIEvaluationService();
+export const noteService = new NoteService();

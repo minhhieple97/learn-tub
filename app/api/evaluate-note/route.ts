@@ -10,11 +10,12 @@ import {
 } from '@/config/constants';
 
 import { getProfileByUserId } from '@/features/profile/queries/profile';
-import { aiEvaluationService } from '@/features/quizzes/services';
+
 
 import { NoteEvaluationRequest } from '@/features/notes/types';
 import { IFeedback, StreamChunk } from '@/types';
 import { createNoteInteraction } from '@/features/notes/queries';
+import { noteService } from '@/features/notes/services/note-service';
 
 export async function GET(request: NextRequest) {
   try {
@@ -66,7 +67,7 @@ export async function GET(request: NextRequest) {
       },
     };
 
-    const aiStream = await aiEvaluationService.evaluateNote(evaluationRequest);
+    const aiStream = await noteService.evaluateNote(evaluationRequest);
 
     const stream = new ReadableStream<Uint8Array>({
       async start(controller) {
