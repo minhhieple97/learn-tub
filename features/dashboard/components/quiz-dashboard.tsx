@@ -4,7 +4,7 @@ import { Brain } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAction } from 'next-safe-action/hooks';
-import { retakeQuizAction } from '../actions/quiz-dashboard-actions';
+import { retakeQuizAction } from '../actions/quiz-actions';
 import { QuizDashboardStats } from './quiz-dashboard-stats';
 import { QuizDashboardFilters } from './quiz-dashboard-filters';
 import { QuizSessionCard } from './quiz-session-card';

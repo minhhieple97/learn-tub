@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { routes } from '@/routes';
 
-const confirmParamsSchema = z.object({
+const ConfirmParamsSchema = z.object({
   token_hash: z.string().min(1, 'Token hash is required'),
   type: z.enum([
     'signup',
@@ -28,13 +28,10 @@ export async function GET(request: NextRequest) {
     next: searchParams.get('next'),
   };
 
-  const validationResult = confirmParamsSchema.safeParse(rawParams);
+  const validationResult = ConfirmParamsSchema.safeParse(rawParams);
 
   if (!validationResult.success) {
-    console.error(
-      'Invalid confirmation parameters:',
-      validationResult.error.errors,
-    );
+    console.error('Invalid confirmation parameters:', validationResult.error.errors);
     redirect(routes.auth.authCodeError);
   }
 
