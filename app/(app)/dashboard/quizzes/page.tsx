@@ -3,12 +3,13 @@ import {
   getQuizDashboardData,
   getUserVideos,
 } from '@/features/dashboard/queries/quiz-dashboard-queries';
-import { getProfileInSession } from '@/features/profile/queries/profile';
+import { getProfileInSession } from '@/features/profile/queries';
 import type { IQuizFilters } from '@/features/dashboard/types';
+import type { IQuizDifficultyFilter } from '@/features/quizzes/types';
 
 type SearchParams = Promise<{
   search?: string;
-  difficulty?: 'all' | 'easy' | 'medium' | 'hard' | 'mixed';
+  difficulty?: IQuizDifficultyFilter;
   videoId?: string;
   sortBy?: 'created_at' | 'score' | 'attempts';
   sortOrder?: 'asc' | 'desc';

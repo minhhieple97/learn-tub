@@ -1,12 +1,7 @@
 'use server';
 import { createClient } from '@/lib/supabase/server';
 import { IQuizFilters, QuizDashboardData } from '../types';
-import {
-  QuizAttempt,
-  QuizQuestion,
-  QuizSessionWithAttempts,
-  IQuizDifficulty,
-} from '@/features/quizzes/types';
+import { IQuizQuestion, IQuizDifficulty, IQuizSessionWithAttempts } from '@/features/quizzes/types';
 
 export const getQuizDashboardData = async (
   userId: string,
@@ -103,7 +98,7 @@ export const getQuizDashboardData = async (
     ? Math.round(avgData.reduce((sum, attempt) => sum + attempt.score, 0) / avgData.length)
     : 0;
 
-  const processedSessions: QuizSessionWithAttempts[] = (sessions || []).map((session) => {
+  const processedSessions: IQuizSessionWithAttempts[] = (sessions || []).map((session) => {
     const attempts = session.quiz_attempts || [];
     const latestAttempt = attempts.length > 0 ? attempts[0] : undefined;
     const bestScore = attempts.length > 0 ? Math.max(...attempts.map((a) => a.score)) : undefined;
@@ -157,7 +152,7 @@ export const getQuizSessionForRetake = async (sessionId: string, userId: string)
 export const getQuizSessionDetail = async (
   sessionId: string,
   userId: string,
-): Promise<QuizSessionWithAttempts | null> => {
+): Promise<IQuizSessionWithAttempts | null> => {
   const supabase = await createClient();
 
   const { data: session, error } = await supabase
@@ -197,7 +192,7 @@ export const getQuizSessionDetail = async (
     ...session,
     difficulty: session.difficulty as IQuizDifficulty,
     topics: session.topics || [],
-    questions: (session.questions as QuizQuestion[]) || [],
+    questions: (session.questions as IQuizQuestion[]) || [],
     attempts,
     latest_attempt: latestAttempt,
     best_score: bestScore,

@@ -5,13 +5,13 @@ import { QuizHeader } from './quiz-detail/quiz-header';
 import { QuizInfoCard } from './quiz-detail/quiz-info-card';
 import { QuestionItem } from './quiz-detail/question-item';
 import { AttemptHistory } from './quiz-detail/attempt-history';
-import { QuizSessionWithAttempts, QuizQuestion } from '@/features/quizzes/types';
+import { IQuizQuestion, IQuizSessionWithAttempts } from '@/features/quizzes/types';
 
-type QuizDetailContentProps = {
-  quizSession: QuizSessionWithAttempts;
+type IQuizDetailContentProps = {
+  quizSession: IQuizSessionWithAttempts;
 };
 
-export const QuizDetailContent = ({ quizSession }: QuizDetailContentProps) => {
+export const QuizDetailContent = ({ quizSession }: IQuizDetailContentProps) => {
   return (
     <div className="space-y-8">
       <QuizHeader quizSession={quizSession} />
@@ -26,12 +26,12 @@ export const QuizDetailContent = ({ quizSession }: QuizDetailContentProps) => {
         </CardHeader>
         <CardContent className="pt-0">
           <div className="space-y-6">
-            {((quizSession.questions as QuizQuestion[]) ?? []).map((question, index) => (
+            {((quizSession.questions as IQuizQuestion[]) ?? []).map((question, index) => (
               <QuestionItem
                 key={question.id}
                 question={question}
                 index={index}
-                isLast={index === ((quizSession.questions as QuizQuestion[]) ?? []).length - 1}
+                isLast={index === ((quizSession.questions as IQuizQuestion[]) ?? []).length - 1}
               />
             ))}
           </div>

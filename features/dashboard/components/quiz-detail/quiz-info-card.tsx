@@ -6,13 +6,13 @@ import { Clock, Target, Trophy } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { QuizRetakeButton } from './quiz-retake-button';
 import { DifficultyBadge } from '@/components/ui/difficulty-badge';
-import { QuizSessionWithAttempts } from '@/features/quizzes/types';
+import { IQuizSessionWithAttempts } from '@/features/quizzes/types';
 
-type QuizInfoCardProps = {
-  quizSession: QuizSessionWithAttempts;
+type IQuizInfoCardProps = {
+  quizSession: IQuizSessionWithAttempts;
 };
 
-export const QuizInfoCard = ({ quizSession }: QuizInfoCardProps) => {
+export const QuizInfoCard = ({ quizSession }: IQuizInfoCardProps) => {
   return (
     <Card className="border-border/50 shadow-sm">
       <CardHeader className="pb-4">

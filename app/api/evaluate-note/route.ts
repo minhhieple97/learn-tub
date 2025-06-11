@@ -9,7 +9,7 @@ import {
   HTTP_STATUS,
 } from '@/config/constants';
 
-import { getProfileByUserId } from '@/features/profile/queries/profile';
+import { getProfileByUserId } from '@/features/profile/queries';
 
 
 import { NoteEvaluationRequest } from '@/features/notes/types';

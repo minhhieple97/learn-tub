@@ -2,8 +2,8 @@
 import { authAction } from '@/lib/safe-action';
 import { z } from 'zod';
 import { quizService } from '../services/quiz-service';
-import { createQuizSession } from '../queries/quiz-queries';
-import { getProfileByUserId } from '@/features/profile/queries/profile';
+import { createQuizSession } from '../queries';
+import { getProfileByUserId } from '@/features/profile/queries';
 
 const GenerateQuizQuestionsSchema = z.object({
   videoId: z.string().min(1, 'Video ID is required'),

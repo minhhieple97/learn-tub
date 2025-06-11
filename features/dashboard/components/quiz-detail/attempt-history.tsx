@@ -4,10 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Clock, Target } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
-import { QuizAttempt } from '@/features/quizzes/types';
+import { IQuizAttempt } from '@/features/quizzes/types';
 
-type AttemptHistoryProps = {
-  attempts: QuizAttempt[];
+type IAttemptHistoryProps = {
+  attempts: IQuizAttempt[];
 };
 
 const getScoreBadgeVariant = (score: number) => {
@@ -26,7 +26,7 @@ const formatTime = (seconds: number) => {
   return `${minutes}m ${remainingSeconds}s`;
 };
 
-export const AttemptHistory = ({ attempts }: AttemptHistoryProps) => {
+export const AttemptHistory = ({ attempts }: IAttemptHistoryProps) => {
   if (attempts.length === 0) {
     return null;
   }
@@ -34,9 +34,7 @@ export const AttemptHistory = ({ attempts }: AttemptHistoryProps) => {
   return (
     <Card className="border-border/50 shadow-sm">
       <CardHeader>
-        <CardTitle className="text-lg font-semibold text-foreground">
-          Attempt History
-        </CardTitle>
+        <CardTitle className="text-lg font-semibold text-foreground">Attempt History</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
@@ -46,11 +44,7 @@ export const AttemptHistory = ({ attempts }: AttemptHistoryProps) => {
               className="flex items-center justify-between p-4 bg-muted/30 dark:bg-muted/20 rounded-lg border border-border/30 hover:bg-muted/50 transition-colors"
             >
               <div className="flex items-center gap-4">
-                <Badge
-                  className={`${getScoreBadgeVariant(
-                    attempt.score,
-                  )} border font-medium`}
-                >
+                <Badge className={`${getScoreBadgeVariant(attempt.score)} border font-medium`}>
                   {attempt.score}%
                 </Badge>
                 <div className="flex items-center gap-4 text-sm">

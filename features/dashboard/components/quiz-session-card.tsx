@@ -15,15 +15,15 @@ import Link from 'next/link';
 import { QuizRetakeButton } from './quiz-detail/quiz-retake-button';
 import { DifficultyBadge } from '@/components/ui/difficulty-badge';
 import { routes } from '@/routes';
-import { QuizSessionWithAttempts } from '@/features/quizzes/types';
+import { IQuizSessionWithAttempts } from '@/features/quizzes/types';
 
-type QuizSessionCardProps = {
-  session: QuizSessionWithAttempts;
+type IQuizSessionCardProps = {
+  session: IQuizSessionWithAttempts;
   onRetake: (sessionId: string) => void;
   isRetaking: boolean;
 };
 
-const QuizSessionCardComponent = ({ session }: QuizSessionCardProps) => {
+const QuizSessionCardComponent = ({ session }: IQuizSessionCardProps) => {
   const getScoreBadgeVariant = (score: number) => {
     if (score >= 80) return 'default';
     if (score >= 60) return 'secondary';
@@ -52,10 +52,7 @@ const QuizSessionCardComponent = ({ session }: QuizSessionCardProps) => {
           </div>
           <div className="flex items-center gap-2">
             <DifficultyBadge difficulty={session.difficulty} />
-            <Badge
-              variant="outline"
-              className="border-border/60 text-foreground bg-background/50"
-            >
+            <Badge variant="outline" className="border-border/60 text-foreground bg-background/50">
               {session.question_count} questions
             </Badge>
           </div>
@@ -67,29 +64,21 @@ const QuizSessionCardComponent = ({ session }: QuizSessionCardProps) => {
           <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-4 text-sm text-card-foreground flex-wrap">
               <span className="font-medium">
-                Attempts:{' '}
-                <strong className="text-foreground">
-                  {session.attempt_count}
-                </strong>
+                Attempts: <strong className="text-foreground">{session.attempt_count}</strong>
               </span>
               {session.best_score !== undefined && (
                 <span className="font-medium">
-                  Best Score:{' '}
-                  <strong className="text-foreground">
-                    {session.best_score}%
-                  </strong>
+                  Best Score: <strong className="text-foreground">{session.best_score}%</strong>
                 </span>
               )}
-              {session.latest_attempt &&
-                session.latest_attempt.completed_at && (
-                  <span className="font-medium text-muted-foreground">
-                    Last Attempt:{' '}
-                    {formatDistanceToNow(
-                      new Date(session.latest_attempt.completed_at),
-                      { addSuffix: true },
-                    )}
-                  </span>
-                )}
+              {session.latest_attempt && session.latest_attempt.completed_at && (
+                <span className="font-medium text-muted-foreground">
+                  Last Attempt:{' '}
+                  {formatDistanceToNow(new Date(session.latest_attempt.completed_at), {
+                    addSuffix: true,
+                  })}
+                </span>
+              )}
             </div>
 
             <div className="flex items-center gap-2 flex-shrink-0">
@@ -106,9 +95,7 @@ const QuizSessionCardComponent = ({ session }: QuizSessionCardProps) => {
           {session.attempts.length > 0 && (
             <div className="space-y-3">
               <Separator className="bg-border/60" />
-              <h4 className="text-sm font-semibold text-card-foreground">
-                Recent Attempts
-              </h4>
+              <h4 className="text-sm font-semibold text-card-foreground">Recent Attempts</h4>
               <div className="space-y-2">
                 {session.attempts.slice(0, 3).map((attempt) => (
                   <div
@@ -116,15 +103,11 @@ const QuizSessionCardComponent = ({ session }: QuizSessionCardProps) => {
                     className="flex items-center justify-between p-3 bg-muted/40 dark:bg-muted/20 rounded-lg border border-border/40 hover:bg-muted/60 dark:hover:bg-muted/30 transition-colors"
                   >
                     <div className="flex items-center gap-3 text-sm">
-                      <Badge
-                        variant={getScoreBadgeVariant(attempt.score)}
-                        className="font-medium"
-                      >
+                      <Badge variant={getScoreBadgeVariant(attempt.score)} className="font-medium">
                         {attempt.score}%
                       </Badge>
                       <span className="text-foreground font-medium">
-                        {attempt.correct_answers}/{attempt.total_questions}{' '}
-                        correct
+                        {attempt.correct_answers}/{attempt.total_questions} correct
                       </span>
                       {attempt.time_taken_seconds && (
                         <span className="text-muted-foreground">

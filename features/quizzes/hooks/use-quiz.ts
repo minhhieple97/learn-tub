@@ -1,10 +1,10 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useAction } from 'next-safe-action/hooks';
 import { generateQuizQuestionsAction, evaluateQuizAction } from '../actions';
-import type { QuizSettings, QuizState } from '../types';
 import { AI_DEFAULTS, AI_PROVIDERS, AI_QUIZ_CONFIG } from '@/config/constants';
+import { IQuizSettings, IQuizState } from '../types';
 
-type ExtendedQuizState = QuizState & {
+type ExtendedQuizState = IQuizState & {
   startTime: number | null;
   currentTime: number;
   timeTakenSeconds: number;
@@ -56,9 +56,7 @@ export const useQuiz = (videoId: string) => {
     }
     setState((prev) => {
       if (prev.startTime) {
-        const timeTakenSeconds = Math.floor(
-          (Date.now() - prev.startTime) / 1000,
-        );
+        const timeTakenSeconds = Math.floor((Date.now() - prev.startTime) / 1000);
         return { ...prev, timeTakenSeconds };
       }
       return prev;
@@ -73,8 +71,9 @@ export const useQuiz = (videoId: string) => {
     };
   }, []);
 
-  const { execute: executeGenerate, isExecuting: isGeneratingQuestions } =
-    useAction(generateQuizQuestionsAction, {
+  const { execute: executeGenerate, isExecuting: isGeneratingQuestions } = useAction(
+    generateQuizQuestionsAction,
+    {
       onSuccess: (result) => {
         setState((prev) => ({
           ...prev,
@@ -97,7 +96,8 @@ export const useQuiz = (videoId: string) => {
         console.error('Failed to generate questions:', error);
         setState((prev) => ({ ...prev, isGenerating: false }));
       },
-    });
+    },
+  );
 
   const { execute: executeEvaluate, isExecuting: isEvaluatingQuiz } = useAction(
     evaluateQuizAction,
@@ -122,7 +122,7 @@ export const useQuiz = (videoId: string) => {
     async (
       videoTitle?: string,
       videoDescription?: string,
-      customSettings?: Partial<QuizSettings>,
+      customSettings?: Partial<IQuizSettings>,
     ) => {
       const settings = { ...state.settings, ...customSettings };
       setState((prev) => ({ ...prev, isGenerating: true, settings }));
@@ -143,9 +143,7 @@ export const useQuiz = (videoId: string) => {
   const answerQuestion = useCallback(
     (questionId: string, selectedAnswer: 'A' | 'B' | 'C' | 'D') => {
       setState((prev) => {
-        const existingAnswerIndex = prev.answers.findIndex(
-          (a) => a.questionId === questionId,
-        );
+        const existingAnswerIndex = prev.answers.findIndex((a) => a.questionId === questionId);
         const newAnswers = [...prev.answers];
 
         if (existingAnswerIndex >= 0) {
@@ -166,10 +164,7 @@ export const useQuiz = (videoId: string) => {
   const nextQuestion = useCallback(() => {
     setState((prev) => ({
       ...prev,
-      currentQuestionIndex: Math.min(
-        prev.currentQuestionIndex + 1,
-        prev.questions.length - 1,
-      ),
+      currentQuestionIndex: Math.min(prev.currentQuestionIndex + 1, prev.questions.length - 1),
     }));
   }, []);
 
@@ -183,10 +178,7 @@ export const useQuiz = (videoId: string) => {
   const goToQuestion = useCallback((index: number) => {
     setState((prev) => ({
       ...prev,
-      currentQuestionIndex: Math.max(
-        0,
-        Math.min(index, prev.questions.length - 1),
-      ),
+      currentQuestionIndex: Math.max(0, Math.min(index, prev.questions.length - 1)),
     }));
   }, []);
 
@@ -244,7 +236,7 @@ export const useQuiz = (videoId: string) => {
     }));
   }, [stopTimer]);
 
-  const updateSettings = useCallback((newSettings: Partial<QuizSettings>) => {
+  const updateSettings = useCallback((newSettings: Partial<IQuizSettings>) => {
     setState((prev) => ({
       ...prev,
       settings: { ...prev.settings, ...newSettings },
@@ -254,15 +246,11 @@ export const useQuiz = (videoId: string) => {
   const formatTime = useCallback((seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs
-      .toString()
-      .padStart(2, '0')}`;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   }, []);
 
   const currentQuestion = state.questions[state.currentQuestionIndex];
-  const currentAnswer = state.answers.find(
-    (a) => a.questionId === currentQuestion?.id,
-  );
+  const currentAnswer = state.answers.find((a) => a.questionId === currentQuestion?.id);
   const hasAnsweredAll = state.answers.length === state.questions.length;
   const canGoNext = state.currentQuestionIndex < state.questions.length - 1;
   const canGoPrevious = state.currentQuestionIndex > 0;
