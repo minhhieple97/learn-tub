@@ -100,7 +100,6 @@ export type Database = {
           created_at: string | null
           id: string
           input_data: Json | null
-          interaction_type: string
           note_id: string | null
           output_data: Json | null
           user_id: string
@@ -109,7 +108,6 @@ export type Database = {
           created_at?: string | null
           id?: string
           input_data?: Json | null
-          interaction_type: string
           note_id?: string | null
           output_data?: Json | null
           user_id: string
@@ -118,7 +116,6 @@ export type Database = {
           created_at?: string | null
           id?: string
           input_data?: Json | null
-          interaction_type?: string
           note_id?: string | null
           output_data?: Json | null
           user_id?: string
@@ -346,6 +343,7 @@ export type Database = {
           published_at: string | null
           thumbnail_url: string | null
           title: string
+          tutorial: string | null
           updated_at: string | null
           user_id: string
           youtube_id: string
@@ -360,6 +358,7 @@ export type Database = {
           published_at?: string | null
           thumbnail_url?: string | null
           title: string
+          tutorial?: string | null
           updated_at?: string | null
           user_id: string
           youtube_id: string
@@ -374,6 +373,7 @@ export type Database = {
           published_at?: string | null
           thumbnail_url?: string | null
           title?: string
+          tutorial?: string | null
           updated_at?: string | null
           user_id?: string
           youtube_id?: string

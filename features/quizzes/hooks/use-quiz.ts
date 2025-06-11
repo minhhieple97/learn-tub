@@ -122,6 +122,7 @@ export const useQuiz = (videoId: string) => {
     async (
       videoTitle?: string,
       videoDescription?: string,
+      videoTutorial?: string,
       customSettings?: Partial<IQuizSettings>,
     ) => {
       const settings = { ...state.settings, ...customSettings };
@@ -131,6 +132,7 @@ export const useQuiz = (videoId: string) => {
         videoId,
         videoTitle,
         videoDescription,
+        videoTutorial,
         questionCount: settings.questionCount,
         difficulty: settings.difficulty,
         provider: settings.provider,
@@ -183,7 +185,7 @@ export const useQuiz = (videoId: string) => {
   }, []);
 
   const submitQuiz = useCallback(
-    async (videoTitle?: string, videoDescription?: string) => {
+    async (videoTitle?: string, videoDescription?: string, videoTutorial?: string) => {
       if (state.questions.length === 0 || state.answers.length === 0) {
         return;
       }
@@ -201,6 +203,7 @@ export const useQuiz = (videoId: string) => {
         videoContext: {
           title: videoTitle,
           description: videoDescription,
+          tutorial: videoTutorial,
         },
         provider: state.settings.provider,
         model: state.settings.model,

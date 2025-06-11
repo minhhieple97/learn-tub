@@ -193,7 +193,8 @@ export const AI_QUIZ_PROMPTS = {
 - Include clear explanations for the correct answers
 - Cover different aspects and key concepts from the video
 - Questions should test understanding, not just memorization
-- Include the topic/subject area for each question`,
+- Include the topic/subject area for each question
+- If learning objectives are provided, tailor questions to focus on those specific goals`,
   GENERATION_FORMAT: `Please provide your response in the following JSON format:
 {
   "questions": [
@@ -213,10 +214,8 @@ export const AI_QUIZ_PROMPTS = {
     }
   ]
 }`,
-  GENERATION_FOOTER:
-    'Make sure the questions are educational, relevant, and well-structured.',
-  EVALUATION_INTRO:
-    'Please evaluate the following quiz results and provide detailed feedback:',
+  GENERATION_FOOTER: 'Make sure the questions are educational, relevant, and well-structured.',
+  EVALUATION_INTRO: 'Please evaluate the following quiz results and provide detailed feedback:',
   EVALUATION_FORMAT: `Please analyze the performance and provide feedback in the following JSON format:
 {
   "totalQuestions": {total},
@@ -234,19 +233,17 @@ export const AI_QUIZ_PROMPTS = {
   }
 }`,
   EVALUATION_FOCUS: `Focus on:
-1. Overall knowledge retention
-2. Understanding of key concepts
-3. Areas of strength and weakness
-4. Specific recommendations for improvement
-5. Performance patterns by topic and difficulty
-
-Be constructive and educational in your feedback.`,
+- Overall understanding level
+- Strengths and areas for improvement
+- Specific recommendations for further learning
+- Topic-based performance analysis`,
+  QUIZ_RESULTS_PREFIX: 'Quiz Results:',
   TOPICS_PREFIX: 'Focus on these topics: ',
   DIFFICULTY_MIXED: 'Mix of easy, medium, and hard questions',
-  DIFFICULTY_SUFFIX: ' difficulty level',
+  DIFFICULTY_SUFFIX: ' level questions',
   VIDEO_TITLE_PREFIX: 'Video Title: "',
   VIDEO_DESCRIPTION_PREFIX: 'Video Description: "',
-  QUIZ_RESULTS_PREFIX: 'Quiz Results:',
+  VIDEO_TUTORIAL_PREFIX: 'Learning Objective: "',
 } as const;
 
 export const STATUS_STREAMING = {

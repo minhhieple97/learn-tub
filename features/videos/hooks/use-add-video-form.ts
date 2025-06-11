@@ -37,17 +37,20 @@ export const useAddVideoForm = (): IUseAddVideoFormReturn => {
   });
 
   const [url, setUrl] = useState('');
+  const [tutorial, setTutorial] = useState('');
 
   const isValidUrl = !!url && isValidYouTubeUrl(url);
   const canSubmit = !isPending && !!url && isValidUrl;
 
-  const handleExecute = (input: { videoUrl: string }) => {
+  const handleExecute = (input: { videoUrl: string; tutorial?: string }) => {
     execute(input);
   };
 
   return {
     url,
     setUrl,
+    tutorial,
+    setTutorial,
     isValidUrl,
     isPending,
     execute: handleExecute,
