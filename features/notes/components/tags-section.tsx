@@ -5,16 +5,11 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Plus, X } from 'lucide-react';
-import type { TagsSectionProps } from '../types';
+import type { ITagsSectionProps } from '../types';
 import { VALIDATION_LIMITS } from '@/config/constants';
 import { useNotesStore } from '../store';
 
-export const TagsSection = ({
-  onAddTag,
-  onRemoveTag,
-  onKeyDown,
-  onTagInputChange,
-}: TagsSectionProps) => {
+export const TagsSection = ({ onAddTag, onRemoveTag, onKeyDown, onTagInputChange }: ITagsSectionProps) => {
   const { formTags, tagInput } = useNotesStore();
   return (
     <div className="space-y-4">

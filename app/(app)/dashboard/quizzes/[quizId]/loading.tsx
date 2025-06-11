@@ -1,6 +1,5 @@
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 
 export default function QuizDetailLoading() {
   return (
@@ -22,7 +21,7 @@ export default function QuizDetailLoading() {
             <Skeleton className="h-6 w-32" />
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <Skeleton className="h-4 w-24" />
                 <Skeleton className="h-4 w-32" />
@@ -54,15 +53,15 @@ export default function QuizDetailLoading() {
           <CardContent>
             <div className="space-y-6">
               {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="space-y-4 p-4 border rounded-lg">
-                  <div className="flex justify-between items-start">
+                <div key={i} className="space-y-4 rounded-lg border p-4">
+                  <div className="flex items-start justify-between">
                     <Skeleton className="h-6 w-80" /> {/* Question text */}
                     <Skeleton className="h-6 w-16" /> {/* Topic badge */}
                   </div>
                   <div className="space-y-2">
                     {Array.from({ length: 4 }).map((_, j) => (
                       <div key={j} className="flex items-center space-x-2">
-                        <Skeleton className="h-4 w-4 rounded" />{' '}
+                        <Skeleton className="size-4 rounded" />{' '}
                         {/* Radio button */}
                         <Skeleton className="h-4 w-64" /> {/* Option text */}
                       </div>
@@ -91,13 +90,13 @@ export default function QuizDetailLoading() {
               {Array.from({ length: 2 }).map((_, i) => (
                 <div
                   key={i}
-                  className="flex justify-between items-center p-4 border rounded-lg"
+                  className="flex items-center justify-between rounded-lg border p-4"
                 >
                   <div className="space-y-1">
                     <Skeleton className="h-4 w-24" /> {/* Attempt number */}
                     <Skeleton className="h-4 w-32" /> {/* Date */}
                   </div>
-                  <div className="text-right space-y-1">
+                  <div className="space-y-1 text-right">
                     <Skeleton className="h-6 w-16" /> {/* Score */}
                     <Skeleton className="h-4 w-20" /> {/* Percentage */}
                   </div>

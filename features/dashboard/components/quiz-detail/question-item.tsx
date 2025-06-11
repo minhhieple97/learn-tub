@@ -5,11 +5,11 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { ChevronDown, ChevronUp, CheckCircle, Eye, EyeOff } from 'lucide-react';
-import { QuizQuestion } from '@/features/ai';
 import { DifficultyBadge } from '@/components/ui/difficulty-badge';
+import { IQuizQuestion } from '@/features/quizzes/types';
 
 type QuestionItemProps = {
-  question: QuizQuestion;
+  question: IQuizQuestion;
   index: number;
   isLast: boolean;
 };

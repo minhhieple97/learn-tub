@@ -1,16 +1,17 @@
+import { DashboardContent } from '@/features/dashboard';
 import {
-  DashboardContent,
   getDashboardStats,
-  getRecentVideos,
+  getInsightsData,
   getLearningGoals,
-} from '@/features/dashboard';
+  getRecentVideos,
+} from '@/features/dashboard/queries/dashboard-queries';
 
 export default async function DashboardPage() {
-  // Fetch data in parallel
-  const [stats, recentVideos, learningGoals] = await Promise.all([
+  const [stats, recentVideos, learningGoals, insightsData] = await Promise.all([
     getDashboardStats(),
     getRecentVideos(),
     getLearningGoals(),
+    getInsightsData(),
   ]);
 
   return (
@@ -18,6 +19,7 @@ export default async function DashboardPage() {
       stats={stats}
       recentVideos={recentVideos}
       learningGoals={learningGoals}
+      insightsData={insightsData}
     />
   );
 }

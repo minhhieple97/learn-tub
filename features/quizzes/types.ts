@@ -1,16 +1,18 @@
-import {
-  AI_PROVIDERS,
-  AI_CHUNK_TYPES,
-  AI_STATUS,
-  AI_FORMAT,
-} from '@/config/constants';
-export type QuizSettingsType = {
+import { AI_FORMAT } from '@/config/constants';
+import { Json } from '@/database.types';
+import { AIProvider, IFeedback, IApiResponse, IAsyncOperationHook } from '@/types';
+
+export type IQuizDifficulty = 'easy' | 'medium' | 'hard' | 'mixed';
+
+export type IQuizDifficultyFilter = 'all' | IQuizDifficulty;
+
+export type IQuizSettingsType = {
   questionCount: number;
-  difficulty: 'easy' | 'medium' | 'hard' | 'mixed';
-  provider: string;
+  difficulty: IQuizDifficulty;
+  provider: AIProvider;
 };
 
-export type Question = {
+export type IQuestion = {
   id: string;
   question: string;
   options: {
@@ -24,12 +26,12 @@ export type Question = {
   difficulty: 'easy' | 'medium' | 'hard';
 };
 
-export type Answer = {
+export type IAnswer = {
   questionId: string;
   selectedAnswer: 'A' | 'B' | 'C' | 'D';
 };
 
-export type QuizQuestion = {
+export type IQuizQuestion = {
   id: string;
   question: string;
   options: {
@@ -44,12 +46,12 @@ export type QuizQuestion = {
   difficulty: 'easy' | 'medium' | 'hard';
 };
 
-export type UserAnswer = {
+export type IUserAnswer = {
   questionId: string;
   selectedAnswer: 'A' | 'B' | 'C' | 'D';
 };
 
-export type QuizResult = {
+export type IQuizResult = {
   questionId: string;
   question: string;
   selectedAnswer: 'A' | 'B' | 'C' | 'D';
@@ -60,11 +62,11 @@ export type QuizResult = {
   difficulty: 'easy' | 'medium' | 'hard';
 };
 
-export type QuizFeedback = {
+export type IQuizFeedback = {
   totalQuestions: number;
   correctAnswers: number;
   score: number;
-  results: QuizResult[];
+  results: IQuizResult[];
   overallFeedback: string;
   areasForImprovement: string[];
   strengths: string[];
@@ -78,21 +80,21 @@ export type QuizFeedback = {
   >;
 };
 
-export type GenerateQuestionsRequest = {
+export type IGenerateQuestionsRequest = {
   videoId: string;
   videoTitle?: string;
   videoDescription?: string;
   questionCount?: number;
-  difficulty?: 'easy' | 'medium' | 'hard' | 'mixed';
+  difficulty?: IQuizDifficulty;
   topics?: string[];
   provider: string;
   model: string;
 };
 
-export type EvaluateQuizRequest = {
+export type IEvaluateQuizRequest = {
   videoId: string;
-  questions: QuizQuestion[];
-  answers: UserAnswer[];
+  questions: IQuizQuestion[];
+  answers: IUserAnswer[];
   videoContext?: {
     title?: string;
     description?: string;
@@ -101,168 +103,104 @@ export type EvaluateQuizRequest = {
   model: string;
 };
 
-export type QuizGenerationResponse = {
-  success: boolean;
-  questions?: QuizQuestion[];
-  error?: string;
-};
+// Use common generic response types
+export type IQuizGenerationResponse = IApiResponse<IQuizQuestion[]>;
+export type IQuizEvaluationResponse = IApiResponse<IQuizFeedback>;
 
-export type QuizStreamChunk = {
+export type IQuizStreamChunk = {
   type: 'question' | 'complete' | 'error';
   content: string;
   finished: boolean;
 };
 
-export type QuizEvaluationResponse = {
-  success: boolean;
-  feedback?: QuizFeedback;
-  error?: string;
-};
-
-export type QuizSettings = {
+export type IQuizSettings = {
   questionCount: number;
-  difficulty: 'easy' | 'medium' | 'hard' | 'mixed';
-  provider: string;
+  difficulty: IQuizDifficulty;
+  provider: AIProvider;
   model: string;
 };
 
-export type QuizState = {
-  questions: QuizQuestion[];
-  answers: UserAnswer[];
+export type IQuizState = {
+  questions: IQuizQuestion[];
+  answers: IUserAnswer[];
   currentQuestionIndex: number;
   showResults: boolean;
-  feedback: QuizFeedback | null;
+  feedback: IQuizFeedback | null;
   isGenerating: boolean;
   isEvaluating: boolean;
-  settings: QuizSettings;
+  settings: IQuizSettings;
 };
 
-export type AIProvider =
-  | typeof AI_PROVIDERS.OPENAI
-  | typeof AI_PROVIDERS.GEMINI;
-
-export type AIEvaluationResult = {
+export type INoteEvaluationResult = {
   id: string;
   note_id: string;
   user_id: string;
   provider: AIProvider;
   model: string;
-  feedback: AIFeedback;
+  feedback: Json;
   created_at: string;
 };
 
-export type AIFeedback = {
-  summary: string;
-  correct_points: string[];
-  incorrect_points: string[];
-  improvement_suggestions: string[];
-  overall_score: number; // 1-10
-  detailed_analysis: string;
-};
-
-export type AIEvaluationRequest = {
-  noteId: string;
-  content: string;
-  provider: AIProvider;
-  model: string;
-  context?: {
-    videoTitle?: string;
-    videoDescription?: string;
-    timestamp: number | null;
-  };
-};
-
-export type AIEvaluationResponse = {
-  success: boolean;
-  data?: AIEvaluationResult;
-  error?: string;
-};
-
-export type AIStreamChunk = {
-  type:
-    | typeof AI_CHUNK_TYPES.FEEDBACK
-    | typeof AI_CHUNK_TYPES.COMPLETE
-    | typeof AI_CHUNK_TYPES.ERROR;
-  content: string;
-  finished?: boolean;
-};
-
-export type AIEvaluationSettings = {
-  provider: AIProvider;
-  model: string;
-  temperature: number;
-  max_tokens: number;
-};
-
-export type CreateAIEvaluationInput = {
+export type ICreateAIEvaluationInput = {
   noteId: string;
   provider: AIProvider;
   model: string;
 };
 
-export type CopyFeedbackInput = {
-  feedback: AIFeedback;
-  format:
-    | typeof AI_FORMAT.COPY_FORMATS.PLAIN
-    | typeof AI_FORMAT.COPY_FORMATS.MARKDOWN;
+export type ICopyFeedbackInput = {
+  feedback: IFeedback;
+  format: typeof AI_FORMAT.COPY_FORMATS.PLAIN | typeof AI_FORMAT.COPY_FORMATS.MARKDOWN;
 };
 
-export type AIEvaluationStatus =
-  | typeof AI_STATUS.IDLE
-  | typeof AI_STATUS.EVALUATING
-  | typeof AI_STATUS.STREAMING
-  | typeof AI_STATUS.COMPLETED
-  | typeof AI_STATUS.ERROR;
-
-export type VideoWithNotes = {
+export type IVideoWithNotes = {
   id: string;
   title: string;
   youtube_id: string;
   notes: Array<{ content: string }>;
 };
 
-export type VideoInfo = {
+export type IVideoInfo = {
   id: string;
   title: string;
   youtube_id?: string;
 };
 
-export type UserNote = {
+export type IUserNote = {
   content: string;
 };
 
-export type QuizSession = {
+export type IQuizSession = {
   id: string;
   user_id: string;
   video_id: string;
   title: string;
-  difficulty: 'easy' | 'medium' | 'hard' | 'mixed';
+  difficulty: IQuizDifficulty;
   question_count: number;
-  topics: string[];
+  topics: string[] | null;
   ai_provider: string;
   ai_model: string;
-  questions: QuizQuestion[];
-  created_at: string;
-  updated_at: string;
+  questions: Json;
+  created_at: string | null;
+  updated_at: string | null;
 };
 
-export type QuizAttempt = {
+export type IQuizAttempt = {
   id: string;
   quiz_session_id: string;
   user_id: string;
-  answers: UserAnswer[];
+  answers: Json; // Use Json type to match database
   score: number;
   total_questions: number;
   correct_answers: number;
-  feedback?: QuizFeedback;
-  time_taken_seconds?: number;
-  completed_at: string;
-  created_at: string;
+  feedback?: Json | null; // Use Json type to match database
+  time_taken_seconds?: number | null;
+  completed_at: string | null; // Allow null to match database
+  created_at: string | null; // Allow null to match database
 };
 
-export type QuizSessionWithAttempts = QuizSession & {
-  attempts: QuizAttempt[];
-  latest_attempt?: QuizAttempt;
+export type IQuizSessionWithAttempts = IQuizSession & {
+  attempts: IQuizAttempt[];
+  latest_attempt?: IQuizAttempt;
   best_score?: number;
   attempt_count: number;
   videos?: {
@@ -270,4 +208,34 @@ export type QuizSessionWithAttempts = QuizSession & {
     youtube_id: string;
     description: string;
   };
+};
+
+// Add these types for database compatibility
+export type IDatabaseQuizSession = {
+  id: string;
+  user_id: string;
+  video_id: string;
+  title: string;
+  difficulty: string; // Database stores as string
+  question_count: number;
+  topics: string[] | null;
+  ai_provider: string;
+  ai_model: string;
+  questions: Json;
+  created_at: string | null;
+  updated_at: string | null;
+};
+
+export type IDatabaseQuizAttempt = {
+  id: string;
+  quiz_session_id: string;
+  user_id: string;
+  answers: Json; // Database stores as Json
+  score: number;
+  total_questions: number;
+  correct_answers: number;
+  feedback?: Json | null;
+  time_taken_seconds?: number | null;
+  completed_at: string | null;
+  created_at: string | null;
 };

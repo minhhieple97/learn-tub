@@ -1,6 +1,8 @@
+import { createClient } from '@/lib/supabase/server';
+import { getProfileInSession } from '@/features/profile/queries';
+import { getQuizStatistics } from '@/features/quizzes/queries';
 import type { DashboardStats, RecentVideo, LearningGoal } from '../types';
 
-// Mock data - replace with actual database queries
 export const getDashboardStats = async (): Promise<DashboardStats> => {
   return {
     totalVideos: 12,
@@ -44,4 +46,25 @@ export const getLearningGoals = async (): Promise<LearningGoal[]> => {
       color: 'bg-green-600',
     },
   ];
+};
+
+export const getInsightsData = async () => {
+  const supabase = await createClient();
+  const profile = await getProfileInSession();
+
+  const { count: analysisCount } = await supabase
+    .from('note_interactions')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', profile.id)
+    .eq('interaction_type', 'note_evaluation');
+
+  const quizStats = await getQuizStatistics(profile.id);
+
+  const studyPlanCount = 0;
+
+  return {
+    analysisCount: analysisCount || 0,
+    quizStats,
+    studyPlanCount,
+  };
 };

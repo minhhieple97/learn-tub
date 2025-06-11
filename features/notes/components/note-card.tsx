@@ -3,11 +3,11 @@ import { Badge } from '@/components/ui/badge';
 import { TimestampDisplay } from './timestamp-display';
 import { NoteCardActions } from './note-card-actions';
 import { useNotesStore } from '../store';
-import type { Note } from '../types';
+import type { INote } from '../types';
 import { NoteEvaluation } from '@/features/notes/components/note-evaluation';
 
 type NoteCardProps = {
-  note: Note;
+  note: INote;
   onTimestampClick?: (timestamp: number) => void;
 };
 

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 
-type UsePlayerControlsProps = {
+type IUsePlayerControlsProps = {
   player: any;
   playerState: number;
   initialTimestamp?: number;
@@ -8,7 +8,7 @@ type UsePlayerControlsProps = {
   targetSeekTime?: number;
 };
 
-type UsePlayerControlsReturn = {
+type IUsePlayerControlsReturn = {
   currentTime: number;
   volume: number;
   isMuted: boolean;
@@ -26,10 +26,10 @@ export const usePlayerControls = ({
   initialTimestamp = 0,
   onTimeUpdate,
   targetSeekTime,
-}: UsePlayerControlsProps): UsePlayerControlsReturn => {
-  const [currentTime, setCurrentTime] = useState(initialTimestamp);
-  const [volume, setVolume] = useState(100);
-  const [isMuted, setIsMuted] = useState(false);
+}: IUsePlayerControlsProps): IUsePlayerControlsReturn => {
+  const [currentTime, setCurrentTime] = useState<number>(initialTimestamp);
+  const [volume, setVolume] = useState<number>(100);
+  const [isMuted, setIsMuted] = useState<boolean>(false);
   const timeUpdateIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {

@@ -2,12 +2,12 @@ import Link from 'next/link';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Clock, BookOpen, Play, Eye, Calendar } from 'lucide-react';
-import { Video } from '../types';
+import { IVideo } from '../types';
 import { formatDistanceToNow, formatDuration } from '@/lib/utils';
 import { routes } from '@/routes';
 
 type VideoCardProps = {
-  video: Video;
+  video: IVideo;
 };
 
 export const VideoCard = ({ video }: VideoCardProps) => {
@@ -25,10 +25,10 @@ export const VideoCard = ({ video }: VideoCardProps) => {
 
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent opacity-70 group-hover:opacity-90 transition-opacity duration-500" />
 
-          {video.duration > 0 && (
+          {(video.duration ?? 0) > 0 && (
             <Badge className="absolute bottom-4 right-4 bg-black/90 text-white border-0 backdrop-blur-sm font-mono text-sm shadow-2xl px-3 py-1.5 rounded-xl">
               <Clock className="h-3.5 w-3.5 mr-1.5" />
-              {formatDuration(video.duration)}
+              {formatDuration(video.duration ?? 0)}
             </Badge>
           )}
         </div>
@@ -47,7 +47,7 @@ export const VideoCard = ({ video }: VideoCardProps) => {
             <div className="flex items-center gap-2">
               <div className="flex items-center text-xs text-slate-500 dark:text-slate-400 bg-gradient-to-r from-slate-100/80 to-slate-200/60 dark:from-slate-800/80 dark:to-slate-700/60 px-2.5 py-1.5 rounded-lg backdrop-blur-sm border border-slate-200/50 dark:border-slate-700/50">
                 <Calendar className="h-3 w-3 mr-2" />
-                {formatDistanceToNow(new Date(video.created_at))}
+                {formatDistanceToNow(new Date(video.created_at ?? Date.now()))}
               </div>
               <div className="flex items-center text-xs text-slate-500 dark:text-slate-400 bg-gradient-to-r from-slate-100/80 to-slate-200/60 dark:from-slate-800/80 dark:to-slate-700/60 px-2.5 py-1.5 rounded-lg backdrop-blur-sm border border-slate-200/50 dark:border-slate-700/50">
                 <BookOpen className="h-3 w-3 mr-2" />
@@ -55,7 +55,7 @@ export const VideoCard = ({ video }: VideoCardProps) => {
               </div>
             </div>
             <span className="text-xs text-slate-500 dark:text-slate-400 font-semibold bg-slate-100/60 dark:bg-slate-800/60 px-2.5 py-1 rounded-md">
-              {new Date(video.created_at).toLocaleDateString()}
+              {new Date(video.created_at ?? Date.now()).toLocaleDateString()}
             </span>
           </div>
         </CardContent>

@@ -3,17 +3,17 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useAction } from 'next-safe-action/hooks';
-import { toast, useToast } from '@/hooks/use-toast';
+import { toast } from '@/hooks/use-toast';
 import { registerSchema } from '../schemas';
 import { registerAction } from '../actions';
-import type { RegisterFormData } from '../types';
-import { redirect, useRouter } from 'next/navigation';
+import type { IRegisterFormData } from '../types';
+import { useRouter } from 'next/navigation';
 import { routes } from '@/routes';
 
 type UseRegisterReturn = {
-  register: ReturnType<typeof useForm<RegisterFormData>>['register'];
-  handleSubmit: ReturnType<typeof useForm<RegisterFormData>>['handleSubmit'];
-  errors: ReturnType<typeof useForm<RegisterFormData>>['formState']['errors'];
+  register: ReturnType<typeof useForm<IRegisterFormData>>['register'];
+  handleSubmit: ReturnType<typeof useForm<IRegisterFormData>>['handleSubmit'];
+  errors: ReturnType<typeof useForm<IRegisterFormData>>['formState']['errors'];
   isSubmitting: boolean;
   isLoading: boolean;
   password: string;
@@ -21,7 +21,7 @@ type UseRegisterReturn = {
   passwordRequirements: {
     hasMinLength: boolean;
   };
-  onSubmit: (data: RegisterFormData) => Promise<void>;
+  onSubmit: (data: IRegisterFormData) => Promise<void>;
 };
 
 export const useRegister = (): UseRegisterReturn => {
@@ -30,9 +30,7 @@ export const useRegister = (): UseRegisterReturn => {
   const { execute, isPending } = useAction(registerAction, {
     onError: ({ error }) => {
       toast.error({
-        description:
-          error.serverError ||
-          'An unexpected error occurred during registration',
+        description: error.serverError || 'An unexpected error occurred during registration',
       });
     },
     onSuccess: () => {
@@ -49,7 +47,7 @@ export const useRegister = (): UseRegisterReturn => {
     handleSubmit,
     formState: { errors, isSubmitting },
     watch,
-  } = useForm<RegisterFormData>({
+  } = useForm<IRegisterFormData>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
       fullName: '',
@@ -66,7 +64,7 @@ export const useRegister = (): UseRegisterReturn => {
     hasMinLength: password.length >= 8,
   };
 
-  const onSubmit = async (data: RegisterFormData) => {
+  const onSubmit = async (data: IRegisterFormData) => {
     execute(data);
   };
 

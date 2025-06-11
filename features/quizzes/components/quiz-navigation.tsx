@@ -8,25 +8,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  ChevronLeft,
-  ChevronRight,
-  CheckCircle,
-  Loader2,
-  Clock,
-} from 'lucide-react';
-import type { Question, Answer } from '../../ai/types';
+import { ChevronLeft, ChevronRight, CheckCircle, Loader2, Clock } from 'lucide-react';
+import { IAnswer, IQuestion } from '../types';
 
 type QuizNavigationProps = {
   currentQuestionIndex: number;
   totalQuestions: number;
-  currentAnswer?: Answer;
+  currentAnswer?: IAnswer;
   canGoNext: boolean;
   canGoPrevious: boolean;
   hasAnsweredAll: boolean;
   isEvaluating: boolean;
-  questions: Question[];
-  answers: Answer[];
+  questions: IQuestion[];
+  answers: IAnswer[];
   formattedTime?: string;
   onPrevious: () => void;
   onNext: () => void;

@@ -1,11 +1,11 @@
 import { Badge } from '@/components/ui/badge';
 import { Users } from 'lucide-react';
 
-type VideoStatsHeaderProps = {
+type IVideoStatsHeaderProps = {
   videoCount: number;
 };
 
-export const VideoStatsHeader = ({ videoCount }: VideoStatsHeaderProps) => {
+export const VideoStatsHeader = ({ videoCount }: IVideoStatsHeaderProps) => {
   return (
     <div className="ml-auto">
       <Badge

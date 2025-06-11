@@ -7,7 +7,7 @@ import {
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { AI_MODELS } from '@/config/constants';
-import type { AIProvider } from '../../ai/types';
+import { AIProvider } from '@/types';
 
 type AIModelSelectorProps = {
   provider: AIProvider;

@@ -4,38 +4,30 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { createClient } from '@/lib/supabase/client';
 import { TOAST_MESSAGES } from '@/config/constants';
-import type { Note } from '../types';
+import type { INote } from '../types';
 import { toast } from '@/hooks/use-toast';
 
 type NotesState = {
-  notes: Note[];
+  notes: INote[];
   isLoading: boolean;
   error: string | null;
   searchQuery: string;
-  searchResults: Note[];
+  searchResults: INote[];
   isSearching: boolean;
   isSearchActive: boolean;
   resultCount: number;
   formContent: string;
   formTags: string[];
   tagInput: string;
-  editingNote: Note | null;
+  editingNote: INote | null;
   isFormLoading: boolean;
   currentVideoId: string | null;
   currentTimestamp: number;
   setCurrentVideo: (videoId: string) => void;
   setCurrentTimestamp: (timestamp: number) => void;
   loadNotes: (videoId: string) => Promise<void>;
-  saveNote: (
-    content: string,
-    tags: string[],
-    timestamp: number,
-  ) => Promise<void>;
-  updateNote: (
-    noteId: string,
-    content: string,
-    tags: string[],
-  ) => Promise<void>;
+  saveNote: (content: string, tags: string[], timestamp: number) => Promise<void>;
+  updateNote: (noteId: string, content: string, tags: string[]) => Promise<void>;
   deleteNote: (noteId: string) => Promise<void>;
   setSearchQuery: (query: string) => void;
   performSearch: (query?: string) => Promise<void>;
@@ -45,10 +37,10 @@ type NotesState = {
   setTagInput: (input: string) => void;
   addTag: () => void;
   removeTag: (tag: string) => void;
-  startEditing: (note: Note) => void;
+  startEditing: (note: INote) => void;
   cancelEditing: () => void;
   resetForm: () => void;
-  getDisplayNotes: () => Note[];
+  getDisplayNotes: () => INote[];
   getSearchResultCount: () => number;
 };
 
@@ -104,8 +96,7 @@ export const useNotesStore = create<NotesState>()(
         } catch (error) {
           console.error('Error loading notes:', error);
           set({
-            error:
-              error instanceof Error ? error.message : 'Failed to load notes',
+            error: error instanceof Error ? error.message : 'Failed to load notes',
             isLoading: false,
           });
         }
@@ -189,18 +180,13 @@ export const useNotesStore = create<NotesState>()(
       deleteNote: async (noteId: string) => {
         try {
           const supabase = createClient();
-          const { error } = await supabase
-            .from('notes')
-            .delete()
-            .eq('id', noteId);
+          const { error } = await supabase.from('notes').delete().eq('id', noteId);
 
           if (error) throw error;
 
           set((state) => ({
             notes: state.notes.filter((note) => note.id !== noteId),
-            searchResults: state.searchResults.filter(
-              (note) => note.id !== noteId,
-            ),
+            searchResults: state.searchResults.filter((note) => note.id !== noteId),
           }));
 
           toast.success({
@@ -239,14 +225,15 @@ export const useNotesStore = create<NotesState>()(
 
         try {
           const supabase = createClient();
-          const { data: user } = await supabase.auth.getUser();
+          const dataUser = await supabase.auth.getUser();
+          const user = dataUser.data.user;
+          if (!user) return;
           const { data: profile } = await supabase
             .from('profiles')
             .select('*')
-            .eq('id', user.user?.id)
+            .eq('id', user.id)
             .single();
-          if (!user.user || !profile) return;
-
+          if (!profile) return;
           let queryBuilder = supabase
             .from('notes')
             .select('*')
@@ -254,10 +241,7 @@ export const useNotesStore = create<NotesState>()(
             .eq('user_id', profile.id);
 
           if (hasQuery) {
-            queryBuilder = queryBuilder.ilike(
-              'content',
-              `%${searchQuery.trim()}%`,
-            );
+            queryBuilder = queryBuilder.ilike('content', `%${searchQuery.trim()}%`);
           }
 
           const { data, error } = await queryBuilder.order('created_at', {
@@ -321,7 +305,7 @@ export const useNotesStore = create<NotesState>()(
         }));
       },
 
-      startEditing: (note: Note) => {
+      startEditing: (note: INote) => {
         set({
           editingNote: note,
           formContent: note.content,

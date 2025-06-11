@@ -1,4 +1,5 @@
-import { createClient } from '@/lib/supabase/server';
+'use client';
+
 import {
   Card,
   CardContent,
@@ -7,26 +8,18 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Brain, TrendingUp, Target, Zap, Trophy, Clock } from 'lucide-react';
-import { getProfileInSession } from '@/features/profile/queries/profile';
 import { Badge } from '@/components/ui/badge';
 import { formatDistanceToNow } from 'date-fns';
 import Link from 'next/link';
 import { routes } from '@/routes';
-import { getQuizStatistics } from '@/features/quizzes/queries/quiz-queries';
+import type { InsightsData } from '../types';
 
-export async function InsightsDashboard() {
-  const supabase = await createClient();
-  const profile = await getProfileInSession();
+type InsightsDashboardProps = {
+  data: InsightsData;
+};
 
-  const { count: analysisCount } = await supabase
-    .from('note_interactions')
-    .select('*', { count: 'exact', head: true })
-    .eq('user_id', profile.id)
-    .eq('interaction_type', 'note_evaluation');
-
-  const quizStats = await getQuizStatistics(profile.id);
-
-  const studyPlanCount = 0;
+export const InsightsDashboard = ({ data }: InsightsDashboardProps) => {
+  const { analysisCount, quizStats, studyPlanCount } = data;
 
   return (
     <div className="space-y-6">
@@ -42,7 +35,7 @@ export async function InsightsDashboard() {
             <Brain className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{analysisCount || 0}</div>
+            <div className="text-2xl font-bold">{analysisCount}</div>
             <p className="text-xs text-muted-foreground">AI-powered insights</p>
           </CardContent>
         </Card>
@@ -174,4 +167,4 @@ export async function InsightsDashboard() {
       )}
     </div>
   );
-}
+};

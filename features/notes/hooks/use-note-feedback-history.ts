@@ -4,10 +4,10 @@ import {
   getAIFeedbackHistoryAction,
   deleteAIFeedbackAction,
 } from '../../quizzes/actions/get-ai-feedback-history';
-import { AIEvaluationResult } from '@/features/quizzes/types';
+import { INoteEvaluationResult } from '@/features/quizzes/types';
 
 export const useNoteFeedbackHistory = () => {
-  const [history, setHistory] = useState<AIEvaluationResult[]>([]);
+  const [history, setHistory] = useState<INoteEvaluationResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -21,14 +21,12 @@ export const useNoteFeedbackHistory = () => {
       if (result.data?.success && result.data.data) {
         setHistory(result.data.data);
       } else {
-        const errorMessage =
-          result.data?.error || 'Failed to fetch feedback history';
+        const errorMessage = result.data?.error || 'Failed to fetch feedback history';
         setError(errorMessage);
         toast.error('Failed to load feedback history');
       }
     } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : 'Unknown error occurred';
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
       setError(errorMessage);
       toast.error('Failed to load feedback history');
     } finally {
