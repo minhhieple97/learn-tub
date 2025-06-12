@@ -10,7 +10,7 @@
     "lint:fix": "next lint --fix",
     "db:pull": "npx supabase db pull",
     "db:reset": "npx supabase db reset",
-    "db": "npm run db:pull && npm run db:reset"
+    "db": "npm run db:reset && npm run db:pull"
   },
   "dependencies": {
     "@eslint/eslintrc": "^3.3.1",

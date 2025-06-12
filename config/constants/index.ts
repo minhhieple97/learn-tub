@@ -88,6 +88,15 @@ export const AI_PROVIDERS = {
   GEMINI: 'gemini',
 } as const;
 
+
+export const AI_COMMANDS = {
+  EVALUATE_NOTE: 'evaluate_note',
+  GENERATE_QUIZ_QUESTIONS: 'generate_quiz_questions',
+  EVALUATE_QUIZ_ANSWERS: 'evaluate_quiz_answers',
+  CHAT_COMPLETION: 'chat_completion',
+  TEXT_GENERATION: 'text_generation',
+} as const;
+
 export const AI_API = {
   EVALUATE_NOTE_PATH: '/api/evaluate-note',
   CHAT_COMPLETIONS_PATH: '/chat/completions',

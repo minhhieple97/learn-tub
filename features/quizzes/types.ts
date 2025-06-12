@@ -90,6 +90,7 @@ export type IGenerateQuestionsRequest = {
   topics?: string[];
   provider: string;
   model: string;
+  userId: string;
 };
 
 export type IEvaluateQuizRequest = {
@@ -103,6 +104,7 @@ export type IEvaluateQuizRequest = {
   };
   provider: string;
   model: string;
+  userId: string;
 };
 
 export type IQuizGenerationResponse = IApiResponse<IQuizQuestion[]>;

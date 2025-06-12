@@ -54,6 +54,7 @@ export const generateQuizQuestionsAction = authAction
       videoTitle,
       videoDescription,
       videoTutorial,
+      userId: profile.id,
     });
 
     if (!response.success) {

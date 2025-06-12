@@ -194,6 +194,7 @@ export type INoteEvaluationRequest = {
   content: string;
   provider: AIProvider;
   model: string;
+  userId: string;
   context?: {
     videoTitle?: string;
     videoDescription?: string;

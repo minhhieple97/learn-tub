@@ -24,7 +24,10 @@ export const evaluateQuizAction = authAction
     }
     const profile = await getProfileByUserId(user.id);
 
-    const response = await quizService.evaluateQuiz(data);
+    const response = await quizService.evaluateQuiz({
+      ...data,
+      userId: profile.id,
+    });
 
     if (!response.success) {
       throw new ActionError(response.error || 'Failed to evaluate quiz');

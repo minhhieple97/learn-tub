@@ -17,17 +17,22 @@ import {
 } from '@/config/constants';
 import { INoteEvaluationRequest } from '@/features/notes/types';
 import { IFeedback, StreamChunk } from '@/types';
+import { aiUsageTracker } from '@/features/ai';
 
 type StreamController = ReadableStreamDefaultController<StreamChunk>;
-type ProviderEvaluator = (model: string, prompt: string) => Promise<ReadableStream<StreamChunk>>;
+type ProviderEvaluator = (
+  model: string,
+  prompt: string,
+  userId: string,
+) => Promise<ReadableStream<StreamChunk>>;
 
 class NoteService {
   async evaluateNote(request: INoteEvaluationRequest): Promise<ReadableStream<StreamChunk>> {
-    const { provider, model, content, context } = request;
+    const { provider, model, content, context, userId } = request;
     const prompt = this.createEvaluationPrompt(content, context);
 
     const evaluator = this.getProviderEvaluator(provider);
-    return evaluator(model, prompt);
+    return evaluator(model, prompt, userId);
   }
 
   private getProviderEvaluator(provider: string): ProviderEvaluator {
@@ -165,69 +170,93 @@ ${feedback.detailed_analysis}`;
   private async evaluateWithOpenAI(
     model: string,
     prompt: string,
+    userId: string,
   ): Promise<ReadableStream<StreamChunk>> {
-    const openai = new OpenAI({
-      apiKey: env.OPENAI_API_KEY,
-      baseURL: AI_CONFIG.BASE_URL,
-    });
+    return aiUsageTracker.wrapAIOperation(
+      {
+        user_id: userId,
+        command: 'evaluate_note',
+        provider: AI_PROVIDERS.OPENAI,
+        model: model || AI_DEFAULTS.OPENAI_MODEL,
+        request_payload: { prompt_length: prompt.length },
+      },
+      async () => {
+        const openai = new OpenAI({
+          apiKey: env.OPENAI_API_KEY,
+          baseURL: AI_CONFIG.BASE_URL,
+        });
 
-    const stream = await openai.chat.completions.create({
-      model: model || AI_DEFAULTS.OPENAI_MODEL,
-      messages: [
-        {
-          role: AI_CHAT_ROLES.SYSTEM,
-          content: AI_SYSTEM_MESSAGES.EDUCATIONAL_ASSISTANT,
-        },
-        {
-          role: AI_CHAT_ROLES.USER,
-          content: prompt,
-        },
-      ],
-      stream: true,
-      temperature: AI_CONFIG.TEMPERATURE,
-      max_tokens: AI_CONFIG.MAX_TOKENS,
-    });
+        const stream = await openai.chat.completions.create({
+          model: model || AI_DEFAULTS.OPENAI_MODEL,
+          messages: [
+            {
+              role: AI_CHAT_ROLES.SYSTEM,
+              content: AI_SYSTEM_MESSAGES.EDUCATIONAL_ASSISTANT,
+            },
+            {
+              role: AI_CHAT_ROLES.USER,
+              content: prompt,
+            },
+          ],
+          stream: true,
+          temperature: AI_CONFIG.TEMPERATURE,
+          max_tokens: AI_CONFIG.MAX_TOKENS,
+        });
 
-    return this.createStreamFromOpenAI(stream);
+        return this.createStreamFromOpenAI(stream);
+      },
+    );
   }
 
   private async evaluateWithGemini(
     model: string,
     prompt: string,
+    userId: string,
   ): Promise<ReadableStream<StreamChunk>> {
-    const response = await fetch(`${AI_CONFIG.BASE_URL}${AI_API.CHAT_COMPLETIONS_PATH}`, {
-      method: HTTP_CONFIG.METHODS.POST,
-      headers: {
-        'Content-Type': HTTP_CONFIG.HEADERS.CONTENT_TYPE,
-        Authorization: `${HTTP_CONFIG.HEADERS.AUTHORIZATION_PREFIX}${env.GEMINI_API_KEY}`,
-      },
-      body: JSON.stringify({
+    return aiUsageTracker.wrapAIOperation(
+      {
+        user_id: userId,
+        command: 'evaluate_note',
+        provider: AI_PROVIDERS.GEMINI,
         model: model || AI_DEFAULTS.GEMINI_MODEL,
-        messages: [
-          {
-            role: AI_CHAT_ROLES.SYSTEM,
-            content: AI_SYSTEM_MESSAGES.EDUCATIONAL_ASSISTANT,
+        request_payload: { prompt_length: prompt.length },
+      },
+      async () => {
+        const response = await fetch(`${AI_CONFIG.BASE_URL}${AI_API.CHAT_COMPLETIONS_PATH}`, {
+          method: HTTP_CONFIG.METHODS.POST,
+          headers: {
+            'Content-Type': HTTP_CONFIG.HEADERS.CONTENT_TYPE,
+            Authorization: `${HTTP_CONFIG.HEADERS.AUTHORIZATION_PREFIX}${env.GEMINI_API_KEY}`,
           },
-          {
-            role: AI_CHAT_ROLES.USER,
-            content: prompt,
-          },
-        ],
-        stream: true,
-        temperature: AI_CONFIG.TEMPERATURE,
-        max_tokens: AI_CONFIG.MAX_TOKENS,
-      }),
-    });
+          body: JSON.stringify({
+            model: model || AI_DEFAULTS.GEMINI_MODEL,
+            messages: [
+              {
+                role: AI_CHAT_ROLES.SYSTEM,
+                content: AI_SYSTEM_MESSAGES.EDUCATIONAL_ASSISTANT,
+              },
+              {
+                role: AI_CHAT_ROLES.USER,
+                content: prompt,
+              },
+            ],
+            stream: true,
+            temperature: AI_CONFIG.TEMPERATURE,
+            max_tokens: AI_CONFIG.MAX_TOKENS,
+          }),
+        });
 
-    if (!response.ok) {
-      throw new Error(`${API_ERROR_MESSAGES.GEMINI_REQUEST_FAILED}: ${response.statusText}`);
-    }
+        if (!response.ok) {
+          throw new Error(`${API_ERROR_MESSAGES.GEMINI_REQUEST_FAILED}: ${response.statusText}`);
+        }
 
-    if (!response.body) {
-      throw new Error(API_ERROR_MESSAGES.NO_RESPONSE_BODY_GEMINI);
-    }
+        if (!response.body) {
+          throw new Error(API_ERROR_MESSAGES.NO_RESPONSE_BODY_GEMINI);
+        }
 
-    return this.createStreamFromGemini(response.body);
+        return this.createStreamFromGemini(response.body);
+      },
+    );
   }
 
   private createStreamFromOpenAI(
