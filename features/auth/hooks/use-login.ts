@@ -9,12 +9,13 @@ import type { ILoginFormData } from '../types';
 import { toast, useToast } from '@/hooks/use-toast';
 
 type UseLoginReturn = {
+  form: ReturnType<typeof useForm<ILoginFormData>>;
+  onSubmit: (data: ILoginFormData) => void;
   register: ReturnType<typeof useForm<ILoginFormData>>['register'];
   handleSubmit: ReturnType<typeof useForm<ILoginFormData>>['handleSubmit'];
   errors: ReturnType<typeof useForm<ILoginFormData>>['formState']['errors'];
   isSubmitting: boolean;
   isLoading: boolean;
-  onSubmit: (data: ILoginFormData) => Promise<void>;
 };
 
 export const useLogin = (): UseLoginReturn => {
@@ -32,11 +33,7 @@ export const useLogin = (): UseLoginReturn => {
     },
   });
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-  } = useForm<ILoginFormData>({
+  const form = useForm<ILoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
       email: '',
@@ -44,16 +41,23 @@ export const useLogin = (): UseLoginReturn => {
     },
   });
 
-  const onSubmit = async (data: ILoginFormData) => {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = form;
+
+  const onSubmit = (data: ILoginFormData) => {
     execute(data);
   };
 
   return {
+    form,
+    onSubmit,
     register,
     handleSubmit,
     errors,
     isSubmitting,
     isLoading: isPending,
-    onSubmit,
   };
 };

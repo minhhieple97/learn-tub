@@ -2,10 +2,17 @@
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import {
   Youtube,
   Play,
@@ -21,8 +28,7 @@ import { useAddVideoForm } from '../hooks/use-add-video-form';
 import { cn } from '@/lib/utils';
 
 export const AddVideoForm = () => {
-  const { url, setUrl, tutorial, setTutorial, isValidUrl, isPending, execute, canSubmit } =
-    useAddVideoForm();
+  const { form, onSubmit, isValidUrl, isPending, canSubmit } = useAddVideoForm();
 
   return (
     <TooltipProvider>
@@ -60,163 +66,164 @@ export const AddVideoForm = () => {
           </CardHeader>
 
           <CardContent className="relative space-y-8 pb-10 px-8">
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                execute({ videoUrl: url, tutorial: tutorial || undefined });
-              }}
-              className="space-y-8"
-            >
-              <div className="space-y-4">
-                <Label
-                  htmlFor="videoUrl"
-                  className="text-xl font-semibold text-white flex items-center gap-3"
-                >
-                  <Youtube className="h-6 w-6" />
-                  YouTube URL
-                  <span className="text-blue-200 dark:text-blue-300 text-sm font-normal">
-                    (Required)
-                  </span>
-                </Label>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                <FormField
+                  control={form.control}
+                  name="videoUrl"
+                  render={({ field }) => (
+                    <FormItem className="space-y-4">
+                      <FormLabel className="text-xl font-semibold text-white flex items-center gap-3">
+                        <Youtube className="h-6 w-6" />
+                        YouTube URL
+                        <span className="text-blue-200 dark:text-blue-300 text-sm font-normal">
+                          (Required)
+                        </span>
+                      </FormLabel>
 
-                <div className="relative group">
-                  <Input
-                    id="videoUrl"
-                    name="videoUrl"
-                    type="url"
-                    placeholder="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-                    value={url}
-                    onChange={(e) => setUrl(e.target.value)}
-                    className={cn(
-                      'h-16 text-lg font-medium transition-all duration-300',
-                      'bg-white/95 dark:bg-white/90 backdrop-blur-sm border-0 shadow-lg',
-                      'text-gray-900 dark:text-gray-800',
-                      'placeholder:text-gray-500 dark:placeholder:text-gray-600',
-                      'focus:bg-white dark:focus:bg-white focus:shadow-xl focus:scale-[1.02]',
-                      'pl-6 pr-16 rounded-xl',
-                      url && isValidUrl && 'ring-2 ring-green-400 bg-green-50',
-                      url && !isValidUrl && 'ring-2 ring-orange-400 bg-orange-50',
-                    )}
-                    required
-                  />
+                      <div className="relative group">
+                        <FormControl>
+                          <Input
+                            type="url"
+                            placeholder="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+                            {...field}
+                            className={cn(
+                              'h-16 text-lg font-medium transition-all duration-300',
+                              'bg-white/95 dark:bg-white/90 backdrop-blur-sm border-0 shadow-lg',
+                              'text-gray-900 dark:text-gray-800',
+                              'placeholder:text-gray-500 dark:placeholder:text-gray-600',
+                              'focus:bg-white dark:focus:bg-white focus:shadow-xl focus:scale-[1.02]',
+                              'pl-6 pr-16 rounded-xl',
+                              field.value && isValidUrl && 'ring-2 ring-green-400 bg-green-50',
+                              field.value && !isValidUrl && 'ring-2 ring-orange-400 bg-orange-50',
+                            )}
+                          />
+                        </FormControl>
 
-                  <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                    {url && isValidUrl && (
-                      <CheckCircle className="h-6 w-6 text-green-500 animate-in fade-in duration-300" />
-                    )}
-                    {url && !isValidUrl && (
-                      <AlertCircle className="h-6 w-6 text-orange-500 animate-in fade-in duration-300" />
-                    )}
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 text-blue-100 dark:text-blue-200 text-sm">
-                  <div className="h-1 w-1 bg-blue-200 dark:bg-blue-300 rounded-full"></div>
-                  <span>Supports youtube.com, youtu.be, and embedded URLs</span>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <Label
-                    htmlFor="tutorial"
-                    className="text-xl font-semibold text-white flex items-center gap-3"
-                  >
-                    <BookOpen className="h-6 w-6" />
-                    What do you want to learn?
-                    <span className="text-blue-200 dark:text-blue-300 text-sm font-normal">
-                      (Optional)
-                    </span>
-                  </Label>
-
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button
-                        type="button"
-                        className="text-white/70 hover:text-white transition-colors"
-                      >
-                        <HelpCircle className="h-5 w-5" />
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent side="right" className="max-w-64 text-center">
-                      <div className="space-y-2">
-                        <p className="font-medium text-sm">💡 Why add learning objectives?</p>
-                        <p className="text-xs text-muted-foreground leading-relaxed">
-                          While optional, this helps our AI create more targeted quiz questions for
-                          better learning outcomes.
-                        </p>
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                          {field.value && isValidUrl && (
+                            <CheckCircle className="h-6 w-6 text-green-500 animate-in fade-in duration-300" />
+                          )}
+                          {field.value && !isValidUrl && (
+                            <AlertCircle className="h-6 w-6 text-orange-500 animate-in fade-in duration-300" />
+                          )}
+                        </div>
                       </div>
-                    </TooltipContent>
-                  </Tooltip>
-                </div>
 
-                <div className="relative group">
-                  <Textarea
-                    id="tutorial"
-                    name="tutorial"
-                    placeholder="e.g., I want to learn Python basics, React hooks, data structures and algorithms..."
-                    value={tutorial}
-                    onChange={(e) => setTutorial(e.target.value)}
-                    className={cn(
-                      'min-h-[120px] text-lg font-medium transition-all duration-300',
-                      'bg-white/95 dark:bg-white/90 backdrop-blur-sm border-0 shadow-lg resize-none',
-                      'text-gray-900 dark:text-gray-800',
-                      'placeholder:text-gray-500 dark:placeholder:text-gray-600',
-                      'focus:bg-white dark:focus:bg-white focus:shadow-xl focus:scale-[1.02]',
-                      'p-6 rounded-xl leading-relaxed',
-                    )}
-                    maxLength={500}
-                  />
+                      <div className="flex items-center gap-2 text-blue-100 dark:text-blue-200 text-sm">
+                        <div className="h-1 w-1 bg-blue-200 dark:bg-blue-300 rounded-full"></div>
+                        <span>Supports youtube.com, youtu.be, and embedded URLs</span>
+                      </div>
+                      <FormMessage className="text-blue-100 dark:text-blue-200" />
+                    </FormItem>
+                  )}
+                />
 
-                  <div className="absolute bottom-3 right-4 text-xs text-gray-400 dark:text-gray-500">
-                    <span
-                      className={cn(
-                        tutorial.length > 400 && 'text-orange-500',
-                        tutorial.length > 475 && 'text-red-500 font-medium',
-                      )}
-                    >
-                      {tutorial.length}
-                    </span>
-                    <span>/500</span>
-                  </div>
-                </div>
+                <FormField
+                  control={form.control}
+                  name="tutorial"
+                  render={({ field }) => (
+                    <FormItem className="space-y-4">
+                      <div className="flex items-center gap-2">
+                        <FormLabel className="text-xl font-semibold text-white flex items-center gap-3">
+                          <BookOpen className="h-6 w-6" />
+                          What do you want to learn?
+                          <span className="text-blue-200 dark:text-blue-300 text-sm font-normal">
+                            (Optional)
+                          </span>
+                        </FormLabel>
 
-                <div className="flex items-start gap-3 text-blue-100 dark:text-blue-200 text-sm bg-white/10 dark:bg-white/5 p-4 rounded-lg backdrop-blur-sm">
-                  <Sparkles className="h-5 w-5 text-blue-300 dark:text-blue-400 mt-0.5 flex-shrink-0" />
-                  <div>
-                    <p className="font-medium mb-1">✨ AI Enhancement</p>
-                    <p>
-                      This helps our AI generate better quiz questions tailored to your specific
-                      learning goals and interests.
-                    </p>
-                  </div>
-                </div>
-              </div>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <button
+                              type="button"
+                              className="text-white/70 hover:text-white transition-colors"
+                            >
+                              <HelpCircle className="h-5 w-5" />
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent side="right" className="max-w-64 text-center">
+                            <div className="space-y-2">
+                              <p className="font-medium text-sm">💡 Why add learning objectives?</p>
+                              <p className="text-xs text-muted-foreground leading-relaxed">
+                                While optional, this helps our AI create more targeted quiz
+                                questions for better learning outcomes.
+                              </p>
+                            </div>
+                          </TooltipContent>
+                        </Tooltip>
+                      </div>
 
-              <Button
-                type="submit"
-                disabled={!canSubmit}
-                className={cn(
-                  'w-full h-16 text-xl font-bold transition-all duration-300',
-                  'bg-white hover:bg-blue-50 text-blue-600 hover:text-blue-700',
-                  'shadow-xl hover:shadow-2xl transform hover:scale-[1.02] active:scale-[0.98]',
-                  'disabled:transform-none disabled:opacity-50 disabled:cursor-not-allowed',
-                  'rounded-xl border-2 border-white/20',
-                )}
-              >
-                {isPending ? (
-                  <div className="flex items-center justify-center gap-3">
-                    <Loader2 className="h-6 w-6 animate-spin" />
-                    <span>Importing Video...</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-center gap-3">
-                    <Play className="h-6 w-6" />
-                    <span>Start Learning Journey</span>
-                  </div>
-                )}
-              </Button>
-            </form>
+                      <div className="relative group">
+                        <FormControl>
+                          <Textarea
+                            placeholder="e.g., I want to learn Python basics, React hooks, data structures and algorithms..."
+                            {...field}
+                            className={cn(
+                              'min-h-[120px] text-lg font-medium transition-all duration-300',
+                              'bg-white/95 dark:bg-white/90 backdrop-blur-sm border-0 shadow-lg resize-none',
+                              'text-gray-900 dark:text-gray-800',
+                              'placeholder:text-gray-500 dark:placeholder:text-gray-600',
+                              'focus:bg-white dark:focus:bg-white focus:shadow-xl focus:scale-[1.02]',
+                              'p-6 rounded-xl leading-relaxed',
+                            )}
+                            maxLength={500}
+                          />
+                        </FormControl>
+
+                        <div className="absolute bottom-3 right-4 text-xs text-gray-400 dark:text-gray-500">
+                          <span
+                            className={cn(
+                              (field.value?.length || 0) > 400 && 'text-orange-500',
+                              (field.value?.length || 0) > 475 && 'text-red-500 font-medium',
+                            )}
+                          >
+                            {field.value?.length || 0}
+                          </span>
+                          <span>/500</span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-start gap-3 text-blue-100 dark:text-blue-200 text-sm bg-white/10 dark:bg-white/5 p-4 rounded-lg backdrop-blur-sm">
+                        <Sparkles className="h-5 w-5 text-blue-300 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+                        <div>
+                          <p className="font-medium mb-1">✨ AI Enhancement</p>
+                          <p>
+                            This helps our AI generate better quiz questions tailored to your
+                            specific learning goals and interests.
+                          </p>
+                        </div>
+                      </div>
+                      <FormMessage className="text-blue-100 dark:text-blue-200" />
+                    </FormItem>
+                  )}
+                />
+
+                <Button
+                  type="submit"
+                  disabled={!canSubmit}
+                  className={cn(
+                    'w-full h-16 text-xl font-bold transition-all duration-300',
+                    'bg-white hover:bg-blue-50 text-blue-600 hover:text-blue-700',
+                    'shadow-xl hover:shadow-2xl transform hover:scale-[1.02] active:scale-[0.98]',
+                    'disabled:transform-none disabled:opacity-50 disabled:cursor-not-allowed',
+                    'rounded-xl border-2 border-white/20',
+                  )}
+                >
+                  {isPending ? (
+                    <div className="flex items-center justify-center gap-3">
+                      <Loader2 className="h-6 w-6 animate-spin" />
+                      <span>Importing Video...</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center gap-3">
+                      <Play className="h-6 w-6" />
+                      <span>Start Learning Journey</span>
+                    </div>
+                  )}
+                </Button>
+              </form>
+            </Form>
           </CardContent>
         </Card>
       </div>
