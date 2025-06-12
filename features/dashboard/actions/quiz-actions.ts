@@ -1,12 +1,12 @@
 'use server';
 
 import { authAction } from '@/lib/safe-action';
-import { z } from 'zod';
 import { getQuizSessionForRetake } from '../queries/quiz-dashboard-queries';
-import { getProfileByUserId } from '@/features/profile/queries';
+
 import { revalidatePath } from 'next/cache';
 import { routes } from '@/routes';
 import { RetakeQuizSchema } from '../schemas';
+import { getProfileByUserId } from '@/lib/require-auth';
 
 export const retakeQuizAction = authAction
   .inputSchema(RetakeQuizSchema)

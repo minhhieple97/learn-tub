@@ -2,10 +2,11 @@
 import { authAction, ActionError } from '@/lib/safe-action';
 import { quizService } from '../services/quiz-service';
 import { saveQuizAttempt } from '../queries';
-import { getProfileByUserId } from '@/features/profile/queries';
+
 import { z } from 'zod';
 import { EvaluateQuizSchema } from '../schema';
 import { RateLimiter } from '@/lib/rate-limiter';
+import { getProfileByUserId } from '@/lib/require-auth';
 
 const ExtendedEvaluateQuizSchema = EvaluateQuizSchema.extend({
   quizSessionId: z.string().min(1, 'Session ID is required'),

@@ -2,7 +2,7 @@
 
 import { authAction, ActionError } from '@/lib/safe-action';
 import { checkExistingVideo, insertVideo } from '../queries';
-import { getProfileByUserId } from '@/features/profile/queries';
+
 import { addVideoSchema } from '../schemas';
 import {
   fetchYouTubeVideoData,
@@ -12,6 +12,7 @@ import {
 } from '@/lib/utils';
 import { VIDEO_DEFAULTS, TOAST_MESSAGES } from '@/config/constants';
 import { RateLimiter } from '@/lib/rate-limiter';
+import { getProfileByUserId } from '@/lib/require-auth';
 
 export const addVideoAction = authAction
   .inputSchema(addVideoSchema)
