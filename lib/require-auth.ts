@@ -1,35 +1,33 @@
 import 'server-only';
 import { redirect } from 'next/navigation';
 import { cache } from 'react';
-import { createClient } from './supabase/server';
 import { routes } from '@/routes';
+import {
+  getProfileByUserId,
+  getProfileInSession,
+  getUserInSession,
+} from '@/features/profile/queries';
 
-export const getUserInSession = cache(async () => {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+export const checkAuth = cache(async () => {
+  const user = await getUserInSession();
   if (!user) {
     redirect(routes.login);
   }
   return user;
 });
 
-export const getProfileInSession = cache(async () => {
-  const supabase = await createClient();
-  const user = await getUserInSession();
-  const { data, error } = await supabase.from('profiles').select('*').eq('id', user.id).single();
-  if (!data || error) {
+export const checkProfile = cache(async () => {
+  const profile = await getProfileInSession();
+  if (!profile) {
     redirect(routes.login);
   }
-  return data;
+  return profile;
 });
 
-export const getProfileByUserId = async (userId: string) => {
-  const supabase = await createClient();
-  const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).single();
-  if (!data || error) {
+export const checkProfileByUserId = async (userId: string) => {
+  const profile = await getProfileByUserId(userId);
+  if (!profile) {
     redirect(routes.login);
   }
-  return data;
+  return profile;
 };

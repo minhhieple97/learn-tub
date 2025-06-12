@@ -6,7 +6,7 @@ import { createQuizSession } from '../queries';
 
 import { getVideoById } from '@/features/videos/queries';
 import { RateLimiter } from '@/lib/rate-limiter';
-import { getProfileByUserId } from '@/lib/require-auth';
+import { checkProfileByUserId } from '@/lib/require-auth';
 
 const GenerateQuizQuestionsSchema = z.object({
   videoId: z.string().min(1, 'Video ID is required'),
@@ -31,7 +31,7 @@ export const generateQuizQuestionsAction = authAction
       );
     }
 
-    const profile = await getProfileByUserId(user.id);
+    const profile = await checkProfileByUserId(user.id);
 
     let videoTitle = data.videoTitle;
     let videoDescription = data.videoDescription;

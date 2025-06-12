@@ -17,7 +17,7 @@ import { createNoteInteraction } from '@/features/notes/queries';
 import { noteService } from '@/features/notes/services/note-service';
 import { ActionError } from '@/lib/safe-action';
 import { RateLimiter } from '@/lib/rate-limiter';
-import { getProfileByUserId } from '@/lib/require-auth';
+import { getProfileInSession, getUserInSession } from '@/features/profile/queries';
 
 const EvaluateNoteQuerySchema = z.object({
   noteId: z.string().uuid('Invalid note ID format'),
@@ -59,18 +59,13 @@ export async function GET(request: NextRequest) {
     }
 
     const { noteId, provider, model } = validationResult.data;
-
-    const supabase = await createClient();
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
+    const [user, profile] = await Promise.all([getUserInSession(), getProfileInSession()]);
+    if (!user || !profile) {
       return new Response(ERROR_MESSAGES.UNAUTHORIZED, {
         status: HTTP_STATUS.UNAUTHORIZED,
       });
     }
+    const supabase = await createClient();
     const rateLimitResult = await RateLimiter.checkRateLimit(user.id);
 
     if (!rateLimitResult.allowed) {
@@ -78,7 +73,7 @@ export async function GET(request: NextRequest) {
         `Rate limit exceeded. Try again in a minute. Remaining: ${rateLimitResult.remaining}`,
       );
     }
-    const profile = await getProfileByUserId(user.id);
+
     const { data: note, error: noteError } = await supabase
       .from('notes')
       .select('content, timestamp_seconds')

@@ -12,7 +12,7 @@ import {
 } from '@/lib/utils';
 import { VIDEO_DEFAULTS, TOAST_MESSAGES } from '@/config/constants';
 import { RateLimiter } from '@/lib/rate-limiter';
-import { getProfileByUserId } from '@/lib/require-auth';
+import { checkProfileByUserId } from '@/lib/require-auth';
 
 export const addVideoAction = authAction
   .inputSchema(addVideoSchema)
@@ -25,7 +25,7 @@ export const addVideoAction = authAction
           `Rate limit exceeded. Try again in a minute. Remaining: ${rateLimitResult.remaining}`,
         );
       }
-      const profile = await getProfileByUserId(user.id);
+      const profile = await checkProfileByUserId(user.id);
       const videoId = extractYouTubeId(videoUrl);
       if (!videoId) {
         throw new ActionError(TOAST_MESSAGES.INVALID_URL_ERROR);

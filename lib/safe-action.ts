@@ -1,5 +1,5 @@
+import { getUserInSession } from '@/features/profile/queries';
 import { createSafeActionClient, DEFAULT_SERVER_ERROR_MESSAGE } from 'next-safe-action';
-import { getUserInSession } from './require-auth';
 
 export class ActionError extends Error {}
 

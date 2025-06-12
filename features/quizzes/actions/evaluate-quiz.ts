@@ -6,7 +6,7 @@ import { saveQuizAttempt } from '../queries';
 import { z } from 'zod';
 import { EvaluateQuizSchema } from '../schema';
 import { RateLimiter } from '@/lib/rate-limiter';
-import { getProfileByUserId } from '@/lib/require-auth';
+import { checkProfileByUserId } from '@/lib/require-auth';
 
 const ExtendedEvaluateQuizSchema = EvaluateQuizSchema.extend({
   quizSessionId: z.string().min(1, 'Session ID is required'),
@@ -23,7 +23,7 @@ export const evaluateQuizAction = authAction
         `Rate limit exceeded. Try again in a minute. Remaining: ${rateLimitResult.remaining}`,
       );
     }
-    const profile = await getProfileByUserId(user.id);
+    const profile = await checkProfileByUserId(user.id);
 
     const response = await quizService.evaluateQuiz({
       ...data,

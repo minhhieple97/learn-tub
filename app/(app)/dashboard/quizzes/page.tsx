@@ -6,7 +6,7 @@ import {
 
 import type { IQuizFilters } from '@/features/dashboard/types';
 import type { IQuizDifficultyFilter } from '@/features/quizzes/types';
-import { getProfileInSession } from '@/lib/require-auth';
+import { checkProfile } from '@/lib/require-auth';
 
 type SearchParams = Promise<{
   search?: string;
@@ -23,7 +23,7 @@ type IQuizDashboardPageProps = {
 
 export default async function QuizDashboardPage({ searchParams }: IQuizDashboardPageProps) {
   const params = await searchParams;
-  const profile = await getProfileInSession();
+  const profile = await checkProfile();
 
   const filters: Partial<IQuizFilters> = {
     search: params.search || '',
@@ -42,7 +42,7 @@ export default async function QuizDashboardPage({ searchParams }: IQuizDashboard
 
   return (
     <div className="container mx-auto">
-      <QuizDashboard initialData={data} videos={videos} userId={profile.id} />
+      <QuizDashboard initialData={data} videos={videos} />
     </div>
   );
 }

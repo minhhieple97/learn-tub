@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 
 
 import { IVideo, IVideoData } from '../types';
-import { getProfileInSession } from '@/lib/require-auth';
+import { checkProfile } from '@/lib/require-auth';
 
 export const getUserVideos = async (userId: string): Promise<IVideo[]> => {
   const supabase = await createClient();
@@ -20,7 +20,7 @@ export const getUserVideos = async (userId: string): Promise<IVideo[]> => {
 };
 
 export const getLearnPageData = async () => {
-  const profile = await getProfileInSession();
+  const profile = await checkProfile();
   const videosPromise = getUserVideos(profile.id);
   return videosPromise;
 };
@@ -78,7 +78,7 @@ export const getVideoByYoutubeId = async (youtubeId: string, userId: string) => 
 };
 
 export const getVideoPageData = async (videoId: string) => {
-  const profile = await getProfileInSession();
+  const profile = await checkProfile();
 
   const video = await getVideoByYoutubeId(videoId, profile.id);
 
