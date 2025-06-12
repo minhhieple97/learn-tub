@@ -7,7 +7,7 @@ import { createClient } from '@/lib/supabase/server';
 
 import { DeleteAIFeedbackSchema, GetAIFeedbackHistorySchema } from '../schema';
 import { getNoteInteractionsByNoteId } from '@/features/notes/queries';
-import { getProfileByUserId } from '@/lib/require-auth';
+import { checkProfileByUserId } from '@/lib/require-auth';
 
 export const getAIFeedbackHistoryAction = authAction
   .inputSchema(GetAIFeedbackHistorySchema)
@@ -31,8 +31,7 @@ export const deleteAIFeedbackAction = authAction
   .inputSchema(DeleteAIFeedbackSchema)
   .action(async ({ parsedInput: { feedbackId }, ctx: { user } }) => {
     const supabase = await createClient();
-    const profile = await getProfileByUserId(user.id);
-    // eslint-disable-next-line drizzle/enforce-delete-with-where
+    const profile = await checkProfileByUserId(user.id);
     const { error } = await supabase
       .from('note_interactions')
       .delete()

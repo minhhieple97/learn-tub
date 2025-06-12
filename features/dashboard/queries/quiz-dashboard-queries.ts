@@ -1,4 +1,4 @@
-'use server';
+import 'server-only';
 import { createClient } from '@/lib/supabase/server';
 import { IQuizFilters, QuizDashboardData } from '../types';
 import { IQuizQuestion, IQuizDifficulty, IQuizSessionWithAttempts } from '@/features/quizzes/types';

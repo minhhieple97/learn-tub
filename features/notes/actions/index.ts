@@ -5,14 +5,13 @@ import { ActionError, authAction } from '@/lib/safe-action';
 import { createClient } from '@/lib/supabase/server';
 import { saveNoteInputSchema, updateNoteInputSchema, deleteNoteInputSchema } from '../schemas';
 import { routes } from '@/routes';
-import { getProfileByUserId } from '@/lib/require-auth';
-
+import { checkProfileByUserId } from '@/lib/require-auth';
 
 export const saveNoteAction = authAction
   .inputSchema(saveNoteInputSchema)
   .action(async ({ parsedInput: { videoId, content, timestamp, tags }, ctx: { user } }) => {
     const supabase = await createClient();
-    const profile = await getProfileByUserId(user.id);
+    const profile = await checkProfileByUserId(user.id);
     const { data, error } = await supabase
       .from('notes')
       .insert({
@@ -42,7 +41,7 @@ export const updateNoteAction = authAction
   .inputSchema(updateNoteInputSchema)
   .action(async ({ parsedInput: { noteId, content, tags }, ctx: { user } }) => {
     const supabase = await createClient();
-    const profile = await getProfileByUserId(user.id);
+    const profile = await checkProfileByUserId(user.id);
     const { error } = await supabase
       .from('notes')
       .update({
@@ -70,7 +69,7 @@ export const deleteNoteAction = authAction
   .inputSchema(deleteNoteInputSchema)
   .action(async ({ parsedInput: { noteId }, ctx: { user } }) => {
     const supabase = await createClient();
-    const profile = await getProfileByUserId(user.id);
+    const profile = await checkProfileByUserId(user.id);
     const { error } = await supabase
       .from('notes')
       .delete()

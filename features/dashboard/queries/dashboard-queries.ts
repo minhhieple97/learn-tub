@@ -1,8 +1,9 @@
+import 'server-only';
 import { createClient } from '@/lib/supabase/server';
 
 import { getQuizStatistics } from '@/features/quizzes/queries';
 import type { DashboardStats, RecentVideo, LearningGoal } from '../types';
-import { getProfileInSession } from '@/lib/require-auth';
+import { checkProfile } from '@/lib/require-auth';
 
 export const getDashboardStats = async (): Promise<DashboardStats> => {
   return {
@@ -51,7 +52,7 @@ export const getLearningGoals = async (): Promise<LearningGoal[]> => {
 
 export const getInsightsData = async () => {
   const supabase = await createClient();
-  const profile = await getProfileInSession();
+  const profile = await checkProfile();
 
   const { count: analysisCount } = await supabase
     .from('note_interactions')

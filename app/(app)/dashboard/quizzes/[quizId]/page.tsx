@@ -1,6 +1,6 @@
 import { QuizDetailContent } from '@/features/dashboard/components/quiz-detail';
 import { getQuizSessionDetail } from '@/features/dashboard/queries/quiz-dashboard-queries';
-import { getProfileInSession } from '@/lib/require-auth';
+import { checkProfile } from '@/lib/require-auth';
 
 import { notFound } from 'next/navigation';
 
@@ -10,7 +10,7 @@ type IQuizDetailPageProps = {
 
 export default async function QuizDetailPage({ params }: IQuizDetailPageProps) {
   const { quizId } = await params;
-  const profile = await getProfileInSession();
+  const profile = await checkProfile();
   const quizSession = await getQuizSessionDetail(quizId, profile.id);
   if (!quizSession) {
     notFound();

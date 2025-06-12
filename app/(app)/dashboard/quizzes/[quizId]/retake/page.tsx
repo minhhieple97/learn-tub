@@ -2,7 +2,7 @@ import { getQuizSessionDetail } from '@/features/dashboard/queries/quiz-dashboar
 
 import { notFound } from 'next/navigation';
 import { QuizRetakeContent } from '@/features/quizzes/components/quiz-retake-content';
-import { getProfileInSession } from '@/lib/require-auth';
+import { checkProfile } from '@/lib/require-auth';
 
 type IQuizRetakePageProps = {
   params: Promise<{ quizId: string }>;
@@ -10,7 +10,7 @@ type IQuizRetakePageProps = {
 
 export default async function QuizRetakePage({ params }: IQuizRetakePageProps) {
   const { quizId } = await params;
-  const profile = await getProfileInSession();
+  const profile = await checkProfile();
   const quizSession = await getQuizSessionDetail(quizId, profile.id);
   if (!quizSession) {
     notFound();
