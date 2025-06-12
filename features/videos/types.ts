@@ -1,4 +1,5 @@
 import { IYouTubeVideo, IAsyncOperationHook } from '@/types';
+import { UseFormReturn } from 'react-hook-form';
 
 export type ICourse = {
   title: string;
@@ -43,6 +44,11 @@ export type IVideo = {
 export type { IYouTubeVideo as IYouTubeVideoData } from '@/types';
 
 export type IUseAddVideoFormReturn = {
+  form: UseFormReturn<{
+    videoUrl: string;
+    tutorial?: string;
+  }>;
+  onSubmit: (data: { videoUrl: string; tutorial?: string }) => void;
   url: string;
   setUrl: (url: string) => void;
   tutorial: string;

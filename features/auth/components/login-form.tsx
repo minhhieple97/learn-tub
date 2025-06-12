@@ -2,12 +2,19 @@
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import { GoogleAuthButton } from './google-auth-button';
 import { useLogin } from '@/features/auth/hooks/use-login';
 
 export const LoginForm = () => {
-  const { register, handleSubmit, errors, isSubmitting, isLoading, onSubmit } = useLogin();
+  const { form, onSubmit, isSubmitting, isLoading } = useLogin();
 
   return (
     <div className="space-y-4">
@@ -22,39 +29,51 @@ export const LoginForm = () => {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="email">Email</Label>
-          <Input
-            id="email"
-            type="email"
-            {...register('email')}
-            className={errors.email ? 'border-red-500 focus-visible:ring-red-500' : ''}
-            placeholder="Enter your email address"
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem className="space-y-2">
+                <FormLabel htmlFor="email">Email</FormLabel>
+                <FormControl>
+                  <Input
+                    id="email"
+                    type="email"
+                    {...field}
+                    placeholder="Enter your email address"
+                  />
+                </FormControl>
+                <FormMessage className="text-sm text-red-600 dark:text-red-400" />
+              </FormItem>
+            )}
           />
-          {errors.email && (
-            <p className="text-sm text-red-600 dark:text-red-400">{errors.email.message}</p>
-          )}
-        </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="password">Password</Label>
-          <Input
-            id="password"
-            type="password"
-            {...register('password')}
-            className={errors.password ? 'border-red-500 focus-visible:ring-red-500' : ''}
-            placeholder="Enter your password"
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem className="space-y-2">
+                <FormLabel htmlFor="password">Password</FormLabel>
+                <FormControl>
+                  <Input
+                    id="password"
+                    type="password"
+                    {...field}
+                    placeholder="Enter your password"
+                  />
+                </FormControl>
+                <FormMessage className="text-sm text-red-600 dark:text-red-400" />
+              </FormItem>
+            )}
           />
-          {errors.password && (
-            <p className="text-sm text-red-600 dark:text-red-400">{errors.password.message}</p>
-          )}
-        </div>
 
-        <Button type="submit" className="w-full" disabled={isLoading || isSubmitting}>
-          {isLoading || isSubmitting ? 'Signing in...' : 'Sign In'}
-        </Button>
-      </form>
+          <Button type="submit" className="w-full" disabled={isLoading || isSubmitting}>
+            {isLoading || isSubmitting ? 'Signing in...' : 'Sign In'}
+          </Button>
+        </form>
+      </Form>
     </div>
   );
-}
+};

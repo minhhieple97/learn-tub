@@ -11,6 +11,8 @@ import { useRouter } from 'next/navigation';
 import { routes } from '@/routes';
 
 type UseRegisterReturn = {
+  form: ReturnType<typeof useForm<IRegisterFormData>>;
+  onSubmit: (data: IRegisterFormData) => void;
   register: ReturnType<typeof useForm<IRegisterFormData>>['register'];
   handleSubmit: ReturnType<typeof useForm<IRegisterFormData>>['handleSubmit'];
   errors: ReturnType<typeof useForm<IRegisterFormData>>['formState']['errors'];
@@ -21,7 +23,6 @@ type UseRegisterReturn = {
   passwordRequirements: {
     hasMinLength: boolean;
   };
-  onSubmit: (data: IRegisterFormData) => Promise<void>;
 };
 
 export const useRegister = (): UseRegisterReturn => {
@@ -42,12 +43,7 @@ export const useRegister = (): UseRegisterReturn => {
     },
   });
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-    watch,
-  } = useForm<IRegisterFormData>({
+  const form = useForm<IRegisterFormData>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
       fullName: '',
@@ -57,6 +53,13 @@ export const useRegister = (): UseRegisterReturn => {
     },
   });
 
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    watch,
+  } = form;
+
   const password = watch('password') || '';
   const confirmPassword = watch('confirmPassword') || '';
 
@@ -64,11 +67,13 @@ export const useRegister = (): UseRegisterReturn => {
     hasMinLength: password.length >= 8,
   };
 
-  const onSubmit = async (data: IRegisterFormData) => {
+  const onSubmit = (data: IRegisterFormData) => {
     execute(data);
   };
 
   return {
+    form,
+    onSubmit,
     register,
     handleSubmit,
     errors,
@@ -77,6 +82,5 @@ export const useRegister = (): UseRegisterReturn => {
     password,
     confirmPassword,
     passwordRequirements,
-    onSubmit,
   };
 };
