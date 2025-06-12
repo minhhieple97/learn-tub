@@ -1,7 +1,8 @@
 import { createClient } from '@/lib/supabase/server';
 
-import { getProfileInSession } from '@/features/profile/queries';
+
 import { IVideo, IVideoData } from '../types';
+import { getProfileInSession } from '@/lib/require-auth';
 
 export const getUserVideos = async (userId: string): Promise<IVideo[]> => {
   const supabase = await createClient();
