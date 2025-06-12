@@ -88,3 +88,49 @@ export type IAIUsageFilters = {
   limit?: number;
   offset?: number;
 };
+
+
+export type IAIMessage = {
+  role: string;
+  content: string;
+};
+
+export type IAICompletionRequest = {
+  model: string;
+  messages: IAIMessage[];
+  temperature?: number;
+  max_tokens?: number;
+  stream?: boolean;
+  stream_options?: {
+    include_usage?: boolean;
+  };
+};
+
+export type IAICompletionResponse = {
+  choices: Array<{
+    message?: {
+      content: string;
+    };
+    delta?: {
+      content?: string;
+    };
+  }>;
+  usage?: {
+    prompt_tokens: number;
+    completion_tokens: number;
+    total_tokens: number;
+  };
+};
+
+export type IAIStreamChunk = {
+  choices: Array<{
+    delta?: {
+      content?: string;
+    };
+  }>;
+  usage?: {
+    prompt_tokens: number;
+    completion_tokens: number;
+    total_tokens: number;
+  };
+};

@@ -1,23 +1,17 @@
-import OpenAI from 'openai';
-import { env } from '@/env.mjs';
 import {
-  AI_CONFIG,
   AI_DEFAULTS,
   AI_PROVIDERS,
   CHUNK_TYPES,
-  AI_CHAT_ROLES,
   AI_SYSTEM_MESSAGES,
   AI_FORMAT,
   ERROR_MESSAGES,
   EVALUATION_ERRORS,
-  AI_API,
-  HTTP_CONFIG,
-  API_ERROR_MESSAGES,
   AI_QUIZ_CONFIG,
 } from '@/config/constants';
 import { INoteEvaluationRequest } from '@/features/notes/types';
 import { IFeedback, StreamChunk } from '@/types';
 import { aiUsageTracker } from '@/features/ai';
+import { AIClientFactory } from '@/features/ai/services/ai-client';
 
 type StreamController = ReadableStreamDefaultController<StreamChunk>;
 type ProviderEvaluator = (
@@ -181,29 +175,22 @@ ${feedback.detailed_analysis}`;
         request_payload: { prompt_length: prompt.length },
       },
       async () => {
-        const openai = new OpenAI({
-          apiKey: env.OPENAI_API_KEY,
-          baseURL: AI_CONFIG.BASE_URL,
-        });
+        const aiClient = AIClientFactory.getClient(AI_PROVIDERS.OPENAI);
 
-        const stream = await openai.chat.completions.create({
+        const messages = aiClient.createSystemUserMessages(
+          AI_SYSTEM_MESSAGES.EDUCATIONAL_ASSISTANT,
+          prompt,
+        );
+
+        const responseStream = await aiClient.streamChatCompletion({
           model: model || AI_DEFAULTS.OPENAI_MODEL,
-          messages: [
-            {
-              role: AI_CHAT_ROLES.SYSTEM,
-              content: AI_SYSTEM_MESSAGES.EDUCATIONAL_ASSISTANT,
-            },
-            {
-              role: AI_CHAT_ROLES.USER,
-              content: prompt,
-            },
-          ],
-          stream: true,
-          temperature: AI_CONFIG.TEMPERATURE,
-          max_tokens: AI_CONFIG.MAX_TOKENS,
+          messages,
+          stream_options: {
+            include_usage: true,
+          },
         });
 
-        return this.createStreamFromOpenAI(stream);
+        return this.createStreamFromAIClient(responseStream);
       },
     );
   }
@@ -222,53 +209,43 @@ ${feedback.detailed_analysis}`;
         request_payload: { prompt_length: prompt.length },
       },
       async () => {
-        const response = await fetch(`${AI_CONFIG.BASE_URL}${AI_API.CHAT_COMPLETIONS_PATH}`, {
-          method: HTTP_CONFIG.METHODS.POST,
-          headers: {
-            'Content-Type': HTTP_CONFIG.HEADERS.CONTENT_TYPE,
-            Authorization: `${HTTP_CONFIG.HEADERS.AUTHORIZATION_PREFIX}${env.GEMINI_API_KEY}`,
+        const aiClient = AIClientFactory.getClient(AI_PROVIDERS.GEMINI);
+
+        const messages = aiClient.createSystemUserMessages(
+          AI_SYSTEM_MESSAGES.EDUCATIONAL_ASSISTANT,
+          prompt,
+        );
+
+        const responseStream = await aiClient.streamChatCompletion({
+          model: model || AI_DEFAULTS.GEMINI_MODEL,
+          messages,
+          stream_options: {
+            include_usage: true,
           },
-          body: JSON.stringify({
-            model: model || AI_DEFAULTS.GEMINI_MODEL,
-            messages: [
-              {
-                role: AI_CHAT_ROLES.SYSTEM,
-                content: AI_SYSTEM_MESSAGES.EDUCATIONAL_ASSISTANT,
-              },
-              {
-                role: AI_CHAT_ROLES.USER,
-                content: prompt,
-              },
-            ],
-            stream: true,
-            temperature: AI_CONFIG.TEMPERATURE,
-            max_tokens: AI_CONFIG.MAX_TOKENS,
-          }),
         });
 
-        if (!response.ok) {
-          throw new Error(`${API_ERROR_MESSAGES.GEMINI_REQUEST_FAILED}: ${response.statusText}`);
-        }
-
-        if (!response.body) {
-          throw new Error(API_ERROR_MESSAGES.NO_RESPONSE_BODY_GEMINI);
-        }
-
-        return this.createStreamFromGemini(response.body);
+        return this.createStreamFromAIClient(responseStream);
       },
     );
   }
 
-  private createStreamFromOpenAI(
-    stream: AsyncIterable<OpenAI.Chat.Completions.ChatCompletionChunk>,
+  private createStreamFromAIClient(
+    responseBody: ReadableStream<Uint8Array>,
   ): ReadableStream<StreamChunk> {
+    const aiClient = AIClientFactory.getClient(AI_PROVIDERS.OPENAI); // Can use any provider for stream parsing
+    const aiStream = aiClient.createStreamFromResponse(responseBody);
+
     return new ReadableStream<StreamChunk>({
       async start(controller) {
         try {
           let fullContent = '';
+          const reader = aiStream.getReader();
 
-          for await (const chunk of stream) {
-            const content = chunk.choices[0]?.delta?.content || '';
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            const content = value.choices[0]?.delta?.content || '';
             fullContent += content;
 
             controller.enqueue({
@@ -276,55 +253,6 @@ ${feedback.detailed_analysis}`;
               content,
               finished: false,
             });
-          }
-
-          noteService.handleStreamCompletion(controller, fullContent);
-        } catch (error) {
-          noteService.handleStreamError(controller, error);
-        }
-      },
-    });
-  }
-
-  private createStreamFromGemini(
-    responseBody: ReadableStream<Uint8Array>,
-  ): ReadableStream<StreamChunk> {
-    return new ReadableStream<StreamChunk>({
-      async start(controller) {
-        try {
-          let fullContent = '';
-          const reader = responseBody.getReader();
-          const decoder = new TextDecoder();
-
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-
-            const chunk = decoder.decode(value, { stream: true });
-            const lines = chunk.split('\n');
-
-            for (const line of lines) {
-              if (line.startsWith(AI_API.SSE_DATA_PREFIX)) {
-                const data = line.slice(AI_API.SSE_DATA_PREFIX_LENGTH);
-                if (data === AI_API.SSE_DONE_MESSAGE) continue;
-
-                try {
-                  const parsed = JSON.parse(data);
-                  const content = parsed.choices[0]?.delta?.content || '';
-                  fullContent += content;
-
-                  controller.enqueue({
-                    type: CHUNK_TYPES.FEEDBACK,
-                    content,
-                    finished: false,
-                  });
-                } catch (error) {
-                  console.error('Invalid JSON chunk:', data);
-                  console.error('Error parsing JSON:', error);
-                  // Skip invalid JSON chunks
-                }
-              }
-            }
           }
 
           noteService.handleStreamCompletion(controller, fullContent);

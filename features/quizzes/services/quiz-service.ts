@@ -1,17 +1,10 @@
-import OpenAI from 'openai';
-import { env } from '@/env.mjs';
 import {
-  AI_CONFIG,
   AI_DEFAULTS,
   AI_PROVIDERS,
-  AI_CHAT_ROLES,
   AI_SYSTEM_MESSAGES,
   AI_QUIZ_CONFIG,
   AI_QUIZ_ERRORS,
   AI_QUIZ_PROMPTS,
-  AI_API,
-  HTTP_CONFIG,
-  API_ERROR_MESSAGES,
 } from '@/config/constants';
 import type {
   IEvaluateQuizRequest,
@@ -23,8 +16,9 @@ import type {
   IQuizStreamChunk,
 } from '../types';
 import { aiUsageTracker } from '@/features/ai';
+import { AIClientFactory } from '@/features/ai/services/ai-client';
 
-type StreamController = ReadableStreamDefaultController<IQuizStreamChunk>;
+type IStreamController = ReadableStreamDefaultController<IQuizStreamChunk>;
 
 class QuizService {
   async generateQuestions(request: IGenerateQuestionsRequest): Promise<IQuizGenerationResponse> {
@@ -205,43 +199,38 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
     prompt: string,
     userId: string,
   ): Promise<string> {
-    if (provider === AI_PROVIDERS.OPENAI) {
-      return this.callOpenAI(model, prompt, userId);
-    } else if (provider === AI_PROVIDERS.GEMINI) {
-      return this.callGemini(model, prompt, userId);
-    } else {
+    if (provider !== AI_PROVIDERS.OPENAI && provider !== AI_PROVIDERS.GEMINI) {
       throw new Error(`${AI_QUIZ_ERRORS.UNSUPPORTED_PROVIDER}: ${provider}`);
     }
-  }
 
-  private async callAIProviderStream(
-    provider: string,
-    model: string,
-    prompt: string,
-    userId: string,
-  ): Promise<ReadableStream<IQuizStreamChunk>> {
-    if (provider === AI_PROVIDERS.OPENAI) {
-      return this.callOpenAIStream(model, prompt, userId);
-    } else if (provider === AI_PROVIDERS.GEMINI) {
-      return this.callGeminiStream(model, prompt, userId);
-    } else {
-      throw new Error(`${AI_QUIZ_ERRORS.UNSUPPORTED_PROVIDER}: ${provider}`);
-    }
-  }
+    return aiUsageTracker.wrapAIOperation(
+      {
+        user_id: userId,
+        command: 'generate_quiz_questions',
+        provider: provider as any,
+        model:
+          model ||
+          (provider === AI_PROVIDERS.OPENAI ? AI_DEFAULTS.OPENAI_MODEL : AI_DEFAULTS.GEMINI_MODEL),
+        request_payload: { prompt_length: prompt.length },
+      },
+      async () => {
+        const aiClient = AIClientFactory.getClient(provider);
 
-  private async callAIProviderStreamForAPI(
-    provider: string,
-    model: string,
-    prompt: string,
-    userId: string,
-  ): Promise<ReadableStream<Uint8Array>> {
-    if (provider === AI_PROVIDERS.OPENAI) {
-      return this.callOpenAIStreamForAPI(model, prompt, userId);
-    } else if (provider === AI_PROVIDERS.GEMINI) {
-      return this.callGeminiStreamForAPI(model, prompt, userId);
-    } else {
-      throw new Error(`${AI_QUIZ_ERRORS.UNSUPPORTED_PROVIDER}: ${provider}`);
-    }
+        const messages = aiClient.createSystemUserMessages(
+          AI_SYSTEM_MESSAGES.EDUCATIONAL_ASSISTANT,
+          prompt,
+        );
+
+        return aiClient.chatCompletion({
+          model:
+            model ||
+            (provider === AI_PROVIDERS.OPENAI
+              ? AI_DEFAULTS.OPENAI_MODEL
+              : AI_DEFAULTS.GEMINI_MODEL),
+          messages,
+        });
+      },
+    );
   }
 
   private async callAIProviderForEvaluation(
@@ -250,363 +239,224 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
     prompt: string,
     userId: string,
   ): Promise<string> {
-    if (provider === AI_PROVIDERS.OPENAI) {
-      return this.callOpenAIForEvaluation(model, prompt, userId);
-    } else if (provider === AI_PROVIDERS.GEMINI) {
-      return this.callGeminiForEvaluation(model, prompt, userId);
-    } else {
+    if (provider !== AI_PROVIDERS.OPENAI && provider !== AI_PROVIDERS.GEMINI) {
       throw new Error(`${AI_QUIZ_ERRORS.UNSUPPORTED_PROVIDER}: ${provider}`);
     }
-  }
 
-  private async callOpenAI(model: string, prompt: string, userId: string): Promise<string> {
-    return aiUsageTracker.wrapAIOperation(
-      {
-        user_id: userId,
-        command: 'generate_quiz_questions',
-        provider: 'openai',
-        model: model || AI_DEFAULTS.OPENAI_MODEL,
-        request_payload: { prompt_length: prompt.length },
-      },
-      async () => {
-        const openai = new OpenAI({
-          apiKey: env.OPENAI_API_KEY,
-          baseURL: AI_CONFIG.BASE_URL,
-        });
-
-        const response = await openai.chat.completions.create({
-          model: model || AI_DEFAULTS.OPENAI_MODEL,
-          messages: [
-            {
-              role: AI_CHAT_ROLES.SYSTEM,
-              content: AI_SYSTEM_MESSAGES.EDUCATIONAL_ASSISTANT,
-            },
-            {
-              role: AI_CHAT_ROLES.USER,
-              content: prompt,
-            },
-          ],
-          temperature: AI_CONFIG.TEMPERATURE,
-          max_tokens: AI_CONFIG.MAX_TOKENS,
-        });
-
-        return response.choices[0]?.message?.content || '';
-      },
-    );
-  }
-
-  private async callGemini(model: string, prompt: string, userId: string): Promise<string> {
-    return aiUsageTracker.wrapAIOperation(
-      {
-        user_id: userId,
-        command: 'generate_quiz_questions',
-        provider: 'gemini',
-        model: model || AI_DEFAULTS.GEMINI_MODEL,
-        request_payload: { prompt_length: prompt.length },
-      },
-      async () => {
-        const response = await fetch(`${AI_CONFIG.BASE_URL}${AI_API.CHAT_COMPLETIONS_PATH}`, {
-          method: HTTP_CONFIG.METHODS.POST,
-          headers: {
-            'Content-Type': HTTP_CONFIG.HEADERS.CONTENT_TYPE,
-            Authorization: `${HTTP_CONFIG.HEADERS.AUTHORIZATION_PREFIX}${env.GEMINI_API_KEY}`,
-          },
-          body: JSON.stringify({
-            model: model || AI_DEFAULTS.GEMINI_MODEL,
-            messages: [
-              {
-                role: AI_CHAT_ROLES.SYSTEM,
-                content: AI_SYSTEM_MESSAGES.EDUCATIONAL_ASSISTANT,
-              },
-              {
-                role: AI_CHAT_ROLES.USER,
-                content: prompt,
-              },
-            ],
-            temperature: AI_CONFIG.TEMPERATURE,
-            max_tokens: AI_CONFIG.MAX_TOKENS,
-          }),
-        });
-
-        if (!response.ok) {
-          throw new Error(`${API_ERROR_MESSAGES.GEMINI_REQUEST_FAILED}: ${response.statusText}`);
-        }
-
-        const data = await response.json();
-        return data.choices[0]?.message?.content || '';
-      },
-    );
-  }
-
-  private async callOpenAIForEvaluation(
-    model: string,
-    prompt: string,
-    userId: string,
-  ): Promise<string> {
     return aiUsageTracker.wrapAIOperation(
       {
         user_id: userId,
         command: 'evaluate_quiz_answers',
-        provider: 'openai',
-        model: model || AI_DEFAULTS.OPENAI_MODEL,
+        provider: provider as any,
+        model:
+          model ||
+          (provider === AI_PROVIDERS.OPENAI ? AI_DEFAULTS.OPENAI_MODEL : AI_DEFAULTS.GEMINI_MODEL),
         request_payload: { prompt_length: prompt.length },
       },
       async () => {
-        const openai = new OpenAI({
-          apiKey: env.OPENAI_API_KEY,
-          baseURL: AI_CONFIG.BASE_URL,
-        });
+        const aiClient = AIClientFactory.getClient(provider);
 
-        const response = await openai.chat.completions.create({
-          model: model || AI_DEFAULTS.OPENAI_MODEL,
-          messages: [
-            {
-              role: AI_CHAT_ROLES.SYSTEM,
-              content: AI_SYSTEM_MESSAGES.EDUCATIONAL_ASSISTANT,
-            },
-            {
-              role: AI_CHAT_ROLES.USER,
-              content: prompt,
-            },
-          ],
-          temperature: AI_CONFIG.TEMPERATURE,
-          max_tokens: AI_CONFIG.MAX_TOKENS,
-        });
+        const messages = aiClient.createSystemUserMessages(
+          AI_SYSTEM_MESSAGES.EDUCATIONAL_ASSISTANT,
+          prompt,
+        );
 
-        return response.choices[0]?.message?.content || '';
+        return aiClient.chatCompletion({
+          model:
+            model ||
+            (provider === AI_PROVIDERS.OPENAI
+              ? AI_DEFAULTS.OPENAI_MODEL
+              : AI_DEFAULTS.GEMINI_MODEL),
+          messages,
+        });
       },
     );
   }
 
-  private async callGeminiForEvaluation(
-    model: string,
-    prompt: string,
-    userId: string,
-  ): Promise<string> {
-    return aiUsageTracker.wrapAIOperation(
-      {
-        user_id: userId,
-        command: 'evaluate_quiz_answers',
-        provider: 'gemini',
-        model: model || AI_DEFAULTS.GEMINI_MODEL,
-        request_payload: { prompt_length: prompt.length },
-      },
-      async () => {
-        const response = await fetch(`${AI_CONFIG.BASE_URL}${AI_API.CHAT_COMPLETIONS_PATH}`, {
-          method: HTTP_CONFIG.METHODS.POST,
-          headers: {
-            'Content-Type': HTTP_CONFIG.HEADERS.CONTENT_TYPE,
-            Authorization: `${HTTP_CONFIG.HEADERS.AUTHORIZATION_PREFIX}${env.GEMINI_API_KEY}`,
-          },
-          body: JSON.stringify({
-            model: model || AI_DEFAULTS.GEMINI_MODEL,
-            messages: [
-              {
-                role: AI_CHAT_ROLES.SYSTEM,
-                content: AI_SYSTEM_MESSAGES.EDUCATIONAL_ASSISTANT,
-              },
-              {
-                role: AI_CHAT_ROLES.USER,
-                content: prompt,
-              },
-            ],
-            temperature: AI_CONFIG.TEMPERATURE,
-            max_tokens: AI_CONFIG.MAX_TOKENS,
-          }),
-        });
-
-        if (!response.ok) {
-          throw new Error(`${API_ERROR_MESSAGES.GEMINI_REQUEST_FAILED}: ${response.statusText}`);
-        }
-
-        const data = await response.json();
-        return data.choices[0]?.message?.content || '';
-      },
-    );
-  }
-
-  private async callOpenAIStream(
+  private async callAIProviderStream(
+    provider: string,
     model: string,
     prompt: string,
     userId: string,
   ): Promise<ReadableStream<IQuizStreamChunk>> {
+    if (provider !== AI_PROVIDERS.OPENAI && provider !== AI_PROVIDERS.GEMINI) {
+      throw new Error(`${AI_QUIZ_ERRORS.UNSUPPORTED_PROVIDER}: ${provider}`);
+    }
+
     return aiUsageTracker.wrapAIOperation(
       {
         user_id: userId,
         command: 'generate_quiz_questions',
-        provider: 'openai',
-        model: model || AI_DEFAULTS.OPENAI_MODEL,
+        provider: provider as any,
+        model:
+          model ||
+          (provider === AI_PROVIDERS.OPENAI ? AI_DEFAULTS.OPENAI_MODEL : AI_DEFAULTS.GEMINI_MODEL),
         request_payload: { prompt_length: prompt.length },
       },
       async () => {
-        const openai = new OpenAI({
-          apiKey: env.OPENAI_API_KEY,
-          baseURL: AI_CONFIG.BASE_URL,
+        const aiClient = AIClientFactory.getClient(provider);
+
+        const messages = aiClient.createSystemUserMessages(
+          AI_SYSTEM_MESSAGES.EDUCATIONAL_ASSISTANT,
+          prompt,
+        );
+
+        const responseStream = await aiClient.streamChatCompletion({
+          model:
+            model ||
+            (provider === AI_PROVIDERS.OPENAI
+              ? AI_DEFAULTS.OPENAI_MODEL
+              : AI_DEFAULTS.GEMINI_MODEL),
+          messages,
         });
 
-        const stream = await openai.chat.completions.create({
-          model: model || AI_DEFAULTS.OPENAI_MODEL,
-          messages: [
-            {
-              role: AI_CHAT_ROLES.SYSTEM,
-              content: AI_SYSTEM_MESSAGES.EDUCATIONAL_ASSISTANT,
-            },
-            {
-              role: AI_CHAT_ROLES.USER,
-              content: prompt,
-            },
-          ],
-          stream: true,
-          temperature: AI_CONFIG.TEMPERATURE,
-          max_tokens: AI_CONFIG.MAX_TOKENS,
-        });
-
-        return this.createStreamFromOpenAI(stream);
+        return this.createStreamFromAIClient(responseStream);
       },
     );
   }
 
-  private async callGeminiStream(
-    model: string,
-    prompt: string,
-    userId: string,
-  ): Promise<ReadableStream<IQuizStreamChunk>> {
-    return aiUsageTracker.wrapAIOperation(
-      {
-        user_id: userId,
-        command: 'generate_quiz_questions',
-        provider: 'gemini',
-        model: model || AI_DEFAULTS.GEMINI_MODEL,
-        request_payload: { prompt_length: prompt.length },
-      },
-      async () => {
-        const response = await fetch(`${AI_CONFIG.BASE_URL}${AI_API.CHAT_COMPLETIONS_PATH}`, {
-          method: HTTP_CONFIG.METHODS.POST,
-          headers: {
-            'Content-Type': HTTP_CONFIG.HEADERS.CONTENT_TYPE,
-            Authorization: `${HTTP_CONFIG.HEADERS.AUTHORIZATION_PREFIX}${env.GEMINI_API_KEY}`,
-          },
-          body: JSON.stringify({
-            model: model || AI_DEFAULTS.GEMINI_MODEL,
-            messages: [
-              {
-                role: AI_CHAT_ROLES.SYSTEM,
-                content: AI_SYSTEM_MESSAGES.EDUCATIONAL_ASSISTANT,
-              },
-              {
-                role: AI_CHAT_ROLES.USER,
-                content: prompt,
-              },
-            ],
-            stream: true,
-            temperature: AI_CONFIG.TEMPERATURE,
-            max_tokens: AI_CONFIG.MAX_TOKENS,
-          }),
-        });
-
-        if (!response.ok) {
-          throw new Error(`${API_ERROR_MESSAGES.GEMINI_REQUEST_FAILED}: ${response.statusText}`);
-        }
-
-        if (!response.body) {
-          throw new Error(API_ERROR_MESSAGES.NO_RESPONSE_BODY_GEMINI);
-        }
-
-        return this.createStreamFromGemini(response.body);
-      },
-    );
-  }
-
-  private async callOpenAIStreamForAPI(
+  private async callAIProviderStreamForAPI(
+    provider: string,
     model: string,
     prompt: string,
     userId: string,
   ): Promise<ReadableStream<Uint8Array>> {
+    if (provider !== AI_PROVIDERS.OPENAI && provider !== AI_PROVIDERS.GEMINI) {
+      throw new Error(`${AI_QUIZ_ERRORS.UNSUPPORTED_PROVIDER}: ${provider}`);
+    }
+
     return aiUsageTracker.wrapAIOperation(
       {
         user_id: userId,
         command: 'generate_quiz_questions',
-        provider: 'openai',
-        model: model || AI_DEFAULTS.OPENAI_MODEL,
+        provider: provider as any,
+        model:
+          model ||
+          (provider === AI_PROVIDERS.OPENAI ? AI_DEFAULTS.OPENAI_MODEL : AI_DEFAULTS.GEMINI_MODEL),
         request_payload: { prompt_length: prompt.length },
       },
       async () => {
-        const openai = new OpenAI({
-          apiKey: env.OPENAI_API_KEY,
-          baseURL: AI_CONFIG.BASE_URL,
+        const aiClient = AIClientFactory.getClient(provider);
+
+        const messages = aiClient.createSystemUserMessages(
+          AI_SYSTEM_MESSAGES.EDUCATIONAL_ASSISTANT,
+          prompt,
+        );
+
+        const responseStream = await aiClient.streamChatCompletion({
+          model:
+            model ||
+            (provider === AI_PROVIDERS.OPENAI
+              ? AI_DEFAULTS.OPENAI_MODEL
+              : AI_DEFAULTS.GEMINI_MODEL),
+          messages,
         });
 
-        const stream = await openai.chat.completions.create({
-          model: model || AI_DEFAULTS.OPENAI_MODEL,
-          messages: [
-            {
-              role: AI_CHAT_ROLES.SYSTEM,
-              content: AI_SYSTEM_MESSAGES.EDUCATIONAL_ASSISTANT,
-            },
-            {
-              role: AI_CHAT_ROLES.USER,
-              content: prompt,
-            },
-          ],
-          stream: true,
-          temperature: AI_CONFIG.TEMPERATURE,
-          max_tokens: AI_CONFIG.MAX_TOKENS,
-        });
-
-        return this.createAPIStreamFromOpenAI(stream);
+        return this.createAPIStreamFromAIClient(responseStream);
       },
     );
   }
 
-  private async callGeminiStreamForAPI(
-    model: string,
-    prompt: string,
-    userId: string,
-  ): Promise<ReadableStream<Uint8Array>> {
-    return aiUsageTracker.wrapAIOperation(
-      {
-        user_id: userId,
-        command: 'generate_quiz_questions',
-        provider: 'gemini',
-        model: model || AI_DEFAULTS.GEMINI_MODEL,
-        request_payload: { prompt_length: prompt.length },
-      },
-      async () => {
-        const response = await fetch(`${AI_CONFIG.BASE_URL}${AI_API.CHAT_COMPLETIONS_PATH}`, {
-          method: HTTP_CONFIG.METHODS.POST,
-          headers: {
-            'Content-Type': HTTP_CONFIG.HEADERS.CONTENT_TYPE,
-            Authorization: `${HTTP_CONFIG.HEADERS.AUTHORIZATION_PREFIX}${env.GEMINI_API_KEY}`,
-          },
-          body: JSON.stringify({
-            model: model || AI_DEFAULTS.GEMINI_MODEL,
-            messages: [
-              {
-                role: AI_CHAT_ROLES.SYSTEM,
-                content: AI_SYSTEM_MESSAGES.EDUCATIONAL_ASSISTANT,
-              },
-              {
-                role: AI_CHAT_ROLES.USER,
-                content: prompt,
-              },
-            ],
-            stream: true,
-            temperature: AI_CONFIG.TEMPERATURE,
-            max_tokens: AI_CONFIG.MAX_TOKENS,
-          }),
-        });
+  private createStreamFromAIClient(
+    responseBody: ReadableStream<Uint8Array>,
+  ): ReadableStream<IQuizStreamChunk> {
+    const aiClient = AIClientFactory.getClient(AI_PROVIDERS.OPENAI); // Can use any provider for stream parsing
+    const aiStream = aiClient.createStreamFromResponse(responseBody);
 
-        if (!response.ok) {
-          throw new Error(`${API_ERROR_MESSAGES.GEMINI_REQUEST_FAILED}: ${response.statusText}`);
+    return new ReadableStream<IQuizStreamChunk>({
+      async start(controller) {
+        try {
+          let fullContent = '';
+          const reader = aiStream.getReader();
+
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            const content = value.choices[0]?.delta?.content || '';
+            fullContent += content;
+
+            controller.enqueue({
+              type: 'question',
+              content,
+              finished: false,
+            });
+          }
+
+          quizService.handleStreamCompletion(controller, fullContent);
+        } catch (error) {
+          quizService.handleStreamError(controller, error);
         }
-
-        if (!response.body) {
-          throw new Error(API_ERROR_MESSAGES.NO_RESPONSE_BODY_GEMINI);
-        }
-
-        return this.createAPIStreamFromGemini(response.body);
       },
-    );
+    });
+  }
+
+  private createAPIStreamFromAIClient(
+    responseBody: ReadableStream<Uint8Array>,
+  ): ReadableStream<Uint8Array> {
+    const encoder = new TextEncoder();
+    const aiClient = AIClientFactory.getClient(AI_PROVIDERS.OPENAI); // Can use any provider for stream parsing
+    const aiStream = aiClient.createStreamFromResponse(responseBody);
+
+    return new ReadableStream<Uint8Array>({
+      async start(controller) {
+        try {
+          let fullContent = '';
+          const reader = aiStream.getReader();
+
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            const content = value.choices[0]?.delta?.content || '';
+            fullContent += content;
+
+            const chunkData =
+              JSON.stringify({
+                type: 'question',
+                content,
+                finished: false,
+              }) + '\n';
+
+            controller.enqueue(encoder.encode(chunkData));
+          }
+
+          try {
+            const questions = quizService.parseQuestionsFromResponse(fullContent);
+            const completeData =
+              JSON.stringify({
+                type: 'complete',
+                content: JSON.stringify(questions),
+                finished: true,
+              }) + '\n';
+
+            controller.enqueue(encoder.encode(completeData));
+          } catch {
+            const errorData =
+              JSON.stringify({
+                type: 'error',
+                content: AI_QUIZ_ERRORS.FAILED_TO_PARSE_QUESTIONS,
+                finished: true,
+              }) + '\n';
+
+            controller.enqueue(encoder.encode(errorData));
+          }
+        } catch (error) {
+          const errorMessage =
+            error instanceof Error ? error.message : AI_QUIZ_ERRORS.FAILED_TO_GENERATE;
+          const errorData =
+            JSON.stringify({
+              type: 'error',
+              content: `${AI_QUIZ_ERRORS.FAILED_TO_GENERATE}: ${errorMessage}`,
+              finished: true,
+            }) + '\n';
+
+          controller.enqueue(encoder.encode(errorData));
+        } finally {
+          controller.close();
+        }
+      },
+    });
   }
 
   private parseQuestionsFromResponse(responseText: string): IQuizQuestion[] {
@@ -762,81 +612,7 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
     }
   }
 
-  private createStreamFromOpenAI(
-    stream: AsyncIterable<OpenAI.Chat.Completions.ChatCompletionChunk>,
-  ): ReadableStream<IQuizStreamChunk> {
-    return new ReadableStream<IQuizStreamChunk>({
-      async start(controller) {
-        try {
-          let fullContent = '';
-
-          for await (const chunk of stream) {
-            const content = chunk.choices[0]?.delta?.content || '';
-            fullContent += content;
-
-            controller.enqueue({
-              type: 'question',
-              content,
-              finished: false,
-            });
-          }
-
-          quizService.handleStreamCompletion(controller, fullContent);
-        } catch (error) {
-          quizService.handleStreamError(controller, error);
-        }
-      },
-    });
-  }
-
-  private createStreamFromGemini(
-    responseBody: ReadableStream<Uint8Array>,
-  ): ReadableStream<IQuizStreamChunk> {
-    return new ReadableStream<IQuizStreamChunk>({
-      async start(controller) {
-        try {
-          let fullContent = '';
-          const reader = responseBody.getReader();
-          const decoder = new TextDecoder();
-
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-
-            const chunk = decoder.decode(value, { stream: true });
-            const lines = chunk.split('\n');
-
-            for (const line of lines) {
-              if (line.startsWith(AI_API.SSE_DATA_PREFIX)) {
-                const data = line.slice(AI_API.SSE_DATA_PREFIX_LENGTH);
-                if (data === AI_API.SSE_DONE_MESSAGE) continue;
-
-                try {
-                  const parsed = JSON.parse(data);
-                  const content = parsed.choices[0]?.delta?.content || '';
-                  fullContent += content;
-
-                  controller.enqueue({
-                    type: 'question',
-                    content,
-                    finished: false,
-                  });
-                } catch {
-                  // Skip invalid JSON chunks
-                }
-              }
-            }
-          }
-
-          quizService.handleStreamCompletion(controller, fullContent);
-        } catch (error) {
-          quizService.handleStreamError(controller, error);
-        }
-      },
-    });
-  }
-
-  private handleStreamCompletion(controller: StreamController, fullContent: string): void {
+  private handleStreamCompletion(controller: IStreamController, fullContent: string): void {
     try {
       const questions = this.parseQuestionsFromResponse(fullContent);
       controller.enqueue({
@@ -855,7 +631,7 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
     }
   }
 
-  private handleStreamError(controller: StreamController, error: unknown): void {
+  private handleStreamError(controller: IStreamController, error: unknown): void {
     const errorMessage = error instanceof Error ? error.message : AI_QUIZ_ERRORS.FAILED_TO_GENERATE;
 
     controller.enqueue({
@@ -865,150 +641,6 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
     });
 
     controller.close();
-  }
-
-  private createAPIStreamFromOpenAI(
-    stream: AsyncIterable<OpenAI.Chat.Completions.ChatCompletionChunk>,
-  ): ReadableStream<Uint8Array> {
-    const encoder = new TextEncoder();
-
-    return new ReadableStream<Uint8Array>({
-      async start(controller) {
-        try {
-          let fullContent = '';
-
-          for await (const chunk of stream) {
-            const content = chunk.choices[0]?.delta?.content || '';
-            fullContent += content;
-
-            const chunkData =
-              JSON.stringify({
-                type: 'question',
-                content,
-                finished: false,
-              }) + '\n';
-
-            controller.enqueue(encoder.encode(chunkData));
-          }
-
-          try {
-            const questions = quizService.parseQuestionsFromResponse(fullContent);
-            const completeData =
-              JSON.stringify({
-                type: 'complete',
-                content: JSON.stringify(questions),
-                finished: true,
-              }) + '\n';
-
-            controller.enqueue(encoder.encode(completeData));
-          } catch {
-            const errorData =
-              JSON.stringify({
-                type: 'error',
-                content: AI_QUIZ_ERRORS.FAILED_TO_PARSE_QUESTIONS,
-                finished: true,
-              }) + '\n';
-
-            controller.enqueue(encoder.encode(errorData));
-          }
-        } catch (error) {
-          const errorMessage =
-            error instanceof Error ? error.message : AI_QUIZ_ERRORS.FAILED_TO_GENERATE;
-          const errorData =
-            JSON.stringify({
-              type: 'error',
-              content: `${AI_QUIZ_ERRORS.FAILED_TO_GENERATE}: ${errorMessage}`,
-              finished: true,
-            }) + '\n';
-
-          controller.enqueue(encoder.encode(errorData));
-        } finally {
-          controller.close();
-        }
-      },
-    });
-  }
-
-  private createAPIStreamFromGemini(
-    responseBody: ReadableStream<Uint8Array>,
-  ): ReadableStream<Uint8Array> {
-    const encoder = new TextEncoder();
-
-    return new ReadableStream<Uint8Array>({
-      async start(controller) {
-        try {
-          let fullContent = '';
-          const reader = responseBody.getReader();
-          const decoder = new TextDecoder();
-
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-
-            const chunk = decoder.decode(value, { stream: true });
-            const lines = chunk.split('\n');
-
-            for (const line of lines) {
-              if (line.startsWith(AI_API.SSE_DATA_PREFIX)) {
-                const data = line.slice(AI_API.SSE_DATA_PREFIX_LENGTH);
-                if (data === AI_API.SSE_DONE_MESSAGE) continue;
-
-                try {
-                  const parsed = JSON.parse(data);
-                  const content = parsed.choices[0]?.delta?.content || '';
-                  fullContent += content;
-
-                  const chunkData =
-                    JSON.stringify({
-                      type: 'question',
-                      content,
-                      finished: false,
-                    }) + '\n';
-
-                  controller.enqueue(encoder.encode(chunkData));
-                } catch {
-                  // Skip invalid JSON chunks
-                }
-              }
-            }
-          }
-
-          try {
-            const questions = quizService.parseQuestionsFromResponse(fullContent);
-            const completeData =
-              JSON.stringify({
-                type: 'complete',
-                content: JSON.stringify(questions),
-                finished: true,
-              }) + '\n';
-
-            controller.enqueue(encoder.encode(completeData));
-          } catch {
-            const errorData =
-              JSON.stringify({
-                type: 'error',
-                content: AI_QUIZ_ERRORS.FAILED_TO_PARSE_QUESTIONS,
-                finished: true,
-              }) + '\n';
-
-            controller.enqueue(encoder.encode(errorData));
-          }
-        } catch (error) {
-          const errorMessage =
-            error instanceof Error ? error.message : AI_QUIZ_ERRORS.FAILED_TO_GENERATE;
-          const errorData =
-            JSON.stringify({
-              type: 'error',
-              content: `${AI_QUIZ_ERRORS.FAILED_TO_GENERATE}: ${errorMessage}`,
-              finished: true,
-            }) + '\n';
-
-          controller.enqueue(encoder.encode(errorData));
-        } finally {
-          controller.close();
-        }
-      },
-    });
   }
 }
 

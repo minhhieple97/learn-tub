@@ -6,6 +6,7 @@ import {
   CHUNK_TYPES,
   ERROR_MESSAGES,
   STATUS_STREAMING,
+  AI_DEFAULTS,
 } from '@/config/constants';
 import { AIProvider, IFeedback } from '@/types';
 import { INoteEvaluationStatus } from '../types';
@@ -19,8 +20,8 @@ export const useNoteEvaluation = () => {
   const evaluateNote = useCallback(
     async (
       noteId: string,
-      provider: AIProvider = AI_PROVIDERS.OPENAI,
-      model: string = AI_CONFIG.DEFAULT_MODEL,
+      provider: AIProvider = AI_PROVIDERS.GEMINI,
+      model: string = AI_DEFAULTS.GEMINI_MODEL,
     ) => {
       try {
         setStatus(STATUS_STREAMING.EVALUATING);
