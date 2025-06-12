@@ -1,5 +1,4 @@
 import OpenAI from 'openai';
-import { GoogleGenAI } from '@google/genai';
 import { env } from '@/env.mjs';
 import {
   AI_CONFIG,
@@ -11,6 +10,10 @@ import {
   AI_FORMAT,
   ERROR_MESSAGES,
   EVALUATION_ERRORS,
+  AI_API,
+  HTTP_CONFIG,
+  API_ERROR_MESSAGES,
+  AI_QUIZ_CONFIG,
 } from '@/config/constants';
 import { INoteEvaluationRequest } from '@/features/notes/types';
 import { IFeedback, StreamChunk } from '@/types';
@@ -192,16 +195,39 @@ ${feedback.detailed_analysis}`;
     model: string,
     prompt: string,
   ): Promise<ReadableStream<StreamChunk>> {
-    const genAI = new GoogleGenAI({
-      apiKey: env.GEMINI_API_KEY,
+    const response = await fetch(`${AI_CONFIG.BASE_URL}${AI_API.CHAT_COMPLETIONS_PATH}`, {
+      method: HTTP_CONFIG.METHODS.POST,
+      headers: {
+        'Content-Type': HTTP_CONFIG.HEADERS.CONTENT_TYPE,
+        Authorization: `${HTTP_CONFIG.HEADERS.AUTHORIZATION_PREFIX}${env.GEMINI_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: model || AI_DEFAULTS.GEMINI_MODEL,
+        messages: [
+          {
+            role: AI_CHAT_ROLES.SYSTEM,
+            content: AI_SYSTEM_MESSAGES.EDUCATIONAL_ASSISTANT,
+          },
+          {
+            role: AI_CHAT_ROLES.USER,
+            content: prompt,
+          },
+        ],
+        stream: true,
+        temperature: AI_CONFIG.TEMPERATURE,
+        max_tokens: AI_CONFIG.MAX_TOKENS,
+      }),
     });
 
-    const response = await genAI.models.generateContentStream({
-      model: model || AI_DEFAULTS.GEMINI_MODEL,
-      contents: prompt,
-    });
+    if (!response.ok) {
+      throw new Error(`${API_ERROR_MESSAGES.GEMINI_REQUEST_FAILED}: ${response.statusText}`);
+    }
 
-    return this.createStreamFromGemini(response);
+    if (!response.body) {
+      throw new Error(API_ERROR_MESSAGES.NO_RESPONSE_BODY_GEMINI);
+    }
+
+    return this.createStreamFromGemini(response.body);
   }
 
   private createStreamFromOpenAI(
@@ -232,22 +258,44 @@ ${feedback.detailed_analysis}`;
   }
 
   private createStreamFromGemini(
-    response: AsyncIterable<{ text?: string }>,
+    responseBody: ReadableStream<Uint8Array>,
   ): ReadableStream<StreamChunk> {
     return new ReadableStream<StreamChunk>({
       async start(controller) {
         try {
           let fullContent = '';
+          const reader = responseBody.getReader();
+          const decoder = new TextDecoder();
 
-          for await (const chunk of response) {
-            const content = chunk.text || '';
-            fullContent += content;
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
 
-            controller.enqueue({
-              type: CHUNK_TYPES.FEEDBACK,
-              content,
-              finished: false,
-            });
+            const chunk = decoder.decode(value, { stream: true });
+            const lines = chunk.split('\n');
+
+            for (const line of lines) {
+              if (line.startsWith(AI_API.SSE_DATA_PREFIX)) {
+                const data = line.slice(AI_API.SSE_DATA_PREFIX_LENGTH);
+                if (data === AI_API.SSE_DONE_MESSAGE) continue;
+
+                try {
+                  const parsed = JSON.parse(data);
+                  const content = parsed.choices[0]?.delta?.content || '';
+                  fullContent += content;
+
+                  controller.enqueue({
+                    type: CHUNK_TYPES.FEEDBACK,
+                    content,
+                    finished: false,
+                  });
+                } catch (error) {
+                  console.error('Invalid JSON chunk:', data);
+                  console.error('Error parsing JSON:', error);
+                  // Skip invalid JSON chunks
+                }
+              }
+            }
           }
 
           noteService.handleStreamCompletion(controller, fullContent);
@@ -258,9 +306,58 @@ ${feedback.detailed_analysis}`;
     });
   }
 
+  private parseFeedbackFromResponse(responseText: string): IFeedback {
+    try {
+      let cleanedText = responseText.trim();
+
+      if (cleanedText.startsWith(AI_QUIZ_CONFIG.MARKDOWN_JSON_START)) {
+        cleanedText = cleanedText.replace(
+          new RegExp(`^${AI_QUIZ_CONFIG.MARKDOWN_JSON_START}\\s*`),
+          '',
+        );
+      }
+      if (cleanedText.startsWith(AI_QUIZ_CONFIG.MARKDOWN_CODE_START)) {
+        cleanedText = cleanedText.replace(
+          new RegExp(`^${AI_QUIZ_CONFIG.MARKDOWN_CODE_START}\\s*`),
+          '',
+        );
+      }
+      if (cleanedText.endsWith(AI_QUIZ_CONFIG.MARKDOWN_CODE_END)) {
+        cleanedText = cleanedText.replace(
+          new RegExp(`\\s*${AI_QUIZ_CONFIG.MARKDOWN_CODE_END}$`),
+          '',
+        );
+      }
+
+      const jsonMatch = cleanedText.match(new RegExp(AI_QUIZ_CONFIG.JSON_REGEX_PATTERN));
+      if (jsonMatch) {
+        cleanedText = jsonMatch[0];
+      }
+
+      const parsed = JSON.parse(cleanedText) as IFeedback;
+
+      if (!parsed.summary || typeof parsed.overall_score !== 'number') {
+        throw new Error('Invalid feedback format: missing required fields');
+      }
+
+      return {
+        summary: parsed.summary || '',
+        correct_points: Array.isArray(parsed.correct_points) ? parsed.correct_points : [],
+        incorrect_points: Array.isArray(parsed.incorrect_points) ? parsed.incorrect_points : [],
+        improvement_suggestions: Array.isArray(parsed.improvement_suggestions)
+          ? parsed.improvement_suggestions
+          : [],
+        overall_score: parsed.overall_score || 0,
+        detailed_analysis: parsed.detailed_analysis || '',
+      };
+    } catch (error) {
+      throw new Error(EVALUATION_ERRORS.FAILED_TO_PARSE_RESPONSE);
+    }
+  }
+
   private handleStreamCompletion(controller: StreamController, fullContent: string): void {
     try {
-      const feedback = JSON.parse(fullContent) as IFeedback;
+      const feedback = this.parseFeedbackFromResponse(fullContent);
       controller.enqueue({
         type: CHUNK_TYPES.COMPLETE,
         content: JSON.stringify(feedback),

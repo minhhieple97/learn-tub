@@ -5,8 +5,7 @@ export const YOUTUBE_API = {
 } as const;
 
 export const YOUTUBE_PATTERNS = {
-  URL_REGEX:
-    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
+  URL_REGEX: /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
   DURATION_REGEX: /PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/,
   VALID_URL_REGEX:
     /^https?:\/\/(?:www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})(?:[&?][^\s]*)?$/i,
@@ -66,21 +65,16 @@ export const AI_CONFIG = {
 } as const;
 
 export const AI_MODELS = {
-  openai: [
-    { value: 'gpt-4o', label: 'GPT-4o' },
-    { value: 'gpt-4o-mini', label: 'GPT-4o Mini' },
-  ],
   gemini: [
-    { value: 'gemini-2.0-flash-exp', label: 'Gemini 2.0 Flash (Experimental)' },
+    { value: 'gemini-2.5-flash-preview', label: 'Gemini 2.5 Flash (Experimental)' },
     { value: 'gemini-2.0-pro-exp', label: 'Gemini 2.0 Pro (Experimental)' },
-    { value: 'gemini-pro', label: 'Gemini Pro' },
-    { value: 'gemini-pro-vision', label: 'Gemini Pro Vision' },
   ],
+  openai: [{ value: 'gpt-4o-mini', label: 'GPT-4o Mini' }],
 } as const;
 
 export const AI_DEFAULTS = {
   OPENAI_MODEL: 'gpt-4o-mini',
-  GEMINI_MODEL: 'gemini-2.0-flash-exp',
+  GEMINI_MODEL: 'gemini-2.5-flash-preview',
   SERVICE_MODEL: 'gpt-4o-mini',
 } as const;
 
@@ -96,8 +90,20 @@ export const AI_PROVIDERS = {
 
 export const AI_API = {
   EVALUATE_NOTE_PATH: '/api/evaluate-note',
+  CHAT_COMPLETIONS_PATH: '/chat/completions',
   SSE_DATA_PREFIX: 'data: ',
   SSE_DATA_PREFIX_LENGTH: 6,
+  SSE_DONE_MESSAGE: '[DONE]',
+} as const;
+
+export const HTTP_CONFIG = {
+  HEADERS: {
+    CONTENT_TYPE: 'application/json',
+    AUTHORIZATION_PREFIX: 'Bearer ',
+  },
+  METHODS: {
+    POST: 'POST',
+  },
 } as const;
 
 export const CHUNK_TYPES = {
@@ -131,6 +137,13 @@ export const ERROR_MESSAGES = {
   UNKNOWN_ERROR: 'Unknown error',
   FAILED_TO_PARSE_CHUNK: 'Failed to parse chunk',
   FAILED_TO_PARSE_AI_FEEDBACK: 'Failed to parse AI feedback for database save',
+} as const;
+
+export const API_ERROR_MESSAGES = {
+  OPENAI_REQUEST_FAILED: 'OpenAI API request failed',
+  GEMINI_REQUEST_FAILED: 'Gemini API request failed',
+  NO_RESPONSE_BODY_OPENAI: 'No response body from OpenAI API',
+  NO_RESPONSE_BODY_GEMINI: 'No response body from Gemini API',
 } as const;
 
 export const AI_CHAT_ROLES = {
@@ -178,8 +191,7 @@ export const AI_QUIZ_ERRORS = {
   FAILED_TO_PARSE_FEEDBACK: 'Failed to parse feedback from AI response',
   INVALID_RESPONSE_FORMAT: 'Invalid response format: missing questions array',
   UNSUPPORTED_PROVIDER: 'Unsupported provider',
-  QUIZ_COMPLETED_FALLBACK:
-    'Quiz completed. AI feedback parsing failed, showing basic results.',
+  QUIZ_COMPLETED_FALLBACK: 'Quiz completed. AI feedback parsing failed, showing basic results.',
   QUIZ_COMPLETED_SUCCESS: 'Quiz completed successfully.',
 } as const;
 
