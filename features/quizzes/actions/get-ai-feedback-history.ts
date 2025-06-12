@@ -4,9 +4,10 @@ import { authAction } from '@/lib/safe-action';
 
 
 import { createClient } from '@/lib/supabase/server';
-import { getProfileByUserId } from '@/features/profile/queries';
+
 import { DeleteAIFeedbackSchema, GetAIFeedbackHistorySchema } from '../schema';
 import { getNoteInteractionsByNoteId } from '@/features/notes/queries';
+import { getProfileByUserId } from '@/lib/require-auth';
 
 export const getAIFeedbackHistoryAction = authAction
   .inputSchema(GetAIFeedbackHistorySchema)

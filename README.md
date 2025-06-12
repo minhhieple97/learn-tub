@@ -128,7 +128,7 @@ learn-tub/
 ├── components/           # Shared UI components
 │   └── ui/               # Shadcn UI components
 ├── features/             # Feature-specific modules (AI, Auth, Notes, Videos)
-│   ├── ai/         # AI Usage Tracking System
+│   ├── ai/               # AI Usage Tracking System
 │   │   ├── types.ts      # TypeScript definitions with I prefix
 │   │   ├── schemas.ts    # Zod validation schemas
 │   │   ├── queries/      # Database operations for AI usage analytics

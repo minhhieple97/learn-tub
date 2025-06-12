@@ -1,7 +1,8 @@
 import { createClient } from '@/lib/supabase/server';
-import { getProfileInSession } from '@/features/profile/queries';
+
 import { getQuizStatistics } from '@/features/quizzes/queries';
 import type { DashboardStats, RecentVideo, LearningGoal } from '../types';
+import { getProfileInSession } from '@/lib/require-auth';
 
 export const getDashboardStats = async (): Promise<DashboardStats> => {
   return {

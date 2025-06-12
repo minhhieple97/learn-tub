@@ -1,5 +1,5 @@
 import { createSafeActionClient, DEFAULT_SERVER_ERROR_MESSAGE } from 'next-safe-action';
-import { createClient } from './supabase/server';
+import { getUserInSession } from './require-auth';
 
 export class ActionError extends Error {}
 
@@ -16,12 +16,9 @@ export const action = createSafeActionClient({
 });
 
 export const authAction = action.use(async ({ next }) => {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
+  const user = await getUserInSession();
   if (!user) {
     throw new ActionError('Authentication failed');
   }
-
   return next({ ctx: { user } });
 });

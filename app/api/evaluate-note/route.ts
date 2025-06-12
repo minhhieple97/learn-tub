@@ -10,7 +10,6 @@ import {
   HTTP_STATUS,
 } from '@/config/constants';
 
-import { getProfileByUserId } from '@/features/profile/queries';
 
 import { INoteEvaluationRequest } from '@/features/notes/types';
 import { IFeedback, StreamChunk } from '@/types';
@@ -18,6 +17,7 @@ import { createNoteInteraction } from '@/features/notes/queries';
 import { noteService } from '@/features/notes/services/note-service';
 import { ActionError } from '@/lib/safe-action';
 import { RateLimiter } from '@/lib/rate-limiter';
+import { getProfileByUserId } from '@/lib/require-auth';
 
 const EvaluateNoteQuerySchema = z.object({
   noteId: z.string().uuid('Invalid note ID format'),

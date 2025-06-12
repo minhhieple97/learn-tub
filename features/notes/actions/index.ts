@@ -5,7 +5,8 @@ import { ActionError, authAction } from '@/lib/safe-action';
 import { createClient } from '@/lib/supabase/server';
 import { saveNoteInputSchema, updateNoteInputSchema, deleteNoteInputSchema } from '../schemas';
 import { routes } from '@/routes';
-import { getProfileByUserId } from '@/features/profile/queries';
+import { getProfileByUserId } from '@/lib/require-auth';
+
 
 export const saveNoteAction = authAction
   .inputSchema(saveNoteInputSchema)
