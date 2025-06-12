@@ -9,6 +9,68 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      ai_usage_logs: {
+        Row: {
+          command: string
+          cost_usd: number | null
+          created_at: string | null
+          error_message: string | null
+          id: string
+          input_tokens: number | null
+          model: string
+          output_tokens: number | null
+          provider: string
+          request_duration_ms: number | null
+          request_payload: Json | null
+          response_payload: Json | null
+          status: string
+          tokens_used: number | null
+          user_id: string
+        }
+        Insert: {
+          command: string
+          cost_usd?: number | null
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          input_tokens?: number | null
+          model: string
+          output_tokens?: number | null
+          provider: string
+          request_duration_ms?: number | null
+          request_payload?: Json | null
+          response_payload?: Json | null
+          status: string
+          tokens_used?: number | null
+          user_id: string
+        }
+        Update: {
+          command?: string
+          cost_usd?: number | null
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          input_tokens?: number | null
+          model?: string
+          output_tokens?: number | null
+          provider?: string
+          request_duration_ms?: number | null
+          request_payload?: Json | null
+          response_payload?: Json | null
+          status?: string
+          tokens_used?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_usage_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       courses: {
         Row: {
           created_at: string | null

@@ -22,6 +22,7 @@ import type {
   IQuizQuestion,
   IQuizStreamChunk,
 } from '../types';
+import { aiUsageTracker } from '@/features/ai';
 
 type StreamController = ReadableStreamDefaultController<IQuizStreamChunk>;
 
@@ -37,6 +38,7 @@ class QuizService {
         questionCount = AI_QUIZ_CONFIG.DEFAULT_QUESTION_COUNT,
         difficulty = AI_QUIZ_CONFIG.DEFAULT_DIFFICULTY,
         topics,
+        userId,
       } = request;
       const prompt = this.createQuestionGenerationPrompt({
         videoTitle,
@@ -47,7 +49,7 @@ class QuizService {
         topics,
       });
 
-      const response = await this.callAIProvider(provider, model, prompt);
+      const response = await this.callAIProvider(provider, model, prompt, userId);
       const questions = this.parseQuestionsFromResponse(response);
 
       return {
@@ -75,6 +77,7 @@ class QuizService {
       questionCount = AI_QUIZ_CONFIG.DEFAULT_QUESTION_COUNT,
       difficulty = AI_QUIZ_CONFIG.DEFAULT_DIFFICULTY,
       topics,
+      userId,
     } = request;
 
     const prompt = this.createQuestionGenerationPrompt({
@@ -86,15 +89,15 @@ class QuizService {
       topics,
     });
 
-    return this.callAIProviderStreamForAPI(provider, model, prompt);
+    return this.callAIProviderStreamForAPI(provider, model, prompt, userId);
   }
 
   async evaluateQuiz(request: IEvaluateQuizRequest): Promise<IQuizEvaluationResponse> {
     try {
-      const { provider, model, questions, answers, videoContext } = request;
+      const { provider, model, questions, answers, videoContext, userId } = request;
       const prompt = this.createEvaluationPrompt(questions, answers, videoContext);
 
-      const response = await this.callAIProvider(provider, model, prompt);
+      const response = await this.callAIProviderForEvaluation(provider, model, prompt, userId);
       const feedback = this.parseFeedbackFromResponse(response, questions, answers);
 
       return {
@@ -196,11 +199,16 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
     return parts.join('\n');
   }
 
-  private async callAIProvider(provider: string, model: string, prompt: string): Promise<string> {
+  private async callAIProvider(
+    provider: string,
+    model: string,
+    prompt: string,
+    userId: string,
+  ): Promise<string> {
     if (provider === AI_PROVIDERS.OPENAI) {
-      return this.callOpenAI(model, prompt);
+      return this.callOpenAI(model, prompt, userId);
     } else if (provider === AI_PROVIDERS.GEMINI) {
-      return this.callGemini(model, prompt);
+      return this.callGemini(model, prompt, userId);
     } else {
       throw new Error(`${AI_QUIZ_ERRORS.UNSUPPORTED_PROVIDER}: ${provider}`);
     }
@@ -210,11 +218,12 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
     provider: string,
     model: string,
     prompt: string,
+    userId: string,
   ): Promise<ReadableStream<IQuizStreamChunk>> {
     if (provider === AI_PROVIDERS.OPENAI) {
-      return this.callOpenAIStream(model, prompt);
+      return this.callOpenAIStream(model, prompt, userId);
     } else if (provider === AI_PROVIDERS.GEMINI) {
-      return this.callGeminiStream(model, prompt);
+      return this.callGeminiStream(model, prompt, userId);
     } else {
       throw new Error(`${AI_QUIZ_ERRORS.UNSUPPORTED_PROVIDER}: ${provider}`);
     }
@@ -224,207 +233,380 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
     provider: string,
     model: string,
     prompt: string,
+    userId: string,
   ): Promise<ReadableStream<Uint8Array>> {
     if (provider === AI_PROVIDERS.OPENAI) {
-      return this.callOpenAIStreamForAPI(model, prompt);
+      return this.callOpenAIStreamForAPI(model, prompt, userId);
     } else if (provider === AI_PROVIDERS.GEMINI) {
-      return this.callGeminiStreamForAPI(model, prompt);
+      return this.callGeminiStreamForAPI(model, prompt, userId);
     } else {
       throw new Error(`${AI_QUIZ_ERRORS.UNSUPPORTED_PROVIDER}: ${provider}`);
     }
   }
 
-  private async callOpenAI(model: string, prompt: string): Promise<string> {
-    const openai = new OpenAI({
-      apiKey: env.OPENAI_API_KEY,
-      baseURL: AI_CONFIG.BASE_URL,
-    });
-
-    const response = await openai.chat.completions.create({
-      model: model || AI_DEFAULTS.OPENAI_MODEL,
-      messages: [
-        {
-          role: AI_CHAT_ROLES.SYSTEM,
-          content: AI_SYSTEM_MESSAGES.EDUCATIONAL_ASSISTANT,
-        },
-        {
-          role: AI_CHAT_ROLES.USER,
-          content: prompt,
-        },
-      ],
-      temperature: AI_CONFIG.TEMPERATURE,
-      max_tokens: AI_CONFIG.MAX_TOKENS,
-    });
-
-    return response.choices[0]?.message?.content || '';
+  private async callAIProviderForEvaluation(
+    provider: string,
+    model: string,
+    prompt: string,
+    userId: string,
+  ): Promise<string> {
+    if (provider === AI_PROVIDERS.OPENAI) {
+      return this.callOpenAIForEvaluation(model, prompt, userId);
+    } else if (provider === AI_PROVIDERS.GEMINI) {
+      return this.callGeminiForEvaluation(model, prompt, userId);
+    } else {
+      throw new Error(`${AI_QUIZ_ERRORS.UNSUPPORTED_PROVIDER}: ${provider}`);
+    }
   }
 
-  private async callGemini(model: string, prompt: string): Promise<string> {
-    const response = await fetch(`${AI_CONFIG.BASE_URL}${AI_API.CHAT_COMPLETIONS_PATH}`, {
-      method: HTTP_CONFIG.METHODS.POST,
-      headers: {
-        'Content-Type': HTTP_CONFIG.HEADERS.CONTENT_TYPE,
-        Authorization: `${HTTP_CONFIG.HEADERS.AUTHORIZATION_PREFIX}${env.GEMINI_API_KEY}`,
+  private async callOpenAI(model: string, prompt: string, userId: string): Promise<string> {
+    return aiUsageTracker.wrapAIOperation(
+      {
+        user_id: userId,
+        command: 'generate_quiz_questions',
+        provider: 'openai',
+        model: model || AI_DEFAULTS.OPENAI_MODEL,
+        request_payload: { prompt_length: prompt.length },
       },
-      body: JSON.stringify({
+      async () => {
+        const openai = new OpenAI({
+          apiKey: env.OPENAI_API_KEY,
+          baseURL: AI_CONFIG.BASE_URL,
+        });
+
+        const response = await openai.chat.completions.create({
+          model: model || AI_DEFAULTS.OPENAI_MODEL,
+          messages: [
+            {
+              role: AI_CHAT_ROLES.SYSTEM,
+              content: AI_SYSTEM_MESSAGES.EDUCATIONAL_ASSISTANT,
+            },
+            {
+              role: AI_CHAT_ROLES.USER,
+              content: prompt,
+            },
+          ],
+          temperature: AI_CONFIG.TEMPERATURE,
+          max_tokens: AI_CONFIG.MAX_TOKENS,
+        });
+
+        return response.choices[0]?.message?.content || '';
+      },
+    );
+  }
+
+  private async callGemini(model: string, prompt: string, userId: string): Promise<string> {
+    return aiUsageTracker.wrapAIOperation(
+      {
+        user_id: userId,
+        command: 'generate_quiz_questions',
+        provider: 'gemini',
         model: model || AI_DEFAULTS.GEMINI_MODEL,
-        messages: [
-          {
-            role: AI_CHAT_ROLES.SYSTEM,
-            content: AI_SYSTEM_MESSAGES.EDUCATIONAL_ASSISTANT,
+        request_payload: { prompt_length: prompt.length },
+      },
+      async () => {
+        const response = await fetch(`${AI_CONFIG.BASE_URL}${AI_API.CHAT_COMPLETIONS_PATH}`, {
+          method: HTTP_CONFIG.METHODS.POST,
+          headers: {
+            'Content-Type': HTTP_CONFIG.HEADERS.CONTENT_TYPE,
+            Authorization: `${HTTP_CONFIG.HEADERS.AUTHORIZATION_PREFIX}${env.GEMINI_API_KEY}`,
           },
-          {
-            role: AI_CHAT_ROLES.USER,
-            content: prompt,
+          body: JSON.stringify({
+            model: model || AI_DEFAULTS.GEMINI_MODEL,
+            messages: [
+              {
+                role: AI_CHAT_ROLES.SYSTEM,
+                content: AI_SYSTEM_MESSAGES.EDUCATIONAL_ASSISTANT,
+              },
+              {
+                role: AI_CHAT_ROLES.USER,
+                content: prompt,
+              },
+            ],
+            temperature: AI_CONFIG.TEMPERATURE,
+            max_tokens: AI_CONFIG.MAX_TOKENS,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`${API_ERROR_MESSAGES.GEMINI_REQUEST_FAILED}: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        return data.choices[0]?.message?.content || '';
+      },
+    );
+  }
+
+  private async callOpenAIForEvaluation(
+    model: string,
+    prompt: string,
+    userId: string,
+  ): Promise<string> {
+    return aiUsageTracker.wrapAIOperation(
+      {
+        user_id: userId,
+        command: 'evaluate_quiz_answers',
+        provider: 'openai',
+        model: model || AI_DEFAULTS.OPENAI_MODEL,
+        request_payload: { prompt_length: prompt.length },
+      },
+      async () => {
+        const openai = new OpenAI({
+          apiKey: env.OPENAI_API_KEY,
+          baseURL: AI_CONFIG.BASE_URL,
+        });
+
+        const response = await openai.chat.completions.create({
+          model: model || AI_DEFAULTS.OPENAI_MODEL,
+          messages: [
+            {
+              role: AI_CHAT_ROLES.SYSTEM,
+              content: AI_SYSTEM_MESSAGES.EDUCATIONAL_ASSISTANT,
+            },
+            {
+              role: AI_CHAT_ROLES.USER,
+              content: prompt,
+            },
+          ],
+          temperature: AI_CONFIG.TEMPERATURE,
+          max_tokens: AI_CONFIG.MAX_TOKENS,
+        });
+
+        return response.choices[0]?.message?.content || '';
+      },
+    );
+  }
+
+  private async callGeminiForEvaluation(
+    model: string,
+    prompt: string,
+    userId: string,
+  ): Promise<string> {
+    return aiUsageTracker.wrapAIOperation(
+      {
+        user_id: userId,
+        command: 'evaluate_quiz_answers',
+        provider: 'gemini',
+        model: model || AI_DEFAULTS.GEMINI_MODEL,
+        request_payload: { prompt_length: prompt.length },
+      },
+      async () => {
+        const response = await fetch(`${AI_CONFIG.BASE_URL}${AI_API.CHAT_COMPLETIONS_PATH}`, {
+          method: HTTP_CONFIG.METHODS.POST,
+          headers: {
+            'Content-Type': HTTP_CONFIG.HEADERS.CONTENT_TYPE,
+            Authorization: `${HTTP_CONFIG.HEADERS.AUTHORIZATION_PREFIX}${env.GEMINI_API_KEY}`,
           },
-        ],
-        temperature: AI_CONFIG.TEMPERATURE,
-        max_tokens: AI_CONFIG.MAX_TOKENS,
-      }),
-    });
+          body: JSON.stringify({
+            model: model || AI_DEFAULTS.GEMINI_MODEL,
+            messages: [
+              {
+                role: AI_CHAT_ROLES.SYSTEM,
+                content: AI_SYSTEM_MESSAGES.EDUCATIONAL_ASSISTANT,
+              },
+              {
+                role: AI_CHAT_ROLES.USER,
+                content: prompt,
+              },
+            ],
+            temperature: AI_CONFIG.TEMPERATURE,
+            max_tokens: AI_CONFIG.MAX_TOKENS,
+          }),
+        });
 
-    if (!response.ok) {
-      throw new Error(`${API_ERROR_MESSAGES.GEMINI_REQUEST_FAILED}: ${response.statusText}`);
-    }
+        if (!response.ok) {
+          throw new Error(`${API_ERROR_MESSAGES.GEMINI_REQUEST_FAILED}: ${response.statusText}`);
+        }
 
-    const data = await response.json();
-    return data.choices[0]?.message?.content || '';
+        const data = await response.json();
+        return data.choices[0]?.message?.content || '';
+      },
+    );
   }
 
   private async callOpenAIStream(
     model: string,
     prompt: string,
+    userId: string,
   ): Promise<ReadableStream<IQuizStreamChunk>> {
-    const openai = new OpenAI({
-      apiKey: env.OPENAI_API_KEY,
-      baseURL: AI_CONFIG.BASE_URL,
-    });
+    return aiUsageTracker.wrapAIOperation(
+      {
+        user_id: userId,
+        command: 'generate_quiz_questions',
+        provider: 'openai',
+        model: model || AI_DEFAULTS.OPENAI_MODEL,
+        request_payload: { prompt_length: prompt.length },
+      },
+      async () => {
+        const openai = new OpenAI({
+          apiKey: env.OPENAI_API_KEY,
+          baseURL: AI_CONFIG.BASE_URL,
+        });
 
-    const stream = await openai.chat.completions.create({
-      model: model || AI_DEFAULTS.OPENAI_MODEL,
-      messages: [
-        {
-          role: AI_CHAT_ROLES.SYSTEM,
-          content: AI_SYSTEM_MESSAGES.EDUCATIONAL_ASSISTANT,
-        },
-        {
-          role: AI_CHAT_ROLES.USER,
-          content: prompt,
-        },
-      ],
-      stream: true,
-      temperature: AI_CONFIG.TEMPERATURE,
-      max_tokens: AI_CONFIG.MAX_TOKENS,
-    });
+        const stream = await openai.chat.completions.create({
+          model: model || AI_DEFAULTS.OPENAI_MODEL,
+          messages: [
+            {
+              role: AI_CHAT_ROLES.SYSTEM,
+              content: AI_SYSTEM_MESSAGES.EDUCATIONAL_ASSISTANT,
+            },
+            {
+              role: AI_CHAT_ROLES.USER,
+              content: prompt,
+            },
+          ],
+          stream: true,
+          temperature: AI_CONFIG.TEMPERATURE,
+          max_tokens: AI_CONFIG.MAX_TOKENS,
+        });
 
-    return this.createStreamFromOpenAI(stream);
+        return this.createStreamFromOpenAI(stream);
+      },
+    );
   }
 
   private async callGeminiStream(
     model: string,
     prompt: string,
+    userId: string,
   ): Promise<ReadableStream<IQuizStreamChunk>> {
-    const response = await fetch(`${AI_CONFIG.BASE_URL}${AI_API.CHAT_COMPLETIONS_PATH}`, {
-      method: HTTP_CONFIG.METHODS.POST,
-      headers: {
-        'Content-Type': HTTP_CONFIG.HEADERS.CONTENT_TYPE,
-        Authorization: `${HTTP_CONFIG.HEADERS.AUTHORIZATION_PREFIX}${env.GEMINI_API_KEY}`,
-      },
-      body: JSON.stringify({
+    return aiUsageTracker.wrapAIOperation(
+      {
+        user_id: userId,
+        command: 'generate_quiz_questions',
+        provider: 'gemini',
         model: model || AI_DEFAULTS.GEMINI_MODEL,
-        messages: [
-          {
-            role: AI_CHAT_ROLES.SYSTEM,
-            content: AI_SYSTEM_MESSAGES.EDUCATIONAL_ASSISTANT,
+        request_payload: { prompt_length: prompt.length },
+      },
+      async () => {
+        const response = await fetch(`${AI_CONFIG.BASE_URL}${AI_API.CHAT_COMPLETIONS_PATH}`, {
+          method: HTTP_CONFIG.METHODS.POST,
+          headers: {
+            'Content-Type': HTTP_CONFIG.HEADERS.CONTENT_TYPE,
+            Authorization: `${HTTP_CONFIG.HEADERS.AUTHORIZATION_PREFIX}${env.GEMINI_API_KEY}`,
           },
-          {
-            role: AI_CHAT_ROLES.USER,
-            content: prompt,
-          },
-        ],
-        stream: true,
-        temperature: AI_CONFIG.TEMPERATURE,
-        max_tokens: AI_CONFIG.MAX_TOKENS,
-      }),
-    });
+          body: JSON.stringify({
+            model: model || AI_DEFAULTS.GEMINI_MODEL,
+            messages: [
+              {
+                role: AI_CHAT_ROLES.SYSTEM,
+                content: AI_SYSTEM_MESSAGES.EDUCATIONAL_ASSISTANT,
+              },
+              {
+                role: AI_CHAT_ROLES.USER,
+                content: prompt,
+              },
+            ],
+            stream: true,
+            temperature: AI_CONFIG.TEMPERATURE,
+            max_tokens: AI_CONFIG.MAX_TOKENS,
+          }),
+        });
 
-    if (!response.ok) {
-      throw new Error(`${API_ERROR_MESSAGES.GEMINI_REQUEST_FAILED}: ${response.statusText}`);
-    }
+        if (!response.ok) {
+          throw new Error(`${API_ERROR_MESSAGES.GEMINI_REQUEST_FAILED}: ${response.statusText}`);
+        }
 
-    if (!response.body) {
-      throw new Error(API_ERROR_MESSAGES.NO_RESPONSE_BODY_GEMINI);
-    }
+        if (!response.body) {
+          throw new Error(API_ERROR_MESSAGES.NO_RESPONSE_BODY_GEMINI);
+        }
 
-    return this.createStreamFromGemini(response.body);
+        return this.createStreamFromGemini(response.body);
+      },
+    );
   }
 
   private async callOpenAIStreamForAPI(
     model: string,
     prompt: string,
+    userId: string,
   ): Promise<ReadableStream<Uint8Array>> {
-    const openai = new OpenAI({
-      apiKey: env.OPENAI_API_KEY,
-      baseURL: AI_CONFIG.BASE_URL,
-    });
+    return aiUsageTracker.wrapAIOperation(
+      {
+        user_id: userId,
+        command: 'generate_quiz_questions',
+        provider: 'openai',
+        model: model || AI_DEFAULTS.OPENAI_MODEL,
+        request_payload: { prompt_length: prompt.length },
+      },
+      async () => {
+        const openai = new OpenAI({
+          apiKey: env.OPENAI_API_KEY,
+          baseURL: AI_CONFIG.BASE_URL,
+        });
 
-    const stream = await openai.chat.completions.create({
-      model: model || AI_DEFAULTS.OPENAI_MODEL,
-      messages: [
-        {
-          role: AI_CHAT_ROLES.SYSTEM,
-          content: AI_SYSTEM_MESSAGES.EDUCATIONAL_ASSISTANT,
-        },
-        {
-          role: AI_CHAT_ROLES.USER,
-          content: prompt,
-        },
-      ],
-      stream: true,
-      temperature: AI_CONFIG.TEMPERATURE,
-      max_tokens: AI_CONFIG.MAX_TOKENS,
-    });
+        const stream = await openai.chat.completions.create({
+          model: model || AI_DEFAULTS.OPENAI_MODEL,
+          messages: [
+            {
+              role: AI_CHAT_ROLES.SYSTEM,
+              content: AI_SYSTEM_MESSAGES.EDUCATIONAL_ASSISTANT,
+            },
+            {
+              role: AI_CHAT_ROLES.USER,
+              content: prompt,
+            },
+          ],
+          stream: true,
+          temperature: AI_CONFIG.TEMPERATURE,
+          max_tokens: AI_CONFIG.MAX_TOKENS,
+        });
 
-    return this.createAPIStreamFromOpenAI(stream);
+        return this.createAPIStreamFromOpenAI(stream);
+      },
+    );
   }
 
   private async callGeminiStreamForAPI(
     model: string,
     prompt: string,
+    userId: string,
   ): Promise<ReadableStream<Uint8Array>> {
-    const response = await fetch(`${AI_CONFIG.BASE_URL}${AI_API.CHAT_COMPLETIONS_PATH}`, {
-      method: HTTP_CONFIG.METHODS.POST,
-      headers: {
-        'Content-Type': HTTP_CONFIG.HEADERS.CONTENT_TYPE,
-        Authorization: `${HTTP_CONFIG.HEADERS.AUTHORIZATION_PREFIX}${env.GEMINI_API_KEY}`,
-      },
-      body: JSON.stringify({
+    return aiUsageTracker.wrapAIOperation(
+      {
+        user_id: userId,
+        command: 'generate_quiz_questions',
+        provider: 'gemini',
         model: model || AI_DEFAULTS.GEMINI_MODEL,
-        messages: [
-          {
-            role: AI_CHAT_ROLES.SYSTEM,
-            content: AI_SYSTEM_MESSAGES.EDUCATIONAL_ASSISTANT,
+        request_payload: { prompt_length: prompt.length },
+      },
+      async () => {
+        const response = await fetch(`${AI_CONFIG.BASE_URL}${AI_API.CHAT_COMPLETIONS_PATH}`, {
+          method: HTTP_CONFIG.METHODS.POST,
+          headers: {
+            'Content-Type': HTTP_CONFIG.HEADERS.CONTENT_TYPE,
+            Authorization: `${HTTP_CONFIG.HEADERS.AUTHORIZATION_PREFIX}${env.GEMINI_API_KEY}`,
           },
-          {
-            role: AI_CHAT_ROLES.USER,
-            content: prompt,
-          },
-        ],
-        stream: true,
-        temperature: AI_CONFIG.TEMPERATURE,
-        max_tokens: AI_CONFIG.MAX_TOKENS,
-      }),
-    });
+          body: JSON.stringify({
+            model: model || AI_DEFAULTS.GEMINI_MODEL,
+            messages: [
+              {
+                role: AI_CHAT_ROLES.SYSTEM,
+                content: AI_SYSTEM_MESSAGES.EDUCATIONAL_ASSISTANT,
+              },
+              {
+                role: AI_CHAT_ROLES.USER,
+                content: prompt,
+              },
+            ],
+            stream: true,
+            temperature: AI_CONFIG.TEMPERATURE,
+            max_tokens: AI_CONFIG.MAX_TOKENS,
+          }),
+        });
 
-    if (!response.ok) {
-      throw new Error(`${API_ERROR_MESSAGES.GEMINI_REQUEST_FAILED}: ${response.statusText}`);
-    }
+        if (!response.ok) {
+          throw new Error(`${API_ERROR_MESSAGES.GEMINI_REQUEST_FAILED}: ${response.statusText}`);
+        }
 
-    if (!response.body) {
-      throw new Error(API_ERROR_MESSAGES.NO_RESPONSE_BODY_GEMINI);
-    }
+        if (!response.body) {
+          throw new Error(API_ERROR_MESSAGES.NO_RESPONSE_BODY_GEMINI);
+        }
 
-    return this.createAPIStreamFromGemini(response.body);
+        return this.createAPIStreamFromGemini(response.body);
+      },
+    );
   }
 
   private parseQuestionsFromResponse(responseText: string): IQuizQuestion[] {

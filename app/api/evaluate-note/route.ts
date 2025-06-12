@@ -97,6 +97,7 @@ export async function GET(request: NextRequest) {
       provider,
       model,
       content: note.content,
+      userId: profile.id,
       context: {
         timestamp: note.timestamp_seconds,
       },

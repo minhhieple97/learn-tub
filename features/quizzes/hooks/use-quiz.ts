@@ -4,7 +4,7 @@ import { generateQuizQuestionsAction, evaluateQuizAction } from '../actions';
 import { AI_DEFAULTS, AI_PROVIDERS, AI_QUIZ_CONFIG } from '@/config/constants';
 import { IQuizAnswerOption, IQuizSettings, IQuizState } from '../types';
 
-type ExtendedQuizState = IQuizState & {
+type IExtendedQuizState = IQuizState & {
   startTime: number | null;
   currentTime: number;
   timeTakenSeconds: number;
@@ -12,7 +12,7 @@ type ExtendedQuizState = IQuizState & {
 };
 
 export const useQuiz = (videoId: string) => {
-  const [state, setState] = useState<ExtendedQuizState>({
+  const [state, setState] = useState<IExtendedQuizState>({
     questions: [],
     answers: [],
     currentQuestionIndex: 0,
@@ -27,8 +27,8 @@ export const useQuiz = (videoId: string) => {
     settings: {
       questionCount: AI_QUIZ_CONFIG.DEFAULT_QUESTION_COUNT,
       difficulty: AI_QUIZ_CONFIG.DEFAULT_DIFFICULTY,
-      provider: AI_PROVIDERS.OPENAI,
-      model: AI_DEFAULTS.SERVICE_MODEL,
+      provider: AI_PROVIDERS.GEMINI,
+      model: AI_DEFAULTS.GEMINI_MODEL,
     },
   });
 

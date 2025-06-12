@@ -15,9 +15,10 @@ LearnTub is a modern learning platform that transforms passive YouTube video wat
 
 - 🧠 **AI-Powered Notes** - Get intelligent feedback and insights with advanced AI analysis
 - 🎯 **AI Quiz Assistant** - Test knowledge with auto-generated questions and personalized feedback
+- 📊 **AI Usage Analytics** - Comprehensive tracking and analytics for all AI interactions
 - ⏰ **Timestamp Sync** - Notes automatically sync with video timestamps for seamless navigation
 - 📚 **Smart Organization** - Organize learning with courses, tags, and intelligent categorization
-- 📊 **Progress Tracking** - Monitor your learning progress with detailed analytics and insights
+- 📈 **Progress Tracking** - Monitor your learning progress with detailed analytics and insights
 
 ## 🛠️ Tech Stack
 
@@ -26,6 +27,7 @@ LearnTub is a modern learning platform that transforms passive YouTube video wat
 - **Database:** [PostgreSQL](https://www.postgresql.org/) (Vercel/Neon) + [Supabase](https://supabase.com/)
 - **Authentication:** Supabase Auth
 - **AI Integration:** [OpenAI](https://openai.com/) & [Google Gemini](https://ai.google.dev/) for intelligent note evaluation
+- **AI Analytics:** Comprehensive usage tracking with cost calculation and performance metrics
 - **External APIs:** YouTube Data API v3 for video integration
 - **Environment:** Type-safe environment variables with [@t3-oss/env-nextjs](https://env.t3.gg/)
 - **Styling:** [Tailwind CSS](https://tailwindcss.com/) with custom design system
@@ -126,13 +128,24 @@ learn-tub/
 ├── components/           # Shared UI components
 │   └── ui/               # Shadcn UI components
 ├── features/             # Feature-specific modules (AI, Auth, Notes, Videos)
-│   ├── ai/               # AI evaluation services, components, and hooks
-│   │   ├── components/   # AI UI components (evaluation, feedback display)
-│   │   ├── hooks/        # AI-related React hooks
-│   │   ├── services/     # AI provider integrations (OpenAI, Gemini)
-│   │   └── types/        # AI-related TypeScript types
+│   ├── ai/         # AI Usage Tracking System
+│   │   ├── types.ts      # TypeScript definitions with I prefix
+│   │   ├── schemas.ts    # Zod validation schemas
+│   │   ├── queries/      # Database operations for AI usage analytics
+│   │   ├── services/     # AI usage tracker service (singleton)
+│   │   ├── examples/     # Integration examples and usage patterns
+│   │   └── README.md     # Detailed AI usage tracking documentation
+│   ├── notes/            # Note-taking features with AI evaluation
+│   │   ├── components/   # Note UI components (evaluation, feedback display)
+│   │   ├── hooks/        # Note-related React hooks
+│   │   ├── services/     # Note service with integrated AI tracking
+│   │   └── types/        # Note-related TypeScript types
+│   ├── quizzes/          # Quiz features with AI generation
+│   │   ├── components/   # Quiz UI components
+│   │   ├── hooks/        # Quiz-related React hooks
+│   │   ├── services/     # Quiz service with integrated AI tracking
+│   │   └── types/        # Quiz-related TypeScript types
 │   ├── auth/
-│   ├── notes/
 │   └── videos/
 ├── hooks/                # Custom React hooks (e.g., use-mobile, use-toast)
 ├── lib/                  # Core utilities, Supabase clients, Safe Action setup
@@ -140,7 +153,7 @@ learn-tub/
 │   └── utils/
 ├── public/               # Static assets
 ├── supabase/             # Supabase local development files
-│   └── migrations/       # Database schema migrations
+│   └── migrations/       # Database schema migrations (includes AI usage logs)
 ├── .vscode/              # VSCode specific settings (Deno integration)
 ├── env.mjs               # Environment variable validation (t3-env)
 ├── middleware.ts         # Next.js middleware for route protection
@@ -251,6 +264,7 @@ We welcome contributions! Please follow these steps:
 
 - **Authentication:** Secure user authentication via Supabase Auth
 - **Data Protection:** All user data encrypted and stored securely
+- **AI Usage Privacy:** AI tracking data is user-specific with Row Level Security
 - **Privacy First:** No tracking, no ads, user data stays private
 - **GDPR Compliant:** Full compliance with data protection regulations
 
@@ -262,6 +276,7 @@ The AI evaluation system provides comprehensive feedback on your learning notes:
 
 - **Multi-Provider Support**: Choose between OpenAI and Google Gemini
 - **Streaming Responses**: Real-time feedback as AI analyzes your notes
+- **Automatic Tracking**: All AI interactions are automatically tracked for analytics
 - **Structured Analysis**: Get detailed feedback including:
   - Overall summary and assessment
   - Correct points identification
@@ -275,6 +290,7 @@ The AI evaluation system provides comprehensive feedback on your learning notes:
 The AI Quiz Assistant transforms passive video watching into active learning through intelligent testing:
 
 - **Intelligent Question Generation**: AI analyzes video content to create relevant multiple-choice questions
+- **Automatic Usage Tracking**: All quiz generation and evaluation is tracked for analytics
 - **Flexible Configuration**:
   - **Question Count**: Generate 5-20 questions per quiz
   - **Difficulty Levels**: Easy, medium, hard, or mixed difficulty
@@ -294,6 +310,17 @@ The AI Quiz Assistant transforms passive video watching into active learning thr
   - **Smooth Animations**: Loading states and transitions for better UX
   - **Accessibility**: ARIA labels and keyboard navigation support
 
+### AI Usage Analytics
+
+The comprehensive AI usage tracking system provides insights into your AI interactions:
+
+- **Usage Monitoring**: Track all AI operations across note evaluation and quiz features
+- **Cost Analysis**: Real-time cost calculation and budget tracking
+- **Performance Metrics**: Monitor response times, success rates, and error patterns
+- **Provider Comparison**: Compare performance and costs across different AI providers
+- **Historical Data**: Access detailed usage history and trends over time
+- **Privacy-First**: All tracking data is user-specific and secure
+
 ## 💡 Potential Future Enhancements
 
 - **Courses Feature**: Group videos into courses. (Schema exists)
@@ -307,7 +334,13 @@ The AI Quiz Assistant transforms passive video watching into active learning thr
   - Automated concept extraction
   - Advanced quiz features (timed quizzes, adaptive difficulty)
   - AI-powered study plans and learning paths
+- **Advanced AI Analytics**:
+  - Predictive cost modeling
+  - AI performance optimization recommendations
+  - Usage pattern analysis and insights
+  - Automated budget alerts and recommendations
 
 ## 🤝 Contributing
 
 Contributions are welcome! Please follow standard Git practices: fork the repository, create a feature branch, and submit a pull request. Ensure your code adheres to the existing linting and formatting rules.
+
