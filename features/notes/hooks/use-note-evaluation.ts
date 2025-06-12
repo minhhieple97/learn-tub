@@ -79,6 +79,7 @@ export const useNoteEvaluation = () => {
           }
         }
       } catch (err) {
+        console.log(err);
         setError(err instanceof Error ? err.message : ERROR_MESSAGES.UNKNOWN_ERROR);
         setStatus(STATUS_STREAMING.ERROR);
         setStreamingContent('');

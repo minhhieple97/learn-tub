@@ -34,12 +34,19 @@ export const QuizzWelcomeScreen = ({
         personalized feedback to improve your understanding.
       </p>
 
-      {showSettings && <QuizSettings settings={settings} onUpdateSettings={onUpdateSettings} />}
+      {showSettings && (
+        <QuizSettings
+          settings={settings}
+          onUpdateSettings={onUpdateSettings}
+          isGenerating={isGenerating}
+        />
+      )}
 
       <div className="flex gap-3">
         <Button
           variant="outline"
           onClick={() => setShowSettings(!showSettings)}
+          disabled={isGenerating}
           className="border-blue-300 text-blue-600 hover:bg-blue-50 dark:border-blue-600 dark:text-blue-400 dark:hover:bg-blue-950/50"
         >
           <Settings className="mr-2 size-4" />

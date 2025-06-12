@@ -1,5 +1,4 @@
 import OpenAI from 'openai';
-import { GoogleGenAI } from '@google/genai';
 import { env } from '@/env.mjs';
 import {
   AI_CONFIG,
@@ -10,6 +9,9 @@ import {
   AI_QUIZ_CONFIG,
   AI_QUIZ_ERRORS,
   AI_QUIZ_PROMPTS,
+  AI_API,
+  HTTP_CONFIG,
+  API_ERROR_MESSAGES,
 } from '@/config/constants';
 import type {
   IEvaluateQuizRequest,
@@ -258,16 +260,35 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
   }
 
   private async callGemini(model: string, prompt: string): Promise<string> {
-    const genAI = new GoogleGenAI({
-      apiKey: env.GEMINI_API_KEY,
+    const response = await fetch(`${AI_CONFIG.BASE_URL}${AI_API.CHAT_COMPLETIONS_PATH}`, {
+      method: HTTP_CONFIG.METHODS.POST,
+      headers: {
+        'Content-Type': HTTP_CONFIG.HEADERS.CONTENT_TYPE,
+        Authorization: `${HTTP_CONFIG.HEADERS.AUTHORIZATION_PREFIX}${env.GEMINI_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: model || AI_DEFAULTS.GEMINI_MODEL,
+        messages: [
+          {
+            role: AI_CHAT_ROLES.SYSTEM,
+            content: AI_SYSTEM_MESSAGES.EDUCATIONAL_ASSISTANT,
+          },
+          {
+            role: AI_CHAT_ROLES.USER,
+            content: prompt,
+          },
+        ],
+        temperature: AI_CONFIG.TEMPERATURE,
+        max_tokens: AI_CONFIG.MAX_TOKENS,
+      }),
     });
 
-    const response = await genAI.models.generateContent({
-      model: model || AI_DEFAULTS.GEMINI_MODEL,
-      contents: prompt,
-    });
+    if (!response.ok) {
+      throw new Error(`${API_ERROR_MESSAGES.GEMINI_REQUEST_FAILED}: ${response.statusText}`);
+    }
 
-    return response.text || '';
+    const data = await response.json();
+    return data.choices[0]?.message?.content || '';
   }
 
   private async callOpenAIStream(
@@ -303,16 +324,39 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
     model: string,
     prompt: string,
   ): Promise<ReadableStream<IQuizStreamChunk>> {
-    const genAI = new GoogleGenAI({
-      apiKey: env.GEMINI_API_KEY,
+    const response = await fetch(`${AI_CONFIG.BASE_URL}${AI_API.CHAT_COMPLETIONS_PATH}`, {
+      method: HTTP_CONFIG.METHODS.POST,
+      headers: {
+        'Content-Type': HTTP_CONFIG.HEADERS.CONTENT_TYPE,
+        Authorization: `${HTTP_CONFIG.HEADERS.AUTHORIZATION_PREFIX}${env.GEMINI_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: model || AI_DEFAULTS.GEMINI_MODEL,
+        messages: [
+          {
+            role: AI_CHAT_ROLES.SYSTEM,
+            content: AI_SYSTEM_MESSAGES.EDUCATIONAL_ASSISTANT,
+          },
+          {
+            role: AI_CHAT_ROLES.USER,
+            content: prompt,
+          },
+        ],
+        stream: true,
+        temperature: AI_CONFIG.TEMPERATURE,
+        max_tokens: AI_CONFIG.MAX_TOKENS,
+      }),
     });
 
-    const response = await genAI.models.generateContentStream({
-      model: model || AI_DEFAULTS.GEMINI_MODEL,
-      contents: prompt,
-    });
+    if (!response.ok) {
+      throw new Error(`${API_ERROR_MESSAGES.GEMINI_REQUEST_FAILED}: ${response.statusText}`);
+    }
 
-    return this.createStreamFromGemini(response);
+    if (!response.body) {
+      throw new Error(API_ERROR_MESSAGES.NO_RESPONSE_BODY_GEMINI);
+    }
+
+    return this.createStreamFromGemini(response.body);
   }
 
   private async callOpenAIStreamForAPI(
@@ -348,16 +392,39 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
     model: string,
     prompt: string,
   ): Promise<ReadableStream<Uint8Array>> {
-    const genAI = new GoogleGenAI({
-      apiKey: env.GEMINI_API_KEY,
+    const response = await fetch(`${AI_CONFIG.BASE_URL}${AI_API.CHAT_COMPLETIONS_PATH}`, {
+      method: HTTP_CONFIG.METHODS.POST,
+      headers: {
+        'Content-Type': HTTP_CONFIG.HEADERS.CONTENT_TYPE,
+        Authorization: `${HTTP_CONFIG.HEADERS.AUTHORIZATION_PREFIX}${env.GEMINI_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: model || AI_DEFAULTS.GEMINI_MODEL,
+        messages: [
+          {
+            role: AI_CHAT_ROLES.SYSTEM,
+            content: AI_SYSTEM_MESSAGES.EDUCATIONAL_ASSISTANT,
+          },
+          {
+            role: AI_CHAT_ROLES.USER,
+            content: prompt,
+          },
+        ],
+        stream: true,
+        temperature: AI_CONFIG.TEMPERATURE,
+        max_tokens: AI_CONFIG.MAX_TOKENS,
+      }),
     });
 
-    const response = await genAI.models.generateContentStream({
-      model: model || AI_DEFAULTS.GEMINI_MODEL,
-      contents: prompt,
-    });
+    if (!response.ok) {
+      throw new Error(`${API_ERROR_MESSAGES.GEMINI_REQUEST_FAILED}: ${response.statusText}`);
+    }
 
-    return this.createAPIStreamFromGemini(response);
+    if (!response.body) {
+      throw new Error(API_ERROR_MESSAGES.NO_RESPONSE_BODY_GEMINI);
+    }
+
+    return this.createAPIStreamFromGemini(response.body);
   }
 
   private parseQuestionsFromResponse(responseText: string): IQuizQuestion[] {
@@ -541,22 +608,42 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
   }
 
   private createStreamFromGemini(
-    response: AsyncIterable<{ text?: string }>,
+    responseBody: ReadableStream<Uint8Array>,
   ): ReadableStream<IQuizStreamChunk> {
     return new ReadableStream<IQuizStreamChunk>({
       async start(controller) {
         try {
           let fullContent = '';
+          const reader = responseBody.getReader();
+          const decoder = new TextDecoder();
 
-          for await (const chunk of response) {
-            const content = chunk.text || '';
-            fullContent += content;
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
 
-            controller.enqueue({
-              type: 'question',
-              content,
-              finished: false,
-            });
+            const chunk = decoder.decode(value, { stream: true });
+            const lines = chunk.split('\n');
+
+            for (const line of lines) {
+              if (line.startsWith(AI_API.SSE_DATA_PREFIX)) {
+                const data = line.slice(AI_API.SSE_DATA_PREFIX_LENGTH);
+                if (data === AI_API.SSE_DONE_MESSAGE) continue;
+
+                try {
+                  const parsed = JSON.parse(data);
+                  const content = parsed.choices[0]?.delta?.content || '';
+                  fullContent += content;
+
+                  controller.enqueue({
+                    type: 'question',
+                    content,
+                    finished: false,
+                  });
+                } catch {
+                  // Skip invalid JSON chunks
+                }
+              }
+            }
           }
 
           quizService.handleStreamCompletion(controller, fullContent);
@@ -661,7 +748,7 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
   }
 
   private createAPIStreamFromGemini(
-    response: AsyncIterable<{ text?: string }>,
+    responseBody: ReadableStream<Uint8Array>,
   ): ReadableStream<Uint8Array> {
     const encoder = new TextEncoder();
 
@@ -669,19 +756,39 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
       async start(controller) {
         try {
           let fullContent = '';
+          const reader = responseBody.getReader();
+          const decoder = new TextDecoder();
 
-          for await (const chunk of response) {
-            const content = chunk.text || '';
-            fullContent += content;
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
 
-            const chunkData =
-              JSON.stringify({
-                type: 'question',
-                content,
-                finished: false,
-              }) + '\n';
+            const chunk = decoder.decode(value, { stream: true });
+            const lines = chunk.split('\n');
 
-            controller.enqueue(encoder.encode(chunkData));
+            for (const line of lines) {
+              if (line.startsWith(AI_API.SSE_DATA_PREFIX)) {
+                const data = line.slice(AI_API.SSE_DATA_PREFIX_LENGTH);
+                if (data === AI_API.SSE_DONE_MESSAGE) continue;
+
+                try {
+                  const parsed = JSON.parse(data);
+                  const content = parsed.choices[0]?.delta?.content || '';
+                  fullContent += content;
+
+                  const chunkData =
+                    JSON.stringify({
+                      type: 'question',
+                      content,
+                      finished: false,
+                    }) + '\n';
+
+                  controller.enqueue(encoder.encode(chunkData));
+                } catch {
+                  // Skip invalid JSON chunks
+                }
+              }
+            }
           }
 
           try {
