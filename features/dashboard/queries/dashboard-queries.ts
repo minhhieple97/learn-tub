@@ -55,8 +55,7 @@ export const getInsightsData = async () => {
   const { count: analysisCount } = await supabase
     .from('note_interactions')
     .select('*', { count: 'exact', head: true })
-    .eq('user_id', profile.id)
-    .eq('interaction_type', 'note_evaluation');
+    .eq('user_id', profile.id);
 
   const quizStats = await getQuizStatistics(profile.id);
 

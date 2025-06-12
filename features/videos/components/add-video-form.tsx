@@ -27,9 +27,9 @@ export const AddVideoForm = () => {
   return (
     <TooltipProvider>
       <div className="relative w-full mx-auto">
-        <div className="absolute -inset-1 bg-gradient-to-r from-red-600 via-pink-600 to-orange-600 rounded-2xl blur-xl opacity-25 animate-pulse"></div>
+        <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 rounded-2xl blur-xl opacity-25 animate-pulse"></div>
 
-        <Card className="relative overflow-hidden border-0 shadow-2xl bg-gradient-to-br from-red-500 via-red-600 to-red-700 dark:from-red-600 dark:via-red-700 dark:to-red-800">
+        <Card className="relative overflow-hidden border-0 shadow-2xl bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 dark:from-blue-600 dark:via-blue-700 dark:to-blue-800">
           <div
             className="absolute inset-0 opacity-10"
             style={{ backgroundImage: `url('${dotPatternUrl}')` }}
@@ -53,7 +53,7 @@ export const AddVideoForm = () => {
             <CardTitle className="text-4xl font-bold text-white mb-4 tracking-tight">
               Import YouTube Video
             </CardTitle>
-            <CardDescription className="text-xl text-red-100 dark:text-red-200 max-w-lg mx-auto leading-relaxed">
+            <CardDescription className="text-xl text-blue-100 dark:text-blue-200 max-w-lg mx-auto leading-relaxed">
               Transform any YouTube video into an interactive learning experience with AI-powered
               quizzes
             </CardDescription>
@@ -74,7 +74,7 @@ export const AddVideoForm = () => {
                 >
                   <Youtube className="h-6 w-6" />
                   YouTube URL
-                  <span className="text-red-200 dark:text-red-300 text-sm font-normal">
+                  <span className="text-blue-200 dark:text-blue-300 text-sm font-normal">
                     (Required)
                   </span>
                 </Label>
@@ -110,8 +110,8 @@ export const AddVideoForm = () => {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 text-red-100 dark:text-red-200 text-sm">
-                  <div className="h-1 w-1 bg-red-200 dark:bg-red-300 rounded-full"></div>
+                <div className="flex items-center gap-2 text-blue-100 dark:text-blue-200 text-sm">
+                  <div className="h-1 w-1 bg-blue-200 dark:bg-blue-300 rounded-full"></div>
                   <span>Supports youtube.com, youtu.be, and embedded URLs</span>
                 </div>
               </div>
@@ -124,7 +124,7 @@ export const AddVideoForm = () => {
                   >
                     <BookOpen className="h-6 w-6" />
                     What do you want to learn?
-                    <span className="text-red-200 dark:text-red-300 text-sm font-normal">
+                    <span className="text-blue-200 dark:text-blue-300 text-sm font-normal">
                       (Optional)
                     </span>
                   </Label>
@@ -169,12 +169,20 @@ export const AddVideoForm = () => {
                   />
 
                   <div className="absolute bottom-3 right-4 text-xs text-gray-400 dark:text-gray-500">
-                    {tutorial.length}/500
+                    <span
+                      className={cn(
+                        tutorial.length > 400 && 'text-orange-500',
+                        tutorial.length > 475 && 'text-red-500 font-medium',
+                      )}
+                    >
+                      {tutorial.length}
+                    </span>
+                    <span>/500</span>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-3 text-red-100 dark:text-red-200 text-sm bg-white/10 dark:bg-white/5 p-4 rounded-lg backdrop-blur-sm">
-                  <Sparkles className="h-5 w-5 text-yellow-300 dark:text-yellow-400 mt-0.5 flex-shrink-0" />
+                <div className="flex items-start gap-3 text-blue-100 dark:text-blue-200 text-sm bg-white/10 dark:bg-white/5 p-4 rounded-lg backdrop-blur-sm">
+                  <Sparkles className="h-5 w-5 text-blue-300 dark:text-blue-400 mt-0.5 flex-shrink-0" />
                   <div>
                     <p className="font-medium mb-1">✨ AI Enhancement</p>
                     <p>
@@ -185,17 +193,15 @@ export const AddVideoForm = () => {
                 </div>
               </div>
 
-              {/* Submit Button */}
               <Button
                 type="submit"
                 disabled={!canSubmit}
                 className={cn(
                   'w-full h-16 text-xl font-bold transition-all duration-300',
-                  'bg-white hover:bg-red-50 text-red-600 hover:text-red-700',
+                  'bg-white hover:bg-blue-50 text-blue-600 hover:text-blue-700',
                   'shadow-xl hover:shadow-2xl transform hover:scale-[1.02] active:scale-[0.98]',
                   'disabled:transform-none disabled:opacity-50 disabled:cursor-not-allowed',
                   'rounded-xl border-2 border-white/20',
-                  canSubmit && 'animate-pulse',
                 )}
               >
                 {isPending ? (

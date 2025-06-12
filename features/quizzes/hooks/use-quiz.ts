@@ -2,7 +2,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { useAction } from 'next-safe-action/hooks';
 import { generateQuizQuestionsAction, evaluateQuizAction } from '../actions';
 import { AI_DEFAULTS, AI_PROVIDERS, AI_QUIZ_CONFIG } from '@/config/constants';
-import { IQuizSettings, IQuizState } from '../types';
+import { IQuizAnswerOption, IQuizSettings, IQuizState } from '../types';
 
 type ExtendedQuizState = IQuizState & {
   startTime: number | null;
@@ -142,26 +142,23 @@ export const useQuiz = (videoId: string) => {
     [videoId, state.settings, executeGenerate],
   );
 
-  const answerQuestion = useCallback(
-    (questionId: string, selectedAnswer: 'A' | 'B' | 'C' | 'D') => {
-      setState((prev) => {
-        const existingAnswerIndex = prev.answers.findIndex((a) => a.questionId === questionId);
-        const newAnswers = [...prev.answers];
+  const answerQuestion = useCallback((questionId: string, selectedAnswer: IQuizAnswerOption) => {
+    setState((prev) => {
+      const existingAnswerIndex = prev.answers.findIndex((a) => a.questionId === questionId);
+      const newAnswers = [...prev.answers];
 
-        if (existingAnswerIndex >= 0) {
-          newAnswers[existingAnswerIndex] = { questionId, selectedAnswer };
-        } else {
-          newAnswers.push({ questionId, selectedAnswer });
-        }
+      if (existingAnswerIndex >= 0) {
+        newAnswers[existingAnswerIndex] = { questionId, selectedAnswer };
+      } else {
+        newAnswers.push({ questionId, selectedAnswer });
+      }
 
-        return {
-          ...prev,
-          answers: newAnswers,
-        };
-      });
-    },
-    [],
-  );
+      return {
+        ...prev,
+        answers: newAnswers,
+      };
+    });
+  }, []);
 
   const nextQuestion = useCallback(() => {
     setState((prev) => ({

@@ -39,7 +39,7 @@ export const AnalyzeNotesSchema = z.object({
 
 export const GenerateQuizSchema = z.object({
   videoId: z.string().uuid('Invalid video ID'),
-  difficulty: z.enum(['easy', 'medium', 'hard']).default('medium'),
+  difficulty: z.enum(['easy', 'medium', 'hard', 'mixed']).default('medium'),
 });
 
 export const GenerateStudyPlanSchema = z.object({
@@ -77,7 +77,7 @@ export const QuizQuestionSchema = z.object({
   correctAnswer: z.enum(['A', 'B', 'C', 'D']),
   explanation: z.string(),
   topic: z.string(),
-  difficulty: z.enum(['easy', 'medium', 'hard']),
+  difficulty: z.enum(['easy', 'medium', 'hard', 'mixed']),
 });
 
 export const UserAnswerSchema = z.object({

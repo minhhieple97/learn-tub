@@ -8,6 +8,7 @@ import { QuizNavigation } from './quiz-navigation';
 import { QuizResults } from './quiz-results';
 import { useQuiz } from '../hooks/use-quiz';
 import { AIProvider } from '@/types';
+import { IQuizAnswerOption } from '../types';
 
 type QuizzTabProps = {
   videoId: string;
@@ -51,7 +52,7 @@ export const QuizzTab = ({ videoId, videoTitle, videoDescription }: QuizzTabProp
     await submitQuiz(videoTitle, videoDescription);
   };
 
-  const handleAnswerSelect = (selectedAnswer: 'A' | 'B' | 'C' | 'D') => {
+  const handleAnswerSelect = (selectedAnswer: IQuizAnswerOption) => {
     if (currentQuestion) {
       answerQuestion(currentQuestion.id, selectedAnswer);
     }
