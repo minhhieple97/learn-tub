@@ -13,6 +13,7 @@ import {
   IAICompletionResponse,
   IAIStreamChunk,
   IAIMessage,
+  ITokenUsage,
 } from '@/features/ai/types';
 
 abstract class BaseAIProvider<T extends IAICompletionRequest> {
@@ -141,6 +142,34 @@ export class AIClient {
     return data.choices[0]?.message?.content || '';
   }
 
+  async chatCompletionWithUsage(request: IAICompletionRequest): Promise<{
+    result: string;
+    tokenUsage?: ITokenUsage;
+  }> {
+    const response = await this.provider.makeRequest(request);
+
+    if (!response.body) {
+      throw new Error('No response body received');
+    }
+
+    const data: IAICompletionResponse = await response.json();
+    const result = data.choices[0]?.message?.content || '';
+
+    let tokenUsage: ITokenUsage | undefined;
+    if (data.usage) {
+      tokenUsage = {
+        input_tokens: data.usage.prompt_tokens,
+        output_tokens: data.usage.completion_tokens,
+        total_tokens: data.usage.total_tokens,
+      };
+    }
+
+    return {
+      result,
+      tokenUsage,
+    };
+  }
+
   async streamChatCompletion(request: IAICompletionRequest): Promise<ReadableStream<Uint8Array>> {
     const streamRequest = { ...request, stream: true };
     const response = await this.provider.makeRequest(streamRequest);
@@ -150,6 +179,117 @@ export class AIClient {
     }
 
     return response.body;
+  }
+
+  async streamChatCompletionWithUsage(request: IAICompletionRequest): Promise<{
+    stream: ReadableStream<Uint8Array>;
+    getUsage: () => Promise<ITokenUsage | undefined>;
+  }> {
+    const streamRequest = { ...request, stream: true, stream_options: { include_usage: true } };
+    const response = await this.provider.makeRequest(streamRequest);
+
+    if (!response.body) {
+      throw new Error('No response body received for streaming');
+    }
+
+    let capturedUsage: ITokenUsage | undefined;
+    const usagePromiseResolvers: {
+      resolve: (value: ITokenUsage | undefined) => void;
+      reject: (reason?: unknown) => void;
+    }[] = [];
+
+    // Create a transformed stream that captures usage information
+    const transformedStream = new ReadableStream<Uint8Array>({
+      async start(controller) {
+        try {
+          const reader = response.body!.getReader();
+          const decoder = new TextDecoder();
+          let buffer = '';
+
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            controller.enqueue(value);
+
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+            buffer = lines.pop() || '';
+
+            for (const line of lines) {
+              if (line.startsWith(AI_API.SSE_DATA_PREFIX)) {
+                const data = line.slice(AI_API.SSE_DATA_PREFIX_LENGTH).trim();
+                if (data === AI_API.SSE_DONE_MESSAGE) continue;
+
+                try {
+                  const parsed: IAIStreamChunk = JSON.parse(data);
+                  if (parsed.usage) {
+                    capturedUsage = {
+                      input_tokens: parsed.usage.prompt_tokens,
+                      output_tokens: parsed.usage.completion_tokens,
+                      total_tokens: parsed.usage.total_tokens,
+                    };
+                    usagePromiseResolvers.forEach(({ resolve }) => resolve(capturedUsage));
+                    usagePromiseResolvers.length = 0;
+                  }
+                } catch (error) {
+                  console.error('Failed to parse streaming chunk for usage:', error);
+                }
+              }
+            }
+          }
+
+          if (buffer.trim()) {
+            const remainingLines = buffer.split('\n');
+            for (const line of remainingLines) {
+              if (line.startsWith(AI_API.SSE_DATA_PREFIX)) {
+                const data = line.slice(AI_API.SSE_DATA_PREFIX_LENGTH).trim();
+                if (data === AI_API.SSE_DONE_MESSAGE) continue;
+
+                try {
+                  const parsed: IAIStreamChunk = JSON.parse(data);
+                  if (parsed.usage) {
+                    capturedUsage = {
+                      input_tokens: parsed.usage.prompt_tokens,
+                      output_tokens: parsed.usage.completion_tokens,
+                      total_tokens: parsed.usage.total_tokens,
+                    };
+                    // Resolve any pending usage promises
+                    usagePromiseResolvers.forEach(({ resolve }) => resolve(capturedUsage));
+                    usagePromiseResolvers.length = 0;
+                  }
+                } catch (error) {
+                  console.error('Failed to parse final streaming chunk for usage:', error);
+                }
+              }
+            }
+          }
+
+          usagePromiseResolvers.forEach(({ resolve }) => resolve(undefined));
+        } catch (error) {
+          console.error('Stream processing error:', error);
+          usagePromiseResolvers.forEach(({ reject }) => reject(error));
+          controller.error(error);
+        } finally {
+          controller.close();
+        }
+      },
+    });
+
+    const getUsage = (): Promise<ITokenUsage | undefined> => {
+      if (capturedUsage !== undefined) {
+        return Promise.resolve(capturedUsage);
+      }
+
+      return new Promise((resolve, reject) => {
+        usagePromiseResolvers.push({ resolve, reject });
+      });
+    };
+
+    return {
+      stream: transformedStream,
+      getUsage,
+    };
   }
 
   createStreamFromResponse(

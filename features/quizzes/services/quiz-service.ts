@@ -203,7 +203,7 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
       throw new Error(`${AI_QUIZ_ERRORS.UNSUPPORTED_PROVIDER}: ${provider}`);
     }
 
-    return aiUsageTracker.wrapAIOperation(
+    return aiUsageTracker.wrapAIOperationWithTokens(
       {
         user_id: userId,
         command: 'generate_quiz_questions',
@@ -221,7 +221,7 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
           prompt,
         );
 
-        return aiClient.chatCompletion({
+        const { result, tokenUsage } = await aiClient.chatCompletionWithUsage({
           model:
             model ||
             (provider === AI_PROVIDERS.OPENAI
@@ -229,6 +229,11 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
               : AI_DEFAULTS.GEMINI_MODEL),
           messages,
         });
+
+        return {
+          result,
+          tokenUsage,
+        };
       },
     );
   }
@@ -243,7 +248,7 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
       throw new Error(`${AI_QUIZ_ERRORS.UNSUPPORTED_PROVIDER}: ${provider}`);
     }
 
-    return aiUsageTracker.wrapAIOperation(
+    return aiUsageTracker.wrapAIOperationWithTokens(
       {
         user_id: userId,
         command: 'evaluate_quiz_answers',
@@ -261,7 +266,7 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
           prompt,
         );
 
-        return aiClient.chatCompletion({
+        const { result, tokenUsage } = await aiClient.chatCompletionWithUsage({
           model:
             model ||
             (provider === AI_PROVIDERS.OPENAI
@@ -269,6 +274,11 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
               : AI_DEFAULTS.GEMINI_MODEL),
           messages,
         });
+
+        return {
+          result,
+          tokenUsage,
+        };
       },
     );
   }
@@ -283,7 +293,7 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
       throw new Error(`${AI_QUIZ_ERRORS.UNSUPPORTED_PROVIDER}: ${provider}`);
     }
 
-    return aiUsageTracker.wrapAIOperation(
+    return aiUsageTracker.wrapStreamingOperation(
       {
         user_id: userId,
         command: 'generate_quiz_questions',
@@ -301,16 +311,24 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
           prompt,
         );
 
-        const responseStream = await aiClient.streamChatCompletion({
+        const { stream, getUsage } = await aiClient.streamChatCompletionWithUsage({
           model:
             model ||
             (provider === AI_PROVIDERS.OPENAI
               ? AI_DEFAULTS.OPENAI_MODEL
               : AI_DEFAULTS.GEMINI_MODEL),
           messages,
+          stream_options: {
+            include_usage: true,
+          },
         });
 
-        return this.createStreamFromAIClient(responseStream);
+        const transformedStream = this.createStreamFromAIClient(stream);
+
+        return {
+          stream: transformedStream,
+          getUsage,
+        };
       },
     );
   }
@@ -325,7 +343,7 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
       throw new Error(`${AI_QUIZ_ERRORS.UNSUPPORTED_PROVIDER}: ${provider}`);
     }
 
-    return aiUsageTracker.wrapAIOperation(
+    return aiUsageTracker.wrapStreamingOperation(
       {
         user_id: userId,
         command: 'generate_quiz_questions',
@@ -343,16 +361,24 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
           prompt,
         );
 
-        const responseStream = await aiClient.streamChatCompletion({
+        const { stream, getUsage } = await aiClient.streamChatCompletionWithUsage({
           model:
             model ||
             (provider === AI_PROVIDERS.OPENAI
               ? AI_DEFAULTS.OPENAI_MODEL
               : AI_DEFAULTS.GEMINI_MODEL),
           messages,
+          stream_options: {
+            include_usage: true,
+          },
         });
 
-        return this.createAPIStreamFromAIClient(responseStream);
+        const transformedStream = this.createAPIStreamFromAIClient(stream);
+
+        return {
+          stream: transformedStream,
+          getUsage,
+        };
       },
     );
   }
