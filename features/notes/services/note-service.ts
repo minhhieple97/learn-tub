@@ -166,7 +166,7 @@ ${feedback.detailed_analysis}`;
     prompt: string,
     userId: string,
   ): Promise<ReadableStream<StreamChunk>> {
-    return aiUsageTracker.wrapAIOperation(
+    return aiUsageTracker.wrapStreamingOperation(
       {
         user_id: userId,
         command: 'evaluate_note',
@@ -182,7 +182,7 @@ ${feedback.detailed_analysis}`;
           prompt,
         );
 
-        const responseStream = await aiClient.streamChatCompletion({
+        const { stream, getUsage } = await aiClient.streamChatCompletionWithUsage({
           model: model || AI_DEFAULTS.OPENAI_MODEL,
           messages,
           stream_options: {
@@ -190,7 +190,12 @@ ${feedback.detailed_analysis}`;
           },
         });
 
-        return this.createStreamFromAIClient(responseStream);
+        const transformedStream = this.createStreamFromAIClient(stream);
+
+        return {
+          stream: transformedStream,
+          getUsage,
+        };
       },
     );
   }
@@ -200,7 +205,7 @@ ${feedback.detailed_analysis}`;
     prompt: string,
     userId: string,
   ): Promise<ReadableStream<StreamChunk>> {
-    return aiUsageTracker.wrapAIOperation(
+    return aiUsageTracker.wrapStreamingOperation(
       {
         user_id: userId,
         command: 'evaluate_note',
@@ -216,7 +221,7 @@ ${feedback.detailed_analysis}`;
           prompt,
         );
 
-        const responseStream = await aiClient.streamChatCompletion({
+        const { stream, getUsage } = await aiClient.streamChatCompletionWithUsage({
           model: model || AI_DEFAULTS.GEMINI_MODEL,
           messages,
           stream_options: {
@@ -224,7 +229,12 @@ ${feedback.detailed_analysis}`;
           },
         });
 
-        return this.createStreamFromAIClient(responseStream);
+        const transformedStream = this.createStreamFromAIClient(stream);
+
+        return {
+          stream: transformedStream,
+          getUsage,
+        };
       },
     );
   }

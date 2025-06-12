@@ -243,6 +243,145 @@ class AIUsageTracker {
       console.error('Failed to track batch AI usage:', error);
     }
   }
+
+  public async wrapStreamingOperationWithTokens<T>(
+    params: {
+      user_id: string;
+      command: IAICommand;
+      provider: IAIProvider;
+      model: string;
+      request_payload?: any;
+    },
+    operation: () => Promise<{ result: T; getUsage: () => Promise<ITokenUsage | undefined> }>,
+  ): Promise<T> {
+    const startTime = Date.now();
+    let status: IAIUsageStatus = 'success';
+    let errorMessage: string | undefined;
+    let tokenUsage: ITokenUsage | undefined;
+    let result: T;
+
+    try {
+      const operationResult = await operation();
+      result = operationResult.result;
+
+      // Get usage information asynchronously
+      try {
+        tokenUsage = await operationResult.getUsage();
+      } catch (usageError) {
+        console.warn('Failed to get token usage information:', usageError);
+      }
+
+      return result;
+    } catch (error) {
+      status = 'error';
+      errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      throw error;
+    } finally {
+      const duration = Date.now() - startTime;
+
+      // Track the usage with token information
+      await this.trackUsage({
+        user_id: params.user_id,
+        command: params.command,
+        provider: params.provider,
+        model: params.model,
+        status,
+        token_usage: tokenUsage,
+        request_duration_ms: duration,
+        error_message: errorMessage,
+        request_payload: params.request_payload,
+        response_payload:
+          status === 'success' ? { success: true, has_usage: !!tokenUsage } : undefined,
+      });
+    }
+  }
+
+  // Wrapper for streaming operations that returns a stream
+  public async wrapStreamingOperation<T extends ReadableStream<any>>(
+    params: {
+      user_id: string;
+      command: IAICommand;
+      provider: IAIProvider;
+      model: string;
+      request_payload?: any;
+    },
+    operation: () => Promise<{ stream: T; getUsage: () => Promise<ITokenUsage | undefined> }>,
+  ): Promise<T> {
+    const startTime = Date.now();
+    let status: IAIUsageStatus = 'success';
+    let errorMessage: string | undefined;
+    let result: T;
+
+    try {
+      const operationResult = await operation();
+      result = operationResult.stream;
+
+      // Set up background usage tracking
+      operationResult.getUsage().then(
+        (tokenUsage) => {
+          const duration = Date.now() - startTime;
+          this.trackUsage({
+            user_id: params.user_id,
+            command: params.command,
+            provider: params.provider,
+            model: params.model,
+            status: 'success',
+            token_usage: tokenUsage,
+            request_duration_ms: duration,
+            error_message: undefined,
+            request_payload: params.request_payload,
+            response_payload: { success: true, has_usage: !!tokenUsage },
+          }).catch((error) => {
+            console.error('Background usage tracking failed:', error);
+          });
+        },
+        (usageError) => {
+          console.warn('Failed to get token usage information:', usageError);
+          const duration = Date.now() - startTime;
+          this.trackUsage({
+            user_id: params.user_id,
+            command: params.command,
+            provider: params.provider,
+            model: params.model,
+            status: 'success',
+            token_usage: undefined,
+            request_duration_ms: duration,
+            error_message: undefined,
+            request_payload: params.request_payload,
+            response_payload: {
+              success: true,
+              has_usage: false,
+              usage_error: usageError instanceof Error ? usageError.message : 'Unknown usage error',
+            },
+          }).catch((error) => {
+            console.error('Background usage tracking failed:', error);
+          });
+        },
+      );
+
+      return result;
+    } catch (error) {
+      status = 'error';
+      errorMessage = error instanceof Error ? error.message : 'Unknown error';
+
+      // Track error immediately
+      const duration = Date.now() - startTime;
+      await this.trackUsage({
+        user_id: params.user_id,
+        command: params.command,
+        provider: params.provider,
+        model: params.model,
+        status,
+        token_usage: undefined,
+        request_duration_ms: duration,
+        error_message: errorMessage,
+        request_payload: params.request_payload,
+        response_payload: undefined,
+      });
+
+      throw error;
+    }
+  }
 }
 
 // Export singleton instance
