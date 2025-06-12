@@ -1,9 +1,9 @@
 import { AI_FORMAT } from '@/config/constants';
 import { Json } from '@/database.types';
-import { AIProvider, IFeedback, IApiResponse, IAsyncOperationHook } from '@/types';
+import { AIProvider, IFeedback, IApiResponse } from '@/types';
 
 export type IQuizDifficulty = 'easy' | 'medium' | 'hard' | 'mixed';
-
+export type IQuizAnswerOption = 'A' | 'B' | 'C' | 'D';
 export type IQuizDifficultyFilter = 'all' | IQuizDifficulty;
 
 export type IQuizSettingsType = {
@@ -21,14 +21,14 @@ export type IQuestion = {
     C: string;
     D: string;
   };
-  correctAnswer: 'A' | 'B' | 'C' | 'D';
+  correctAnswer: IQuizAnswerOption;
   topic: string;
-  difficulty: 'easy' | 'medium' | 'hard';
+  difficulty: IQuizDifficulty;
 };
 
 export type IAnswer = {
   questionId: string;
-  selectedAnswer: 'A' | 'B' | 'C' | 'D';
+  selectedAnswer: IQuizAnswerOption;
 };
 
 export type IQuizQuestion = {
@@ -40,26 +40,26 @@ export type IQuizQuestion = {
     C: string;
     D: string;
   };
-  correctAnswer: 'A' | 'B' | 'C' | 'D';
+  correctAnswer: IQuizAnswerOption;
   explanation: string;
   topic: string;
-  difficulty: 'easy' | 'medium' | 'hard';
+  difficulty: IQuizDifficulty;
 };
 
 export type IUserAnswer = {
   questionId: string;
-  selectedAnswer: 'A' | 'B' | 'C' | 'D';
+  selectedAnswer: IQuizAnswerOption;
 };
 
 export type IQuizResult = {
   questionId: string;
   question: string;
-  selectedAnswer: 'A' | 'B' | 'C' | 'D';
-  correctAnswer: 'A' | 'B' | 'C' | 'D';
+  selectedAnswer: IQuizAnswerOption;
+  correctAnswer: IQuizAnswerOption;
   isCorrect: boolean;
   explanation: string;
   topic: string;
-  difficulty: 'easy' | 'medium' | 'hard';
+  difficulty: IQuizDifficulty;
 };
 
 export type IQuizFeedback = {
@@ -105,7 +105,6 @@ export type IEvaluateQuizRequest = {
   model: string;
 };
 
-// Use common generic response types
 export type IQuizGenerationResponse = IApiResponse<IQuizQuestion[]>;
 export type IQuizEvaluationResponse = IApiResponse<IQuizFeedback>;
 
@@ -190,14 +189,14 @@ export type IQuizAttempt = {
   id: string;
   quiz_session_id: string;
   user_id: string;
-  answers: Json; // Use Json type to match database
+  answers: Json;
   score: number;
   total_questions: number;
   correct_answers: number;
-  feedback?: Json | null; // Use Json type to match database
+  feedback?: Json | null;
   time_taken_seconds?: number | null;
-  completed_at: string | null; // Allow null to match database
-  created_at: string | null; // Allow null to match database
+  completed_at: string | null;
+  created_at: string | null;
 };
 
 export type IQuizSessionWithAttempts = IQuizSession & {
@@ -212,13 +211,12 @@ export type IQuizSessionWithAttempts = IQuizSession & {
   };
 };
 
-// Add these types for database compatibility
 export type IDatabaseQuizSession = {
   id: string;
   user_id: string;
   video_id: string;
   title: string;
-  difficulty: string; // Database stores as string
+  difficulty: string;
   question_count: number;
   topics: string[] | null;
   ai_provider: string;
@@ -232,7 +230,7 @@ export type IDatabaseQuizAttempt = {
   id: string;
   quiz_session_id: string;
   user_id: string;
-  answers: Json; // Database stores as Json
+  answers: Json;
   score: number;
   total_questions: number;
   correct_answers: number;

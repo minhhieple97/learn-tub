@@ -1,14 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import {
-  BookOpen,
-  Home,
-  Play,
-  Settings,
-  ChevronLeft,
-  Menu,
-} from 'lucide-react';
+import { BookOpen, Home, Play, ChevronLeft, Menu } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -18,7 +11,6 @@ import { useState } from 'react';
 const navigation = [
   { name: 'Learn', href: routes.learn, icon: Play },
   { name: 'Dashboard', href: routes.dashboard.root, icon: Home },
-  { name: 'Settings', href: routes.settings.root, icon: Settings },
 ];
 
 export const Sidebar = () => {
@@ -36,20 +28,13 @@ export const Sidebar = () => {
         isCollapsed ? 'w-16' : 'w-64',
       )}
     >
-      <div
-        className={cn(
-          'transition-all duration-300',
-          isCollapsed ? 'p-2' : 'p-6',
-        )}
-      >
+      <div className={cn('transition-all duration-300', isCollapsed ? 'p-2' : 'p-6')}>
         {!isCollapsed && (
           <div className="mb-8 flex items-center justify-between">
-            <div className="flex items-center space-x-2">
+            <Link href={routes.home} className="flex items-center space-x-2">
               <BookOpen className="size-8 text-blue-600" />
-              <span className="text-2xl font-bold text-gray-900 dark:text-white">
-                LearnTub
-              </span>
-            </div>
+              <span className="text-2xl font-bold text-gray-900 dark:text-white">LearnTub</span>
+            </Link>
             <Button
               variant="ghost"
               size="sm"
@@ -71,7 +56,9 @@ export const Sidebar = () => {
 
         {isCollapsed && (
           <div className="mb-6 flex flex-col items-center space-y-4">
-            <BookOpen className="size-8 text-blue-600" />
+            <Link href={routes.home}>
+              <BookOpen className="size-8 text-blue-600" />
+            </Link>
             <Button
               variant="ghost"
               size="sm"
@@ -107,9 +94,7 @@ export const Sidebar = () => {
                 title={isCollapsed ? item.name : undefined}
               >
                 <Link href={item.href}>
-                  <item.icon
-                    className={cn('h-4 w-4', !isCollapsed && 'mr-2')}
-                  />
+                  <item.icon className={cn('h-4 w-4', !isCollapsed && 'mr-2')} />
                   {!isCollapsed && item.name}
                 </Link>
               </Button>

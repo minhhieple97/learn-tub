@@ -111,7 +111,6 @@ export const createNoteInteraction = async (
     .insert({
       user_id: userId,
       note_id: noteId,
-      interaction_type: 'note_evaluation',
       input_data: {
         provider,
         model,
@@ -139,7 +138,6 @@ export const getNoteInteractionsByNoteId = async (
     .select('*')
     .eq('note_id', noteId)
     .eq('user_id', userId)
-    .eq('interaction_type', 'note_evaluation')
     .order('created_at', { ascending: false });
 
   if (error) {
@@ -179,7 +177,6 @@ export const getLatestAIEvaluation = async (
     .select('*')
     .eq('note_id', noteId)
     .eq('user_id', userId)
-    .eq('interaction_type', 'note_evaluation')
     .order('created_at', { ascending: false })
     .limit(1)
     .single();

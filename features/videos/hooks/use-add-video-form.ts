@@ -8,17 +8,44 @@ import { isValidYouTubeUrl } from '@/lib/utils';
 import { TOAST_MESSAGES } from '@/config/constants';
 import { IUseAddVideoFormReturn } from '../types';
 
+type IActionResult = { success: boolean; videoId: string } | undefined;
+
 export const useAddVideoForm = (): IUseAddVideoFormReturn => {
   const router = useRouter();
+  const [url, setUrl] = useState('');
+  const [tutorial, setTutorial] = useState('');
+
+  const handleValidationError = (fieldErrors: Record<string, string[] | undefined>) => {
+    if (fieldErrors.videoUrl?.length) {
+      toast.error({
+        title: 'Invalid URL',
+        description: fieldErrors.videoUrl[0] || TOAST_MESSAGES.INVALID_URL_ERROR,
+      });
+      return;
+    }
+
+    if (fieldErrors.tutorial?.length) {
+      toast.error({
+        title: 'Invalid Tutorial Text',
+        description: fieldErrors.tutorial[0],
+      });
+      return;
+    }
+  };
+
+  const handleSuccess = (data: IActionResult) => {
+    if (data?.success && data?.videoId) {
+      toast.success({
+        description: TOAST_MESSAGES.VIDEO_ADDED_SUCCESS,
+      });
+      router.push(`${routes.learn}/${data.videoId}`);
+    }
+  };
+
   const { execute, isPending } = useAction(addVideoAction, {
     onError: ({ error }) => {
-      if (error.validationErrors?.fieldErrors?.videoUrl) {
-        toast.error({
-          title: 'Invalid input',
-          description:
-            error.validationErrors.fieldErrors.videoUrl[0] ||
-            TOAST_MESSAGES.INVALID_URL_ERROR,
-        });
+      if (error.validationErrors?.fieldErrors) {
+        handleValidationError(error.validationErrors.fieldErrors);
       } else {
         toast.error({
           title: 'Failed to add video',
@@ -26,21 +53,11 @@ export const useAddVideoForm = (): IUseAddVideoFormReturn => {
         });
       }
     },
-    onSuccess: ({ data }) => {
-      if (data?.success && data?.videoId) {
-        toast.success({
-          description: TOAST_MESSAGES.VIDEO_ADDED_SUCCESS,
-        });
-        router.push(`${routes.learn}/${data.videoId}`);
-      }
-    },
+    onSuccess: ({ data }) => handleSuccess(data),
   });
 
-  const [url, setUrl] = useState('');
-  const [tutorial, setTutorial] = useState('');
-
   const isValidUrl = !!url && isValidYouTubeUrl(url);
-  const canSubmit = !isPending && !!url && isValidUrl;
+  const canSubmit = !isPending && isValidUrl;
 
   const handleExecute = (input: { videoUrl: string; tutorial?: string }) => {
     execute(input);
