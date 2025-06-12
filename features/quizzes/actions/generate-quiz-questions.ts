@@ -3,9 +3,10 @@ import { ActionError, authAction } from '@/lib/safe-action';
 import { z } from 'zod';
 import { quizService } from '../services/quiz-service';
 import { createQuizSession } from '../queries';
-import { getProfileByUserId } from '@/features/profile/queries';
+
 import { getVideoById } from '@/features/videos/queries';
 import { RateLimiter } from '@/lib/rate-limiter';
+import { getProfileByUserId } from '@/lib/require-auth';
 
 const GenerateQuizQuestionsSchema = z.object({
   videoId: z.string().min(1, 'Video ID is required'),

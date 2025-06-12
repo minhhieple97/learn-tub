@@ -1,6 +1,7 @@
 import { QuizDetailContent } from '@/features/dashboard/components/quiz-detail';
 import { getQuizSessionDetail } from '@/features/dashboard/queries/quiz-dashboard-queries';
-import { getProfileInSession } from '@/features/profile/queries';
+import { getProfileInSession } from '@/lib/require-auth';
+
 import { notFound } from 'next/navigation';
 
 type IQuizDetailPageProps = {
