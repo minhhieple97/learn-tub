@@ -1,18 +1,20 @@
 'use client';
 
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Brain, Play, Settings, Loader2 } from 'lucide-react';
 import { QuizSettings } from './quiz-settings';
-import { useQuizStore } from '../store';
+import { useQuizWelcome } from '../hooks/use-quiz-welcome';
 
-type IQuizzWelcomeScreen = {
+type IQuizzWelcomeScreenProps = {
   isGenerating: boolean;
   onGenerateQuestions: () => void;
 };
 
-export const QuizzWelcomeScreen = ({ isGenerating, onGenerateQuestions }: IQuizzWelcomeScreen) => {
-  const [showSettings, setShowSettings] = useState(false);
+export const QuizzWelcomeScreen = ({
+  isGenerating,
+  onGenerateQuestions,
+}: IQuizzWelcomeScreenProps) => {
+  const { showSettings, toggleSettings } = useQuizWelcome();
 
   return (
     <div className="flex flex-col items-center justify-center py-12 text-center">
@@ -23,8 +25,8 @@ export const QuizzWelcomeScreen = ({ isGenerating, onGenerateQuestions }: IQuizz
         AI Quiz Assistant
       </h2>
       <p className="mb-8 max-w-md text-slate-600 dark:text-slate-300 leading-relaxed">
-        Test your knowledge with AI-generated questions based on this video content. Get
-        personalized feedback to improve your understanding.
+        Test your knowledge with AI-generated questions based on this video
+        content. Get personalized feedback to improve your understanding.
       </p>
 
       {showSettings && <QuizSettings isGenerating={isGenerating} />}
@@ -32,7 +34,7 @@ export const QuizzWelcomeScreen = ({ isGenerating, onGenerateQuestions }: IQuizz
       <div className="flex gap-3">
         <Button
           variant="outline"
-          onClick={() => setShowSettings(!showSettings)}
+          onClick={toggleSettings}
           disabled={isGenerating}
           className="border-blue-300 text-blue-600 hover:bg-blue-50 dark:border-blue-600 dark:text-blue-400 dark:hover:bg-blue-950/50"
         >

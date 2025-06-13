@@ -47,7 +47,6 @@ export const QuizRetakeContent = ({ quizSession }: IQuizRetakeContentProps) => {
     getFormattedTime,
   } = useQuizStore();
 
-  // Initialize retake mode when component mounts
   useEffect(() => {
     initializeRetake(quizSession);
   }, [quizSession, initializeRetake]);
@@ -70,11 +69,6 @@ export const QuizRetakeContent = ({ quizSession }: IQuizRetakeContentProps) => {
     router.push(routes.dashboard.quizzes);
   };
 
-  const handleResetQuiz = () => {
-    resetRetake();
-    setHasStarted(false);
-  };
-
   if (showResults && feedback) {
     return (
       <div className="space-y-6">
@@ -91,8 +85,12 @@ export const QuizRetakeContent = ({ quizSession }: IQuizRetakeContentProps) => {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-center text-2xl font-bold">Quiz Retake Results</CardTitle>
-            <p className="text-center text-muted-foreground">{quizSession.videos?.title}</p>
+            <CardTitle className="text-center text-2xl font-bold">
+              Quiz Retake Results
+            </CardTitle>
+            <p className="text-center text-muted-foreground">
+              {quizSession.videos?.title}
+            </p>
           </CardHeader>
           <CardContent>
             <QuizResults feedback={feedback} isGenerating={false} />
@@ -131,15 +129,17 @@ export const QuizRetakeContent = ({ quizSession }: IQuizRetakeContentProps) => {
                 <div className="text-muted-foreground">Questions</div>
               </div>
               <div className="text-center p-4 bg-muted rounded-lg">
-                <div className="font-semibold text-lg capitalize">{quizSession.difficulty}</div>
+                <div className="font-semibold text-lg capitalize">
+                  {quizSession.difficulty}
+                </div>
                 <div className="text-muted-foreground">Difficulty</div>
               </div>
             </div>
 
             <div className="text-center">
               <p className="text-sm text-muted-foreground mb-4">
-                You're about to retake this quiz. Your previous answers will be cleared and you'll
-                start fresh.
+                You're about to retake this quiz. Your previous answers will be
+                cleared and you'll start fresh.
               </p>
               <Button
                 onClick={handleStartRetake}
@@ -167,7 +167,9 @@ export const QuizRetakeContent = ({ quizSession }: IQuizRetakeContentProps) => {
         </Button>
         <div className="text-center">
           <h1 className="text-xl font-semibold">Quiz Retake</h1>
-          <p className="text-sm text-muted-foreground">{quizSession.videos?.title}</p>
+          <p className="text-sm text-muted-foreground">
+            {quizSession.videos?.title}
+          </p>
         </div>
         <div className="w-24" />
       </div>
@@ -185,7 +187,9 @@ export const QuizRetakeContent = ({ quizSession }: IQuizRetakeContentProps) => {
         <QuestionCard
           question={currentQuestion}
           currentAnswer={currentAnswer ?? undefined}
-          onAnswerSelect={(answer) => answerQuestion(currentQuestion.id, answer)}
+          onAnswerSelect={(answer) =>
+            answerQuestion(currentQuestion.id, answer)
+          }
         />
       )}
 
