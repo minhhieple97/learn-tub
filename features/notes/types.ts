@@ -97,11 +97,7 @@ export type ITimestampDisplayProps = {
   clickable?: boolean;
 };
 
-export type INoteCardActionsProps = {
-  onEdit: () => void;
-  onDelete: () => void;
-  noteId: string;
-};
+
 
 export type INoteFormActionsProps = {
   isLoading: boolean;

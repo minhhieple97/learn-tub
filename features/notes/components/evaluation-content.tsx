@@ -3,76 +3,62 @@ import { EvaluationError } from './evaluation-error';
 import { EvaluationWelcome } from './evaluation-welcome';
 import { NoteEvaluationStreaming } from './note-evaluation-streaming';
 import { NoteFeedbackDisplay } from './note-feedback-display';
-import { IFeedback } from '@/types';
 import { STATUS_STREAMING } from '@/config/constants';
+import { useNotesStore } from '../store';
 
 type IEvaluationContentProps = {
-  // State
-  showSettings: boolean;
-  hasError: boolean;
-  error: string;
-  isEvaluating: boolean;
-  isCompleted: boolean;
-  streamingContent: string;
-  feedback: any;
-  status: string;
-
-  // Configuration
   provider: string | null;
   aiModelId: string;
-
-  // Handlers
   onProviderChange: (provider: string) => void;
   onModelChange: (modelId: string) => void;
-  onEvaluate: () => void;
-  onReset: () => void;
-  onShowSettings: () => void;
-  onAdjustSettings: () => void;
+  onEvaluate: () => Promise<void>;
 };
 
 export const EvaluationContent = ({
-  showSettings,
-  hasError,
-  error,
-  isEvaluating,
-  isCompleted,
-  streamingContent,
-  feedback,
-  status,
   provider,
   aiModelId,
   onProviderChange,
   onModelChange,
   onEvaluate,
-  onReset,
-  onShowSettings,
-  onAdjustSettings,
 }: IEvaluationContentProps) => {
+  const { evaluation, resetEvaluation, showEvaluationSettings, adjustEvaluationSettings } =
+    useNotesStore();
+
   return (
     <div className="space-y-6">
-      {showSettings && (
+      {evaluation.showSettings && (
         <EvaluationSettings
           provider={provider}
           aiModelId={aiModelId}
           onProviderChange={onProviderChange}
           onModelChange={onModelChange}
           onEvaluate={onEvaluate}
-          onReset={onReset}
-          isEvaluating={isEvaluating}
-          showReset={isCompleted || hasError}
+          onReset={resetEvaluation}
+          isEvaluating={evaluation.isEvaluating}
+          showReset={evaluation.isCompleted || evaluation.hasError}
         />
       )}
 
-      {hasError && <EvaluationError error={error} onAdjustSettings={onAdjustSettings} />}
-
-      {(isEvaluating || streamingContent) && (
-        <NoteEvaluationStreaming content={streamingContent} isEvaluating={isEvaluating} />
+      {evaluation.hasError && (
+        <EvaluationError
+          error={evaluation.error || ''}
+          onAdjustSettings={adjustEvaluationSettings}
+        />
       )}
 
-      {feedback && isCompleted && <NoteFeedbackDisplay feedback={feedback} onReset={onReset} />}
+      {(evaluation.isEvaluating || evaluation.streamingContent) && (
+        <NoteEvaluationStreaming
+          content={evaluation.streamingContent}
+          isEvaluating={evaluation.isEvaluating}
+        />
+      )}
 
-      {status === STATUS_STREAMING.IDLE && !showSettings && (
-        <EvaluationWelcome onStartAnalysis={onShowSettings} />
+      {evaluation.feedback && evaluation.isCompleted && (
+        <NoteFeedbackDisplay feedback={evaluation.feedback} onReset={resetEvaluation} />
+      )}
+
+      {evaluation.status === STATUS_STREAMING.IDLE && !evaluation.showSettings && (
+        <EvaluationWelcome onStartAnalysis={showEvaluationSettings} />
       )}
     </div>
   );

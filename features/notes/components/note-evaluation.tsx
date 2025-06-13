@@ -1,13 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Brain, Sparkles, History } from 'lucide-react';
-import { AI_CONFIG, STATUS_STREAMING } from '@/config/constants';
+import { STATUS_STREAMING } from '@/config/constants';
 import { EvaluationDialogHeader } from './evaluation-dialog-header';
 import { EvaluationContent } from './evaluation-content';
 import { AIFeedbackHistory } from './note-feedback-history';
-import { useNoteEvaluation } from '../hooks/use-note-evaluation';
+import { useNotesStore } from '../store';
 import { useAIModelData } from '@/features/ai/hooks/use-ai-models';
 import type { IAIModelOption } from '@/features/ai/types';
 
@@ -17,82 +17,55 @@ type INoteEvaluationProps = {
 };
 
 export const NoteEvaluation = ({ noteId, disabled }: INoteEvaluationProps) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
-  const [activeTab, setActiveTab] = useState('evaluate');
-  const [provider, setProvider] = useState<string | null>(null);
-  const [aiModelId, setAIModelId] = useState<string>('');
   const { data } = useAIModelData();
   const providers = data?.providers || [];
   const modelOptions = data?.modelOptions || [];
 
   const {
-    status,
-    feedback,
-    streamingContent,
-    error,
+    evaluation,
+    openEvaluation,
+    closeEvaluation,
+    setActiveTab,
+    setProvider,
+    setAiModelId,
     evaluateNote,
-    reset,
-    isEvaluating,
-    isCompleted,
-    hasError,
-  } = useNoteEvaluation();
+    toggleSettings,
+  } = useNotesStore();
 
   useEffect(() => {
-    if (providers.length > 0 && !providers.some((p) => p.name === provider)) {
+    if (providers.length > 0 && !providers.some((p) => p.name === evaluation.provider)) {
       setProvider(providers[0].name);
     }
-  }, [providers, provider]);
+  }, [providers, evaluation.provider, setProvider]);
 
   useEffect(() => {
-    if (!aiModelId && modelOptions.length > 0) {
+    if (!evaluation.aiModelId && modelOptions.length > 0) {
       const providerModel = modelOptions.find(
-        (opt: IAIModelOption) => opt.provider_name === provider,
+        (opt: IAIModelOption) => opt.provider_name === evaluation.provider,
       );
       if (providerModel) {
-        setAIModelId(providerModel.ai_model_id);
+        setAiModelId(providerModel.ai_model_id);
       }
     }
-  }, [provider, aiModelId, modelOptions]);
+  }, [evaluation.provider, evaluation.aiModelId, modelOptions, setAiModelId]);
 
   const handleEvaluate = async () => {
-    if (!aiModelId) return;
-    setShowSettings(false);
-    await evaluateNote(noteId, aiModelId);
-  };
-
-  const handleReset = () => {
-    reset();
-    setShowSettings(false);
+    if (!evaluation.aiModelId) return;
+    await evaluateNote(noteId, evaluation.aiModelId);
   };
 
   const handleOpenDialog = () => {
-    setIsOpen(true);
-    if (status === STATUS_STREAMING.IDLE) {
-      setShowSettings(true);
+    openEvaluation(noteId);
+  };
+
+  const handleCloseDialog = (open: boolean) => {
+    if (!open) {
+      closeEvaluation();
     }
   };
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
-    if (value === 'evaluate' && status === STATUS_STREAMING.IDLE) {
-      setShowSettings(true);
-    } else {
-      setShowSettings(false);
-    }
-  };
-
-  const handleShowSettings = () => {
-    setShowSettings(true);
-  };
-
-  const handleAdjustSettings = () => {
-    reset();
-    setShowSettings(true);
-  };
-
-  const handleToggleSettings = () => {
-    setShowSettings(!showSettings);
   };
 
   const handleProviderChange = (newProvider: string) => {
@@ -101,79 +74,69 @@ export const NoteEvaluation = ({ noteId, disabled }: INoteEvaluationProps) => {
       (opt: IAIModelOption) => opt.provider_name === newProvider,
     );
     if (providerModel) {
-      setAIModelId(providerModel.ai_model_id);
+      setAiModelId(providerModel.ai_model_id);
     }
   };
 
   const handleModelChange = (newModelId: string) => {
-    setAIModelId(newModelId);
+    setAiModelId(newModelId);
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Button
-          variant="outline"
-          size="sm"
-          disabled={disabled}
-          onClick={handleOpenDialog}
-          className="h-8 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-700 transition-colors"
-        >
-          <Brain className="h-4 w-4 mr-1" />
-          Analyze
-        </Button>
-      </DialogTrigger>
-      <DialogContent
-        className="max-w-3xl overflow-hidden"
-        style={{
-          maxHeight: '90vh',
-        }}
+    <>
+      <Button
+        variant="outline"
+        size="sm"
+        disabled={disabled}
+        onClick={handleOpenDialog}
+        className="h-8 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-700 transition-colors"
       >
-        <EvaluationDialogHeader
-          showSettingsButton={isCompleted || hasError}
-          onToggleSettings={handleToggleSettings}
-        />
+        <Brain className="h-4 w-4 mr-1" />
+        Analyze
+      </Button>
 
-        <div className="overflow-y-auto flex-1 py-4 pb-6">
-          <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-6">
-              <TabsTrigger value="evaluate" className="flex items-center gap-2">
-                <Sparkles className="h-4 w-4" />
-                New Analysis
-              </TabsTrigger>
-              <TabsTrigger value="history" className="flex items-center gap-2">
-                <History className="h-4 w-4" />
-                History
-              </TabsTrigger>
-            </TabsList>
+      <Dialog open={evaluation.isOpen} onOpenChange={handleCloseDialog}>
+        <DialogContent
+          className="max-w-3xl overflow-hidden"
+          style={{
+            maxHeight: '90vh',
+          }}
+        >
+          <EvaluationDialogHeader
+            showSettingsButton={evaluation.isCompleted || evaluation.hasError}
+            onToggleSettings={toggleSettings}
+          />
 
-            <TabsContent value="evaluate" className="space-y-6">
-              <EvaluationContent
-                showSettings={showSettings}
-                hasError={hasError}
-                error={error || ''}
-                isEvaluating={isEvaluating}
-                isCompleted={isCompleted}
-                streamingContent={streamingContent}
-                feedback={feedback}
-                status={status}
-                provider={provider}
-                aiModelId={aiModelId}
-                onProviderChange={handleProviderChange}
-                onModelChange={handleModelChange}
-                onEvaluate={handleEvaluate}
-                onReset={handleReset}
-                onShowSettings={handleShowSettings}
-                onAdjustSettings={handleAdjustSettings}
-              />
-            </TabsContent>
+          <div className="overflow-y-auto flex-1 py-4 pb-6">
+            <Tabs value={evaluation.activeTab} onValueChange={handleTabChange} className="w-full">
+              <TabsList className="grid w-full grid-cols-2 mb-6">
+                <TabsTrigger value="evaluate" className="flex items-center gap-2">
+                  <Sparkles className="h-4 w-4" />
+                  New Analysis
+                </TabsTrigger>
+                <TabsTrigger value="history" className="flex items-center gap-2">
+                  <History className="h-4 w-4" />
+                  History
+                </TabsTrigger>
+              </TabsList>
 
-            <TabsContent value="history" className="space-y-6 pb-4">
-              <AIFeedbackHistory noteId={noteId} />
-            </TabsContent>
-          </Tabs>
-        </div>
-      </DialogContent>
-    </Dialog>
+              <TabsContent value="evaluate" className="space-y-6">
+                <EvaluationContent
+                  provider={evaluation.provider}
+                  aiModelId={evaluation.aiModelId}
+                  onProviderChange={handleProviderChange}
+                  onModelChange={handleModelChange}
+                  onEvaluate={handleEvaluate}
+                />
+              </TabsContent>
+
+              <TabsContent value="history" className="space-y-6 pb-4">
+                <AIFeedbackHistory noteId={noteId} />
+              </TabsContent>
+            </Tabs>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };

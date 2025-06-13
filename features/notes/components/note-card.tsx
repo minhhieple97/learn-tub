@@ -2,7 +2,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { TimestampDisplay } from './timestamp-display';
 import { NoteCardActions } from './note-card-actions';
-import { useNotesStore } from '../store';
 import type { INote } from '../types';
 import { NoteEvaluation } from '@/features/notes/components/note-evaluation';
 
@@ -12,13 +11,7 @@ type NoteCardProps = {
 };
 
 export const NoteCard = ({ note, onTimestampClick }: NoteCardProps) => {
-  const { startEditing } = useNotesStore((state) => state);
-  const { deleteNote } = useNotesStore((state) => state);
-
-  const handleEdit = () => startEditing(note);
-  const handleDelete = () => deleteNote(note.id);
-  const handleTimestampClick = (timestamp: number) =>
-    onTimestampClick?.(timestamp);
+  const handleTimestampClick = (timestamp: number) => onTimestampClick?.(timestamp);
 
   return (
     <Card className="overflow-hidden">
@@ -30,11 +23,7 @@ export const NoteCard = ({ note, onTimestampClick }: NoteCardProps) => {
         />
         <div className="flex items-center gap-2">
           <NoteEvaluation noteId={note.id} />
-          <NoteCardActions
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-            noteId={note.id}
-          />
+          <NoteCardActions noteId={note.id} />
         </div>
       </div>
       <CardContent className="p-4">
