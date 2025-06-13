@@ -1,20 +1,15 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Brain, Sparkles, History } from 'lucide-react';
-import {
-  AI_CONFIG,
-  AI_DEFAULTS,
-  AI_MODELS,
-  AI_PROVIDERS,
-  STATUS_STREAMING,
-} from '@/config/constants';
+import { AI_CONFIG, STATUS_STREAMING } from '@/config/constants';
 import { EvaluationDialogHeader } from './evaluation-dialog-header';
 import { EvaluationContent } from './evaluation-content';
 import { AIFeedbackHistory } from './note-feedback-history';
 import { useNoteEvaluation } from '../hooks/use-note-evaluation';
-import { AIProvider } from '@/types';
+import { useAIModelData } from '@/features/ai/hooks/use-ai-models';
+import type { IAIModelOption } from '@/features/ai/types';
 
 type INoteEvaluationProps = {
   noteId: string;
@@ -25,8 +20,11 @@ export const NoteEvaluation = ({ noteId, disabled }: INoteEvaluationProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [activeTab, setActiveTab] = useState('evaluate');
-  const [provider, setProvider] = useState<AIProvider>(AI_PROVIDERS.GEMINI);
-  const [model, setModel] = useState<string>(AI_DEFAULTS.GEMINI_MODEL);
+  const [provider, setProvider] = useState<string | null>(null);
+  const [aiModelId, setAIModelId] = useState<string>('');
+  const { data } = useAIModelData();
+  const providers = data?.providers || [];
+  const modelOptions = data?.modelOptions || [];
 
   const {
     status,
@@ -40,9 +38,27 @@ export const NoteEvaluation = ({ noteId, disabled }: INoteEvaluationProps) => {
     hasError,
   } = useNoteEvaluation();
 
+  useEffect(() => {
+    if (providers.length > 0 && !providers.some((p) => p.name === provider)) {
+      setProvider(providers[0].name);
+    }
+  }, [providers, provider]);
+
+  useEffect(() => {
+    if (!aiModelId && modelOptions.length > 0) {
+      const providerModel = modelOptions.find(
+        (opt: IAIModelOption) => opt.provider_name === provider,
+      );
+      if (providerModel) {
+        setAIModelId(providerModel.ai_model_id);
+      }
+    }
+  }, [provider, aiModelId, modelOptions]);
+
   const handleEvaluate = async () => {
+    if (!aiModelId) return;
     setShowSettings(false);
-    await evaluateNote(noteId, provider, model);
+    await evaluateNote(noteId, aiModelId);
   };
 
   const handleReset = () => {
@@ -77,6 +93,20 @@ export const NoteEvaluation = ({ noteId, disabled }: INoteEvaluationProps) => {
 
   const handleToggleSettings = () => {
     setShowSettings(!showSettings);
+  };
+
+  const handleProviderChange = (newProvider: string) => {
+    setProvider(newProvider);
+    const providerModel = modelOptions.find(
+      (opt: IAIModelOption) => opt.provider_name === newProvider,
+    );
+    if (providerModel) {
+      setAIModelId(providerModel.ai_model_id);
+    }
+  };
+
+  const handleModelChange = (newModelId: string) => {
+    setAIModelId(newModelId);
   };
 
   return (
@@ -128,9 +158,9 @@ export const NoteEvaluation = ({ noteId, disabled }: INoteEvaluationProps) => {
                 feedback={feedback}
                 status={status}
                 provider={provider}
-                model={model}
-                onProviderChange={setProvider}
-                onModelChange={setModel}
+                aiModelId={aiModelId}
+                onProviderChange={handleProviderChange}
+                onModelChange={handleModelChange}
                 onEvaluate={handleEvaluate}
                 onReset={handleReset}
                 onShowSettings={handleShowSettings}

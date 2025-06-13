@@ -1,6 +1,6 @@
 import { type Tables, type TablesInsert, type TablesUpdate, type Json } from '@/database.types';
 import { z } from 'zod';
-import { IAICommandSchema, IAIProviderSchema } from './schemas';
+import { IAICommandSchema } from './schemas';
 
 export type IAIUsageLog = Tables<'ai_usage_logs'>;
 export type IAIUsageLogInsert = TablesInsert<'ai_usage_logs'>;
@@ -9,8 +9,6 @@ export type IAIUsageLogUpdate = TablesUpdate<'ai_usage_logs'>;
 export type IAIUsageStatus = 'success' | 'error';
 
 export type IAICommand = z.infer<typeof IAICommandSchema>;
-
-export type IAIProvider = z.infer<typeof IAIProviderSchema>;
 
 export type ITokenUsage = {
   input_tokens: number;
@@ -27,8 +25,7 @@ export type ICostDetails = {
 export type ITrackAIUsageRequest = {
   user_id: string;
   command: IAICommand;
-  provider: IAIProvider;
-  model: string;
+  ai_model_id: string;
   status: IAIUsageStatus;
   tokens_used?: number;
   input_tokens?: number;
@@ -62,13 +59,13 @@ export type IAIUsageByTimeRange = {
 };
 
 export type IAIUsageByProvider = {
-  provider: IAIProvider;
+  provider: string;
   analytics: IAIUsageAnalytics;
 };
 
 export type IAIUsageByModel = {
   model: string;
-  provider: IAIProvider;
+  provider: string;
   analytics: IAIUsageAnalytics;
 };
 
@@ -79,7 +76,7 @@ export type IAIUsageByCommand = {
 
 export type IAIUsageFilters = {
   user_id?: string;
-  provider?: IAIProvider;
+  provider?: string;
   model?: string;
   command?: IAICommand;
   status?: IAIUsageStatus;
@@ -88,7 +85,6 @@ export type IAIUsageFilters = {
   limit?: number;
   offset?: number;
 };
-
 
 export type IAIMessage = {
   role: string;
@@ -133,4 +129,56 @@ export type IAIStreamChunk = {
     completion_tokens: number;
     total_tokens: number;
   };
+};
+
+export type IAIModelPricing = {
+  id: string;
+  provider_id: string;
+  model_name: string;
+  input_cost_per_million_tokens: number;
+  output_cost_per_million_tokens: number;
+  is_active: boolean;
+  created_at: string | null;
+  updated_at: string | null;
+};
+
+export type IAIModelPricingView = {
+  id: string;
+  provider_name: string;
+  provider_display_name: string;
+  model_name: string;
+  input_cost_per_million_tokens: number;
+  output_cost_per_million_tokens: number;
+  is_active: boolean;
+  created_at: string | null;
+  updated_at: string | null;
+};
+
+export type IAIModelPricingFilters = {
+  provider_id?: string;
+  model_name?: string;
+  is_active?: boolean;
+};
+
+export type IAIModelOption = {
+  value: string;
+  label: string;
+  provider_id: string;
+  provider_name: string;
+  provider_display_name: string;
+  input_cost_per_million_tokens: number;
+  output_cost_per_million_tokens: number;
+  ai_model_id: string;
+};
+
+export type IAIModelProvider = {
+  id: string;
+  name: string;
+  display_name: string;
+  is_active: boolean;
+};
+
+export type IAIModelData = {
+  providers: IAIModelProvider[];
+  modelOptions: IAIModelOption[];
 };

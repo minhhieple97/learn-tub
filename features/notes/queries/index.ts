@@ -2,10 +2,8 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { INote } from '../types';
-import { AIProvider } from '@/types';
 import { Json } from '@/database.types';
 import { INoteEvaluationResult } from '@/features/quizzes/types';
-import { AI_DEFAULTS, AI_PROVIDERS } from '@/config/constants';
 
 export async function getNotesByVideoId(videoId: string, userId: string): Promise<INote[]> {
   const supabase = await createClient();
@@ -101,8 +99,7 @@ export const searchNotes = async (userId: string, searchTerm: string): Promise<I
 export const createNoteInteraction = async (
   userId: string,
   noteId: string,
-  provider: AIProvider,
-  model: string,
+  aiModelId: string,
   feedback: Json,
 ): Promise<{ id: string }> => {
   const supabase = await createClient();
@@ -111,11 +108,7 @@ export const createNoteInteraction = async (
     .insert({
       user_id: userId,
       note_id: noteId,
-      input_data: {
-        provider,
-        model,
-        note_id: noteId,
-      },
+      ai_model_id: aiModelId,
       output_data: feedback,
     })
     .select('id')
@@ -135,7 +128,16 @@ export const getNoteInteractionsByNoteId = async (
   const supabase = await createClient();
   const { data, error } = await supabase
     .from('note_interactions')
-    .select('*')
+    .select(
+      `
+      *,
+      ai_model_pricing_view!inner(
+        model_name,
+        provider_name,
+        provider_display_name
+      )
+    `,
+    )
     .eq('note_id', noteId)
     .eq('user_id', userId)
     .order('created_at', { ascending: false });
@@ -144,26 +146,15 @@ export const getNoteInteractionsByNoteId = async (
     throw new Error(`Failed to fetch AI interactions: ${error.message}`);
   }
 
-  return data.map((interaction) => {
-    const inputData =
-      interaction.input_data &&
-      typeof interaction.input_data === 'object' &&
-      !Array.isArray(interaction.input_data)
-        ? interaction.input_data
-        : {};
-
-    return {
-      id: interaction.id,
-      note_id: interaction.note_id || '',
-      user_id: interaction.user_id,
-      provider: (typeof inputData.provider === 'string'
-        ? inputData.provider
-        : AI_PROVIDERS.OPENAI) as AIProvider,
-      model: typeof inputData.model === 'string' ? inputData.model : AI_DEFAULTS.SERVICE_MODEL,
-      feedback: interaction.output_data,
-      created_at: interaction.created_at || '',
-    };
-  });
+  return data.map((interaction) => ({
+    id: interaction.id,
+    note_id: interaction.note_id || '',
+    user_id: interaction.user_id,
+    provider: interaction.ai_model_pricing_view?.provider_name,
+    model: interaction.ai_model_pricing_view?.model_name || '',
+    feedback: interaction.output_data,
+    created_at: interaction.created_at || '',
+  }));
 };
 
 export const getLatestAIEvaluation = async (
@@ -174,7 +165,16 @@ export const getLatestAIEvaluation = async (
 
   const { data, error } = await supabase
     .from('note_interactions')
-    .select('*')
+    .select(
+      `
+      *,
+      ai_model_pricing_view!inner(
+        model_name,
+        provider_name,
+        provider_display_name
+      )
+    `,
+    )
     .eq('note_id', noteId)
     .eq('user_id', userId)
     .order('created_at', { ascending: false })
@@ -189,8 +189,8 @@ export const getLatestAIEvaluation = async (
     id: data.id,
     note_id: data.note_id || '',
     user_id: data.user_id,
-    provider: (data.input_data as any)?.provider || AI_PROVIDERS.OPENAI,
-    model: (data.input_data as any)?.model || AI_DEFAULTS.SERVICE_MODEL,
+    provider: data.ai_model_pricing_view?.provider_name,
+    model: data.ai_model_pricing_view?.model_name || '',
     feedback: data.output_data as any,
     created_at: data.created_at || '',
   };

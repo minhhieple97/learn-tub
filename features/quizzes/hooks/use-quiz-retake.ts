@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { useAction } from 'next-safe-action/hooks';
 import { evaluateQuizAction } from '../actions';
 
-import { AI_DEFAULTS, AI_PROVIDERS, AI_QUIZ_CONFIG } from '@/config/constants';
+import { AI_QUIZ_CONFIG } from '@/config/constants';
 import { IQuizSession, IQuizState } from '../types';
 
 type ExtendedQuizState = IQuizState & {
@@ -33,9 +33,8 @@ export const useQuizRetake = (videoId: string, existingSession?: IQuizSession) =
         isRetakeMode: true,
         settings: {
           questionCount: existingSession.question_count,
-          difficulty: existingSession.difficulty as any,
-          provider: existingSession.ai_provider as any,
-          model: existingSession.ai_model,
+          difficulty: existingSession.difficulty,
+          aiModelId: existingSession.ai_model_id || '',
         },
       };
     }
@@ -55,8 +54,7 @@ export const useQuizRetake = (videoId: string, existingSession?: IQuizSession) =
       settings: {
         questionCount: AI_QUIZ_CONFIG.DEFAULT_QUESTION_COUNT,
         difficulty: AI_QUIZ_CONFIG.DEFAULT_DIFFICULTY,
-        provider: AI_PROVIDERS.OPENAI,
-        model: AI_DEFAULTS.SERVICE_MODEL,
+        aiModelId: '',
       },
     };
   });
@@ -167,8 +165,7 @@ export const useQuizRetake = (videoId: string, existingSession?: IQuizSession) =
           title: videoTitle,
           description: videoDescription,
         },
-        provider: state.settings.provider,
-        model: state.settings.model,
+        aiModelId: state.settings.aiModelId,
         quizSessionId: state.sessionId || '',
         timeTakenSeconds: finalTimeTaken,
       });

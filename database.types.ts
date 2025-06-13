@@ -9,17 +9,84 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      ai_model_pricing: {
+        Row: {
+          created_at: string | null
+          id: string
+          input_cost_per_million_tokens: number
+          is_active: boolean | null
+          model_name: string
+          output_cost_per_million_tokens: number
+          provider_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          input_cost_per_million_tokens: number
+          is_active?: boolean | null
+          model_name: string
+          output_cost_per_million_tokens: number
+          provider_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          input_cost_per_million_tokens?: number
+          is_active?: boolean | null
+          model_name?: string
+          output_cost_per_million_tokens?: number
+          provider_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_model_pricing_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "ai_providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_providers: {
+        Row: {
+          created_at: string | null
+          display_name: string
+          id: string
+          is_active: boolean | null
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          display_name: string
+          id?: string
+          is_active?: boolean | null
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          display_name?: string
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       ai_usage_logs: {
         Row: {
+          ai_model_id: string | null
           command: string
           cost_usd: number | null
           created_at: string | null
           error_message: string | null
           id: string
           input_tokens: number | null
-          model: string
           output_tokens: number | null
-          provider: string
           request_duration_ms: number | null
           request_payload: Json | null
           response_payload: Json | null
@@ -28,15 +95,14 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          ai_model_id?: string | null
           command: string
           cost_usd?: number | null
           created_at?: string | null
           error_message?: string | null
           id?: string
           input_tokens?: number | null
-          model: string
           output_tokens?: number | null
-          provider: string
           request_duration_ms?: number | null
           request_payload?: Json | null
           response_payload?: Json | null
@@ -45,15 +111,14 @@ export type Database = {
           user_id: string
         }
         Update: {
+          ai_model_id?: string | null
           command?: string
           cost_usd?: number | null
           created_at?: string | null
           error_message?: string | null
           id?: string
           input_tokens?: number | null
-          model?: string
           output_tokens?: number | null
-          provider?: string
           request_duration_ms?: number | null
           request_payload?: Json | null
           response_payload?: Json | null
@@ -62,6 +127,20 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "ai_usage_logs_ai_model_id_fkey"
+            columns: ["ai_model_id"]
+            isOneToOne: false
+            referencedRelation: "ai_model_pricing"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_usage_logs_ai_model_id_fkey"
+            columns: ["ai_model_id"]
+            isOneToOne: false
+            referencedRelation: "ai_model_pricing_view"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "ai_usage_logs_user_id_fkey"
             columns: ["user_id"]
@@ -159,6 +238,7 @@ export type Database = {
       }
       note_interactions: {
         Row: {
+          ai_model_id: string | null
           created_at: string | null
           id: string
           input_data: Json | null
@@ -167,6 +247,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          ai_model_id?: string | null
           created_at?: string | null
           id?: string
           input_data?: Json | null
@@ -175,6 +256,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          ai_model_id?: string | null
           created_at?: string | null
           id?: string
           input_data?: Json | null
@@ -195,6 +277,20 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "note_interactions_ai_model_id_fkey"
+            columns: ["ai_model_id"]
+            isOneToOne: false
+            referencedRelation: "ai_model_pricing"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "note_interactions_ai_model_id_fkey"
+            columns: ["ai_model_id"]
+            isOneToOne: false
+            referencedRelation: "ai_model_pricing_view"
             referencedColumns: ["id"]
           },
         ]
@@ -336,8 +432,7 @@ export type Database = {
       }
       quiz_sessions: {
         Row: {
-          ai_model: string
-          ai_provider: string
+          ai_model_id: string | null
           created_at: string | null
           difficulty: string
           id: string
@@ -350,8 +445,7 @@ export type Database = {
           video_id: string
         }
         Insert: {
-          ai_model: string
-          ai_provider: string
+          ai_model_id?: string | null
           created_at?: string | null
           difficulty: string
           id?: string
@@ -364,8 +458,7 @@ export type Database = {
           video_id: string
         }
         Update: {
-          ai_model?: string
-          ai_provider?: string
+          ai_model_id?: string | null
           created_at?: string | null
           difficulty?: string
           id?: string
@@ -378,6 +471,20 @@ export type Database = {
           video_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "quiz_sessions_ai_model_id_fkey"
+            columns: ["ai_model_id"]
+            isOneToOne: false
+            referencedRelation: "ai_model_pricing"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quiz_sessions_ai_model_id_fkey"
+            columns: ["ai_model_id"]
+            isOneToOne: false
+            referencedRelation: "ai_model_pricing_view"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "quiz_sessions_user_id_fkey"
             columns: ["user_id"]
@@ -459,7 +566,20 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      ai_model_pricing_view: {
+        Row: {
+          created_at: string | null
+          id: string | null
+          input_cost_per_million_tokens: number | null
+          is_active: boolean | null
+          model_name: string | null
+          output_cost_per_million_tokens: number | null
+          provider_display_name: string | null
+          provider_name: string | null
+          updated_at: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never

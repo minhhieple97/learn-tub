@@ -8,11 +8,7 @@ import {
 } from '../types';
 import { IQuizQuestion } from '../types';
 import { IQuizSession, IQuizSessionWithAttempts } from '../types';
-
-const convertDatabaseToQuizSession = (dbSession: IDatabaseQuizSession): IQuizSession => ({
-  ...dbSession,
-  difficulty: dbSession.difficulty as IQuizDifficulty,
-});
+import type { Database } from '@/database.types';
 
 export const createQuizSession = async (data: {
   userId: string;
@@ -21,10 +17,9 @@ export const createQuizSession = async (data: {
   difficulty: IQuizDifficulty;
   questionCount: number;
   topics?: string[];
-  aiProvider: string;
-  aiModel: string;
+  aiModelId: string;
   questions: IQuizQuestion[];
-}): Promise<IQuizSession> => {
+}): Promise<Database['public']['Tables']['quiz_sessions']['Row']> => {
   const supabase = await createClient();
 
   const { data: session, error } = await supabase
@@ -36,8 +31,7 @@ export const createQuizSession = async (data: {
       difficulty: data.difficulty,
       question_count: data.questionCount,
       topics: data.topics || [],
-      ai_provider: data.aiProvider,
-      ai_model: data.aiModel,
+      ai_model_id: data.aiModelId,
       questions: data.questions,
     })
     .select()
@@ -47,10 +41,7 @@ export const createQuizSession = async (data: {
     throw new Error(`Failed to create quiz session: ${error.message}`);
   }
 
-  return {
-    ...session,
-    difficulty: session.difficulty as IQuizDifficulty,
-  };
+  return session;
 };
 
 export const saveQuizAttempt = async (data: {
@@ -112,6 +103,13 @@ export const getUserQuizSessions = async (
         created_at,
         time_taken_seconds,
         feedback
+      ),
+      ai_model_pricing!inner(
+        model_name,
+        provider:ai_providers!inner(
+          name,
+          display_name
+        )
       )
     `,
     )
@@ -141,6 +139,9 @@ export const getUserQuizSessions = async (
             description: session.videos.description || '',
           }
         : undefined,
+      model_name: session.ai_model_pricing?.model_name,
+      provider_name: session.ai_model_pricing?.provider?.name,
+      provider_display_name: session.ai_model_pricing?.provider?.display_name,
     };
   });
 };
@@ -168,6 +169,13 @@ export const getVideoQuizSessions = async (
         created_at,
         time_taken_seconds,
         feedback
+      ),
+      ai_model_pricing!inner(
+        model_name,
+        provider:ai_providers!inner(
+          name,
+          display_name
+        )
       )
     `,
     )
@@ -191,6 +199,9 @@ export const getVideoQuizSessions = async (
       latest_attempt: latestAttempt,
       best_score: bestScore,
       attempt_count: attempts.length,
+      model_name: session.ai_model_pricing?.model_name,
+      provider_name: session.ai_model_pricing?.provider?.name,
+      provider_display_name: session.ai_model_pricing?.provider?.display_name,
     };
   });
 };
@@ -203,7 +214,18 @@ export const getQuizSessionById = async (
 
   const { data: session, error } = await supabase
     .from('quiz_sessions')
-    .select('*')
+    .select(
+      `
+      *,
+      ai_model_pricing!inner(
+        model_name,
+        provider:ai_providers!inner(
+          name,
+          display_name
+        )
+      )
+    `,
+    )
     .eq('id', sessionId)
     .eq('user_id', userId)
     .single();
@@ -218,6 +240,9 @@ export const getQuizSessionById = async (
   return {
     ...session,
     difficulty: session.difficulty as IQuizDifficulty,
+    model_name: session.ai_model_pricing?.model_name,
+    provider_name: session.ai_model_pricing?.provider?.name,
+    provider_display_name: session.ai_model_pricing?.provider?.display_name,
   };
 };
 

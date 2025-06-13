@@ -2,7 +2,6 @@ import 'server-only';
 import { createClient } from '@/lib/supabase/server';
 import {
   IAICommand,
-  IAIProvider,
   IAIUsageAnalytics,
   IAIUsageByCommand,
   IAIUsageByModel,
@@ -11,7 +10,7 @@ import {
   IAIUsageLog,
   IAIUsageLogInsert,
 } from '../types';
-import { AI_PROVIDERS } from '@/config/constants';
+
 
 export const createAIUsageLog = async (data: IAIUsageLogInsert): Promise<IAIUsageLog> => {
   const supabase = await createClient();
@@ -32,16 +31,25 @@ export const createAIUsageLog = async (data: IAIUsageLogInsert): Promise<IAIUsag
 export const getAIUsageLogs = async (filters: IAIUsageFilters = {}): Promise<IAIUsageLog[]> => {
   const supabase = await createClient();
 
-  let query = supabase.from('ai_usage_logs').select('*');
+  let query = supabase.from('ai_usage_logs').select(`
+      *,
+      ai_model_pricing:provider_id (
+        model_name,
+        provider:provider_id (
+          name,
+          display_name
+        )
+      )
+    `);
 
   if (filters.user_id) {
     query = query.eq('user_id', filters.user_id);
   }
   if (filters.provider) {
-    query = query.eq('provider', filters.provider);
+    query = query.eq('ai_model_pricing.provider.name', filters.provider);
   }
   if (filters.model) {
-    query = query.eq('model', filters.model);
+    query = query.eq('ai_model_pricing.model_name', filters.model);
   }
   if (filters.command) {
     query = query.eq('command', filters.command);
@@ -75,16 +83,25 @@ export const getAIUsageAnalytics = async (
 ): Promise<IAIUsageAnalytics> => {
   const supabase = await createClient();
 
-  let query = supabase.from('ai_usage_logs').select('*');
+  let query = supabase.from('ai_usage_logs').select(`
+      *,
+      ai_model_pricing:provider_id (
+        model_name,
+        provider:provider_id (
+          name,
+          display_name
+        )
+      )
+    `);
 
   if (filters.user_id) {
     query = query.eq('user_id', filters.user_id);
   }
   if (filters.provider) {
-    query = query.eq('provider', filters.provider);
+    query = query.eq('ai_model_pricing.provider.name', filters.provider);
   }
   if (filters.model) {
-    query = query.eq('model', filters.model);
+    query = query.eq('ai_model_pricing.model_name', filters.model);
   }
   if (filters.command) {
     query = query.eq('command', filters.command);
@@ -131,12 +148,18 @@ export const getAIUsageAnalytics = async (
     durations.length > 0 ? durations.reduce((sum, dur) => sum + dur, 0) / durations.length : 0;
 
   const providerCounts = data.reduce((acc, log) => {
-    acc[log.provider] = (acc[log.provider] || 0) + 1;
+    const providerName = log.ai_model_pricing?.provider?.name;
+    if (providerName) {
+      acc[providerName] = (acc[providerName] || 0) + 1;
+    }
     return acc;
   }, {} as Record<string, number>);
 
   const modelCounts = data.reduce((acc, log) => {
-    acc[log.model] = (acc[log.model] || 0) + 1;
+    const modelName = log.ai_model_pricing?.model_name;
+    if (modelName) {
+      acc[modelName] = (acc[modelName] || 0) + 1;
+    }
     return acc;
   }, {} as Record<string, number>);
 
@@ -166,13 +189,25 @@ export const getAIUsageAnalytics = async (
 export const getAIUsageByProvider = async (
   filters: Omit<IAIUsageFilters, 'limit' | 'offset' | 'provider'> = {},
 ): Promise<IAIUsageByProvider[]> => {
-  const providers: IAIProvider[] = [AI_PROVIDERS.OPENAI, AI_PROVIDERS.GEMINI];
+  const supabase = await createClient();
+
+  // Get all active providers
+  const { data: providers, error: providersError } = await supabase
+    .from('ai_providers')
+    .select('name')
+    .eq('is_active', true);
+
+  if (providersError) {
+    throw new Error(`Failed to get providers: ${providersError.message}`);
+  }
+
+  const providerNames = providers?.map((p) => p.name) || [];
 
   const results = await Promise.all(
-    providers.map(async (provider) => {
-      const analytics = await getAIUsageAnalytics({ ...filters, provider });
+    providerNames.map(async (providerName) => {
+      const analytics = await getAIUsageAnalytics({ ...filters, provider: providerName });
       return {
-        provider,
+        provider: providerName,
         analytics,
       };
     }),
@@ -186,42 +221,32 @@ export const getAIUsageByModel = async (
 ): Promise<IAIUsageByModel[]> => {
   const supabase = await createClient();
 
-  let query = supabase.from('ai_usage_logs').select('model, provider');
+  // Get unique model and provider combinations from ai_model_pricing
+  const { data: modelData, error: modelError } = await supabase
+    .from('ai_model_pricing')
+    .select(
+      `
+      model_name,
+      provider:provider_id (
+        name
+      )
+    `,
+    )
+    .eq('is_active', true);
 
-  if (filters.user_id) {
-    query = query.eq('user_id', filters.user_id);
-  }
-  if (filters.provider) {
-    query = query.eq('provider', filters.provider);
-  }
-  if (filters.command) {
-    query = query.eq('command', filters.command);
-  }
-  if (filters.status) {
-    query = query.eq('status', filters.status);
-  }
-  if (filters.date_from) {
-    query = query.gte('created_at', filters.date_from);
-  }
-  if (filters.date_to) {
-    query = query.lte('created_at', filters.date_to);
+  if (modelError) {
+    throw new Error(`Failed to get models: ${modelError.message}`);
   }
 
-  const { data, error } = await query;
-
-  if (error) {
-    throw new Error(`Failed to get models: ${error.message}`);
-  }
-
-  const uniqueModels = Array.from(
-    new Set(data?.map((item) => `${item.model}:${item.provider}`) || []),
-  ).map((combined) => {
-    const [model, provider] = combined.split(':');
-    return { model, provider: provider as IAIProvider };
-  });
+  const uniqueModels =
+    modelData?.map((item) => ({
+      model: item.model_name,
+      provider: item.provider?.name,
+    })) || [];
 
   const results = await Promise.all(
     uniqueModels.map(async ({ model, provider }) => {
+      if (!provider) return null;
       const analytics = await getAIUsageAnalytics({ ...filters, model, provider });
       return {
         model,
@@ -231,7 +256,9 @@ export const getAIUsageByModel = async (
     }),
   );
 
-  return results.filter((result) => result.analytics.total_requests > 0);
+  return results.filter(
+    (result): result is IAIUsageByModel => result !== null && result.analytics.total_requests > 0,
+  );
 };
 
 export const getAIUsageByCommand = async (

@@ -1,8 +1,4 @@
-import { AI_PROVIDERS, CHUNK_TYPES } from './config/constants';
-
-export type AIProvider =
-  | typeof AI_PROVIDERS.OPENAI
-  | typeof AI_PROVIDERS.GEMINI;
+import { CHUNK_TYPES } from './config/constants';
 
 export type StreamChunk = {
   type: typeof CHUNK_TYPES.FEEDBACK | typeof CHUNK_TYPES.COMPLETE | typeof CHUNK_TYPES.ERROR;

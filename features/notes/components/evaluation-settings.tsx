@@ -1,14 +1,13 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Settings, Brain, Sparkles } from 'lucide-react';
-import { AIModelSelector } from './ai-model-selector';
-import { AIProvider } from '@/types';
+import { AIModelSelector } from '../../ai/components/ai-model-selector';
 
 type IEvaluationSettingsProps = {
-  provider: AIProvider;
-  model: string;
-  onProviderChange: (provider: AIProvider) => void;
-  onModelChange: (model: string) => void;
+  provider: string | null;
+  aiModelId: string;
+  onProviderChange: (provider: string) => void;
+  onModelChange: (modelId: string) => void;
   onEvaluate: () => void;
   onReset?: () => void;
   isEvaluating: boolean;
@@ -17,7 +16,7 @@ type IEvaluationSettingsProps = {
 
 export const EvaluationSettings = ({
   provider,
-  model,
+  aiModelId,
   onProviderChange,
   onModelChange,
   onEvaluate,
@@ -36,7 +35,7 @@ export const EvaluationSettings = ({
       <CardContent className="space-y-4">
         <AIModelSelector
           provider={provider}
-          model={model}
+          aiModelId={aiModelId}
           onProviderChange={onProviderChange}
           onModelChange={onModelChange}
           disabled={isEvaluating}

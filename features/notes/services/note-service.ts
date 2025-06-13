@@ -1,6 +1,5 @@
 import {
   AI_DEFAULTS,
-  AI_PROVIDERS,
   CHUNK_TYPES,
   AI_SYSTEM_MESSAGES,
   AI_FORMAT,
@@ -12,35 +11,59 @@ import { INoteEvaluationRequest } from '@/features/notes/types';
 import { IFeedback, StreamChunk } from '@/types';
 import { aiUsageTracker } from '@/features/ai';
 import { AIClientFactory } from '@/features/ai/services/ai-client';
+import { createClient } from '@/lib/supabase/server';
 
 type StreamController = ReadableStreamDefaultController<StreamChunk>;
-type ProviderEvaluator = (
-  model: string,
-  prompt: string,
-  userId: string,
-) => Promise<ReadableStream<StreamChunk>>;
 
 class NoteService {
   async evaluateNote(request: INoteEvaluationRequest): Promise<ReadableStream<StreamChunk>> {
-    const { provider, model, content, context, userId } = request;
+    const { aiModelId, content, context, userId } = request;
     const prompt = this.createEvaluationPrompt(content, context);
 
-    const evaluator = this.getProviderEvaluator(provider);
-    return evaluator(model, prompt, userId);
-  }
+    const supabase = await createClient();
+    const { data: modelData, error: modelError } = (await supabase
+      .from('ai_model_pricing_view')
+      .select('model_name')
+      .eq('id', aiModelId)
+      .single()) as { data: { model_name: string } | null; error: any };
 
-  private getProviderEvaluator(provider: string): ProviderEvaluator {
-    const evaluators: Record<string, ProviderEvaluator> = {
-      [AI_PROVIDERS.OPENAI]: this.evaluateWithOpenAI.bind(this),
-      [AI_PROVIDERS.GEMINI]: this.evaluateWithGemini.bind(this),
-    };
-
-    const evaluator = evaluators[provider];
-    if (!evaluator) {
-      throw new Error(`${EVALUATION_ERRORS.UNSUPPORTED_PROVIDER}: ${provider}`);
+    if (modelError || !modelData?.model_name) {
+      throw new Error(`${EVALUATION_ERRORS.UNSUPPORTED_PROVIDER}: ${aiModelId}`);
     }
 
-    return evaluator;
+    const modelName = modelData.model_name;
+
+    return aiUsageTracker.wrapStreamingOperation(
+      {
+        user_id: userId,
+        command: 'evaluate_note',
+        ai_model_id: aiModelId,
+        request_payload: { prompt_length: prompt.length },
+      },
+      async () => {
+        const aiClient = AIClientFactory.getClient();
+
+        const messages = aiClient.createSystemUserMessages(
+          AI_SYSTEM_MESSAGES.EDUCATIONAL_ASSISTANT,
+          prompt,
+        );
+
+        const { stream, getUsage } = await aiClient.streamChatCompletionWithUsage({
+          model: modelName,
+          messages,
+          stream_options: {
+            include_usage: true,
+          },
+        });
+
+        const transformedStream = this.createStreamFromAIClient(stream);
+
+        return {
+          stream: transformedStream,
+          getUsage,
+        };
+      },
+    );
   }
 
   private createEvaluationPrompt(
@@ -161,88 +184,10 @@ ${feedback.detailed_analysis}`;
     return items.map((item) => `${bullet} ${item}`).join('\n');
   }
 
-  private async evaluateWithOpenAI(
-    model: string,
-    prompt: string,
-    userId: string,
-  ): Promise<ReadableStream<StreamChunk>> {
-    return aiUsageTracker.wrapStreamingOperation(
-      {
-        user_id: userId,
-        command: 'evaluate_note',
-        provider: AI_PROVIDERS.OPENAI,
-        model: model || AI_DEFAULTS.OPENAI_MODEL,
-        request_payload: { prompt_length: prompt.length },
-      },
-      async () => {
-        const aiClient = AIClientFactory.getClient(AI_PROVIDERS.OPENAI);
-
-        const messages = aiClient.createSystemUserMessages(
-          AI_SYSTEM_MESSAGES.EDUCATIONAL_ASSISTANT,
-          prompt,
-        );
-
-        const { stream, getUsage } = await aiClient.streamChatCompletionWithUsage({
-          model: model || AI_DEFAULTS.OPENAI_MODEL,
-          messages,
-          stream_options: {
-            include_usage: true,
-          },
-        });
-
-        const transformedStream = this.createStreamFromAIClient(stream);
-
-        return {
-          stream: transformedStream,
-          getUsage,
-        };
-      },
-    );
-  }
-
-  private async evaluateWithGemini(
-    model: string,
-    prompt: string,
-    userId: string,
-  ): Promise<ReadableStream<StreamChunk>> {
-    return aiUsageTracker.wrapStreamingOperation(
-      {
-        user_id: userId,
-        command: 'evaluate_note',
-        provider: AI_PROVIDERS.GEMINI,
-        model: model || AI_DEFAULTS.GEMINI_MODEL,
-        request_payload: { prompt_length: prompt.length },
-      },
-      async () => {
-        const aiClient = AIClientFactory.getClient(AI_PROVIDERS.GEMINI);
-
-        const messages = aiClient.createSystemUserMessages(
-          AI_SYSTEM_MESSAGES.EDUCATIONAL_ASSISTANT,
-          prompt,
-        );
-
-        const { stream, getUsage } = await aiClient.streamChatCompletionWithUsage({
-          model: model || AI_DEFAULTS.GEMINI_MODEL,
-          messages,
-          stream_options: {
-            include_usage: true,
-          },
-        });
-
-        const transformedStream = this.createStreamFromAIClient(stream);
-
-        return {
-          stream: transformedStream,
-          getUsage,
-        };
-      },
-    );
-  }
-
   private createStreamFromAIClient(
     responseBody: ReadableStream<Uint8Array>,
   ): ReadableStream<StreamChunk> {
-    const aiClient = AIClientFactory.getClient(AI_PROVIDERS.OPENAI); // Can use any provider for stream parsing
+    const aiClient = AIClientFactory.getClient();
     const aiStream = aiClient.createStreamFromResponse(responseBody);
 
     return new ReadableStream<StreamChunk>({

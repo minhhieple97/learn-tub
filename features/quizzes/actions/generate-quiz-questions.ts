@@ -16,8 +16,7 @@ const GenerateQuizQuestionsSchema = z.object({
   questionCount: z.number().min(1).max(50).default(10),
   difficulty: z.enum(['easy', 'medium', 'hard', 'mixed']).default('mixed'),
   topics: z.array(z.string()).optional(),
-  provider: z.string().min(1, 'AI provider is required'),
-  model: z.string().min(1, 'AI model is required'),
+  aiModelId: z.string().uuid('AI model ID is required'),
 });
 
 export const generateQuizQuestionsAction = authAction
@@ -69,8 +68,7 @@ export const generateQuizQuestionsAction = authAction
       difficulty: data.difficulty,
       questionCount: data.questionCount,
       topics: data.topics,
-      aiProvider: data.provider,
-      aiModel: data.model,
+      aiModelId: data.aiModelId,
       questions: response.data || [],
     });
 

@@ -67,7 +67,7 @@ export const QuizInfoCard = ({ quizSession }: IQuizInfoCardProps) => {
             <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30 border border-border/30">
               <div className="text-sm">
                 <span className="text-muted-foreground">AI Model:</span>
-                <span className="ml-1 font-medium text-foreground">{quizSession.ai_model}</span>
+                <span className="ml-1 font-medium text-foreground">{quizSession.ai_model_id}</span>
               </div>
             </div>
           </div>

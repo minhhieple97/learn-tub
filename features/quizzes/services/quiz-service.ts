@@ -1,6 +1,5 @@
 import {
   AI_DEFAULTS,
-  AI_PROVIDERS,
   AI_SYSTEM_MESSAGES,
   AI_QUIZ_CONFIG,
   AI_QUIZ_ERRORS,
@@ -17,6 +16,7 @@ import type {
 } from '../types';
 import { aiUsageTracker } from '@/features/ai';
 import { AIClientFactory } from '@/features/ai/services/ai-client';
+import { createClient } from '@/lib/supabase/client';
 
 type IStreamController = ReadableStreamDefaultController<IQuizStreamChunk>;
 
@@ -24,8 +24,7 @@ class QuizService {
   async generateQuestions(request: IGenerateQuestionsRequest): Promise<IQuizGenerationResponse> {
     try {
       const {
-        provider,
-        model,
+        aiModelId,
         videoTitle,
         videoDescription,
         videoTutorial,
@@ -43,7 +42,46 @@ class QuizService {
         topics,
       });
 
-      const response = await this.callAIProvider(provider, model, prompt, userId);
+      const supabase = await createClient();
+      const { data: modelData, error } = (await supabase
+        .from('ai_model_pricing_view')
+        .select('model_name')
+        .eq('id', aiModelId)
+        .single()) as { data: { model_name: string } | null; error: any };
+
+      if (error || !modelData?.model_name) {
+        throw new Error(`${AI_QUIZ_ERRORS.UNSUPPORTED_PROVIDER}: ${aiModelId}`);
+      }
+
+      const modelName = modelData.model_name;
+
+      const response = await aiUsageTracker.wrapAIOperationWithTokens(
+        {
+          user_id: userId,
+          command: 'generate_quiz_questions',
+          ai_model_id: aiModelId,
+          request_payload: { prompt_length: prompt.length },
+        },
+        async () => {
+          const aiClient = AIClientFactory.getClient();
+
+          const messages = aiClient.createSystemUserMessages(
+            AI_SYSTEM_MESSAGES.EDUCATIONAL_ASSISTANT,
+            prompt,
+          );
+
+          const { result, tokenUsage } = await aiClient.chatCompletionWithUsage({
+            model: modelName,
+            messages,
+          });
+
+          return {
+            result,
+            tokenUsage,
+          };
+        },
+      );
+
       const questions = this.parseQuestionsFromResponse(response);
 
       return {
@@ -63,8 +101,7 @@ class QuizService {
     request: IGenerateQuestionsRequest,
   ): Promise<ReadableStream<Uint8Array>> {
     const {
-      provider,
-      model,
+      aiModelId,
       videoTitle,
       videoDescription,
       videoTutorial,
@@ -83,15 +120,15 @@ class QuizService {
       topics,
     });
 
-    return this.callAIProviderStreamForAPI(provider, model, prompt, userId);
+    return this.callAIProviderStreamForAPI(aiModelId, prompt, userId);
   }
 
   async evaluateQuiz(request: IEvaluateQuizRequest): Promise<IQuizEvaluationResponse> {
     try {
-      const { provider, model, questions, answers, videoContext, userId } = request;
+      const { aiModelId, questions, answers, videoContext, userId } = request;
       const prompt = this.createEvaluationPrompt(questions, answers, videoContext);
 
-      const response = await this.callAIProviderForEvaluation(provider, model, prompt, userId);
+      const response = await this.callAIProviderForEvaluation(aiModelId, prompt, userId);
       const feedback = this.parseFeedbackFromResponse(response, questions, answers);
 
       return {
@@ -193,28 +230,29 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
     return parts.join('\n');
   }
 
-  private async callAIProvider(
-    provider: string,
-    model: string,
-    prompt: string,
-    userId: string,
-  ): Promise<string> {
-    if (provider !== AI_PROVIDERS.OPENAI && provider !== AI_PROVIDERS.GEMINI) {
-      throw new Error(`${AI_QUIZ_ERRORS.UNSUPPORTED_PROVIDER}: ${provider}`);
+  private async callAIProvider(aiModelId: string, prompt: string, userId: string): Promise<string> {
+    const supabase = await createClient();
+    const { data: modelData, error } = (await supabase
+      .from('ai_model_pricing_view')
+      .select('model_name')
+      .eq('id', aiModelId)
+      .single()) as { data: { model_name: string } | null; error: any };
+
+    if (error || !modelData?.model_name) {
+      throw new Error(`${AI_QUIZ_ERRORS.UNSUPPORTED_PROVIDER}: ${aiModelId}`);
     }
+
+    const modelName = modelData.model_name;
 
     return aiUsageTracker.wrapAIOperationWithTokens(
       {
         user_id: userId,
         command: 'generate_quiz_questions',
-        provider: provider as any,
-        model:
-          model ||
-          (provider === AI_PROVIDERS.OPENAI ? AI_DEFAULTS.OPENAI_MODEL : AI_DEFAULTS.GEMINI_MODEL),
+        ai_model_id: aiModelId,
         request_payload: { prompt_length: prompt.length },
       },
       async () => {
-        const aiClient = AIClientFactory.getClient(provider);
+        const aiClient = AIClientFactory.getClient();
 
         const messages = aiClient.createSystemUserMessages(
           AI_SYSTEM_MESSAGES.EDUCATIONAL_ASSISTANT,
@@ -222,11 +260,7 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
         );
 
         const { result, tokenUsage } = await aiClient.chatCompletionWithUsage({
-          model:
-            model ||
-            (provider === AI_PROVIDERS.OPENAI
-              ? AI_DEFAULTS.OPENAI_MODEL
-              : AI_DEFAULTS.GEMINI_MODEL),
+          model: modelName,
           messages,
         });
 
@@ -239,27 +273,32 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
   }
 
   private async callAIProviderForEvaluation(
-    provider: string,
-    model: string,
+    aiModelId: string,
     prompt: string,
     userId: string,
   ): Promise<string> {
-    if (provider !== AI_PROVIDERS.OPENAI && provider !== AI_PROVIDERS.GEMINI) {
-      throw new Error(`${AI_QUIZ_ERRORS.UNSUPPORTED_PROVIDER}: ${provider}`);
+    const supabase = await createClient();
+    const { data: modelData, error } = (await supabase
+      .from('ai_model_pricing_view')
+      .select('model_name')
+      .eq('id', aiModelId)
+      .single()) as { data: { model_name: string } | null; error: any };
+
+    if (error || !modelData?.model_name) {
+      throw new Error(`${AI_QUIZ_ERRORS.UNSUPPORTED_PROVIDER}: ${aiModelId}`);
     }
+
+    const modelName = modelData.model_name;
 
     return aiUsageTracker.wrapAIOperationWithTokens(
       {
         user_id: userId,
         command: 'evaluate_quiz_answers',
-        provider: provider as any,
-        model:
-          model ||
-          (provider === AI_PROVIDERS.OPENAI ? AI_DEFAULTS.OPENAI_MODEL : AI_DEFAULTS.GEMINI_MODEL),
+        ai_model_id: aiModelId,
         request_payload: { prompt_length: prompt.length },
       },
       async () => {
-        const aiClient = AIClientFactory.getClient(provider);
+        const aiClient = AIClientFactory.getClient();
 
         const messages = aiClient.createSystemUserMessages(
           AI_SYSTEM_MESSAGES.EDUCATIONAL_ASSISTANT,
@@ -267,11 +306,7 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
         );
 
         const { result, tokenUsage } = await aiClient.chatCompletionWithUsage({
-          model:
-            model ||
-            (provider === AI_PROVIDERS.OPENAI
-              ? AI_DEFAULTS.OPENAI_MODEL
-              : AI_DEFAULTS.GEMINI_MODEL),
+          model: modelName,
           messages,
         });
 
@@ -284,27 +319,32 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
   }
 
   private async callAIProviderStream(
-    provider: string,
-    model: string,
+    aiModelId: string,
     prompt: string,
     userId: string,
   ): Promise<ReadableStream<IQuizStreamChunk>> {
-    if (provider !== AI_PROVIDERS.OPENAI && provider !== AI_PROVIDERS.GEMINI) {
-      throw new Error(`${AI_QUIZ_ERRORS.UNSUPPORTED_PROVIDER}: ${provider}`);
+    const supabase = await createClient();
+    const { data: modelData, error } = (await supabase
+      .from('ai_model_pricing_view')
+      .select('model_name')
+      .eq('id', aiModelId)
+      .single()) as { data: { model_name: string } | null; error: any };
+
+    if (error || !modelData?.model_name) {
+      throw new Error(`${AI_QUIZ_ERRORS.UNSUPPORTED_PROVIDER}: ${aiModelId}`);
     }
+
+    const modelName = modelData.model_name;
 
     return aiUsageTracker.wrapStreamingOperation(
       {
         user_id: userId,
         command: 'generate_quiz_questions',
-        provider: provider as any,
-        model:
-          model ||
-          (provider === AI_PROVIDERS.OPENAI ? AI_DEFAULTS.OPENAI_MODEL : AI_DEFAULTS.GEMINI_MODEL),
+        ai_model_id: aiModelId,
         request_payload: { prompt_length: prompt.length },
       },
       async () => {
-        const aiClient = AIClientFactory.getClient(provider);
+        const aiClient = AIClientFactory.getClient();
 
         const messages = aiClient.createSystemUserMessages(
           AI_SYSTEM_MESSAGES.EDUCATIONAL_ASSISTANT,
@@ -312,11 +352,7 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
         );
 
         const { stream, getUsage } = await aiClient.streamChatCompletionWithUsage({
-          model:
-            model ||
-            (provider === AI_PROVIDERS.OPENAI
-              ? AI_DEFAULTS.OPENAI_MODEL
-              : AI_DEFAULTS.GEMINI_MODEL),
+          model: modelName,
           messages,
           stream_options: {
             include_usage: true,
@@ -334,27 +370,32 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
   }
 
   private async callAIProviderStreamForAPI(
-    provider: string,
-    model: string,
+    aiModelId: string,
     prompt: string,
     userId: string,
   ): Promise<ReadableStream<Uint8Array>> {
-    if (provider !== AI_PROVIDERS.OPENAI && provider !== AI_PROVIDERS.GEMINI) {
-      throw new Error(`${AI_QUIZ_ERRORS.UNSUPPORTED_PROVIDER}: ${provider}`);
+    const supabase = await createClient();
+    const { data: modelData, error } = (await supabase
+      .from('ai_model_pricing_view')
+      .select('model_name')
+      .eq('id', aiModelId)
+      .single()) as { data: { model_name: string } | null; error: any };
+
+    if (error || !modelData?.model_name) {
+      throw new Error(`${AI_QUIZ_ERRORS.UNSUPPORTED_PROVIDER}: ${aiModelId}`);
     }
+
+    const modelName = modelData.model_name;
 
     return aiUsageTracker.wrapStreamingOperation(
       {
         user_id: userId,
         command: 'generate_quiz_questions',
-        provider: provider as any,
-        model:
-          model ||
-          (provider === AI_PROVIDERS.OPENAI ? AI_DEFAULTS.OPENAI_MODEL : AI_DEFAULTS.GEMINI_MODEL),
+        ai_model_id: aiModelId,
         request_payload: { prompt_length: prompt.length },
       },
       async () => {
-        const aiClient = AIClientFactory.getClient(provider);
+        const aiClient = AIClientFactory.getClient();
 
         const messages = aiClient.createSystemUserMessages(
           AI_SYSTEM_MESSAGES.EDUCATIONAL_ASSISTANT,
@@ -362,11 +403,7 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
         );
 
         const { stream, getUsage } = await aiClient.streamChatCompletionWithUsage({
-          model:
-            model ||
-            (provider === AI_PROVIDERS.OPENAI
-              ? AI_DEFAULTS.OPENAI_MODEL
-              : AI_DEFAULTS.GEMINI_MODEL),
+          model: modelName,
           messages,
           stream_options: {
             include_usage: true,
@@ -386,7 +423,7 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
   private createStreamFromAIClient(
     responseBody: ReadableStream<Uint8Array>,
   ): ReadableStream<IQuizStreamChunk> {
-    const aiClient = AIClientFactory.getClient(AI_PROVIDERS.OPENAI); // Can use any provider for stream parsing
+    const aiClient = AIClientFactory.getClient();
     const aiStream = aiClient.createStreamFromResponse(responseBody);
 
     return new ReadableStream<IQuizStreamChunk>({
@@ -421,7 +458,7 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
     responseBody: ReadableStream<Uint8Array>,
   ): ReadableStream<Uint8Array> {
     const encoder = new TextEncoder();
-    const aiClient = AIClientFactory.getClient(AI_PROVIDERS.OPENAI); // Can use any provider for stream parsing
+    const aiClient = AIClientFactory.getClient();
     const aiStream = aiClient.createStreamFromResponse(responseBody);
 
     return new ReadableStream<Uint8Array>({
@@ -667,6 +704,22 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
     });
 
     controller.close();
+  }
+
+  async generateQuizQuestionsStream(
+    prompt: string,
+    userId: string,
+    aiModelId: string,
+  ): Promise<ReadableStream<IQuizStreamChunk>> {
+    return this.callAIProviderStream(aiModelId, prompt, userId);
+  }
+
+  async generateQuizQuestionsStreamForAPI(
+    prompt: string,
+    userId: string,
+    aiModelId: string,
+  ): Promise<ReadableStream<Uint8Array>> {
+    return this.callAIProviderStreamForAPI(aiModelId, prompt, userId);
   }
 }
 

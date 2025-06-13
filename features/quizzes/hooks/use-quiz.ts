@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useAction } from 'next-safe-action/hooks';
 import { generateQuizQuestionsAction, evaluateQuizAction } from '../actions';
-import { AI_DEFAULTS, AI_PROVIDERS, AI_QUIZ_CONFIG } from '@/config/constants';
+import { AI_QUIZ_CONFIG } from '@/config/constants';
 import { IQuizAnswerOption, IQuizSettings, IQuizState } from '../types';
 
 type IExtendedQuizState = IQuizState & {
@@ -27,8 +27,7 @@ export const useQuiz = (videoId: string) => {
     settings: {
       questionCount: AI_QUIZ_CONFIG.DEFAULT_QUESTION_COUNT,
       difficulty: AI_QUIZ_CONFIG.DEFAULT_DIFFICULTY,
-      provider: AI_PROVIDERS.GEMINI,
-      model: AI_DEFAULTS.GEMINI_MODEL,
+      aiModelId: '',
     },
   });
 
@@ -135,8 +134,7 @@ export const useQuiz = (videoId: string) => {
         videoTutorial,
         questionCount: settings.questionCount,
         difficulty: settings.difficulty,
-        provider: settings.provider,
-        model: settings.model,
+        aiModelId: settings.aiModelId,
       });
     },
     [videoId, state.settings, executeGenerate],
@@ -202,8 +200,7 @@ export const useQuiz = (videoId: string) => {
           description: videoDescription,
           tutorial: videoTutorial,
         },
-        provider: state.settings.provider,
-        model: state.settings.model,
+        aiModelId: state.settings.aiModelId,
         quizSessionId: state.sessionId || '',
         timeTakenSeconds: finalTimeTaken,
       });

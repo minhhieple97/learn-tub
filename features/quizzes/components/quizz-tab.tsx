@@ -7,7 +7,6 @@ import { QuestionCard } from './question-card';
 import { QuizNavigation } from './quiz-navigation';
 import { QuizResults } from './quiz-results';
 import { useQuiz } from '../hooks/use-quiz';
-import { AIProvider } from '@/types';
 import { IQuizAnswerOption } from '../types';
 
 type QuizzTabProps = {

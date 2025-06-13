@@ -2,15 +2,14 @@
 import { authAction, ActionError } from '@/lib/safe-action';
 import { quizService } from '../services/quiz-service';
 import { saveQuizAttempt } from '../queries';
-
 import { z } from 'zod';
 import { EvaluateQuizSchema } from '../schema';
 import { RateLimiter } from '@/lib/rate-limiter';
 import { checkProfileByUserId } from '@/lib/require-auth';
 
 const ExtendedEvaluateQuizSchema = EvaluateQuizSchema.extend({
-  quizSessionId: z.string().min(1, 'Session ID is required'),
-  timeTakenSeconds: z.number().optional(),
+  quizSessionId: z.string().uuid('Quiz session ID is required'),
+  timeTakenSeconds: z.number().min(0),
 });
 
 export const evaluateQuizAction = authAction
@@ -23,24 +22,28 @@ export const evaluateQuizAction = authAction
         `Rate limit exceeded. Try again in a minute. Remaining: ${rateLimitResult.remaining}`,
       );
     }
+
     const profile = await checkProfileByUserId(user.id);
 
     const response = await quizService.evaluateQuiz({
-      ...data,
+      questions: data.questions,
+      answers: data.answers,
+      videoContext: data.videoContext,
+      aiModelId: data.aiModelId,
       userId: profile.id,
     });
 
-    if (!response.success) {
-      throw new ActionError(response.error || 'Failed to evaluate quiz');
+    if (!response.success || !response.data) {
+      throw new Error(response.error || 'Failed to evaluate quiz');
     }
 
     const attempt = await saveQuizAttempt({
       quizSessionId: data.quizSessionId,
       userId: profile.id,
       answers: data.answers,
-      score: response.data?.score || 0,
-      totalQuestions: response.data?.totalQuestions || data.questions.length,
-      correctAnswers: response.data?.correctAnswers || 0,
+      score: response.data.score,
+      totalQuestions: response.data.totalQuestions,
+      correctAnswers: response.data.correctAnswers,
       feedback: response.data,
       timeTakenSeconds: data.timeTakenSeconds,
     });
