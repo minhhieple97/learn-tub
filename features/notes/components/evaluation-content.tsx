@@ -3,7 +3,7 @@ import { EvaluationError } from './evaluation-error';
 import { EvaluationWelcome } from './evaluation-welcome';
 import { NoteEvaluationStreaming } from './note-evaluation-streaming';
 import { NoteFeedbackDisplay } from './note-feedback-display';
-import { IFeedback, AIProvider } from '@/types';
+import { IFeedback } from '@/types';
 import { STATUS_STREAMING } from '@/config/constants';
 
 type IEvaluationContentProps = {
@@ -14,16 +14,16 @@ type IEvaluationContentProps = {
   isEvaluating: boolean;
   isCompleted: boolean;
   streamingContent: string;
-  feedback: IFeedback | null;
+  feedback: any;
   status: string;
 
   // Configuration
-  provider: AIProvider;
-  model: string;
+  provider: string | null;
+  aiModelId: string;
 
   // Handlers
-  onProviderChange: (provider: AIProvider) => void;
-  onModelChange: (model: string) => void;
+  onProviderChange: (provider: string) => void;
+  onModelChange: (modelId: string) => void;
   onEvaluate: () => void;
   onReset: () => void;
   onShowSettings: () => void;
@@ -40,7 +40,7 @@ export const EvaluationContent = ({
   feedback,
   status,
   provider,
-  model,
+  aiModelId,
   onProviderChange,
   onModelChange,
   onEvaluate,
@@ -53,7 +53,7 @@ export const EvaluationContent = ({
       {showSettings && (
         <EvaluationSettings
           provider={provider}
-          model={model}
+          aiModelId={aiModelId}
           onProviderChange={onProviderChange}
           onModelChange={onModelChange}
           onEvaluate={onEvaluate}

@@ -47,3 +47,8 @@ export const updateNoteInputSchema = z.object({
 export const deleteNoteInputSchema = z.object({
   noteId: z.string().uuid('Invalid note ID'),
 });
+
+export const EvaluateNoteQuerySchema = z.object({
+  noteId: z.string().uuid('Invalid note ID format'),
+  aiModelId: z.string().uuid('Invalid AI Model ID'),
+});

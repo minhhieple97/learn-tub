@@ -45,7 +45,9 @@ export const AIFeedbackHistory = ({ noteId }: AIFeedbackHistoryProps) => {
     return 'bg-red-500';
   };
 
-  const getProviderIcon = (provider: string) => {
+  const getProviderIcon = (provider: string | null) => {
+    if (!provider) return <Settings className="h-4 w-4" />;
+
     switch (provider) {
       case 'openai':
         return <Brain className="h-4 w-4" />;

@@ -1,10 +1,4 @@
 import { z } from 'zod';
-import { AI_PROVIDERS } from '@/config/constants';
-
-export const AIProviderSchema = z.enum([
-  AI_PROVIDERS.OPENAI,
-  AI_PROVIDERS.GEMINI,
-]);
 
 export const AIFeedbackSchema = z.object({
   summary: z.string().min(1, 'Summary is required'),
@@ -15,22 +9,9 @@ export const AIFeedbackSchema = z.object({
   detailed_analysis: z.string().min(1, 'Detailed analysis is required'),
 });
 
-export const CreateAIEvaluationSchema = z.object({
-  noteId: z.string().uuid('Invalid note ID'),
-  provider: AIProviderSchema,
-  model: z.string().min(1, 'Model is required'),
-});
-
 export const CopyFeedbackSchema = z.object({
   feedback: AIFeedbackSchema,
   format: z.enum(['plain', 'markdown']),
-});
-
-export const AIEvaluationSettingsSchema = z.object({
-  provider: AIProviderSchema,
-  model: z.string().min(1, 'Model is required'),
-  temperature: z.number().min(0).max(2).default(0.7),
-  max_tokens: z.number().min(100).max(4000).default(1500),
 });
 
 export const AnalyzeNotesSchema = z.object({
@@ -96,6 +77,7 @@ export const EvaluateQuizSchema = z.object({
       tutorial: z.string().optional(),
     })
     .optional(),
-  provider: z.string().min(1, 'AI provider is required'),
-  model: z.string().min(1, 'AI model is required'),
+  aiModelId: z.string().uuid('AI model ID is required'),
+  quizSessionId: z.string().uuid('Quiz session ID is required'),
+  timeTakenSeconds: z.number().min(0),
 });

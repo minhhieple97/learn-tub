@@ -9,9 +9,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Settings } from 'lucide-react';
-import { AIProvider } from '@/types';
 import { IQuizDifficulty, IQuizSettingsType } from '../types';
-import { AI_PROVIDERS } from '@/config/constants';
+import { AIModelSelector } from '@/features/ai/components/ai-model-selector';
 
 type IQuizSettingsProps = {
   settings: IQuizSettingsType;
@@ -80,24 +79,13 @@ export const QuizSettings = ({
           </Select>
         </div>
 
-        <div>
-          <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-            AI Provider
-          </label>
-          <Select
-            value={settings.provider}
-            onValueChange={(value) => onUpdateSettings({ provider: value as AIProvider })}
-            disabled={isGenerating}
-          >
-            <SelectTrigger className="border-slate-300 dark:border-slate-600 focus:border-blue-500 focus:ring-blue-500">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={AI_PROVIDERS.GEMINI}>Google Gemini</SelectItem>
-              <SelectItem value={AI_PROVIDERS.OPENAI}>OpenAI</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+        <AIModelSelector
+          provider={null}
+          aiModelId={settings.aiModelId}
+          onProviderChange={() => {}}
+          onModelChange={(aiModelId) => onUpdateSettings({ aiModelId })}
+          disabled={isGenerating}
+        />
       </CardContent>
     </Card>
   );

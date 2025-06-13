@@ -64,30 +64,20 @@ export const AI_CONFIG = {
   MAX_TOKENS: 5000,
 } as const;
 
-export const AI_MODELS = {
-  gemini: [
-    { value: 'gemini-2.5-flash-preview', label: 'Gemini 2.5 Flash (Experimental)' },
-    { value: 'gemini-2.0-pro-exp', label: 'Gemini 2.0 Pro (Experimental)' },
-  ],
-  openai: [{ value: 'gpt-4o-mini', label: 'GPT-4o Mini' }],
-} as const;
+export const AI_MODELS = [
+  { value: 'gemini-2.5-flash-preview', label: 'Gemini 2.5 Flash (Experimental)' },
+  { value: 'gemini-2.0-pro-exp', label: 'Gemini 2.0 Pro (Experimental)' },
+  { value: 'gpt-4o-mini', label: 'GPT-4o Mini' },
+] as const;
 
 export const AI_DEFAULTS = {
-  OPENAI_MODEL: 'gpt-4o-mini',
-  GEMINI_MODEL: 'gemini-2.5-flash-preview',
-  SERVICE_MODEL: 'gpt-4o-mini',
+  DEFAULT_MODEL: 'gpt-4o-mini',
 } as const;
 
 export const AI_EVALUATION = {
   SCORE_EXCELLENT_THRESHOLD: 8,
   SCORE_GOOD_THRESHOLD: 6,
 } as const;
-
-export const AI_PROVIDERS = {
-  OPENAI: 'openai',
-  GEMINI: 'gemini',
-} as const;
-
 
 export const AI_COMMANDS = {
   EVALUATE_NOTE: 'evaluate_note',
@@ -100,6 +90,7 @@ export const AI_COMMANDS = {
 export const AI_API = {
   EVALUATE_NOTE_PATH: '/api/evaluate-note',
   CHAT_COMPLETIONS_PATH: '/chat/completions',
+
   SSE_DATA_PREFIX: 'data: ',
   SSE_DATA_PREFIX_LENGTH: 6,
   SSE_DONE_MESSAGE: '[DONE]',

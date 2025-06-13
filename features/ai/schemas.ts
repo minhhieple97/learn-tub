@@ -1,4 +1,4 @@
-import { AI_COMMANDS, AI_PROVIDERS } from '@/config/constants';
+import { AI_COMMANDS } from '@/config/constants';
 import { z } from 'zod';
 
 export const IAICommandSchema = z.enum([
@@ -8,8 +8,6 @@ export const IAICommandSchema = z.enum([
   AI_COMMANDS.CHAT_COMPLETION,
   AI_COMMANDS.TEXT_GENERATION,
 ]);
-
-export const IAIProviderSchema = z.enum([AI_PROVIDERS.OPENAI, AI_PROVIDERS.GEMINI]);
 
 export const IAIUsageStatusSchema = z.enum(['success', 'error']);
 
@@ -28,8 +26,7 @@ export const ICostDetailsSchema = z.object({
 export const ITrackAIUsageRequestSchema = z.object({
   user_id: z.string().uuid(),
   command: IAICommandSchema,
-  provider: IAIProviderSchema,
-  model: z.string().min(1),
+  provider_id: z.string().uuid(),
   status: IAIUsageStatusSchema,
   tokens_used: z.number().min(0).optional(),
   input_tokens: z.number().min(0).optional(),
@@ -45,7 +42,6 @@ export const IAIUsageTimeRangeSchema = z.enum(['day', 'week', 'month', 'year']);
 
 export const IAIUsageFiltersSchema = z.object({
   user_id: z.string().uuid().optional(),
-  provider: IAIProviderSchema.optional(),
   model: z.string().optional(),
   command: IAICommandSchema.optional(),
   status: IAIUsageStatusSchema.optional(),
@@ -58,7 +54,6 @@ export const IAIUsageFiltersSchema = z.object({
 export const ICreateAIUsageLogSchema = z.object({
   user_id: z.string().uuid(),
   command: IAICommandSchema,
-  provider: IAIProviderSchema,
   model: z.string().min(1),
   status: IAIUsageStatusSchema,
   tokens_used: z.number().min(0).optional(),
@@ -80,7 +75,6 @@ export const IAnalyticsQuerySchema = z.object({
   time_range: IAIUsageTimeRangeSchema.optional(),
   date_from: z.string().datetime().optional(),
   date_to: z.string().datetime().optional(),
-  provider: IAIProviderSchema.optional(),
   model: z.string().optional(),
   command: IAICommandSchema.optional(),
 });

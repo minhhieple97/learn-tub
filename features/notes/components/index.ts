@@ -22,5 +22,5 @@ export { EvaluationContent } from './evaluation-content';
 // Other note components
 export { NoteFeedbackDisplay } from './note-feedback-display';
 export { NoteEvaluationStreaming } from './note-evaluation-streaming';
-export { AIModelSelector } from './ai-model-selector';
+export { AIModelSelector } from '../../ai/components/ai-model-selector';
 export { AIFeedbackHistory } from './note-feedback-history';

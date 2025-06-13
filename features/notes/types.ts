@@ -1,5 +1,4 @@
 import {
-  AIProvider,
   IFeedback,
   IApiResponse,
   IActionResult,
@@ -192,8 +191,7 @@ export type INotesListWithSearchProps = INotesListProps & {
 export type INoteEvaluationRequest = {
   noteId: string;
   content: string;
-  provider: AIProvider;
-  model: string;
+  aiModelId: string;
   userId: string;
   context?: {
     videoTitle?: string;
@@ -206,7 +204,7 @@ export type INoteEvaluationResult = {
   id: string;
   note_id: string;
   user_id: string;
-  provider: AIProvider;
+  provider: string | null;
   model: string;
   feedback: IFeedback;
   created_at: string;

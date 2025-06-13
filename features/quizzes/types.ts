@@ -1,6 +1,6 @@
 import { AI_FORMAT } from '@/config/constants';
 import { Json } from '@/database.types';
-import { AIProvider, IFeedback, IApiResponse } from '@/types';
+import { IFeedback, IApiResponse } from '@/types';
 
 export type IQuizDifficulty = 'easy' | 'medium' | 'hard' | 'mixed';
 export type IQuizAnswerOption = 'A' | 'B' | 'C' | 'D';
@@ -9,7 +9,7 @@ export type IQuizDifficultyFilter = 'all' | IQuizDifficulty;
 export type IQuizSettingsType = {
   questionCount: number;
   difficulty: IQuizDifficulty;
-  provider: AIProvider;
+  aiModelId: string;
 };
 
 export type IQuestion = {
@@ -88,22 +88,19 @@ export type IGenerateQuestionsRequest = {
   questionCount?: number;
   difficulty?: IQuizDifficulty;
   topics?: string[];
-  provider: string;
-  model: string;
+  aiModelId: string;
   userId: string;
 };
 
 export type IEvaluateQuizRequest = {
-  videoId: string;
+  aiModelId: string;
   questions: IQuizQuestion[];
-  answers: IUserAnswer[];
+  answers: Array<{ questionId: string; selectedAnswer: 'A' | 'B' | 'C' | 'D' }>;
   videoContext?: {
     title?: string;
     description?: string;
     tutorial?: string;
   };
-  provider: string;
-  model: string;
   userId: string;
 };
 
@@ -119,8 +116,7 @@ export type IQuizStreamChunk = {
 export type IQuizSettings = {
   questionCount: number;
   difficulty: IQuizDifficulty;
-  provider: AIProvider;
-  model: string;
+  aiModelId: string;
 };
 
 export type IQuizState = {
@@ -138,7 +134,7 @@ export type INoteEvaluationResult = {
   id: string;
   note_id: string;
   user_id: string;
-  provider: AIProvider;
+  provider: string | null;
   model: string;
   feedback: Json;
   created_at: string;
@@ -146,7 +142,7 @@ export type INoteEvaluationResult = {
 
 export type ICreateAIEvaluationInput = {
   noteId: string;
-  provider: AIProvider;
+  provider: string | null;
   model: string;
 };
 
@@ -180,11 +176,13 @@ export type IQuizSession = {
   difficulty: IQuizDifficulty;
   question_count: number;
   topics: string[] | null;
-  ai_provider: string;
-  ai_model: string;
+  ai_model_id: string | null;
   questions: Json;
   created_at: string | null;
   updated_at: string | null;
+  model_name?: string;
+  provider_name?: string;
+  provider_display_name?: string;
 };
 
 export type IQuizAttempt = {
@@ -214,15 +212,13 @@ export type IQuizSessionWithAttempts = IQuizSession & {
 };
 
 export type IDatabaseQuizSession = {
-  id: string;
   user_id: string;
   video_id: string;
   title: string;
   difficulty: string;
   question_count: number;
   topics: string[] | null;
-  ai_provider: string;
-  ai_model: string;
+  ai_model_id: string;
   questions: Json;
   created_at: string | null;
   updated_at: string | null;
