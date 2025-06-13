@@ -11,12 +11,12 @@ import { QuizSessionCard } from './quiz-session-card';
 import { QuizPagination } from './quiz-pagination';
 import { useQueryState, parseAsString, parseAsInteger } from 'nuqs';
 import { useQuery } from '@tanstack/react-query';
-import { IQuizFilters, QuizDashboardData } from '../types';
+import { IQuizFilters, IQuizDashboardData } from '../types';
 import { IQuizSessionWithAttempts } from '@/features/quizzes/types';
 
 const fetchQuizDashboardData = async (
   filters: Partial<IQuizFilters>,
-): Promise<QuizDashboardData> => {
+): Promise<IQuizDashboardData> => {
   const searchParams = new URLSearchParams();
 
   if (filters.search) searchParams.set('search', filters.search);
@@ -28,10 +28,14 @@ const fetchQuizDashboardData = async (
   if (filters.page) searchParams.set('page', filters.page.toString());
   if (filters.limit) searchParams.set('limit', filters.limit.toString());
 
-  const response = await fetch(`/api/quiz-dashboard?${searchParams.toString()}`);
+  const response = await fetch(
+    `/api/quiz-dashboard?${searchParams.toString()}`,
+  );
 
   if (!response.ok) {
-    throw new Error(`Failed to fetch quiz dashboard data: ${response.statusText}`);
+    throw new Error(
+      `Failed to fetch quiz dashboard data: ${response.statusText}`,
+    );
   }
 
   return response.json();
@@ -57,10 +61,19 @@ type QuizDashboardProps = {
 
 export const QuizDashboard = ({ initialData, videos }: QuizDashboardProps) => {
   const [search] = useQueryState('search', parseAsString.withDefault(''));
-  const [difficulty] = useQueryState('difficulty', parseAsString.withDefault('all'));
+  const [difficulty] = useQueryState(
+    'difficulty',
+    parseAsString.withDefault('all'),
+  );
   const [videoId] = useQueryState('videoId', parseAsString.withDefault('all'));
-  const [sortBy] = useQueryState('sortBy', parseAsString.withDefault('created_at'));
-  const [sortOrder] = useQueryState('sortOrder', parseAsString.withDefault('desc'));
+  const [sortBy] = useQueryState(
+    'sortBy',
+    parseAsString.withDefault('created_at'),
+  );
+  const [sortOrder] = useQueryState(
+    'sortOrder',
+    parseAsString.withDefault('desc'),
+  );
   const [page] = useQueryState('page', parseAsInteger.withDefault(1));
 
   const filters: Partial<IQuizFilters> = {
@@ -79,7 +92,8 @@ export const QuizDashboard = ({ initialData, videos }: QuizDashboardProps) => {
     initialData,
   });
 
-  const { execute: executeRetake, isExecuting: isRetaking } = useAction(retakeQuizAction);
+  const { execute: executeRetake, isExecuting: isRetaking } =
+    useAction(retakeQuizAction);
 
   const handleRetakeQuiz = async (sessionId: string) => {
     executeRetake({ sessionId });
@@ -151,9 +165,12 @@ export const QuizDashboard = ({ initialData, videos }: QuizDashboardProps) => {
           <Card className="border-border bg-card">
             <CardContent className="text-center py-12">
               <Brain className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-medium mb-2 text-card-foreground">No quizzes found</h3>
+              <h3 className="text-lg font-medium mb-2 text-card-foreground">
+                No quizzes found
+              </h3>
               <p className="text-muted-foreground mb-4">
-                Start creating quizzes from your videos to track your learning progress.
+                Start creating quizzes from your videos to track your learning
+                progress.
               </p>
               <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
                 Create Your First Quiz

@@ -7,15 +7,15 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Brain, TrendingUp, Target, Zap, Trophy, Clock } from 'lucide-react';
+import { Brain, TrendingUp, Zap, Trophy, Clock } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { formatDistanceToNow } from 'date-fns';
 import Link from 'next/link';
 import { routes } from '@/routes';
-import type { InsightsData } from '../types';
+import type { IInsightsData } from '../types';
 
 type InsightsDashboardProps = {
-  data: InsightsData;
+  data: IInsightsData;
 };
 
 export const InsightsDashboard = ({ data }: InsightsDashboardProps) => {

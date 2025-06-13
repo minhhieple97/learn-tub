@@ -1,12 +1,16 @@
 import 'server-only';
 import { createClient } from '@/lib/supabase/server';
-import { IQuizFilters, QuizDashboardData } from '../types';
-import { IQuizQuestion, IQuizDifficulty, IQuizSessionWithAttempts } from '@/features/quizzes/types';
+import { IQuizFilters, IQuizDashboardData } from '../types';
+import {
+  IQuizQuestion,
+  IQuizDifficulty,
+  IQuizSessionWithAttempts,
+} from '@/features/quizzes/types';
 
 export const getQuizDashboardData = async (
   userId: string,
   filters?: Partial<IQuizFilters>,
-): Promise<QuizDashboardData> => {
+): Promise<IQuizDashboardData> => {
   const supabase = await createClient();
   const limit = filters?.limit || 10;
   const page = filters?.page || 1;
@@ -102,32 +106,41 @@ export const getQuizDashboardData = async (
   }
 
   const averageScore = avgData?.length
-    ? Math.round(avgData.reduce((sum, attempt) => sum + attempt.score, 0) / avgData.length)
+    ? Math.round(
+        avgData.reduce((sum, attempt) => sum + attempt.score, 0) /
+          avgData.length,
+      )
     : 0;
 
-  const processedSessions: IQuizSessionWithAttempts[] = (sessions || []).map((session) => {
-    const attempts = session.quiz_attempts || [];
-    const latestAttempt = attempts.length > 0 ? attempts[0] : undefined;
-    const bestScore = attempts.length > 0 ? Math.max(...attempts.map((a) => a.score)) : undefined;
+  const processedSessions: IQuizSessionWithAttempts[] = (sessions || []).map(
+    (session) => {
+      const attempts = session.quiz_attempts || [];
+      const latestAttempt = attempts.length > 0 ? attempts[0] : undefined;
+      const bestScore =
+        attempts.length > 0
+          ? Math.max(...attempts.map((a) => a.score))
+          : undefined;
 
-    return {
-      ...session,
-      difficulty: session.difficulty as IQuizDifficulty,
-      attempts,
-      latest_attempt: latestAttempt,
-      best_score: bestScore,
-      attempt_count: attempts.length,
-      model_name: session.ai_model_pricing?.model_name,
-      provider_name: session.ai_model_pricing?.ai_providers?.name,
-      provider_display_name: session.ai_model_pricing?.ai_providers?.display_name,
-      videos: session.videos
-        ? {
-            ...session.videos,
-            description: session.videos.description || '',
-          }
-        : undefined,
-    };
-  });
+      return {
+        ...session,
+        difficulty: session.difficulty as IQuizDifficulty,
+        attempts,
+        latest_attempt: latestAttempt,
+        best_score: bestScore,
+        attempt_count: attempts.length,
+        model_name: session.ai_model_pricing?.model_name,
+        provider_name: session.ai_model_pricing?.ai_providers?.name,
+        provider_display_name:
+          session.ai_model_pricing?.ai_providers?.display_name,
+        videos: session.videos
+          ? {
+              ...session.videos,
+              description: session.videos.description || '',
+            }
+          : undefined,
+      };
+    },
+  );
 
   const totalPages = Math.ceil((totalCount || 0) / limit);
 
@@ -142,7 +155,10 @@ export const getQuizDashboardData = async (
   };
 };
 
-export const getQuizSessionForRetake = async (sessionId: string, userId: string) => {
+export const getQuizSessionForRetake = async (
+  sessionId: string,
+  userId: string,
+) => {
   const supabase = await createClient();
 
   const { data: session, error } = await supabase
@@ -203,7 +219,8 @@ export const getQuizSessionDetail = async (
 
   const attempts = session.quiz_attempts || [];
   const latestAttempt = attempts.length > 0 ? attempts[0] : undefined;
-  const bestScore = attempts.length > 0 ? Math.max(...attempts.map((a) => a.score)) : undefined;
+  const bestScore =
+    attempts.length > 0 ? Math.max(...attempts.map((a) => a.score)) : undefined;
 
   return {
     ...session,

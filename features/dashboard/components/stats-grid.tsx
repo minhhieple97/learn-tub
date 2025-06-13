@@ -1,9 +1,9 @@
 import { BookOpen, Clock, TrendingUp, Video } from 'lucide-react';
 import { StatCard } from './stat-card';
-import type { DashboardStats } from '../types';
+import type { IDashboardStats } from '../types';
 
 type StatsGridProps = {
-  stats: DashboardStats;
+  stats: IDashboardStats;
 };
 
 export const StatsGrid = ({ stats }: StatsGridProps) => {
