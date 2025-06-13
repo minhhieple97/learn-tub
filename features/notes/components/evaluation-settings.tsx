@@ -8,9 +8,9 @@ type IEvaluationSettingsProps = {
   aiModelId: string;
   onProviderChange: (provider: string) => void;
   onModelChange: (modelId: string) => void;
-  onEvaluate: () => void;
+  onEvaluate: () => Promise<void>;
   onReset?: () => void;
-  isEvaluating: boolean;
+  isEvaluating?: boolean;
   showReset?: boolean;
 };
 
@@ -21,7 +21,7 @@ export const EvaluationSettings = ({
   onModelChange,
   onEvaluate,
   onReset,
-  isEvaluating,
+  isEvaluating = false,
   showReset = false,
 }: IEvaluationSettingsProps) => {
   return (

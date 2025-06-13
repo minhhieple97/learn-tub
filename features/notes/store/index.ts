@@ -3,9 +3,18 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { createClient } from '@/lib/supabase/client';
-import { TOAST_MESSAGES } from '@/config/constants';
+import {
+  TOAST_MESSAGES,
+  AI_CONFIG,
+  AI_API,
+  CHUNK_TYPES,
+  ERROR_MESSAGES,
+  STATUS_STREAMING,
+} from '@/config/constants';
 import type { INote } from '../types';
 import { toast } from '@/hooks/use-toast';
+import { IFeedback } from '@/types';
+import { INoteEvaluationStatus } from '../types';
 
 type NotesState = {
   notes: INote[];
@@ -23,6 +32,24 @@ type NotesState = {
   isFormLoading: boolean;
   currentVideoId: string | null;
   currentTimestamp: number;
+
+  // Evaluation state
+  evaluation: {
+    isOpen: boolean;
+    showSettings: boolean;
+    activeTab: string;
+    provider: string | null;
+    aiModelId: string;
+    currentNoteId: string | null;
+    status: INoteEvaluationStatus;
+    feedback: IFeedback | null;
+    streamingContent: string;
+    error: string | null;
+    isEvaluating: boolean;
+    isCompleted: boolean;
+    hasError: boolean;
+  };
+
   setCurrentVideo: (videoId: string) => void;
   setCurrentTimestamp: (timestamp: number) => void;
   loadNotes: (videoId: string) => Promise<void>;
@@ -42,6 +69,18 @@ type NotesState = {
   resetForm: () => void;
   getDisplayNotes: () => INote[];
   getSearchResultCount: () => number;
+
+  openEvaluation: (noteId: string) => void;
+  closeEvaluation: () => void;
+  setShowSettings: (show: boolean) => void;
+  setActiveTab: (tab: string) => void;
+  setProvider: (provider: string) => void;
+  setAiModelId: (modelId: string) => void;
+  evaluateNote: (noteId: string, aiModelId: string) => Promise<void>;
+  resetEvaluation: () => void;
+  toggleSettings: () => void;
+  showEvaluationSettings: () => void;
+  adjustEvaluationSettings: () => void;
 };
 
 export const useNotesStore = create<NotesState>()(
@@ -62,6 +101,23 @@ export const useNotesStore = create<NotesState>()(
       isFormLoading: false,
       currentVideoId: null,
       currentTimestamp: 0,
+
+      // Evaluation initial state
+      evaluation: {
+        isOpen: false,
+        showSettings: false,
+        activeTab: 'evaluate',
+        provider: null,
+        aiModelId: '',
+        currentNoteId: null,
+        status: STATUS_STREAMING.IDLE,
+        feedback: null,
+        streamingContent: '',
+        error: null,
+        isEvaluating: false,
+        isCompleted: false,
+        hasError: false,
+      },
 
       setCurrentVideo: (videoId: string) => {
         set({ currentVideoId: videoId });
@@ -335,6 +391,221 @@ export const useNotesStore = create<NotesState>()(
       getSearchResultCount: () => {
         const { searchResults } = get();
         return searchResults.length;
+      },
+
+      // Evaluation methods
+      openEvaluation: (noteId: string) => {
+        set((state) => ({
+          evaluation: {
+            ...state.evaluation,
+            isOpen: true,
+            currentNoteId: noteId,
+            showSettings: state.evaluation.status === STATUS_STREAMING.IDLE,
+          },
+        }));
+      },
+
+      closeEvaluation: () => {
+        set((state) => ({
+          evaluation: {
+            ...state.evaluation,
+            isOpen: false,
+            currentNoteId: null,
+          },
+        }));
+      },
+
+      setShowSettings: (show: boolean) => {
+        set((state) => ({
+          evaluation: {
+            ...state.evaluation,
+            showSettings: show,
+          },
+        }));
+      },
+
+      setActiveTab: (tab: string) => {
+        set((state) => ({
+          evaluation: {
+            ...state.evaluation,
+            activeTab: tab,
+            showSettings: tab === 'evaluate' && state.evaluation.status === STATUS_STREAMING.IDLE,
+          },
+        }));
+      },
+
+      setProvider: (provider: string) => {
+        set((state) => ({
+          evaluation: {
+            ...state.evaluation,
+            provider,
+          },
+        }));
+      },
+
+      setAiModelId: (modelId: string) => {
+        set((state) => ({
+          evaluation: {
+            ...state.evaluation,
+            aiModelId: modelId,
+          },
+        }));
+      },
+
+      evaluateNote: async (noteId: string, aiModelId: string) => {
+        try {
+          set((state) => ({
+            evaluation: {
+              ...state.evaluation,
+              status: STATUS_STREAMING.EVALUATING,
+              error: null,
+              feedback: null,
+              streamingContent: '',
+              isEvaluating: true,
+              isCompleted: false,
+              hasError: false,
+              showSettings: false,
+            },
+          }));
+
+          const streamUrl = `${AI_API.EVALUATE_NOTE_PATH}?noteId=${noteId}&aiModelId=${aiModelId}`;
+
+          const response = await fetch(streamUrl);
+
+          if (!response.ok) {
+            throw new Error(`${ERROR_MESSAGES.FAILED_TO_EVALUATE_NOTE}: ${response.statusText}`);
+          }
+
+          if (!response.body) {
+            throw new Error(ERROR_MESSAGES.NO_RESPONSE_BODY);
+          }
+
+          set((state) => ({
+            evaluation: {
+              ...state.evaluation,
+              status: STATUS_STREAMING.STREAMING,
+            },
+          }));
+
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder();
+          let buffer = '';
+
+          while (true) {
+            const { done, value } = await reader.read();
+
+            if (done) break;
+
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+            buffer = lines.pop() || '';
+
+            for (const line of lines) {
+              if (line.startsWith(AI_API.SSE_DATA_PREFIX)) {
+                try {
+                  const chunk = JSON.parse(line.slice(AI_API.SSE_DATA_PREFIX_LENGTH));
+
+                  if (chunk.type === CHUNK_TYPES.FEEDBACK) {
+                    set((state) => ({
+                      evaluation: {
+                        ...state.evaluation,
+                        streamingContent: state.evaluation.streamingContent + chunk.content,
+                      },
+                    }));
+                  } else if (chunk.type === CHUNK_TYPES.COMPLETE) {
+                    const completeFeedback: IFeedback = JSON.parse(chunk.content);
+                    set((state) => ({
+                      evaluation: {
+                        ...state.evaluation,
+                        feedback: completeFeedback,
+                        status: STATUS_STREAMING.COMPLETED,
+                        streamingContent: '',
+                        isEvaluating: false,
+                        isCompleted: true,
+                      },
+                    }));
+                  } else if (chunk.type === CHUNK_TYPES.ERROR) {
+                    set((state) => ({
+                      evaluation: {
+                        ...state.evaluation,
+                        error: chunk.content,
+                        status: STATUS_STREAMING.ERROR,
+                        streamingContent: '',
+                        isEvaluating: false,
+                        hasError: true,
+                      },
+                    }));
+                  }
+                } catch (parseError) {
+                  console.error(ERROR_MESSAGES.FAILED_TO_PARSE_CHUNK, parseError);
+                }
+              }
+            }
+          }
+        } catch (err) {
+          console.log(err);
+          const errorMessage = err instanceof Error ? err.message : ERROR_MESSAGES.UNKNOWN_ERROR;
+          set((state) => ({
+            evaluation: {
+              ...state.evaluation,
+              error: errorMessage,
+              status: STATUS_STREAMING.ERROR,
+              streamingContent: '',
+              isEvaluating: false,
+              hasError: true,
+            },
+          }));
+        }
+      },
+
+      resetEvaluation: () => {
+        set((state) => ({
+          evaluation: {
+            ...state.evaluation,
+            status: STATUS_STREAMING.IDLE,
+            feedback: null,
+            streamingContent: '',
+            error: null,
+            isEvaluating: false,
+            isCompleted: false,
+            hasError: false,
+            showSettings: false,
+          },
+        }));
+      },
+
+      toggleSettings: () => {
+        set((state) => ({
+          evaluation: {
+            ...state.evaluation,
+            showSettings: !state.evaluation.showSettings,
+          },
+        }));
+      },
+
+      showEvaluationSettings: () => {
+        set((state) => ({
+          evaluation: {
+            ...state.evaluation,
+            showSettings: true,
+          },
+        }));
+      },
+
+      adjustEvaluationSettings: () => {
+        set((state) => ({
+          evaluation: {
+            ...state.evaluation,
+            status: STATUS_STREAMING.IDLE,
+            feedback: null,
+            streamingContent: '',
+            error: null,
+            isEvaluating: false,
+            isCompleted: false,
+            hasError: false,
+            showSettings: true,
+          },
+        }));
       },
     }),
     {
