@@ -3,13 +3,18 @@ import { DashboardHeader } from './dashboard-header';
 import { StatsGrid } from './stats-grid';
 import { RecentVideosCard } from './recent-videos-card';
 import { LearningGoalsCard } from './learning-goals-card';
-import type { DashboardStats, RecentVideo, LearningGoal, InsightsData } from '../types';
+import type {
+  IDashboardStats,
+  IRecentVideo,
+  ILearningGoal,
+  IInsightsData,
+} from '../types';
 
 type IDashboardContentProps = {
-  stats: DashboardStats;
-  recentVideos: RecentVideo[];
-  learningGoals: LearningGoal[];
-  insightsData: InsightsData;
+  stats: IDashboardStats;
+  recentVideos: IRecentVideo[];
+  learningGoals: ILearningGoal[];
+  insightsData: IInsightsData;
 };
 
 export const DashboardContent = ({

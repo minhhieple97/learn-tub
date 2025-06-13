@@ -5,10 +5,10 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import type { LearningGoal } from '../types';
+import type { ILearningGoal } from '../types';
 
 type LearningGoalsCardProps = {
-  goals: LearningGoal[];
+  goals: ILearningGoal[];
 };
 
 export const LearningGoalsCard = ({ goals }: LearningGoalsCardProps) => {

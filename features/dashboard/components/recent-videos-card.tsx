@@ -5,10 +5,10 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import type { RecentVideo } from '../types';
+import type { IRecentVideo } from '../types';
 
 type RecentVideosCardProps = {
-  videos: RecentVideo[];
+  videos: IRecentVideo[];
 };
 
 export const RecentVideosCard = ({ videos }: RecentVideosCardProps) => {

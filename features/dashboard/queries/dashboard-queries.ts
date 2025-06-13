@@ -2,10 +2,10 @@ import 'server-only';
 import { createClient } from '@/lib/supabase/server';
 
 import { getQuizStatistics } from '@/features/quizzes/queries';
-import type { DashboardStats, RecentVideo, LearningGoal } from '../types';
+import type { IDashboardStats, IRecentVideo, ILearningGoal } from '../types';
 import { checkProfile } from '@/lib/require-auth';
 
-export const getDashboardStats = async (): Promise<DashboardStats> => {
+export const getDashboardStats = async (): Promise<IDashboardStats> => {
   return {
     totalVideos: 12,
     learningTime: '24h 30m',
@@ -14,7 +14,7 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
   };
 };
 
-export const getRecentVideos = async (): Promise<RecentVideo[]> => {
+export const getRecentVideos = async (): Promise<IRecentVideo[]> => {
   return [
     {
       id: '1',
@@ -29,7 +29,7 @@ export const getRecentVideos = async (): Promise<RecentVideo[]> => {
   ];
 };
 
-export const getLearningGoals = async (): Promise<LearningGoal[]> => {
+export const getLearningGoals = async (): Promise<ILearningGoal[]> => {
   return [
     {
       id: '1',

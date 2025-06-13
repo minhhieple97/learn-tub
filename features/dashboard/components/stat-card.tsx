@@ -1,14 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import type { StatCard as StatCardType } from '../types';
-
-type StatCardProps = StatCardType;
+import type { IStatCardProps } from '../types';
 
 export const StatCard = ({
   title,
   value,
   change,
   icon: Icon,
-}: StatCardProps) => {
+}: IStatCardProps) => {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

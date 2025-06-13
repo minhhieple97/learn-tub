@@ -1,28 +1,32 @@
-import { IQuizAttempt, IQuizDifficultyFilter, IQuizSessionWithAttempts } from '../quizzes/types';
+import {
+  IQuizAttempt,
+  IQuizDifficultyFilter,
+  IQuizSessionWithAttempts,
+} from '../quizzes/types';
 import { Tables } from '@/database.types';
 
-export type DashboardStats = {
+export type IDashboardStats = {
   totalVideos: number;
   learningTime: string;
   notesCreated: number;
   streak: number;
 };
 
-export type StatCard = {
+export type IStatCardProps = {
   title: string;
   value: string | number;
   change: string;
   icon: React.ComponentType<{ className?: string }>;
 };
 
-export type RecentVideo = {
+export type IRecentVideo = {
   id: string;
   title: string;
   timeAgo: string;
   thumbnail?: string;
 };
 
-export type LearningGoal = {
+export type ILearningGoal = {
   id: string;
   title: string;
   current: number;
@@ -31,7 +35,7 @@ export type LearningGoal = {
   color: string;
 };
 
-export type QuizDashboardData = {
+export type IQuizDashboardData = {
   sessions: IQuizSessionWithAttempts[];
   totalSessions: number;
   totalAttempts: number;
@@ -41,7 +45,7 @@ export type QuizDashboardData = {
   currentPage: number;
 };
 
-export type InsightsData = {
+export type IInsightsData = {
   analysisCount: number;
   quizStats: {
     totalSessions: number;
