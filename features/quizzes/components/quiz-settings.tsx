@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Select,
@@ -9,20 +10,39 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Settings } from 'lucide-react';
-import { IQuizDifficulty, IQuizSettingsType } from '../types';
+import { IQuizDifficulty } from '../types';
 import { AIModelSelector } from '@/features/ai/components/ai-model-selector';
+import { useQuizStore } from '../store';
+import { useAIModelData } from '@/features/ai/hooks/use-ai-models';
 
 type IQuizSettingsProps = {
-  settings: IQuizSettingsType;
-  onUpdateSettings: (settings: Partial<IQuizSettingsType>) => void;
   isGenerating?: boolean;
 };
 
-export const QuizSettings = ({
-  settings,
-  onUpdateSettings,
-  isGenerating = false,
-}: IQuizSettingsProps) => {
+export const QuizSettings = ({ isGenerating = false }: IQuizSettingsProps) => {
+  const { settings, updateSettings } = useQuizStore();
+  const { data: aiModelData, isLoading } = useAIModelData();
+
+  // Set default provider and model when data is loaded
+  useEffect(() => {
+    if (aiModelData && !settings.provider && !settings.aiModelId) {
+      const { providers, modelOptions } = aiModelData;
+
+      if (providers.length > 0 && modelOptions.length > 0) {
+        const defaultProvider = providers[0].name;
+        const defaultModel = modelOptions.find(
+          (option) => option.provider_name === defaultProvider,
+        );
+
+        if (defaultModel) {
+          updateSettings({
+            provider: defaultProvider,
+            aiModelId: defaultModel.ai_model_id,
+          });
+        }
+      }
+    }
+  }, [aiModelData, settings.provider, settings.aiModelId, updateSettings]);
   return (
     <Card
       className={`mb-6 w-full max-w-md border-blue-200 dark:border-blue-800 shadow-md ${
@@ -43,7 +63,7 @@ export const QuizSettings = ({
           </label>
           <Select
             value={settings.questionCount.toString()}
-            onValueChange={(value) => onUpdateSettings({ questionCount: parseInt(value) })}
+            onValueChange={(value) => updateSettings({ questionCount: parseInt(value) })}
             disabled={isGenerating}
           >
             <SelectTrigger className="border-slate-300 dark:border-slate-600 focus:border-blue-500 focus:ring-blue-500">
@@ -64,7 +84,7 @@ export const QuizSettings = ({
           </label>
           <Select
             value={settings.difficulty}
-            onValueChange={(value: IQuizDifficulty) => onUpdateSettings({ difficulty: value })}
+            onValueChange={(value: IQuizDifficulty) => updateSettings({ difficulty: value })}
             disabled={isGenerating}
           >
             <SelectTrigger className="border-slate-300 dark:border-slate-600 focus:border-blue-500 focus:ring-blue-500">
@@ -82,8 +102,8 @@ export const QuizSettings = ({
         <AIModelSelector
           provider={settings.provider}
           aiModelId={settings.aiModelId}
-          onProviderChange={(provider) => onUpdateSettings({ provider })}
-          onModelChange={(aiModelId) => onUpdateSettings({ aiModelId })}
+          onProviderChange={(provider) => updateSettings({ provider })}
+          onModelChange={(aiModelId) => updateSettings({ aiModelId })}
           disabled={isGenerating}
         />
       </CardContent>

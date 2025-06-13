@@ -9,18 +9,18 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { ChevronLeft, ChevronRight, CheckCircle, Loader2, Clock } from 'lucide-react';
-import { IAnswer, IQuestion } from '../types';
+import { IUserAnswer, IQuestion } from '../types';
 
 type QuizNavigationProps = {
   currentQuestionIndex: number;
   totalQuestions: number;
-  currentAnswer?: IAnswer;
+  currentAnswer?: IUserAnswer;
   canGoNext: boolean;
   canGoPrevious: boolean;
   hasAnsweredAll: boolean;
   isEvaluating: boolean;
   questions: IQuestion[];
-  answers: IAnswer[];
+  answers: IUserAnswer[];
   formattedTime?: string;
   onPrevious: () => void;
   onNext: () => void;

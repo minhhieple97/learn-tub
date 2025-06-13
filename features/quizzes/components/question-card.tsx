@@ -5,11 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { DifficultyBadge } from '@/components/ui/difficulty-badge';
-import { IQuestion, IAnswer, IQuizAnswerOption } from '../types';
+import { IQuestion, IUserAnswer, IQuizAnswerOption } from '../types';
 
 type QuestionCardProps = {
   question: IQuestion;
-  currentAnswer?: IAnswer;
+  currentAnswer?: IUserAnswer;
   onAnswerSelect: (selectedAnswer: IQuizAnswerOption) => void;
 };
 

@@ -35,14 +35,12 @@ export const AIModelSelector = ({
 
   useEffect(() => {
     if (!aiModelId && filteredModelOptions.length > 0) {
-      // Auto-select first available model
       onModelChange(filteredModelOptions[0].ai_model_id);
     }
   }, [provider, aiModelId, filteredModelOptions, onModelChange]);
 
   const handleProviderChange = (newProvider: string) => {
     onProviderChange(newProvider);
-    // Reset model selection when provider changes
     const newProviderModels = allModelOptions.filter(
       (option: IAIModelOption) => option.provider_name === newProvider,
     );

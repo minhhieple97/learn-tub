@@ -2,7 +2,7 @@
 
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
-import { IAnswer, IQuestion } from '../types';
+import { IUserAnswer, IQuestion } from '../types';
 
 type QuizProgressProps = {
   currentQuestionIndex: number;
@@ -10,7 +10,7 @@ type QuizProgressProps = {
   answeredCount: number;
   progress: number;
   questions: IQuestion[];
-  answers: IAnswer[];
+  answers: IUserAnswer[];
 };
 
 export const QuizProgress = ({
