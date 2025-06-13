@@ -39,7 +39,7 @@ LearnTub is a modern learning platform that transforms passive YouTube video wat
 
 ## 🎯 Live Demo
 
-**🔗 [View Live Application](learn-tub.vercel.app)**
+**🔗 [View Live Application](https://learn-tub.vercel.app)**
 
 ## 📦 Installation
 
