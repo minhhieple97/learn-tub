@@ -30,6 +30,14 @@ const fetchAIModels = async (options: IUseAIModelsOptions) => {
   return response.json();
 };
 
+// Cache configuration constants
+const AI_MODELS_CACHE_CONFIG = {
+  staleTime: 5 * 60 * 1000,
+  gcTime: 10 * 60 * 1000, 
+  refetchOnWindowFocus: false,
+  refetchOnMount: false,
+} as const;
+
 export const useAIModels = (options: IUseAIModelsOptions = {}) => {
   const { provider_id, model_name, is_active, type = 'all', enabled = true } = options;
 
@@ -37,6 +45,7 @@ export const useAIModels = (options: IUseAIModelsOptions = {}) => {
     queryKey: ['ai-models', { provider_id, model_name, is_active, type }],
     queryFn: () => fetchAIModels(options),
     enabled,
+    ...AI_MODELS_CACHE_CONFIG,
   });
 };
 
@@ -45,6 +54,7 @@ export const useAIModelOptions = (enabled = true) => {
     queryKey: ['ai-models', 'options'],
     queryFn: () => fetchAIModels({ type: 'options' }),
     enabled,
+    ...AI_MODELS_CACHE_CONFIG,
   });
 };
 
@@ -53,6 +63,7 @@ export const useAIModelOptionsByProvider = (providerId: string, enabled = true) 
     queryKey: ['ai-models', 'provider', providerId],
     queryFn: () => fetchAIModels({ type: 'provider', provider_id: providerId }),
     enabled: enabled && !!providerId,
+    ...AI_MODELS_CACHE_CONFIG,
   });
 };
 
@@ -68,6 +79,7 @@ export const useAIProviders = (enabled = true) => {
       return response.json();
     },
     enabled,
+    ...AI_MODELS_CACHE_CONFIG,
   });
 };
 
@@ -83,5 +95,6 @@ export const useAIModelData = (enabled = true) => {
       return response.json();
     },
     enabled,
+    ...AI_MODELS_CACHE_CONFIG,
   });
 };
