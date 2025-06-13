@@ -9,6 +9,7 @@ export type IQuizDifficultyFilter = 'all' | IQuizDifficulty;
 export type IQuizSettingsType = {
   questionCount: number;
   difficulty: IQuizDifficulty;
+  provider: string | null;
   aiModelId: string;
 };
 
@@ -116,6 +117,7 @@ export type IQuizStreamChunk = {
 export type IQuizSettings = {
   questionCount: number;
   difficulty: IQuizDifficulty;
+  provider: string | null;
   aiModelId: string;
 };
 

@@ -80,9 +80,9 @@ export const QuizSettings = ({
         </div>
 
         <AIModelSelector
-          provider={null}
+          provider={settings.provider}
           aiModelId={settings.aiModelId}
-          onProviderChange={() => {}}
+          onProviderChange={(provider) => onUpdateSettings({ provider })}
           onModelChange={(aiModelId) => onUpdateSettings({ aiModelId })}
           disabled={isGenerating}
         />

@@ -27,6 +27,7 @@ export const useQuiz = (videoId: string) => {
     settings: {
       questionCount: AI_QUIZ_CONFIG.DEFAULT_QUESTION_COUNT,
       difficulty: AI_QUIZ_CONFIG.DEFAULT_DIFFICULTY,
+      provider: null,
       aiModelId: '',
     },
   });

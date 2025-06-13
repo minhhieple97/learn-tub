@@ -29,23 +29,28 @@ export const AIModelSelector = ({
   const { data, isLoading } = useAIModelData();
   const providers = data?.providers || [];
   const allModelOptions = data?.modelOptions || [];
-  const filteredModelOptions = allModelOptions.filter(
-    (option: IAIModelOption) => option.provider_name === provider,
-  );
+  const filteredModelOptions = provider
+    ? allModelOptions.filter((option: IAIModelOption) => option.provider_name === provider)
+    : allModelOptions;
 
   useEffect(() => {
     if (!aiModelId && filteredModelOptions.length > 0) {
-      const providerModel = filteredModelOptions.find(
-        (opt: IAIModelOption) => opt.provider_name === provider,
-      );
-      if (providerModel) {
-        onModelChange(providerModel.ai_model_id);
-      }
+      // Auto-select first available model
+      onModelChange(filteredModelOptions[0].ai_model_id);
     }
   }, [provider, aiModelId, filteredModelOptions, onModelChange]);
 
   const handleProviderChange = (newProvider: string) => {
     onProviderChange(newProvider);
+    // Reset model selection when provider changes
+    const newProviderModels = allModelOptions.filter(
+      (option: IAIModelOption) => option.provider_name === newProvider,
+    );
+    if (newProviderModels.length > 0) {
+      onModelChange(newProviderModels[0].ai_model_id);
+    } else {
+      onModelChange('');
+    }
   };
 
   if (isLoading) {
@@ -90,7 +95,7 @@ export const AIModelSelector = ({
           <SelectContent>
             {filteredModelOptions.map((option: IAIModelOption) => (
               <SelectItem key={option.ai_model_id} value={option.ai_model_id}>
-                {option.label}
+                {provider ? option.label : `${option.provider_display_name} - ${option.label}`}
               </SelectItem>
             ))}
           </SelectContent>
