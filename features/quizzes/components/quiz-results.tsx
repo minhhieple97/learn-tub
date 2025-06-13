@@ -15,14 +15,15 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { IQuizFeedback } from '../types';
+import { useQuizStore } from '../store';
 
 type IQuizResultsProps = {
   feedback: IQuizFeedback;
   isGenerating: boolean;
-  onResetQuiz: () => void;
 };
 
-export const QuizResults = ({ feedback, onResetQuiz }: IQuizResultsProps) => {
+export const QuizResults = ({ feedback, isGenerating }: IQuizResultsProps) => {
+  const { resetQuiz } = useQuizStore();
   return (
     <ScrollArea className="h-[600px] pr-4">
       <div className="space-y-6">
@@ -151,7 +152,7 @@ export const QuizResults = ({ feedback, onResetQuiz }: IQuizResultsProps) => {
         <div className="flex justify-center gap-3">
           <Button
             variant="outline"
-            onClick={onResetQuiz}
+            onClick={resetQuiz}
             className="border-slate-400 hover:bg-slate-200 dark:border-slate-500 dark:hover:bg-slate-700 dark:hover:text-slate-100"
           >
             <RotateCcw className="mr-2 size-4" />

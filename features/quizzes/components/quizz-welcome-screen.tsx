@@ -4,21 +4,14 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Brain, Play, Settings, Loader2 } from 'lucide-react';
 import { QuizSettings } from './quiz-settings';
-import { IQuizSettingsType } from '../types';
+import { useQuizStore } from '../store';
 
 type IQuizzWelcomeScreen = {
   isGenerating: boolean;
-  settings: IQuizSettingsType;
   onGenerateQuestions: () => void;
-  onUpdateSettings: (settings: Partial<IQuizSettingsType>) => void;
 };
 
-export const QuizzWelcomeScreen = ({
-  isGenerating,
-  settings,
-  onGenerateQuestions,
-  onUpdateSettings,
-}: IQuizzWelcomeScreen) => {
+export const QuizzWelcomeScreen = ({ isGenerating, onGenerateQuestions }: IQuizzWelcomeScreen) => {
   const [showSettings, setShowSettings] = useState(false);
 
   return (
@@ -34,13 +27,7 @@ export const QuizzWelcomeScreen = ({
         personalized feedback to improve your understanding.
       </p>
 
-      {showSettings && (
-        <QuizSettings
-          settings={settings}
-          onUpdateSettings={onUpdateSettings}
-          isGenerating={isGenerating}
-        />
-      )}
+      {showSettings && <QuizSettings isGenerating={isGenerating} />}
 
       <div className="flex gap-3">
         <Button

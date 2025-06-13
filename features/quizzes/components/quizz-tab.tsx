@@ -1,12 +1,13 @@
 'use client';
 
+import { useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { QuizzWelcomeScreen } from './quizz-welcome-screen';
 import { QuizProgress } from './quiz-progress';
 import { QuestionCard } from './question-card';
 import { QuizNavigation } from './quiz-navigation';
 import { QuizResults } from './quiz-results';
-import { useQuiz } from '../hooks/use-quiz';
+import { useQuizStore } from '../store';
 import { IQuizAnswerOption } from '../types';
 
 type QuizzTabProps = {
@@ -19,19 +20,12 @@ export const QuizzTab = ({ videoId, videoTitle, videoDescription }: QuizzTabProp
   const {
     questions,
     answers,
-    currentQuestion,
-    currentAnswer,
     currentQuestionIndex,
     showResults,
     feedback,
-    settings,
-    hasAnsweredAll,
-    canGoNext,
-    canGoPrevious,
-    progress,
-    answeredCount,
     isGenerating,
     isEvaluating,
+    setVideoContext,
     generateQuestions,
     answerQuestion,
     nextQuestion,
@@ -39,17 +33,29 @@ export const QuizzTab = ({ videoId, videoTitle, videoDescription }: QuizzTabProp
     goToQuestion,
     submitQuiz,
     resetQuiz,
-    updateSettings,
-    formattedTime,
-  } = useQuiz(videoId);
+    getCurrentQuestion,
+    getCurrentAnswer,
+    getHasAnsweredAll,
+    getCanGoNext,
+    getCanGoPrevious,
+    getProgress,
+    getAnsweredCount,
+    getFormattedTime,
+  } = useQuizStore();
 
-  const handleGenerateQuestions = async () => {
-    await generateQuestions(videoTitle, videoDescription);
-  };
+  // Set video context when component mounts or props change
+  useEffect(() => {
+    setVideoContext(videoId, videoTitle, videoDescription);
+  }, [videoId, videoTitle, videoDescription, setVideoContext]);
 
-  const handleSubmitQuiz = async () => {
-    await submitQuiz(videoTitle, videoDescription);
-  };
+  const currentQuestion = getCurrentQuestion();
+  const currentAnswer = getCurrentAnswer();
+  const hasAnsweredAll = getHasAnsweredAll();
+  const canGoNext = getCanGoNext();
+  const canGoPrevious = getCanGoPrevious();
+  const progress = getProgress();
+  const answeredCount = getAnsweredCount();
+  const formattedTime = getFormattedTime();
 
   const handleAnswerSelect = (selectedAnswer: IQuizAnswerOption) => {
     if (currentQuestion) {
@@ -59,19 +65,12 @@ export const QuizzTab = ({ videoId, videoTitle, videoDescription }: QuizzTabProp
 
   const renderContent = () => {
     if (showResults && feedback) {
-      return (
-        <QuizResults feedback={feedback} isGenerating={isGenerating} onResetQuiz={resetQuiz} />
-      );
+      return <QuizResults feedback={feedback} isGenerating={isGenerating} />;
     }
 
     if (questions.length === 0) {
       return (
-        <QuizzWelcomeScreen
-          isGenerating={isGenerating}
-          settings={settings}
-          onGenerateQuestions={handleGenerateQuestions}
-          onUpdateSettings={updateSettings}
-        />
+        <QuizzWelcomeScreen isGenerating={isGenerating} onGenerateQuestions={generateQuestions} />
       );
     }
 
@@ -89,14 +88,14 @@ export const QuizzTab = ({ videoId, videoTitle, videoDescription }: QuizzTabProp
 
           <QuestionCard
             question={currentQuestion}
-            currentAnswer={currentAnswer}
+            currentAnswer={currentAnswer ?? undefined}
             onAnswerSelect={handleAnswerSelect}
           />
 
           <QuizNavigation
             currentQuestionIndex={currentQuestionIndex}
             totalQuestions={questions.length}
-            currentAnswer={currentAnswer}
+            currentAnswer={currentAnswer ?? undefined}
             canGoNext={canGoNext}
             canGoPrevious={canGoPrevious}
             hasAnsweredAll={hasAnsweredAll}
@@ -106,7 +105,7 @@ export const QuizzTab = ({ videoId, videoTitle, videoDescription }: QuizzTabProp
             onPrevious={previousQuestion}
             onNext={nextQuestion}
             onGoToQuestion={goToQuestion}
-            onSubmitQuiz={handleSubmitQuiz}
+            onSubmitQuiz={submitQuiz}
             formattedTime={formattedTime}
           />
         </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,7 +11,7 @@ import { QuizNavigation } from './quiz-navigation';
 import { QuizResults } from './quiz-results';
 
 import { routes } from '@/routes';
-import { useQuizRetake } from '../hooks/use-quiz-retake';
+import { useQuizStore } from '../store';
 import { IQuizSessionWithAttempts } from '../types';
 
 type IQuizRetakeContentProps = {
@@ -21,29 +21,45 @@ type IQuizRetakeContentProps = {
 export const QuizRetakeContent = ({ quizSession }: IQuizRetakeContentProps) => {
   const router = useRouter();
   const [hasStarted, setHasStarted] = useState(false);
+
   const {
     questions,
     answers,
     currentQuestionIndex,
     showResults,
     feedback,
-    formattedTime,
-    currentQuestion,
-    currentAnswer,
-    hasAnsweredAll,
-    canGoNext,
-    canGoPrevious,
-    progress,
-    answeredCount,
     isEvaluating,
+    initializeRetake,
     answerQuestion,
     nextQuestion,
     previousQuestion,
     goToQuestion,
     submitQuiz,
-    resetQuiz,
+    resetRetake,
     startTimer,
-  } = useQuizRetake(quizSession.video_id, quizSession);
+    getCurrentQuestion,
+    getCurrentAnswer,
+    getHasAnsweredAll,
+    getCanGoNext,
+    getCanGoPrevious,
+    getProgress,
+    getAnsweredCount,
+    getFormattedTime,
+  } = useQuizStore();
+
+  // Initialize retake mode when component mounts
+  useEffect(() => {
+    initializeRetake(quizSession);
+  }, [quizSession, initializeRetake]);
+
+  const currentQuestion = getCurrentQuestion();
+  const currentAnswer = getCurrentAnswer();
+  const hasAnsweredAll = getHasAnsweredAll();
+  const canGoNext = getCanGoNext();
+  const canGoPrevious = getCanGoPrevious();
+  const progress = getProgress();
+  const answeredCount = getAnsweredCount();
+  const formattedTime = getFormattedTime();
 
   const handleStartRetake = () => {
     setHasStarted(true);
@@ -54,12 +70,8 @@ export const QuizRetakeContent = ({ quizSession }: IQuizRetakeContentProps) => {
     router.push(routes.dashboard.quizzes);
   };
 
-  const handleSubmitQuiz = async () => {
-    await submitQuiz(quizSession.videos?.title, quizSession.videos?.description);
-  };
-
   const handleResetQuiz = () => {
-    resetQuiz();
+    resetRetake();
     setHasStarted(false);
   };
 
@@ -83,7 +95,7 @@ export const QuizRetakeContent = ({ quizSession }: IQuizRetakeContentProps) => {
             <p className="text-center text-muted-foreground">{quizSession.videos?.title}</p>
           </CardHeader>
           <CardContent>
-            <QuizResults feedback={feedback} isGenerating={false} onResetQuiz={handleResetQuiz} />
+            <QuizResults feedback={feedback} isGenerating={false} />
           </CardContent>
         </Card>
       </div>
@@ -172,7 +184,7 @@ export const QuizRetakeContent = ({ quizSession }: IQuizRetakeContentProps) => {
       {currentQuestion && (
         <QuestionCard
           question={currentQuestion}
-          currentAnswer={currentAnswer}
+          currentAnswer={currentAnswer ?? undefined}
           onAnswerSelect={(answer) => answerQuestion(currentQuestion.id, answer)}
         />
       )}
@@ -180,7 +192,7 @@ export const QuizRetakeContent = ({ quizSession }: IQuizRetakeContentProps) => {
       <QuizNavigation
         currentQuestionIndex={currentQuestionIndex}
         totalQuestions={questions.length}
-        currentAnswer={currentAnswer}
+        currentAnswer={currentAnswer ?? undefined}
         canGoNext={canGoNext}
         canGoPrevious={canGoPrevious}
         hasAnsweredAll={hasAnsweredAll}
@@ -191,7 +203,7 @@ export const QuizRetakeContent = ({ quizSession }: IQuizRetakeContentProps) => {
         onPrevious={previousQuestion}
         onNext={nextQuestion}
         onGoToQuestion={goToQuestion}
-        onSubmitQuiz={handleSubmitQuiz}
+        onSubmitQuiz={submitQuiz}
       />
     </div>
   );
