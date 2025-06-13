@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Select,
@@ -13,7 +12,6 @@ import { Settings } from 'lucide-react';
 import { IQuizDifficulty } from '../types';
 import { AIModelSelector } from '@/features/ai/components/ai-model-selector';
 import { useQuizStore } from '../store';
-import { useAIModelData } from '@/features/ai/hooks/use-ai-models';
 
 type IQuizSettingsProps = {
   isGenerating?: boolean;
@@ -21,28 +19,6 @@ type IQuizSettingsProps = {
 
 export const QuizSettings = ({ isGenerating = false }: IQuizSettingsProps) => {
   const { settings, updateSettings } = useQuizStore();
-  const { data: aiModelData, isLoading } = useAIModelData();
-
-  // Set default provider and model when data is loaded
-  useEffect(() => {
-    if (aiModelData && !settings.provider && !settings.aiModelId) {
-      const { providers, modelOptions } = aiModelData;
-
-      if (providers.length > 0 && modelOptions.length > 0) {
-        const defaultProvider = providers[0].name;
-        const defaultModel = modelOptions.find(
-          (option) => option.provider_name === defaultProvider,
-        );
-
-        if (defaultModel) {
-          updateSettings({
-            provider: defaultProvider,
-            aiModelId: defaultModel.ai_model_id,
-          });
-        }
-      }
-    }
-  }, [aiModelData, settings.provider, settings.aiModelId, updateSettings]);
   return (
     <Card
       className={`mb-6 w-full max-w-md border-blue-200 dark:border-blue-800 shadow-md ${
@@ -53,7 +29,9 @@ export const QuizSettings = ({ isGenerating = false }: IQuizSettingsProps) => {
         <CardTitle className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
           <Settings className="size-5" />
           Quiz Settings
-          {isGenerating && <span className="text-sm text-gray-500">(Generating...)</span>}
+          {isGenerating && (
+            <span className="text-sm text-gray-500">(Generating...)</span>
+          )}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -63,7 +41,9 @@ export const QuizSettings = ({ isGenerating = false }: IQuizSettingsProps) => {
           </label>
           <Select
             value={settings.questionCount.toString()}
-            onValueChange={(value) => updateSettings({ questionCount: parseInt(value) })}
+            onValueChange={(value) =>
+              updateSettings({ questionCount: parseInt(value) })
+            }
             disabled={isGenerating}
           >
             <SelectTrigger className="border-slate-300 dark:border-slate-600 focus:border-blue-500 focus:ring-blue-500">
@@ -84,7 +64,9 @@ export const QuizSettings = ({ isGenerating = false }: IQuizSettingsProps) => {
           </label>
           <Select
             value={settings.difficulty}
-            onValueChange={(value: IQuizDifficulty) => updateSettings({ difficulty: value })}
+            onValueChange={(value: IQuizDifficulty) =>
+              updateSettings({ difficulty: value })
+            }
             disabled={isGenerating}
           >
             <SelectTrigger className="border-slate-300 dark:border-slate-600 focus:border-blue-500 focus:ring-blue-500">

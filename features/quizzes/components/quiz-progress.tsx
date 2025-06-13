@@ -4,7 +4,7 @@ import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import { IUserAnswer, IQuestion } from '../types';
 
-type QuizProgressProps = {
+type IQuizProgressProps = {
   currentQuestionIndex: number;
   totalQuestions: number;
   answeredCount: number;
@@ -20,7 +20,7 @@ export const QuizProgress = ({
   progress,
   questions,
   answers,
-}: QuizProgressProps) => {
+}: IQuizProgressProps) => {
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between text-sm text-slate-600 dark:text-slate-400">

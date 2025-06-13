@@ -7,13 +7,8 @@ import { EvaluateQuizSchema } from '../schema';
 import { RateLimiter } from '@/lib/rate-limiter';
 import { checkProfileByUserId } from '@/lib/require-auth';
 
-const ExtendedEvaluateQuizSchema = EvaluateQuizSchema.extend({
-  quizSessionId: z.string().uuid('Quiz session ID is required'),
-  timeTakenSeconds: z.number().min(0),
-});
-
 export const evaluateQuizAction = authAction
-  .inputSchema(ExtendedEvaluateQuizSchema)
+  .inputSchema(EvaluateQuizSchema)
   .action(async ({ parsedInput: data, ctx: { user } }) => {
     const rateLimitResult = await RateLimiter.checkRateLimit(user.id);
 

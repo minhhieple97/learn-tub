@@ -1,80 +1,63 @@
 'use client';
 
-import { useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { QuizzWelcomeScreen } from './quizz-welcome-screen';
 import { QuizProgress } from './quiz-progress';
 import { QuestionCard } from './question-card';
 import { QuizNavigation } from './quiz-navigation';
 import { QuizResults } from './quiz-results';
-import { useQuizStore } from '../store';
-import { IQuizAnswerOption } from '../types';
+import { useQuizTab } from '../hooks/use-quiz-tab';
 
-type QuizzTabProps = {
+type IQuizzTabProps = {
   videoId: string;
   videoTitle?: string;
   videoDescription?: string;
 };
 
-export const QuizzTab = ({ videoId, videoTitle, videoDescription }: QuizzTabProps) => {
+export const QuizzTab = ({
+  videoId,
+  videoTitle,
+  videoDescription,
+}: IQuizzTabProps) => {
   const {
     questions,
     answers,
     currentQuestionIndex,
-    showResults,
     feedback,
     isGenerating,
     isEvaluating,
-    setVideoContext,
+    currentQuestion,
+    currentAnswer,
+    hasAnsweredAll,
+    canGoNext,
+    canGoPrevious,
+    progress,
+    answeredCount,
+    formattedTime,
     generateQuestions,
-    answerQuestion,
+    handleAnswerSelect,
     nextQuestion,
     previousQuestion,
     goToQuestion,
     submitQuiz,
-    resetQuiz,
-    getCurrentQuestion,
-    getCurrentAnswer,
-    getHasAnsweredAll,
-    getCanGoNext,
-    getCanGoPrevious,
-    getProgress,
-    getAnsweredCount,
-    getFormattedTime,
-  } = useQuizStore();
-
-  // Set video context when component mounts or props change
-  useEffect(() => {
-    setVideoContext(videoId, videoTitle, videoDescription);
-  }, [videoId, videoTitle, videoDescription, setVideoContext]);
-
-  const currentQuestion = getCurrentQuestion();
-  const currentAnswer = getCurrentAnswer();
-  const hasAnsweredAll = getHasAnsweredAll();
-  const canGoNext = getCanGoNext();
-  const canGoPrevious = getCanGoPrevious();
-  const progress = getProgress();
-  const answeredCount = getAnsweredCount();
-  const formattedTime = getFormattedTime();
-
-  const handleAnswerSelect = (selectedAnswer: IQuizAnswerOption) => {
-    if (currentQuestion) {
-      answerQuestion(currentQuestion.id, selectedAnswer);
-    }
-  };
+    quizState,
+  } = useQuizTab({ videoId, videoTitle, videoDescription });
 
   const renderContent = () => {
-    if (showResults && feedback) {
-      return <QuizResults feedback={feedback} isGenerating={isGenerating} />;
+    if (quizState.showResults) {
+      return <QuizResults feedback={feedback!} isGenerating={isGenerating} />;
     }
 
-    if (questions.length === 0) {
+    if (quizState.showWelcome) {
       return (
-        <QuizzWelcomeScreen isGenerating={isGenerating} onGenerateQuestions={generateQuestions} />
+        <QuizzWelcomeScreen
+          isGenerating={isGenerating}
+          onGenerateQuestions={generateQuestions}
+        />
       );
     }
 
-    if (currentQuestion) {
+    if (quizState.showQuiz && currentQuestion) {
       return (
         <div className="space-y-6">
           <QuizProgress

@@ -7,13 +7,17 @@ import { cn } from '@/lib/utils';
 import { DifficultyBadge } from '@/components/ui/difficulty-badge';
 import { IQuestion, IUserAnswer, IQuizAnswerOption } from '../types';
 
-type QuestionCardProps = {
+type IQuestionCardProps = {
   question: IQuestion;
   currentAnswer?: IUserAnswer;
   onAnswerSelect: (selectedAnswer: IQuizAnswerOption) => void;
 };
 
-export const QuestionCard = ({ question, currentAnswer, onAnswerSelect }: QuestionCardProps) => {
+export const QuestionCard = ({
+  question,
+  currentAnswer,
+  onAnswerSelect,
+}: IQuestionCardProps) => {
   return (
     <Card className="border-slate-200 dark:border-slate-700 shadow-md">
       <CardHeader className="bg-gradient-to-r">
@@ -26,14 +30,18 @@ export const QuestionCard = ({ question, currentAnswer, onAnswerSelect }: Questi
           </Badge>
           <DifficultyBadge difficulty={question.difficulty} />
         </div>
-        <CardTitle className="text-lg text-slate-800">{question.question}</CardTitle>
+        <CardTitle className="text-lg text-slate-800">
+          {question.question}
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="grid gap-3 mt-2">
           {Object.entries(question.options).map(([key, value]) => (
             <Button
               key={key}
-              variant={currentAnswer?.selectedAnswer === key ? 'default' : 'outline'}
+              variant={
+                currentAnswer?.selectedAnswer === key ? 'default' : 'outline'
+              }
               className={cn(
                 'justify-start p-4 h-auto text-left whitespace-normal transition-all duration-200',
                 currentAnswer?.selectedAnswer === key
