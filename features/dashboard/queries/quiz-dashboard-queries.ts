@@ -18,6 +18,13 @@ export const getQuizDashboardData = async (
       `
       *,
       videos!inner(id, title, youtube_id, description),
+      ai_model_pricing(
+        model_name,
+        ai_providers(
+          name,
+          display_name
+        )
+      ),
       quiz_attempts(
         id,
         quiz_session_id,
@@ -110,6 +117,9 @@ export const getQuizDashboardData = async (
       latest_attempt: latestAttempt,
       best_score: bestScore,
       attempt_count: attempts.length,
+      model_name: session.ai_model_pricing?.model_name,
+      provider_name: session.ai_model_pricing?.ai_providers?.name,
+      provider_display_name: session.ai_model_pricing?.ai_providers?.display_name,
       videos: session.videos
         ? {
             ...session.videos,
@@ -161,6 +171,13 @@ export const getQuizSessionDetail = async (
       `
       *,
       videos!inner(id, title, youtube_id, description),
+      ai_model_pricing(
+        model_name,
+        ai_providers(
+          name,
+          display_name
+        )
+      ),
       quiz_attempts(
         id,
         quiz_session_id,
@@ -197,6 +214,9 @@ export const getQuizSessionDetail = async (
     latest_attempt: latestAttempt,
     best_score: bestScore,
     attempt_count: attempts.length,
+    model_name: session.ai_model_pricing?.model_name,
+    provider_name: session.ai_model_pricing?.ai_providers?.name,
+    provider_display_name: session.ai_model_pricing?.ai_providers?.display_name,
     videos: session.videos
       ? {
           ...session.videos,

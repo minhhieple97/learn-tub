@@ -34,6 +34,7 @@ export const useQuizRetake = (videoId: string, existingSession?: IQuizSession) =
         settings: {
           questionCount: existingSession.question_count,
           difficulty: existingSession.difficulty,
+          provider: existingSession.provider_name || null,
           aiModelId: existingSession.ai_model_id || '',
         },
       };
@@ -54,6 +55,7 @@ export const useQuizRetake = (videoId: string, existingSession?: IQuizSession) =
       settings: {
         questionCount: AI_QUIZ_CONFIG.DEFAULT_QUESTION_COUNT,
         difficulty: AI_QUIZ_CONFIG.DEFAULT_DIFFICULTY,
+        provider: null,
         aiModelId: '',
       },
     };

@@ -31,25 +31,10 @@ export const createAIUsageLog = async (data: IAIUsageLogInsert): Promise<IAIUsag
 export const getAIUsageLogs = async (filters: IAIUsageFilters = {}): Promise<IAIUsageLog[]> => {
   const supabase = await createClient();
 
-  let query = supabase.from('ai_usage_logs').select(`
-      *,
-      ai_model_pricing:provider_id (
-        model_name,
-        provider:provider_id (
-          name,
-          display_name
-        )
-      )
-    `);
+  let query = supabase.from('ai_usage_logs').select('*');
 
   if (filters.user_id) {
     query = query.eq('user_id', filters.user_id);
-  }
-  if (filters.provider) {
-    query = query.eq('ai_model_pricing.provider.name', filters.provider);
-  }
-  if (filters.model) {
-    query = query.eq('ai_model_pricing.model_name', filters.model);
   }
   if (filters.command) {
     query = query.eq('command', filters.command);
@@ -75,7 +60,16 @@ export const getAIUsageLogs = async (filters: IAIUsageFilters = {}): Promise<IAI
     throw new Error(`Failed to get AI usage logs: ${error.message}`);
   }
 
-  return data || [];
+  // Filter by provider/model if specified (will be handled after migration)
+  let filteredData = data || [];
+
+  if (filters.provider || filters.model) {
+    // For now, return empty array if provider/model filters are used
+    // This will be properly implemented after database migration
+    filteredData = [];
+  }
+
+  return filteredData;
 };
 
 export const getAIUsageAnalytics = async (
@@ -83,25 +77,10 @@ export const getAIUsageAnalytics = async (
 ): Promise<IAIUsageAnalytics> => {
   const supabase = await createClient();
 
-  let query = supabase.from('ai_usage_logs').select(`
-      *,
-      ai_model_pricing:provider_id (
-        model_name,
-        provider:provider_id (
-          name,
-          display_name
-        )
-      )
-    `);
+  let query = supabase.from('ai_usage_logs').select('*');
 
   if (filters.user_id) {
     query = query.eq('user_id', filters.user_id);
-  }
-  if (filters.provider) {
-    query = query.eq('ai_model_pricing.provider.name', filters.provider);
-  }
-  if (filters.model) {
-    query = query.eq('ai_model_pricing.model_name', filters.model);
   }
   if (filters.command) {
     query = query.eq('command', filters.command);
@@ -122,7 +101,16 @@ export const getAIUsageAnalytics = async (
     throw new Error(`Failed to get AI usage analytics: ${error.message}`);
   }
 
-  if (!data || data.length === 0) {
+  // Filter by provider/model if specified (will be handled after migration)
+  let filteredData = data || [];
+
+  if (filters.provider || filters.model) {
+    // For now, return empty data if provider/model filters are used
+    // This will be properly implemented after database migration
+    filteredData = [];
+  }
+
+  if (!filteredData || filteredData.length === 0) {
     return {
       total_requests: 0,
       successful_requests: 0,
@@ -136,42 +124,26 @@ export const getAIUsageAnalytics = async (
     };
   }
 
-  const totalRequests = data.length;
-  const successfulRequests = data.filter((log) => log.status === 'success').length;
+  const totalRequests = filteredData.length;
+  const successfulRequests = filteredData.filter((log) => log.status === 'success').length;
   const failedRequests = totalRequests - successfulRequests;
-  const totalTokens = data.reduce((sum, log) => sum + (log.tokens_used || 0), 0);
-  const totalCost = data.reduce((sum, log) => sum + (log.cost_usd || 0), 0);
-  const durations = data
+  const totalTokens = filteredData.reduce((sum, log) => sum + (log.tokens_used || 0), 0);
+  const totalCost = filteredData.reduce((sum, log) => sum + (log.cost_usd || 0), 0);
+  const durations = filteredData
     .filter((log) => log.request_duration_ms)
     .map((log) => log.request_duration_ms!);
   const averageDuration =
     durations.length > 0 ? durations.reduce((sum, dur) => sum + dur, 0) / durations.length : 0;
 
-  const providerCounts = data.reduce((acc, log) => {
-    const providerName = log.ai_model_pricing?.provider?.name;
-    if (providerName) {
-      acc[providerName] = (acc[providerName] || 0) + 1;
-    }
-    return acc;
-  }, {} as Record<string, number>);
-
-  const modelCounts = data.reduce((acc, log) => {
-    const modelName = log.ai_model_pricing?.model_name;
-    if (modelName) {
-      acc[modelName] = (acc[modelName] || 0) + 1;
-    }
-    return acc;
-  }, {} as Record<string, number>);
-
-  const commandCounts = data.reduce((acc, log) => {
+  // TODO: Implement provider and model counting after database migration
+  const commandCounts = filteredData.reduce((acc, log) => {
     acc[log.command] = (acc[log.command] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
 
-  const mostUsedProvider =
-    Object.entries(providerCounts).sort(([, a], [, b]) => b - a)[0]?.[0] || '';
-  const mostUsedModel = Object.entries(modelCounts).sort(([, a], [, b]) => b - a)[0]?.[0] || '';
-  const mostUsedCommand = Object.entries(commandCounts).sort(([, a], [, b]) => b - a)[0]?.[0] || '';
+  const mostUsedCommand =
+    Object.entries(commandCounts).sort(([, a], [, b]) => (b as number) - (a as number))[0]?.[0] ||
+    '';
 
   return {
     total_requests: totalRequests,
@@ -180,8 +152,8 @@ export const getAIUsageAnalytics = async (
     total_tokens: totalTokens,
     total_cost_usd: totalCost,
     average_request_duration_ms: averageDuration,
-    most_used_provider: mostUsedProvider,
-    most_used_model: mostUsedModel,
+    most_used_provider: '', // TODO: Implement after migration
+    most_used_model: '', // TODO: Implement after migration
     most_used_command: mostUsedCommand,
   };
 };
