@@ -2,10 +2,10 @@
 
 import { Card, CardContent } from '@/components/ui/card';
 import { QuizzWelcomeScreen } from './quizz-welcome-screen';
-import { QuizProgress } from './quiz-progress';
+import { QuizzProgress } from './quizz-progress';
 import { QuestionCard } from './question-card';
-import { QuizNavigation } from './quiz-navigation';
-import { QuizResults } from './quiz-results';
+import { QuizzNavigation } from './quizz-navigation';
+import { QuizzResults } from './quizz-results';
 import { useQuizTab } from '../hooks/use-quiz-tab';
 
 type IQuizzTabProps = {
@@ -45,7 +45,7 @@ export const QuizzTab = ({
 
   const renderContent = () => {
     if (quizState.showResults) {
-      return <QuizResults feedback={feedback!} isGenerating={isGenerating} />;
+      return <QuizzResults feedback={feedback!} isGenerating={isGenerating} />;
     }
 
     if (quizState.showWelcome) {
@@ -60,7 +60,7 @@ export const QuizzTab = ({
     if (quizState.showQuiz && currentQuestion) {
       return (
         <div className="space-y-6">
-          <QuizProgress
+          <QuizzProgress
             currentQuestionIndex={currentQuestionIndex}
             totalQuestions={questions.length}
             answeredCount={answeredCount}
@@ -75,7 +75,7 @@ export const QuizzTab = ({
             onAnswerSelect={handleAnswerSelect}
           />
 
-          <QuizNavigation
+          <QuizzNavigation
             currentQuestionIndex={currentQuestionIndex}
             totalQuestions={questions.length}
             currentAnswer={currentAnswer ?? undefined}

@@ -1,7 +1,7 @@
 import { getQuizSessionDetail } from '@/features/dashboard/queries/quiz-dashboard-queries';
 
 import { notFound } from 'next/navigation';
-import { QuizRetakeContent } from '@/features/quizzes/components/quiz-retake-content';
+import { QuizzRetakeContent } from '@/features/quizzes/components/quizz-retake-content';
 import { checkProfile } from '@/lib/require-auth';
 
 type IQuizRetakePageProps = {
@@ -17,7 +17,7 @@ export default async function QuizRetakePage({ params }: IQuizRetakePageProps) {
   }
   return (
     <div className="container mx-auto">
-      <QuizRetakeContent quizSession={quizSession} />
+      <QuizzRetakeContent quizSession={quizSession} />
     </div>
   );
 }

@@ -5,20 +5,22 @@ import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, RotateCcw } from 'lucide-react';
-import { QuizProgress } from './quiz-progress';
+import { QuizzProgress } from './quizz-progress';
 import { QuestionCard } from './question-card';
-import { QuizNavigation } from './quiz-navigation';
-import { QuizResults } from './quiz-results';
+import { QuizzNavigation } from './quizz-navigation';
+import { QuizzResults } from './quizz-results';
 
 import { routes } from '@/routes';
 import { useQuizStore } from '../store';
 import { IQuizSessionWithAttempts } from '../types';
 
-type IQuizRetakeContentProps = {
+type IQuizzRetakeContentProps = {
   quizSession: IQuizSessionWithAttempts;
 };
 
-export const QuizRetakeContent = ({ quizSession }: IQuizRetakeContentProps) => {
+export const QuizzRetakeContent = ({
+  quizSession,
+}: IQuizzRetakeContentProps) => {
   const router = useRouter();
   const [hasStarted, setHasStarted] = useState(false);
 
@@ -35,7 +37,6 @@ export const QuizRetakeContent = ({ quizSession }: IQuizRetakeContentProps) => {
     previousQuestion,
     goToQuestion,
     submitQuiz,
-    resetRetake,
     startTimer,
     getCurrentQuestion,
     getCurrentAnswer,
@@ -93,7 +94,7 @@ export const QuizRetakeContent = ({ quizSession }: IQuizRetakeContentProps) => {
             </p>
           </CardHeader>
           <CardContent>
-            <QuizResults feedback={feedback} isGenerating={false} />
+            <QuizzResults feedback={feedback} isGenerating={false} />
           </CardContent>
         </Card>
       </div>
@@ -174,7 +175,7 @@ export const QuizRetakeContent = ({ quizSession }: IQuizRetakeContentProps) => {
         <div className="w-24" />
       </div>
 
-      <QuizProgress
+      <QuizzProgress
         currentQuestionIndex={currentQuestionIndex}
         totalQuestions={questions.length}
         answeredCount={answeredCount}
@@ -193,7 +194,7 @@ export const QuizRetakeContent = ({ quizSession }: IQuizRetakeContentProps) => {
         />
       )}
 
-      <QuizNavigation
+      <QuizzNavigation
         currentQuestionIndex={currentQuestionIndex}
         totalQuestions={questions.length}
         currentAnswer={currentAnswer ?? undefined}

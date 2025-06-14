@@ -17,12 +17,12 @@ import { cn } from '@/lib/utils';
 import { IQuizFeedback } from '../types';
 import { useQuizStore } from '../store';
 
-type IQuizResultsProps = {
+type IQuizzResultsProps = {
   feedback: IQuizFeedback;
   isGenerating: boolean;
 };
 
-export const QuizResults = ({ feedback, isGenerating }: IQuizResultsProps) => {
+export const QuizzResults = ({ feedback }: IQuizzResultsProps) => {
   const { resetQuiz } = useQuizStore();
   return (
     <ScrollArea className="h-[600px] pr-4">
@@ -66,7 +66,9 @@ export const QuizResults = ({ feedback, isGenerating }: IQuizResultsProps) => {
                 {feedback.strengths.map((strength, index) => (
                   <li key={index} className="flex items-start gap-2">
                     <CheckCircle className="mt-0.5 size-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
-                    <span className="text-slate-800 dark:text-slate-300">{strength}</span>
+                    <span className="text-slate-800 dark:text-slate-300">
+                      {strength}
+                    </span>
                   </li>
                 ))}
               </ul>
@@ -86,7 +88,9 @@ export const QuizResults = ({ feedback, isGenerating }: IQuizResultsProps) => {
                 {feedback.areasForImprovement.map((area, index) => (
                   <li key={index} className="flex items-start gap-2">
                     <XCircle className="mt-0.5 size-4 shrink-0 text-amber-600 dark:text-amber-400" />
-                    <span className="text-slate-800 dark:text-slate-300">{area}</span>
+                    <span className="text-slate-800 dark:text-slate-300">
+                      {area}
+                    </span>
                   </li>
                 ))}
               </ul>
@@ -95,7 +99,9 @@ export const QuizResults = ({ feedback, isGenerating }: IQuizResultsProps) => {
         )}
         <Card className="border-slate-300 dark:border-slate-600">
           <CardHeader className="bg-gradient-to-r from-slate-100 to-blue-100 dark:from-slate-800/50 dark:to-blue-900/50">
-            <CardTitle className="text-slate-800 dark:text-slate-300">Question Review</CardTitle>
+            <CardTitle className="text-slate-800 dark:text-slate-300">
+              Question Review
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
