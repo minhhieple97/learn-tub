@@ -1,16 +1,16 @@
-import { LoginForm } from '@/features/auth/components';
+import { LoginForm } from "@/features/auth/components";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { BookOpen } from 'lucide-react';
-import Link from 'next/link';
-import { routes } from '@/routes';
-import { createClient } from '@/lib/supabase/server';
-import { redirect } from 'next/navigation';
+} from "@/components/ui/card";
+import { BookOpen } from "lucide-react";
+import Link from "next/link";
+import { routes } from "@/routes";
+import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
 
 export default async function LoginPage() {
   const supabase = await createClient();
@@ -47,7 +47,7 @@ export default async function LoginPage() {
             <LoginForm />
             <div className="mt-4 text-center text-sm">
               <span className="text-gray-600 dark:text-gray-400">
-                Don&apos;t have an account?{' '}
+                Don&apos;t have an account?{" "}
               </span>
               <Link
                 href={routes.register}

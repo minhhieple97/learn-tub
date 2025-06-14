@@ -1,7 +1,7 @@
-import { Skeleton } from '@/components/ui/skeleton';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Play, Plus, Library, Youtube, Rocket } from 'lucide-react';
+import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Play, Plus, Library, Youtube, Rocket } from "lucide-react";
 
 function AddVideoFormSkeleton() {
   return (
@@ -67,8 +67,8 @@ export default function Loading() {
               Learn
             </h2>
             <p className="mt-1 text-base text-slate-600 dark:text-slate-300">
-              Transform YouTube videos into interactive learning experiences with AI-powered
-              insights
+              Transform YouTube videos into interactive learning experiences
+              with AI-powered insights
             </p>
           </div>
         </div>
@@ -91,7 +91,10 @@ export default function Loading() {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="add" className="space-y-4 duration-300 animate-in fade-in-50">
+          <TabsContent
+            value="add"
+            className="space-y-4 duration-300 animate-in fade-in-50"
+          >
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
               <div className="lg:col-span-2">
                 <AddVideoFormSkeleton />
@@ -103,7 +106,10 @@ export default function Loading() {
             </div>
           </TabsContent>
 
-          <TabsContent value="library" className="duration-300 animate-in fade-in-50">
+          <TabsContent
+            value="library"
+            className="duration-300 animate-in fade-in-50"
+          >
             <div className="space-y-6">
               <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {Array.from({ length: 8 }).map((_, i) => (

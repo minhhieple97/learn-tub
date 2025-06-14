@@ -1,13 +1,15 @@
-import { Redis } from '@upstash/redis';
-import { Ratelimit } from '@upstash/ratelimit';
+import { Redis } from "@upstash/redis";
+import { Ratelimit } from "@upstash/ratelimit";
 
 const rateLimiter = new Ratelimit({
   redis: Redis.fromEnv(),
-  limiter: Ratelimit.slidingWindow(10, '60 s'),
+  limiter: Ratelimit.slidingWindow(10, "60 s"),
 });
 
 export class RateLimiter {
-  static async checkRateLimit(userId: string): Promise<{ allowed: boolean; remaining: number }> {
+  static async checkRateLimit(
+    userId: string,
+  ): Promise<{ allowed: boolean; remaining: number }> {
     const identifier = `user:${userId}`;
     const result = await rateLimiter.limit(identifier);
 

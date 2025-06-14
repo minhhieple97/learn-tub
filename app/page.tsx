@@ -1,17 +1,17 @@
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { ThemeToggle } from '@/components/shared/react-query/theme-toggle';
-import { BookOpen, Brain, Clock, Users, ArrowRight, Play } from 'lucide-react';
-import Link from 'next/link';
-import { routes } from '@/routes';
-import { createClient } from '@/lib/supabase/server';
-import { redirect } from 'next/navigation';
+} from "@/components/ui/card";
+import { ThemeToggle } from "@/components/shared/react-query/theme-toggle";
+import { BookOpen, Brain, Clock, Users, ArrowRight, Play } from "lucide-react";
+import Link from "next/link";
+import { routes } from "@/routes";
+import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
 
 export default async function LandingPage() {
   const supabase = await createClient();
@@ -31,7 +31,10 @@ export default async function LandingPage() {
               <div className="bg-neutral-sage rounded-xl p-2">
                 <BookOpen className="text-neutral-sage-foreground size-6" />
               </div>
-              <Link href={routes.home} className="text-neutral-pearl-foreground text-2xl font-bold">
+              <Link
+                href={routes.home}
+                className="text-neutral-pearl-foreground text-2xl font-bold"
+              >
                 LearnTub
               </Link>
             </div>
@@ -70,8 +73,9 @@ export default async function LandingPage() {
               </h1>
 
               <p className="text-neutral-stone-foreground mx-auto mb-12 max-w-4xl text-xl leading-relaxed lg:text-2xl">
-                Take smart notes, get AI-powered insights, and transform passive video watching into
-                active learning experiences that accelerate your growth.
+                Take smart notes, get AI-powered insights, and transform passive
+                video watching into active learning experiences that accelerate
+                your growth.
               </p>
 
               <div className="mb-16 flex flex-col items-center justify-center gap-4 sm:flex-row">
@@ -100,17 +104,23 @@ export default async function LandingPage() {
 
               <div className="text-neutral-stone-foreground flex items-center justify-center space-x-8">
                 <div className="text-center">
-                  <div className="text-neutral-pearl-foreground text-2xl font-bold">10K+</div>
+                  <div className="text-neutral-pearl-foreground text-2xl font-bold">
+                    10K+
+                  </div>
                   <div className="text-sm">Active Learners</div>
                 </div>
                 <div className="bg-neutral-stone h-8 w-px"></div>
                 <div className="text-center">
-                  <div className="text-neutral-pearl-foreground text-2xl font-bold">50K+</div>
+                  <div className="text-neutral-pearl-foreground text-2xl font-bold">
+                    50K+
+                  </div>
                   <div className="text-sm">Notes Created</div>
                 </div>
                 <div className="bg-neutral-stone h-8 w-px"></div>
                 <div className="text-center">
-                  <div className="text-neutral-pearl-foreground text-2xl font-bold">95%</div>
+                  <div className="text-neutral-pearl-foreground text-2xl font-bold">
+                    95%
+                  </div>
                   <div className="text-sm">Satisfaction</div>
                 </div>
               </div>
@@ -125,7 +135,8 @@ export default async function LandingPage() {
                 Everything you need to learn smarter
               </h2>
               <p className="text-neutral-stone-foreground mx-auto max-w-3xl text-xl">
-                Powerful features designed to enhance your learning journey and maximize retention.
+                Powerful features designed to enhance your learning journey and
+                maximize retention.
               </p>
             </div>
 
@@ -141,8 +152,9 @@ export default async function LandingPage() {
                 </CardHeader>
                 <CardContent>
                   <CardDescription className="text-neutral-stone-foreground leading-relaxed">
-                    Get intelligent feedback and insights on your notes with advanced AI analysis
-                    that helps you understand concepts deeper.
+                    Get intelligent feedback and insights on your notes with
+                    advanced AI analysis that helps you understand concepts
+                    deeper.
                   </CardDescription>
                 </CardContent>
               </Card>
@@ -158,8 +170,8 @@ export default async function LandingPage() {
                 </CardHeader>
                 <CardContent>
                   <CardDescription className="text-neutral-stone-foreground leading-relaxed">
-                    Notes automatically sync with video timestamps for seamless review and
-                    navigation. Never lose context again.
+                    Notes automatically sync with video timestamps for seamless
+                    review and navigation. Never lose context again.
                   </CardDescription>
                 </CardContent>
               </Card>
@@ -175,8 +187,8 @@ export default async function LandingPage() {
                 </CardHeader>
                 <CardContent>
                   <CardDescription className="text-neutral-stone-foreground leading-relaxed">
-                    Organize your learning with courses, tags, and intelligent categorization that
-                    adapts to your learning style.
+                    Organize your learning with courses, tags, and intelligent
+                    categorization that adapts to your learning style.
                   </CardDescription>
                 </CardContent>
               </Card>
@@ -192,8 +204,8 @@ export default async function LandingPage() {
                 </CardHeader>
                 <CardContent>
                   <CardDescription className="text-neutral-stone-foreground leading-relaxed">
-                    Monitor your learning progress with detailed analytics and insights that help
-                    you stay motivated and on track.
+                    Monitor your learning progress with detailed analytics and
+                    insights that help you stay motivated and on track.
                   </CardDescription>
                 </CardContent>
               </Card>
@@ -212,8 +224,8 @@ export default async function LandingPage() {
                   Ready to Start Learning Smarter?
                 </h2>
                 <p className="text-neutral-stone-foreground mx-auto mb-8 max-w-2xl text-xl leading-relaxed">
-                  Join thousands of learners who are already transforming their YouTube experience
-                  into powerful learning sessions.
+                  Join thousands of learners who are already transforming their
+                  YouTube experience into powerful learning sessions.
                 </p>
               </div>
 

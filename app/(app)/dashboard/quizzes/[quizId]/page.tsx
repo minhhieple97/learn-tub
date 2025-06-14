@@ -1,8 +1,8 @@
-import { QuizDetailContent } from '@/features/dashboard/components/quiz-detail';
-import { getQuizSessionDetail } from '@/features/dashboard/queries/quiz-dashboard-queries';
-import { checkProfile } from '@/lib/require-auth';
+import { QuizDetailContent } from "@/features/dashboard/components/quiz-detail";
+import { getQuizSessionDetail } from "@/features/dashboard/queries/quiz-dashboard-queries";
+import { checkProfile } from "@/lib/require-auth";
 
-import { notFound } from 'next/navigation';
+import { notFound } from "next/navigation";
 
 type IQuizDetailPageProps = {
   params: Promise<{ quizId: string }>;

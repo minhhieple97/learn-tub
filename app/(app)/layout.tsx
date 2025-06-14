@@ -1,9 +1,9 @@
-import type React from 'react';
-import { createClient } from '@/lib/supabase/server';
-import { redirect } from 'next/navigation';
-import { Sidebar } from '@/components/shared/sidebar';
-import { Header } from '@/components/shared/header';
-import { routes } from '@/routes';
+import type React from "react";
+import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
+import { Sidebar } from "@/components/shared/sidebar";
+import { Header } from "@/components/shared/header";
+import { routes } from "@/routes";
 
 export default async function AppLayout({
   children,

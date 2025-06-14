@@ -1,20 +1,20 @@
-import { clsx, type ClassValue } from 'clsx';
-import { twMerge } from 'tailwind-merge';
-import { env } from '@/env.mjs';
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+import { env } from "@/env.mjs";
 import {
   YOUTUBE_API,
   YOUTUBE_PATTERNS,
   VIDEO_DEFAULTS,
   AI_EVALUATION,
-} from '@/config/constants';
-import { IFeedback, IYouTubeVideo } from '@/types';
+} from "@/config/constants";
+import { IFeedback, IYouTubeVideo } from "@/types";
 
 export const cn = (...inputs: ClassValue[]) => {
   return twMerge(clsx(inputs));
 };
 
 export const getPasswordStrength = (password: string) => {
-  if (!password) return { strength: 0, label: '' };
+  if (!password) return { strength: 0, label: "" };
 
   let strength = 0;
   if (password.length >= 6) strength++;
@@ -23,15 +23,15 @@ export const getPasswordStrength = (password: string) => {
   if (/\d/.test(password)) strength++;
   if (/[^a-zA-Z\d]/.test(password)) strength++;
 
-  const labels = ['Very Weak', 'Weak', 'Fair', 'Good', 'Strong'];
-  return { strength, label: labels[strength - 1] || '' };
+  const labels = ["Very Weak", "Weak", "Fair", "Good", "Strong"];
+  return { strength, label: labels[strength - 1] || "" };
 };
 
 export const getPasswordStrengthColor = (strength: number): string => {
-  if (strength <= 1) return 'bg-red-500';
-  if (strength <= 2) return 'bg-yellow-500';
-  if (strength <= 3) return 'bg-blue-500';
-  return 'bg-green-500';
+  if (strength <= 1) return "bg-red-500";
+  if (strength <= 2) return "bg-yellow-500";
+  if (strength <= 3) return "bg-blue-500";
+  return "bg-green-500";
 };
 
 export const isValidYouTubeUrl = (url: string): boolean => {
@@ -46,7 +46,7 @@ export const formatDistanceToNow = (date: Date): string => {
   const now = new Date();
   const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
-  if (diffInSeconds < 60) return 'just now';
+  if (diffInSeconds < 60) return "just now";
   if (diffInSeconds < 3600)
     return `${Math.floor(diffInSeconds / 60)} minutes ago`;
   if (diffInSeconds < 86400)
@@ -58,25 +58,25 @@ export const formatDistanceToNow = (date: Date): string => {
 
 // Format duration from seconds to MM:SS or HH:MM:SS
 export const formatDuration = (seconds: number): string => {
-  if (!seconds) return '00:00';
+  if (!seconds) return "00:00";
 
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
   const secs = Math.floor(seconds % 60);
 
   if (hours > 0) {
-    return `${hours}:${minutes.toString().padStart(2, '0')}:${secs
+    return `${hours}:${minutes.toString().padStart(2, "0")}:${secs
       .toString()
-      .padStart(2, '0')}`;
+      .padStart(2, "0")}`;
   }
 
-  return `${minutes}:${secs.toString().padStart(2, '0')}`;
+  return `${minutes}:${secs.toString().padStart(2, "0")}`;
 };
 
 export const formatTimestamp = (seconds: number) => {
   const mins = Math.floor(seconds / 60);
   const secs = Math.floor(seconds % 60);
-  return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+  return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
 };
 
 export const fetchYouTubeVideoData = async (
@@ -98,7 +98,7 @@ export const fetchYouTubeVideoData = async (
       return data.items[0];
     }
   } catch (error) {
-    console.error('YouTube API error:', error);
+    console.error("YouTube API error:", error);
   }
 
   return null;
@@ -108,9 +108,9 @@ export const parseDuration = (duration: string): number => {
   const match = duration.match(YOUTUBE_PATTERNS.DURATION_REGEX);
   if (!match) return VIDEO_DEFAULTS.DURATION;
 
-  const hours = Number.parseInt(match[1] || '0');
-  const minutes = Number.parseInt(match[2] || '0');
-  const seconds = Number.parseInt(match[3] || '0');
+  const hours = Number.parseInt(match[1] || "0");
+  const minutes = Number.parseInt(match[2] || "0");
+  const seconds = Number.parseInt(match[3] || "0");
 
   return hours * 3600 + minutes * 60 + seconds;
 };
@@ -132,22 +132,22 @@ Summary: ${feedback.summary}
 Overall Score: ${feedback.overall_score}/10
 
 Correct Points:
-${feedback.correct_points.map((point) => `• ${point}`).join('\n')}
+${feedback.correct_points.map((point) => `• ${point}`).join("\n")}
 
 Points to Review:
-${feedback.incorrect_points.map((point) => `• ${point}`).join('\n')}
+${feedback.incorrect_points.map((point) => `• ${point}`).join("\n")}
 
 Improvement Suggestions:
 ${feedback.improvement_suggestions
   .map((suggestion) => `• ${suggestion}`)
-  .join('\n')}
+  .join("\n")}
 
 Detailed Analysis:
 ${feedback.detailed_analysis}`;
 };
 
 export const getScoreColor = (score: number) => {
-  if (score >= AI_EVALUATION.SCORE_EXCELLENT_THRESHOLD) return 'bg-green-500';
-  if (score >= AI_EVALUATION.SCORE_GOOD_THRESHOLD) return 'bg-yellow-500';
-  return 'bg-red-500';
+  if (score >= AI_EVALUATION.SCORE_EXCELLENT_THRESHOLD) return "bg-green-500";
+  if (score >= AI_EVALUATION.SCORE_GOOD_THRESHOLD) return "bg-yellow-500";
+  return "bg-red-500";
 };

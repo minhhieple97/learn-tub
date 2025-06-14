@@ -1,37 +1,36 @@
+import { createSearchParamsCache, parseAsString, parseAsInteger } from 'nuqs/server';
 import { QuizDashboard } from '@/features/dashboard/components/quiz-dashboard';
 import {
   getQuizDashboardData,
   getUserVideos,
 } from '@/features/dashboard/queries/quiz-dashboard-queries';
-
 import type { IQuizFilters } from '@/features/dashboard/types';
-import type { IQuizDifficultyFilter } from '@/features/quizzes/types';
 import { checkProfile } from '@/lib/require-auth';
 
-type SearchParams = Promise<{
-  search?: string;
-  difficulty?: IQuizDifficultyFilter;
-  videoId?: string;
-  sortBy?: 'created_at' | 'score' | 'attempts';
-  sortOrder?: 'asc' | 'desc';
-  page?: string;
-}>;
+const searchParamsCache = createSearchParamsCache({
+  search: parseAsString.withDefault(''),
+  difficulty: parseAsString.withDefault('all'),
+  videoId: parseAsString.withDefault(''),
+  sortBy: parseAsString.withDefault('created_at'),
+  sortOrder: parseAsString.withDefault('desc'),
+  page: parseAsInteger.withDefault(1),
+});
 
 type IQuizDashboardPageProps = {
-  searchParams: SearchParams;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
 export default async function QuizDashboardPage({ searchParams }: IQuizDashboardPageProps) {
-  const params = await searchParams;
+  const params = searchParamsCache.parse(await searchParams);
   const profile = await checkProfile();
 
   const filters: Partial<IQuizFilters> = {
-    search: params.search || '',
+    search: params.search,
     difficulty: (params.difficulty || 'all') as IQuizFilters['difficulty'],
-    videoId: params.videoId,
+    videoId: params.videoId || undefined,
     sortBy: (params.sortBy || 'created_at') as IQuizFilters['sortBy'],
     sortOrder: (params.sortOrder || 'desc') as IQuizFilters['sortOrder'],
-    page: parseInt(params.page || '1'),
+    page: params.page,
     limit: 10,
   };
 
@@ -42,7 +41,7 @@ export default async function QuizDashboardPage({ searchParams }: IQuizDashboard
 
   return (
     <div className="container mx-auto">
-      <QuizDashboard initialData={data} videos={videos} />
+      <QuizDashboard data={data} videos={videos} />
     </div>
   );
 }
