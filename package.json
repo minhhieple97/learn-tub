@@ -6,11 +6,13 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "lint:fix": "next lint --fix",
     "db:pull": "npx supabase db pull",
     "db:reset": "npx supabase db reset",
-    "db": "npm run db:reset && npm run db:pull"
+    "db": "npm run db:reset && npm run db:pull",
+    "lint": "next lint",
+    "lint:fix": "next lint --fix --ext .js,.jsx,.ts,.tsx",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "dependencies": {
     "@eslint/eslintrc": "^3.3.1",
@@ -90,7 +92,9 @@
     "@types/react-dom": "^19",
     "eslint-config-next": "^15.3.3",
     "eslint-config-prettier": "^10.1.5",
+    "eslint-plugin-prettier": "^5.4.1",
     "postcss": "^8.5.4",
+    "prettier": "^3.5.3",
     "supabase": "^2.24.3",
     "tailwindcss": "^3.4.17",
     "typescript": "^5"

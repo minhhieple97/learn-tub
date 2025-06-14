@@ -1,5 +1,5 @@
-import { Skeleton } from '@/components/ui/skeleton';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 export default function QuizDetailLoading() {
   return (
@@ -61,7 +61,7 @@ export default function QuizDetailLoading() {
                   <div className="space-y-2">
                     {Array.from({ length: 4 }).map((_, j) => (
                       <div key={j} className="flex items-center space-x-2">
-                        <Skeleton className="size-4 rounded" />{' '}
+                        <Skeleton className="size-4 rounded" />{" "}
                         {/* Radio button */}
                         <Skeleton className="h-4 w-64" /> {/* Option text */}
                       </div>
@@ -71,7 +71,7 @@ export default function QuizDetailLoading() {
                     <Skeleton className="h-4 w-32" /> {/* Your answer label */}
                     <Skeleton className="h-4 w-48" /> {/* Answer text */}
                     <Skeleton className="h-4 w-28" /> {/* Explanation label */}
-                    <Skeleton className="h-16 w-full" />{' '}
+                    <Skeleton className="h-16 w-full" />{" "}
                     {/* Explanation text */}
                   </div>
                 </div>

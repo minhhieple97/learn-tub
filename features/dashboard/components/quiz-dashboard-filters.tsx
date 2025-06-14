@@ -1,6 +1,8 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+'use client';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Select,
   SelectContent,
@@ -9,7 +11,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Filter, X } from 'lucide-react';
-import { useQueryState, parseAsString, parseAsInteger } from 'nuqs';
+import { useQuizDashboardFilters } from '../hooks/use-quiz-dashboard-filters';
+import { cn } from '@/lib/utils';
 
 type Video = {
   id: string;
@@ -22,54 +25,24 @@ type QuizDashboardFiltersProps = {
 };
 
 export const QuizDashboardFilters = ({ videos }: QuizDashboardFiltersProps) => {
-  const [search, setSearch] = useQueryState(
-    'search',
-    parseAsString.withDefault(''),
-  );
-  const [difficulty, setDifficulty] = useQueryState(
-    'difficulty',
-    parseAsString.withDefault('all'),
-  );
-  const [videoId, setVideoId] = useQueryState(
-    'videoId',
-    parseAsString.withDefault('all'),
-  );
-  const [sortBy, setSortBy] = useQueryState(
-    'sortBy',
-    parseAsString.withDefault('created_at'),
-  );
-  const [page, setPage] = useQueryState('page', parseAsInteger.withDefault(1));
-
-  const handleFilterChange = (key: string, value: string) => {
-    setPage(1);
-    switch (key) {
-      case 'search':
-        setSearch(value);
-        break;
-      case 'difficulty':
-        setDifficulty(value);
-        break;
-      case 'videoId':
-        setVideoId(value);
-        break;
-      case 'sortBy':
-        setSortBy(value);
-        break;
-    }
-  };
-
-  const clearFilters = () => {
-    setSearch('');
-    setDifficulty('all');
-    setVideoId('all');
-    setSortBy('created_at');
-    setPage(1);
-  };
-
-  const hasActiveFilters = search || difficulty !== 'all' || videoId !== 'all';
+  const {
+    search,
+    difficulty,
+    videoId,
+    sortBy,
+    handleFilterChange,
+    clearFilters,
+    hasActiveFilters,
+    isPending,
+  } = useQuizDashboardFilters();
 
   return (
-    <Card className="border-border bg-card">
+    <Card
+      className={cn(
+        'border-border bg-card transition-opacity',
+        isPending && 'opacity-50',
+      )}
+    >
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="text-base flex items-center gap-2 text-card-foreground">
@@ -81,6 +54,7 @@ export const QuizDashboardFilters = ({ videos }: QuizDashboardFiltersProps) => {
               variant="ghost"
               size="sm"
               onClick={clearFilters}
+              disabled={isPending}
               className="text-muted-foreground hover:text-foreground"
             >
               <X className="h-3 w-3 mr-1" />
@@ -96,6 +70,7 @@ export const QuizDashboardFilters = ({ videos }: QuizDashboardFiltersProps) => {
               placeholder="Search quizzes..."
               value={search}
               onChange={(e) => handleFilterChange('search', e.target.value)}
+              disabled={isPending}
               className="bg-background border-input text-foreground placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
             />
           </div>
@@ -103,6 +78,7 @@ export const QuizDashboardFilters = ({ videos }: QuizDashboardFiltersProps) => {
           <Select
             value={difficulty}
             onValueChange={(value) => handleFilterChange('difficulty', value)}
+            disabled={isPending}
           >
             <SelectTrigger className="bg-background border-input text-foreground">
               <SelectValue placeholder="Difficulty" />
@@ -117,8 +93,11 @@ export const QuizDashboardFilters = ({ videos }: QuizDashboardFiltersProps) => {
           </Select>
 
           <Select
-            value={videoId}
-            onValueChange={(value) => handleFilterChange('videoId', value)}
+            value={videoId || 'all'}
+            onValueChange={(value) =>
+              handleFilterChange('videoId', value === 'all' ? '' : value)
+            }
+            disabled={isPending}
           >
             <SelectTrigger className="bg-background border-input text-foreground">
               <SelectValue placeholder="Select Video" />
@@ -136,6 +115,7 @@ export const QuizDashboardFilters = ({ videos }: QuizDashboardFiltersProps) => {
           <Select
             value={sortBy}
             onValueChange={(value) => handleFilterChange('sortBy', value)}
+            disabled={isPending}
           >
             <SelectTrigger className="bg-background border-input text-foreground">
               <SelectValue placeholder="Sort by" />

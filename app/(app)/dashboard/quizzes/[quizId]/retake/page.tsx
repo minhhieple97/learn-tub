@@ -1,8 +1,8 @@
-import { getQuizSessionDetail } from '@/features/dashboard/queries/quiz-dashboard-queries';
+import { getQuizSessionDetail } from "@/features/dashboard/queries/quiz-dashboard-queries";
 
-import { notFound } from 'next/navigation';
-import { QuizzRetakeContent } from '@/features/quizzes/components/quizz-retake-content';
-import { checkProfile } from '@/lib/require-auth';
+import { notFound } from "next/navigation";
+import { QuizzRetakeContent } from "@/features/quizzes/components/quizz-retake-content";
+import { checkProfile } from "@/lib/require-auth";
 
 type IQuizRetakePageProps = {
   params: Promise<{ quizId: string }>;

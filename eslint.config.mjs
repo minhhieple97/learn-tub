@@ -1,54 +1,22 @@
-import globals from 'globals';
-import pluginJs from '@eslint/js';
-import tseslint from 'typescript-eslint';
-import pluginReact from 'eslint-plugin-react';
-import tailwind from 'eslint-plugin-tailwindcss';
+import { dirname } from 'path';
+import { fileURLToPath } from 'url';
 import { FlatCompat } from '@eslint/eslintrc';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 const compat = new FlatCompat({
-  baseDirectory: import.meta.dirname,
+  baseDirectory: __dirname,
 });
 
-/** @type {import('eslint').Linter.Config[]} */
-const config = [
-  { ignores: ['.next/**', 'public/**', 'next.config.js', 'postcss.config.js'] },
-  { files: ['**/*.{js,mjs,cjs,ts,jsx,tsx}'] },
-  { languageOptions: { globals: { ...globals.browser, ...globals.node } } },
-  pluginJs.configs.recommended,
-  ...tseslint.configs.recommended,
-  pluginReact.configs.flat.recommended,
-  ...tailwind.configs['flat/recommended'],
+const eslintConfig = [
   ...compat.config({
-    extends: ['next', 'prettier'],
-    settings: {
-      next: {
-        rootDir: '.',
-      },
+    extends: ['next/core-web-vitals', 'next/typescript', 'prettier'],
+    plugins: ['prettier'],
+    rules: {
+      'prettier/prettier': 'error',
     },
   }),
-  ...compat.config({
-    extends: ['plugin:@next/next/recommended'],
-  }),
-  {
-    rules: {
-      'no-undef': 'error',
-      'react/react-in-jsx-scope': 'off',
-      'tailwindcss/no-custom-classname': 'off',
-      '@typescript-eslint/no-unused-vars': [
-        'error', // or "error"
-        {
-          argsIgnorePattern: '^_',
-          varsIgnorePattern: '^_',
-          caughtErrorsIgnorePattern: '^_',
-        },
-      ],
-    },
-  },
-  {
-    files: ['**/*.{jsx,tsx}'],
-    rules: {
-      'no-console': 'warn',
-    },
-  },
 ];
-export default config;
+
+export default eslintConfig;

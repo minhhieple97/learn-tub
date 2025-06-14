@@ -1,12 +1,12 @@
-import 'server-only';
-import { redirect } from 'next/navigation';
-import { cache } from 'react';
-import { routes } from '@/routes';
+import "server-only";
+import { redirect } from "next/navigation";
+import { cache } from "react";
+import { routes } from "@/routes";
 import {
   getProfileByUserId,
   getProfileInSession,
   getUserInSession,
-} from '@/features/profile/queries';
+} from "@/features/profile/queries";
 
 export const checkAuth = cache(async () => {
   const user = await getUserInSession();

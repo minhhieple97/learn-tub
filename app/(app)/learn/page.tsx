@@ -1,8 +1,8 @@
-import { Play } from 'lucide-react';
-import { getLearnPageData } from '@/features/videos/queries';
-import { LearnTabs } from '@/features/videos/components/learn-tabs';
-import { learnPageCache } from '@/features/videos/search-params';
-import type { SearchParams } from 'nuqs/server';
+import { Play } from "lucide-react";
+import { getLearnPageData } from "@/features/videos/queries";
+import { LearnTabs } from "@/features/videos/components/learn-tabs";
+import { learnPageCache } from "@/features/videos/search-params";
+import type { SearchParams } from "nuqs/server";
 
 type PageProps = {
   searchParams: Promise<SearchParams>;
