@@ -13,11 +13,13 @@ import { IQuizDifficulty } from '../types';
 import { AIModelSelector } from '@/features/ai/components/ai-model-selector';
 import { useQuizStore } from '../store';
 
-type IQuizSettingsProps = {
+type IQuizzSettingsProps = {
   isGenerating?: boolean;
 };
 
-export const QuizSettings = ({ isGenerating = false }: IQuizSettingsProps) => {
+export const QuizzSettings = ({
+  isGenerating = false,
+}: IQuizzSettingsProps) => {
   const { settings, updateSettings } = useQuizStore();
   return (
     <Card

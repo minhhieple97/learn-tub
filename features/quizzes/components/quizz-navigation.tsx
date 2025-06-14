@@ -8,10 +8,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { ChevronLeft, ChevronRight, CheckCircle, Loader2, Clock } from 'lucide-react';
+import {
+  ChevronLeft,
+  ChevronRight,
+  CheckCircle,
+  Loader2,
+  Clock,
+} from 'lucide-react';
 import { IUserAnswer, IQuestion } from '../types';
 
-type QuizNavigationProps = {
+type IQuizzNavigationProps = {
   currentQuestionIndex: number;
   totalQuestions: number;
   currentAnswer?: IUserAnswer;
@@ -28,7 +34,7 @@ type QuizNavigationProps = {
   onSubmitQuiz: () => void;
 };
 
-export const QuizNavigation = ({
+export const QuizzNavigation = ({
   currentQuestionIndex,
   totalQuestions,
   currentAnswer,
@@ -43,7 +49,7 @@ export const QuizNavigation = ({
   onNext,
   onGoToQuestion,
   onSubmitQuiz,
-}: QuizNavigationProps) => {
+}: IQuizzNavigationProps) => {
   return (
     <div className="space-y-4">
       {formattedTime && (

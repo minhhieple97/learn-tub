@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Brain, Play, Settings, Loader2 } from 'lucide-react';
-import { QuizSettings } from './quiz-settings';
+import { QuizzSettings } from './quizz-settings';
 import { useQuizWelcome } from '../hooks/use-quiz-welcome';
 
 type IQuizzWelcomeScreenProps = {
@@ -29,7 +29,7 @@ export const QuizzWelcomeScreen = ({
         content. Get personalized feedback to improve your understanding.
       </p>
 
-      {showSettings && <QuizSettings isGenerating={isGenerating} />}
+      {showSettings && <QuizzSettings isGenerating={isGenerating} />}
 
       <div className="flex gap-3">
         <Button
