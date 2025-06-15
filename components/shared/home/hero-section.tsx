@@ -6,20 +6,23 @@ import { StatsDisplay } from "./stats-display";
 
 export function HeroSection() {
   return (
-    <section className="from-neutral-pearl via-neutral-dust to-neutral-stone relative bg-gradient-to-br">
-      <div className="from-neutral-sage/5 to-neutral-mist/5 absolute inset-0 bg-gradient-to-r"></div>
+    <section className="relative bg-gradient-to-br from-slate-50 via-blue-50/50 to-indigo-50/50 dark:from-slate-900 dark:via-blue-950/30 dark:to-indigo-950/30">
+      <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 to-indigo-600/5 dark:from-blue-400/5 dark:to-indigo-400/5"></div>
       <div className="container relative mx-auto px-4 py-24 lg:py-32">
         <div className="mx-auto max-w-5xl text-center">
-          <div className="bg-neutral-sage/10 border-neutral-sage/20 text-neutral-sage-foreground mb-8 inline-flex items-center rounded-full border px-4 py-2 text-sm">
-            <span className="bg-neutral-sage mr-2 size-2 animate-pulse rounded-full"></span>
+          <div className="bg-blue-100 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 text-blue-800 dark:text-blue-200 mb-8 inline-flex items-center rounded-full px-4 py-2 text-sm backdrop-blur-sm">
+            <span className="bg-blue-600 mr-2 size-2 animate-pulse rounded-full"></span>
             Transform your learning experience
           </div>
 
-          <h1 className="text-neutral-pearl-foreground mb-8 text-5xl font-bold leading-tight lg:text-7xl">
-            Turn YouTube into Your Learning Platform
+          <h1 className="text-slate-900 dark:text-slate-100 mb-8 text-5xl font-bold leading-tight lg:text-7xl">
+            Turn YouTube into Your{" "}
+            <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+              Learning Platform
+            </span>
           </h1>
 
-          <p className="text-neutral-stone-foreground mx-auto mb-12 max-w-4xl text-xl leading-relaxed lg:text-2xl">
+          <p className="text-slate-600 dark:text-slate-300 mx-auto mb-12 max-w-4xl text-xl leading-relaxed lg:text-2xl">
             Take smart notes, get AI-powered insights, and transform passive
             video watching into active learning experiences that accelerate your
             growth.
@@ -28,7 +31,7 @@ export function HeroSection() {
           <div className="mb-16 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Button
               size="lg"
-              className="bg-neutral-sage text-neutral-sage-foreground hover:bg-neutral-sage/90 group px-8 py-4 text-lg"
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 group px-8 py-4 text-lg shadow-xl"
               asChild
             >
               <Link href={routes.register}>
@@ -39,7 +42,7 @@ export function HeroSection() {
             <Button
               size="lg"
               variant="outline"
-              className="border-neutral-stone bg-neutral-pearl/50 text-neutral-pearl-foreground hover:bg-neutral-stone hover:text-neutral-stone-foreground group px-8 py-4 text-lg"
+              className="border-slate-300 dark:border-slate-600 bg-white/80 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-slate-100 group px-8 py-4 text-lg backdrop-blur-sm"
               asChild
             >
               <Link href={routes.demo}>
