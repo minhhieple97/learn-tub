@@ -1,13 +1,13 @@
 'use client';
 
 import { Brain } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Suspense } from 'react';
 import { useAction } from 'next-safe-action/hooks';
 import { retakeQuizAction } from '../actions/quiz-actions';
 import { QuizDashboardStats } from './quiz-dashboard-stats';
 import { QuizDashboardFilters } from './quiz-dashboard-filters';
-import { QuizSessionCard } from './quiz-session-card';
+import { QuizSessionsList } from './quiz-sessions-list';
+import { QuizSessionsSkeleton } from './quiz-sessions-skeleton';
 import { QuizPagination } from './quiz-pagination';
 import type { IQuizSessionWithAttempts } from '@/features/quizzes/types';
 
@@ -30,8 +30,7 @@ type QuizDashboardProps = {
 };
 
 export const QuizDashboard = ({ data, videos }: QuizDashboardProps) => {
-  const { execute: executeRetake, isExecuting: isRetaking } =
-    useAction(retakeQuizAction);
+  const { execute: executeRetake, isExecuting: isRetaking } = useAction(retakeQuizAction);
 
   const handleRetakeQuiz = async (sessionId: string) => {
     executeRetake({ sessionId });
@@ -59,34 +58,13 @@ export const QuizDashboard = ({ data, videos }: QuizDashboardProps) => {
 
       <QuizDashboardFilters videos={videos} />
 
-      <div className="space-y-4">
-        {data.sessions.map((session) => (
-          <QuizSessionCard
-            key={session.id}
-            session={session}
-            onRetake={handleRetakeQuiz}
-            isRetaking={isRetaking}
-          />
-        ))}
-
-        {data.sessions.length === 0 && (
-          <Card className="border-border bg-card">
-            <CardContent className="text-center py-12">
-              <Brain className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-medium mb-2 text-card-foreground">
-                No quizzes found
-              </h3>
-              <p className="text-muted-foreground mb-4">
-                Start creating quizzes from your videos to track your learning
-                progress.
-              </p>
-              <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
-                Create Your First Quiz
-              </Button>
-            </CardContent>
-          </Card>
-        )}
-      </div>
+      <Suspense fallback={<QuizSessionsSkeleton />}>
+        <QuizSessionsList
+          sessions={data.sessions}
+          onRetake={handleRetakeQuiz}
+          isRetaking={isRetaking}
+        />
+      </Suspense>
 
       {data.sessions.length > 0 && (
         <QuizPagination

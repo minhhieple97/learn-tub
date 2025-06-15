@@ -11,8 +11,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Filter, X } from 'lucide-react';
+import { QUIZZ_FILTER_VALUES } from '@/config/constants';
 import { useQuizDashboardFilters } from '../hooks/use-quiz-dashboard-filters';
-import { cn } from '@/lib/utils';
 
 type Video = {
   id: string;
@@ -20,11 +20,11 @@ type Video = {
   youtube_id: string;
 };
 
-type QuizDashboardFiltersProps = {
+type IQuizDashboardFiltersProps = {
   videos: Video[];
 };
 
-export const QuizDashboardFilters = ({ videos }: QuizDashboardFiltersProps) => {
+export const QuizDashboardFilters = ({ videos }: IQuizDashboardFiltersProps) => {
   const {
     search,
     difficulty,
@@ -33,16 +33,10 @@ export const QuizDashboardFilters = ({ videos }: QuizDashboardFiltersProps) => {
     handleFilterChange,
     clearFilters,
     hasActiveFilters,
-    isPending,
   } = useQuizDashboardFilters();
 
   return (
-    <Card
-      className={cn(
-        'border-border bg-card transition-opacity',
-        isPending && 'opacity-50',
-      )}
-    >
+    <Card className="border-border bg-card">
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="text-base flex items-center gap-2 text-card-foreground">
@@ -54,7 +48,6 @@ export const QuizDashboardFilters = ({ videos }: QuizDashboardFiltersProps) => {
               variant="ghost"
               size="sm"
               onClick={clearFilters}
-              disabled={isPending}
               className="text-muted-foreground hover:text-foreground"
             >
               <X className="h-3 w-3 mr-1" />
@@ -70,7 +63,6 @@ export const QuizDashboardFilters = ({ videos }: QuizDashboardFiltersProps) => {
               placeholder="Search quizzes..."
               value={search}
               onChange={(e) => handleFilterChange('search', e.target.value)}
-              disabled={isPending}
               className="bg-background border-input text-foreground placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
             />
           </div>
@@ -78,32 +70,30 @@ export const QuizDashboardFilters = ({ videos }: QuizDashboardFiltersProps) => {
           <Select
             value={difficulty}
             onValueChange={(value) => handleFilterChange('difficulty', value)}
-            disabled={isPending}
           >
             <SelectTrigger className="bg-background border-input text-foreground">
               <SelectValue placeholder="Difficulty" />
             </SelectTrigger>
             <SelectContent className="bg-popover border-border">
-              <SelectItem value="all">All Difficulties</SelectItem>
-              <SelectItem value="easy">Easy</SelectItem>
-              <SelectItem value="medium">Medium</SelectItem>
-              <SelectItem value="hard">Hard</SelectItem>
-              <SelectItem value="mixed">Mixed</SelectItem>
+              <SelectItem value={QUIZZ_FILTER_VALUES.DIFFICULTIES.ALL}>All Difficulties</SelectItem>
+              <SelectItem value={QUIZZ_FILTER_VALUES.DIFFICULTIES.EASY}>Easy</SelectItem>
+              <SelectItem value={QUIZZ_FILTER_VALUES.DIFFICULTIES.MEDIUM}>Medium</SelectItem>
+              <SelectItem value={QUIZZ_FILTER_VALUES.DIFFICULTIES.HARD}>Hard</SelectItem>
+              <SelectItem value={QUIZZ_FILTER_VALUES.DIFFICULTIES.MIXED}>Mixed</SelectItem>
             </SelectContent>
           </Select>
 
           <Select
-            value={videoId || 'all'}
+            value={videoId || QUIZZ_FILTER_VALUES.ALL}
             onValueChange={(value) =>
-              handleFilterChange('videoId', value === 'all' ? '' : value)
+              handleFilterChange('videoId', value === QUIZZ_FILTER_VALUES.ALL ? '' : value)
             }
-            disabled={isPending}
           >
             <SelectTrigger className="bg-background border-input text-foreground">
               <SelectValue placeholder="Select Video" />
             </SelectTrigger>
             <SelectContent className="bg-popover border-border">
-              <SelectItem value="all">All Videos</SelectItem>
+              <SelectItem value={QUIZZ_FILTER_VALUES.ALL}>All Videos</SelectItem>
               {videos.map((video) => (
                 <SelectItem key={video.id} value={video.id}>
                   {video.title}
@@ -112,18 +102,16 @@ export const QuizDashboardFilters = ({ videos }: QuizDashboardFiltersProps) => {
             </SelectContent>
           </Select>
 
-          <Select
-            value={sortBy}
-            onValueChange={(value) => handleFilterChange('sortBy', value)}
-            disabled={isPending}
-          >
+          <Select value={sortBy} onValueChange={(value) => handleFilterChange('sortBy', value)}>
             <SelectTrigger className="bg-background border-input text-foreground">
               <SelectValue placeholder="Sort by" />
             </SelectTrigger>
             <SelectContent className="bg-popover border-border">
-              <SelectItem value="created_at">Date Created</SelectItem>
-              <SelectItem value="score">Best Score</SelectItem>
-              <SelectItem value="attempts">Attempts</SelectItem>
+              <SelectItem value={QUIZZ_FILTER_VALUES.SORT_OPTIONS.CREATED_AT}>
+                Date Created
+              </SelectItem>
+              <SelectItem value={QUIZZ_FILTER_VALUES.SORT_OPTIONS.SCORE}>Best Score</SelectItem>
+              <SelectItem value={QUIZZ_FILTER_VALUES.SORT_OPTIONS.ATTEMPTS}>Attempts</SelectItem>
             </SelectContent>
           </Select>
         </div>

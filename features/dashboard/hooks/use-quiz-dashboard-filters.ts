@@ -1,158 +1,152 @@
-import { useRouter } from 'next/navigation';
-import { useTransition } from 'react';
-import { useQueryState, parseAsString, parseAsInteger } from 'nuqs';
-import { useDebounce } from '@/hooks/use-debounce';
-import { useMemo, useCallback, useEffect } from 'react';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
+import {
+  useTransition,
+  useMemo,
+  useCallback,
+  useRef,
+  useEffect,
+  useState,
+} from 'react';
+import { debounce } from 'lodash';
+import {
+  QUIZZ_DASHBOARD_CONFIG,
+  QUIZZ_FILTER_DEFAULTS,
+  QUIZZ_FILTER_VALUES,
+} from '@/config/constants';
 import type { IQuizFilters } from '../types';
 
 export const useQuizDashboardFilters = () => {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
 
-  const [search, setSearch] = useQueryState('search', parseAsString.withDefault(''));
-  const [difficulty, setDifficulty] = useQueryState('difficulty', parseAsString.withDefault('all'));
-  const [videoId, setVideoId] = useQueryState('videoId', parseAsString.withDefault(''));
-  const [sortBy, setSortBy] = useQueryState('sortBy', parseAsString.withDefault('created_at'));
-  const [sortOrder, setSortOrder] = useQueryState('sortOrder', parseAsString.withDefault('desc'));
-  const [page, setPage] = useQueryState('page', parseAsInteger.withDefault(1));
+  const urlSearch = searchParams.get('search') || QUIZZ_FILTER_DEFAULTS.SEARCH;
+  const difficulty =
+    searchParams.get('difficulty') || QUIZZ_FILTER_DEFAULTS.DIFFICULTY;
+  const videoId = searchParams.get('videoId') || QUIZZ_FILTER_DEFAULTS.VIDEO_ID;
+  const sortBy = searchParams.get('sortBy') || QUIZZ_FILTER_DEFAULTS.SORT_BY;
+  const sortOrder =
+    searchParams.get('sortOrder') || QUIZZ_FILTER_DEFAULTS.SORT_ORDER;
+  const page = parseInt(
+    searchParams.get('page') || QUIZZ_DASHBOARD_CONFIG.DEFAULT_PAGE.toString(),
+    10,
+  );
 
-  const debouncedSearch = useDebounce(search, 300);
+  const [localSearch, setLocalSearch] = useState(urlSearch);
+
+  useEffect(() => {
+    setLocalSearch(urlSearch);
+  }, [urlSearch]);
 
   const filters = useMemo(
     (): Partial<IQuizFilters> => ({
-      search: debouncedSearch,
+      search: urlSearch,
       difficulty: difficulty as IQuizFilters['difficulty'],
       videoId: videoId || undefined,
       sortBy: sortBy as IQuizFilters['sortBy'],
       sortOrder: sortOrder as IQuizFilters['sortOrder'],
       page,
-      limit: 10,
+      limit: QUIZZ_DASHBOARD_CONFIG.PAGINATION_LIMIT,
     }),
-    [debouncedSearch, difficulty, videoId, sortBy, sortOrder, page],
+    [urlSearch, difficulty, videoId, sortBy, sortOrder, page],
   );
 
-  // Build URL with current parameters
-  const buildUrl = useCallback(() => {
-    const params = new URLSearchParams();
+  const getCurrentParams = useCallback(
+    (overrides: Partial<Record<string, string | number>> = {}) => ({
+      search: urlSearch,
+      difficulty,
+      videoId,
+      sortBy,
+      sortOrder,
+      page: QUIZZ_DASHBOARD_CONFIG.DEFAULT_PAGE,
+      ...overrides,
+    }),
+    [urlSearch, difficulty, videoId, sortBy, sortOrder],
+  );
 
-    if (search) params.set('search', search);
-    if (difficulty !== 'all') params.set('difficulty', difficulty);
-    if (videoId) params.set('videoId', videoId);
-    if (sortBy !== 'created_at') params.set('sortBy', sortBy);
-    if (sortOrder !== 'desc') params.set('sortOrder', sortOrder);
-    if (page !== 1) params.set('page', page.toString());
+  const buildUrl = useCallback(
+    (params: Record<string, string | number>) => {
+      const urlParams = new URLSearchParams();
 
-    const queryString = params.toString();
-    return queryString ? `?${queryString}` : '';
-  }, [search, difficulty, videoId, sortBy, sortOrder, page]);
+      Object.entries(params).forEach(([key, value]) => {
+        if (value && value !== QUIZZ_FILTER_VALUES.ALL && value !== '') {
+          urlParams.set(key, value.toString());
+        }
+      });
 
-  const navigateWithTransition = useCallback(
-    (callback: () => void) => {
+      const queryString = urlParams.toString();
+      return pathname + (queryString ? `?${queryString}` : '');
+    },
+    [pathname],
+  );
+
+  const debouncedSearchUpdate = useCallback(
+    (searchValue: string) => {
+      const params = getCurrentParams({ search: searchValue });
+
       startTransition(() => {
-        callback();
-        // Use router.push to navigate to the new URL
-        const newUrl = window.location.pathname + buildUrl();
+        const newUrl = buildUrl(params);
         router.push(newUrl);
       });
     },
-    [router, buildUrl],
+    [getCurrentParams, buildUrl, router],
   );
 
-  // Handle debounced search changes
+  const debouncedSearch = useRef(
+    debounce((value: string) => {
+      debouncedSearchUpdate(value);
+    }, QUIZZ_DASHBOARD_CONFIG.SEARCH_DEBOUNCE_DELAY),
+  ).current;
+
   useEffect(() => {
-    if (debouncedSearch !== search) {
-      // When debounced search changes, trigger navigation
-      startTransition(() => {
-        const params = new URLSearchParams();
-
-        if (debouncedSearch) params.set('search', debouncedSearch);
-        if (difficulty !== 'all') params.set('difficulty', difficulty);
-        if (videoId) params.set('videoId', videoId);
-        if (sortBy !== 'created_at') params.set('sortBy', sortBy);
-        if (sortOrder !== 'desc') params.set('sortOrder', sortOrder);
-        // Reset to page 1 when search changes
-        params.set('page', '1');
-
-        const queryString = params.toString();
-        const newUrl = window.location.pathname + (queryString ? `?${queryString}` : '');
-        router.push(newUrl);
-      });
-    }
-  }, [debouncedSearch, search, difficulty, videoId, sortBy, sortOrder, router]);
+    return () => {
+      debouncedSearch.cancel();
+    };
+  }, [debouncedSearch]);
 
   const handleFilterChange = useCallback(
     (key: string, value: string) => {
-      // For search, just update the state - debounce will handle navigation
       if (key === 'search') {
-        setSearch(value);
-        setPage(1); // Reset page immediately for search
-        return;
+        setLocalSearch(value);
+        debouncedSearch(value);
+      } else {
+        const params = getCurrentParams({ [key]: value });
+
+        startTransition(() => {
+          const newUrl = buildUrl(params);
+          router.push(newUrl);
+        });
       }
-
-      // For other filters, navigate immediately
-      navigateWithTransition(() => {
-        setPage(1);
-
-        switch (key) {
-          case 'difficulty':
-            setDifficulty(value);
-            break;
-          case 'videoId':
-            setVideoId(value);
-            break;
-          case 'sortBy':
-            setSortBy(value);
-            break;
-          case 'sortOrder':
-            setSortOrder(value);
-            break;
-        }
-      });
     },
-    [
-      setSearch,
-      setPage,
-      navigateWithTransition,
-      setDifficulty,
-      setVideoId,
-      setSortBy,
-      setSortOrder,
-    ],
+    [getCurrentParams, buildUrl, router, debouncedSearch],
   );
 
   const handlePageChange = useCallback(
     (newPage: number) => {
-      navigateWithTransition(() => {
-        setPage(newPage);
+      const params = getCurrentParams({ page: newPage });
+
+      startTransition(() => {
+        const newUrl = buildUrl(params);
+        router.push(newUrl);
       });
     },
-    [navigateWithTransition, setPage],
+    [getCurrentParams, buildUrl, router],
   );
 
   const clearFilters = useCallback(() => {
-    navigateWithTransition(() => {
-      setSearch('');
-      setDifficulty('all');
-      setVideoId('');
-      setSortBy('created_at');
-      setSortOrder('desc');
-      setPage(1);
+    debouncedSearch.cancel();
+    startTransition(() => {
+      router.push(pathname);
     });
-  }, [
-    navigateWithTransition,
-    setSearch,
-    setDifficulty,
-    setVideoId,
-    setSortBy,
-    setSortOrder,
-    setPage,
-  ]);
+  }, [router, pathname, debouncedSearch]);
 
-  const hasActiveFilters = search || difficulty !== 'all' || videoId;
+  const hasActiveFilters =
+    urlSearch || difficulty !== QUIZZ_FILTER_VALUES.DIFFICULTIES.ALL || videoId;
 
   return {
-    // Current filter values
-    search,
+    // Current filter values for UI
+    search: localSearch,
     difficulty,
     videoId,
     sortBy,
@@ -160,13 +154,12 @@ export const useQuizDashboardFilters = () => {
     page,
     filters,
 
-    // Actions
+    // Filter actions
     handleFilterChange,
     handlePageChange,
     clearFilters,
-    setPage,
 
-    // State
+    // State flags
     hasActiveFilters,
     isPending,
   };

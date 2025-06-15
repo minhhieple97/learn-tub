@@ -12,7 +12,7 @@ import {
   IQuizSession,
 } from '../types';
 import { generateQuizQuestionsAction, evaluateQuizAction } from '../actions';
-import { AI_QUIZ_CONFIG } from '@/config/constants';
+import { AI_QUIZZ_CONFIG } from '@/config/constants';
 import { toast } from '@/hooks/use-toast';
 
 type QuizState = {
@@ -49,7 +49,10 @@ type QuizState = {
   ) => void;
   updateSettings: (settings: Partial<IQuizSettings>) => void;
   generateQuestions: () => Promise<void>;
-  answerQuestion: (questionId: string, selectedAnswer: IQuizAnswerOption) => void;
+  answerQuestion: (
+    questionId: string,
+    selectedAnswer: IQuizAnswerOption,
+  ) => void;
   nextQuestion: () => void;
   previousQuestion: () => void;
   goToQuestion: (index: number) => void;
@@ -95,8 +98,8 @@ export const useQuizStore = create<QuizState>()(
         isGenerating: false,
         isEvaluating: false,
         settings: {
-          questionCount: AI_QUIZ_CONFIG.DEFAULT_QUESTION_COUNT,
-          difficulty: AI_QUIZ_CONFIG.DEFAULT_DIFFICULTY,
+          questionCount: AI_QUIZZ_CONFIG.DEFAULT_QUESTION_COUNT,
+          difficulty: AI_QUIZZ_CONFIG.DEFAULT_DIFFICULTY,
           provider: null,
           aiModelId: '',
         },
@@ -132,7 +135,13 @@ export const useQuizStore = create<QuizState>()(
         },
 
         generateQuestions: async () => {
-          const { videoId, videoTitle, videoDescription, videoTutorial, settings } = get();
+          const {
+            videoId,
+            videoTitle,
+            videoDescription,
+            videoTutorial,
+            settings,
+          } = get();
 
           if (!videoId) {
             toast.error({ description: 'Video ID is required' });
@@ -140,7 +149,9 @@ export const useQuizStore = create<QuizState>()(
           }
 
           if (!settings.aiModelId) {
-            toast.error({ description: 'Please select an AI model to generate questions' });
+            toast.error({
+              description: 'Please select an AI model to generate questions',
+            });
             return;
           }
 
@@ -173,22 +184,34 @@ export const useQuizStore = create<QuizState>()(
 
               get().startTimer();
 
-              toast.success({ description: 'Quiz questions generated successfully!' });
+              toast.success({
+                description: 'Quiz questions generated successfully!',
+              });
             } else {
-              throw new Error(result?.serverError || 'Failed to generate questions');
+              throw new Error(
+                result?.serverError || 'Failed to generate questions',
+              );
             }
           } catch (error) {
             console.error('Failed to generate questions:', error);
             toast.error({
-              description: error instanceof Error ? error.message : 'Failed to generate questions',
+              description:
+                error instanceof Error
+                  ? error.message
+                  : 'Failed to generate questions',
             });
             set({ isGenerating: false });
           }
         },
 
-        answerQuestion: (questionId: string, selectedAnswer: IQuizAnswerOption) => {
+        answerQuestion: (
+          questionId: string,
+          selectedAnswer: IQuizAnswerOption,
+        ) => {
           set((state) => {
-            const existingAnswerIndex = state.answers.findIndex((a) => a.questionId === questionId);
+            const existingAnswerIndex = state.answers.findIndex(
+              (a) => a.questionId === questionId,
+            );
             const newAnswers = [...state.answers];
 
             if (existingAnswerIndex >= 0) {
@@ -218,7 +241,10 @@ export const useQuizStore = create<QuizState>()(
 
         goToQuestion: (index: number) => {
           set((state) => ({
-            currentQuestionIndex: Math.max(0, Math.min(index, state.questions.length - 1)),
+            currentQuestionIndex: Math.max(
+              0,
+              Math.min(index, state.questions.length - 1),
+            ),
           }));
         },
 
@@ -236,12 +262,16 @@ export const useQuizStore = create<QuizState>()(
             timeTakenSeconds,
           } = get();
           if (questions.length === 0 || answers.length === 0) {
-            toast.error({ description: 'Please answer all questions before submitting' });
+            toast.error({
+              description: 'Please answer all questions before submitting',
+            });
             return;
           }
 
           if (!videoId || !sessionId) {
-            toast.error({ description: 'Missing required data for submission' });
+            toast.error({
+              description: 'Missing required data for submission',
+            });
             return;
           }
 
@@ -282,7 +312,10 @@ export const useQuizStore = create<QuizState>()(
           } catch (error) {
             console.error('Failed to evaluate quiz:', error);
             toast.error({
-              description: error instanceof Error ? error.message : 'Failed to evaluate quiz',
+              description:
+                error instanceof Error
+                  ? error.message
+                  : 'Failed to evaluate quiz',
             });
             set({ isEvaluating: false });
           }
@@ -327,7 +360,9 @@ export const useQuizStore = create<QuizState>()(
           const interval = setInterval(() => {
             set((state) => {
               if (state.startTime) {
-                const currentTime = Math.floor((Date.now() - state.startTime) / 1000);
+                const currentTime = Math.floor(
+                  (Date.now() - state.startTime) / 1000,
+                );
                 return { currentTime };
               }
               return state;
@@ -345,7 +380,9 @@ export const useQuizStore = create<QuizState>()(
           }
 
           if (startTime) {
-            const timeTakenSeconds = Math.floor((Date.now() - startTime) / 1000);
+            const timeTakenSeconds = Math.floor(
+              (Date.now() - startTime) / 1000,
+            );
             set({ timeTakenSeconds });
           }
         },
@@ -405,7 +442,9 @@ export const useQuizStore = create<QuizState>()(
           const { answers } = get();
           const currentQuestion = get().getCurrentQuestion();
           if (!currentQuestion) return null;
-          return answers.find((a) => a.questionId === currentQuestion.id) || null;
+          return (
+            answers.find((a) => a.questionId === currentQuestion.id) || null
+          );
         },
 
         getHasAnsweredAll: () => {
@@ -425,7 +464,9 @@ export const useQuizStore = create<QuizState>()(
 
         getProgress: () => {
           const { currentQuestionIndex, questions } = get();
-          return questions.length > 0 ? ((currentQuestionIndex + 1) / questions.length) * 100 : 0;
+          return questions.length > 0
+            ? ((currentQuestionIndex + 1) / questions.length) * 100
+            : 0;
         },
 
         getAnsweredCount: () => {

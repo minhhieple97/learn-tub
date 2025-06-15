@@ -66,12 +66,7 @@ export const QuizPagination = ({
   };
 
   return (
-    <div
-      className={cn(
-        'flex items-center justify-between transition-opacity',
-        isPending && 'opacity-50',
-      )}
-    >
+    <div className="flex items-center justify-between">
       <div className="text-sm text-muted-foreground">
         Showing {startItem} to {endItem} of {totalItems} results
       </div>
@@ -87,11 +82,7 @@ export const QuizPagination = ({
                   handlePageChange(currentPage - 1);
                 }
               }}
-              className={cn(
-                currentPage === 1 || isPending
-                  ? 'pointer-events-none opacity-50'
-                  : '',
-              )}
+              className={cn(currentPage === 1 || isPending ? 'pointer-events-none opacity-50' : '')}
             />
           </PaginationItem>
 
@@ -127,9 +118,7 @@ export const QuizPagination = ({
                 }
               }}
               className={cn(
-                currentPage === totalPages || isPending
-                  ? 'pointer-events-none opacity-50'
-                  : '',
+                currentPage === totalPages || isPending ? 'pointer-events-none opacity-50' : '',
               )}
             />
           </PaginationItem>
