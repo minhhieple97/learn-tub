@@ -73,15 +73,6 @@ LearnTub is a modern learning platform that transforms passive YouTube video wat
    Create a `.env` file in the root directory:
 
    ```env
-   # Database Configuration (Vercel/Neon PostgreSQL)
-   POSTGRES_URL=your_postgres_url
-   POSTGRES_PRISMA_URL=your_postgres_prisma_url
-   POSTGRES_URL_NON_POOLING=your_postgres_url_non_pooling
-   POSTGRES_USER=your_postgres_user
-   POSTGRES_PASSWORD=your_postgres_password
-   POSTGRES_DATABASE=your_postgres_database
-   POSTGRES_HOST=your_postgres_host
-
    # Supabase Configuration
    NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
    NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
@@ -90,9 +81,18 @@ LearnTub is a modern learning platform that transforms passive YouTube video wat
    # YouTube API Configuration
    YOUTUBE_API_KEY=your_youtube_api_key
 
-   # AI Configuration (Optional - for AI evaluation features)
+   # AI Configuration
    OPENAI_API_KEY=your_openai_api_key
    GEMINI_API_KEY=your_gemini_api_key
+
+   # QStash Configuration (for background jobs)
+   QSTASH_CURRENT_SIGNING_KEY=your_qstash_current_signing_key
+   QSTASH_NEXT_SIGNING_KEY=your_qstash_next_signing_key
+   QSTASH_TOKEN=your_qstash_token
+
+   # Upstash Redis Configuration (for caching and rate limiting)
+   UPSTASH_REDIS_REST_URL=your_upstash_redis_rest_url
+   UPSTASH_REDIS_REST_TOKEN=your_upstash_redis_rest_token
 
    # App Configuration
    NEXT_PUBLIC_APP_URL=http://localhost:3000
@@ -343,4 +343,3 @@ The comprehensive AI usage tracking system provides insights into your AI intera
 ## 🤝 Contributing
 
 Contributions are welcome! Please follow standard Git practices: fork the repository, create a feature branch, and submit a pull request. Ensure your code adheres to the existing linting and formatting rules.
-
