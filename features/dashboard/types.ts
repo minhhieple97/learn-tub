@@ -73,3 +73,5 @@ export type IQuizFilters = {
   page: number;
   limit: number;
 };
+
+export type IQuizFilterParams = Omit<IQuizFilters, 'limit'>;

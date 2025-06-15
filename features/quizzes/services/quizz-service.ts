@@ -1,9 +1,8 @@
 import {
-  AI_DEFAULTS,
   AI_SYSTEM_MESSAGES,
-  AI_QUIZ_CONFIG,
-  AI_QUIZ_ERRORS,
-  AI_QUIZ_PROMPTS,
+  AI_QUIZZ_CONFIG,
+  AI_QUIZZ_ERRORS,
+  AI_QUIZZ_PROMPTS,
 } from '@/config/constants';
 import type {
   IEvaluateQuizRequest,
@@ -20,7 +19,7 @@ import { createClient } from '@/lib/supabase/client';
 
 type IStreamController = ReadableStreamDefaultController<IQuizStreamChunk>;
 
-class QuizService {
+class QuizzService {
   async generateQuestions(request: IGenerateQuestionsRequest): Promise<IQuizGenerationResponse> {
     try {
       const {
@@ -28,8 +27,8 @@ class QuizService {
         videoTitle,
         videoDescription,
         videoTutorial,
-        questionCount = AI_QUIZ_CONFIG.DEFAULT_QUESTION_COUNT,
-        difficulty = AI_QUIZ_CONFIG.DEFAULT_DIFFICULTY,
+        questionCount = AI_QUIZZ_CONFIG.DEFAULT_QUESTION_COUNT,
+        difficulty = AI_QUIZZ_CONFIG.DEFAULT_DIFFICULTY,
         topics,
         userId,
       } = request;
@@ -50,7 +49,7 @@ class QuizService {
         .single()) as { data: { model_name: string } | null; error: any };
 
       if (error || !modelData?.model_name) {
-        throw new Error(`${AI_QUIZ_ERRORS.UNSUPPORTED_PROVIDER}: ${aiModelId}`);
+        throw new Error(`${AI_QUIZZ_ERRORS.UNSUPPORTED_PROVIDER}: ${aiModelId}`);
       }
 
       const modelName = modelData.model_name;
@@ -58,7 +57,7 @@ class QuizService {
       const response = await aiUsageTracker.wrapAIOperationWithTokens(
         {
           user_id: userId,
-          command: 'generate_quiz_questions',
+          command: 'generate_quizz_questions',
           ai_model_id: aiModelId,
           request_payload: { prompt_length: prompt.length },
         },
@@ -92,7 +91,7 @@ class QuizService {
       console.error(error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : AI_QUIZ_ERRORS.FAILED_TO_GENERATE,
+        error: error instanceof Error ? error.message : AI_QUIZZ_ERRORS.FAILED_TO_GENERATE,
       };
     }
   }
@@ -105,8 +104,8 @@ class QuizService {
       videoTitle,
       videoDescription,
       videoTutorial,
-      questionCount = AI_QUIZ_CONFIG.DEFAULT_QUESTION_COUNT,
-      difficulty = AI_QUIZ_CONFIG.DEFAULT_DIFFICULTY,
+      questionCount = AI_QUIZZ_CONFIG.DEFAULT_QUESTION_COUNT,
+      difficulty = AI_QUIZZ_CONFIG.DEFAULT_DIFFICULTY,
       topics,
       userId,
     } = request;
@@ -138,7 +137,7 @@ class QuizService {
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : AI_QUIZ_ERRORS.FAILED_TO_EVALUATE,
+        error: error instanceof Error ? error.message : AI_QUIZZ_ERRORS.FAILED_TO_EVALUATE,
       };
     }
   }
@@ -155,23 +154,25 @@ class QuizService {
       params;
 
     const contextInfo = this.buildVideoContext({ videoTitle, videoDescription, videoTutorial });
-    const topicsInfo = topics?.length ? `${AI_QUIZ_PROMPTS.TOPICS_PREFIX}${topics.join(', ')}` : '';
+    const topicsInfo = topics?.length
+      ? `${AI_QUIZZ_PROMPTS.TOPICS_PREFIX}${topics.join(', ')}`
+      : '';
     const difficultyInfo =
-      difficulty === AI_QUIZ_CONFIG.DEFAULT_DIFFICULTY
-        ? AI_QUIZ_PROMPTS.DIFFICULTY_MIXED
-        : `${difficulty}${AI_QUIZ_PROMPTS.DIFFICULTY_SUFFIX}`;
+      difficulty === AI_QUIZZ_CONFIG.DEFAULT_DIFFICULTY
+        ? AI_QUIZZ_PROMPTS.DIFFICULTY_MIXED
+        : `${difficulty}${AI_QUIZZ_PROMPTS.DIFFICULTY_SUFFIX}`;
 
     return `
-${AI_QUIZ_PROMPTS.GENERATION_INTRO.replace('{count}', questionCount.toString())}
+${AI_QUIZZ_PROMPTS.GENERATION_INTRO.replace('{count}', questionCount.toString())}
 
 ${contextInfo}
 ${topicsInfo}
 
-${AI_QUIZ_PROMPTS.GENERATION_REQUIREMENTS.replace('{difficulty}', difficultyInfo)}
+${AI_QUIZZ_PROMPTS.GENERATION_REQUIREMENTS.replace('{difficulty}', difficultyInfo)}
 
-${AI_QUIZ_PROMPTS.GENERATION_FORMAT}
+${AI_QUIZZ_PROMPTS.GENERATION_FORMAT}
 
-${AI_QUIZ_PROMPTS.GENERATION_FOOTER}`;
+${AI_QUIZZ_PROMPTS.GENERATION_FOOTER}`;
   }
 
   private createEvaluationPrompt(
@@ -197,16 +198,16 @@ ${AI_QUIZ_PROMPTS.GENERATION_FOOTER}`;
     });
 
     return `
-${AI_QUIZ_PROMPTS.EVALUATION_INTRO}
+${AI_QUIZZ_PROMPTS.EVALUATION_INTRO}
 
 ${contextInfo}
 
-${AI_QUIZ_PROMPTS.QUIZ_RESULTS_PREFIX}
+${AI_QUIZZ_PROMPTS.QUIZZ_RESULTS_PREFIX}
 ${JSON.stringify(questionsWithAnswers, null, 2)}
 
-${AI_QUIZ_PROMPTS.EVALUATION_FORMAT.replace('{total}', questions.length.toString())}
+${AI_QUIZZ_PROMPTS.EVALUATION_FORMAT.replace('{total}', questions.length.toString())}
 
-${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
+${AI_QUIZZ_PROMPTS.EVALUATION_FOCUS}`;
   }
 
   private buildVideoContext(context?: {
@@ -218,13 +219,13 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
 
     const parts: string[] = [];
     if (context.videoTitle) {
-      parts.push(`${AI_QUIZ_PROMPTS.VIDEO_TITLE_PREFIX}${context.videoTitle}"`);
+      parts.push(`${AI_QUIZZ_PROMPTS.VIDEO_TITLE_PREFIX}${context.videoTitle}"`);
     }
     if (context.videoDescription) {
-      parts.push(`${AI_QUIZ_PROMPTS.VIDEO_DESCRIPTION_PREFIX}${context.videoDescription}"`);
+      parts.push(`${AI_QUIZZ_PROMPTS.VIDEO_DESCRIPTION_PREFIX}${context.videoDescription}"`);
     }
     if (context.videoTutorial) {
-      parts.push(`${AI_QUIZ_PROMPTS.VIDEO_TUTORIAL_PREFIX}${context.videoTutorial}"`);
+      parts.push(`${AI_QUIZZ_PROMPTS.VIDEO_TUTORIAL_PREFIX}${context.videoTutorial}"`);
     }
 
     return parts.join('\n');
@@ -239,7 +240,7 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
       .single()) as { data: { model_name: string } | null; error: any };
 
     if (error || !modelData?.model_name) {
-      throw new Error(`${AI_QUIZ_ERRORS.UNSUPPORTED_PROVIDER}: ${aiModelId}`);
+      throw new Error(`${AI_QUIZZ_ERRORS.UNSUPPORTED_PROVIDER}: ${aiModelId}`);
     }
 
     const modelName = modelData.model_name;
@@ -247,7 +248,7 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
     return aiUsageTracker.wrapAIOperationWithTokens(
       {
         user_id: userId,
-        command: 'generate_quiz_questions',
+        command: 'generate_quizz_questions',
         ai_model_id: aiModelId,
         request_payload: { prompt_length: prompt.length },
       },
@@ -285,7 +286,7 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
       .single()) as { data: { model_name: string } | null; error: any };
 
     if (error || !modelData?.model_name) {
-      throw new Error(`${AI_QUIZ_ERRORS.UNSUPPORTED_PROVIDER}: ${aiModelId}`);
+      throw new Error(`${AI_QUIZZ_ERRORS.UNSUPPORTED_PROVIDER}: ${aiModelId}`);
     }
 
     const modelName = modelData.model_name;
@@ -293,7 +294,7 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
     return aiUsageTracker.wrapAIOperationWithTokens(
       {
         user_id: userId,
-        command: 'evaluate_quiz_answers',
+        command: 'evaluate_quizz_answers',
         ai_model_id: aiModelId,
         request_payload: { prompt_length: prompt.length },
       },
@@ -331,7 +332,7 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
       .single()) as { data: { model_name: string } | null; error: any };
 
     if (error || !modelData?.model_name) {
-      throw new Error(`${AI_QUIZ_ERRORS.UNSUPPORTED_PROVIDER}: ${aiModelId}`);
+      throw new Error(`${AI_QUIZZ_ERRORS.UNSUPPORTED_PROVIDER}: ${aiModelId}`);
     }
 
     const modelName = modelData.model_name;
@@ -339,7 +340,7 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
     return aiUsageTracker.wrapStreamingOperation(
       {
         user_id: userId,
-        command: 'generate_quiz_questions',
+        command: 'generate_quizz_questions',
         ai_model_id: aiModelId,
         request_payload: { prompt_length: prompt.length },
       },
@@ -382,7 +383,7 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
       .single()) as { data: { model_name: string } | null; error: any };
 
     if (error || !modelData?.model_name) {
-      throw new Error(`${AI_QUIZ_ERRORS.UNSUPPORTED_PROVIDER}: ${aiModelId}`);
+      throw new Error(`${AI_QUIZZ_ERRORS.UNSUPPORTED_PROVIDER}: ${aiModelId}`);
     }
 
     const modelName = modelData.model_name;
@@ -390,7 +391,7 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
     return aiUsageTracker.wrapStreamingOperation(
       {
         user_id: userId,
-        command: 'generate_quiz_questions',
+        command: 'generate_quizz_questions',
         ai_model_id: aiModelId,
         request_payload: { prompt_length: prompt.length },
       },
@@ -498,7 +499,7 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
             const errorData =
               JSON.stringify({
                 type: 'error',
-                content: AI_QUIZ_ERRORS.FAILED_TO_PARSE_QUESTIONS,
+                content: AI_QUIZZ_ERRORS.FAILED_TO_PARSE_QUESTIONS,
                 finished: true,
               }) + '\n';
 
@@ -506,11 +507,11 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
           }
         } catch (error) {
           const errorMessage =
-            error instanceof Error ? error.message : AI_QUIZ_ERRORS.FAILED_TO_GENERATE;
+            error instanceof Error ? error.message : AI_QUIZZ_ERRORS.FAILED_TO_GENERATE;
           const errorData =
             JSON.stringify({
               type: 'error',
-              content: `${AI_QUIZ_ERRORS.FAILED_TO_GENERATE}: ${errorMessage}`,
+              content: `${AI_QUIZZ_ERRORS.FAILED_TO_GENERATE}: ${errorMessage}`,
               finished: true,
             }) + '\n';
 
@@ -525,37 +526,37 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
   private parseQuestionsFromResponse(responseText: string): IQuizQuestion[] {
     try {
       let cleanedText = responseText.trim();
-      if (cleanedText.startsWith(AI_QUIZ_CONFIG.MARKDOWN_JSON_START)) {
+      if (cleanedText.startsWith(AI_QUIZZ_CONFIG.MARKDOWN_JSON_START)) {
         cleanedText = cleanedText.replace(
-          new RegExp(`^${AI_QUIZ_CONFIG.MARKDOWN_JSON_START}\\s*`),
+          new RegExp(`^${AI_QUIZZ_CONFIG.MARKDOWN_JSON_START}\\s*`),
           '',
         );
       }
-      if (cleanedText.startsWith(AI_QUIZ_CONFIG.MARKDOWN_CODE_START)) {
+      if (cleanedText.startsWith(AI_QUIZZ_CONFIG.MARKDOWN_CODE_START)) {
         cleanedText = cleanedText.replace(
-          new RegExp(`^${AI_QUIZ_CONFIG.MARKDOWN_CODE_START}\\s*`),
+          new RegExp(`^${AI_QUIZZ_CONFIG.MARKDOWN_CODE_START}\\s*`),
           '',
         );
       }
-      if (cleanedText.endsWith(AI_QUIZ_CONFIG.MARKDOWN_CODE_END)) {
+      if (cleanedText.endsWith(AI_QUIZZ_CONFIG.MARKDOWN_CODE_END)) {
         cleanedText = cleanedText.replace(
-          new RegExp(`\\s*${AI_QUIZ_CONFIG.MARKDOWN_CODE_END}$`),
+          new RegExp(`\\s*${AI_QUIZZ_CONFIG.MARKDOWN_CODE_END}$`),
           '',
         );
       }
-      const jsonMatch = cleanedText.match(new RegExp(AI_QUIZ_CONFIG.JSON_REGEX_PATTERN));
+      const jsonMatch = cleanedText.match(new RegExp(AI_QUIZZ_CONFIG.JSON_REGEX_PATTERN));
       if (jsonMatch) {
         cleanedText = jsonMatch[0];
       }
       const parsed = JSON.parse(cleanedText);
       if (!parsed.questions || !Array.isArray(parsed.questions)) {
-        throw new Error(AI_QUIZ_ERRORS.INVALID_RESPONSE_FORMAT);
+        throw new Error(AI_QUIZZ_ERRORS.INVALID_RESPONSE_FORMAT);
       }
 
       return parsed.questions.map((q: Record<string, unknown>, index: number) => {
         const options = q.options as Record<string, string> | undefined;
         return {
-          id: (q.id as string) || `${AI_QUIZ_CONFIG.DEFAULT_QUESTION_ID_PREFIX}${index + 1}`,
+          id: (q.id as string) || `${AI_QUIZZ_CONFIG.DEFAULT_QUESTION_ID_PREFIX}${index + 1}`,
           question: (q.question as string) || '',
           options: {
             A: options?.A || '',
@@ -564,17 +565,18 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
             D: options?.D || '',
           },
           correctAnswer:
-            (q.correctAnswer as 'A' | 'B' | 'C' | 'D') || AI_QUIZ_CONFIG.DEFAULT_ANSWER,
+            (q.correctAnswer as 'A' | 'B' | 'C' | 'D') || AI_QUIZZ_CONFIG.DEFAULT_ANSWER,
           explanation: (q.explanation as string) || '',
-          topic: (q.topic as string) || AI_QUIZ_CONFIG.DEFAULT_TOPIC,
+          topic: (q.topic as string) || AI_QUIZZ_CONFIG.DEFAULT_TOPIC,
           difficulty:
-            (q.difficulty as 'easy' | 'medium' | 'hard') || AI_QUIZ_CONFIG.DEFAULT_QUIZ_DIFFICULTY,
+            (q.difficulty as 'easy' | 'medium' | 'hard') ||
+            AI_QUIZZ_CONFIG.DEFAULT_QUIZZ_DIFFICULTY,
         };
       });
     } catch (_error) {
       console.error('Failed to parse AI response:', _error);
       console.error('Original response text:', responseText);
-      throw new Error(AI_QUIZ_ERRORS.FAILED_TO_PARSE_QUESTIONS);
+      throw new Error(AI_QUIZZ_ERRORS.FAILED_TO_PARSE_QUESTIONS);
     }
   }
 
@@ -586,26 +588,26 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
     try {
       let cleanedText = responseText.trim();
 
-      if (cleanedText.startsWith(AI_QUIZ_CONFIG.MARKDOWN_JSON_START)) {
+      if (cleanedText.startsWith(AI_QUIZZ_CONFIG.MARKDOWN_JSON_START)) {
         cleanedText = cleanedText.replace(
-          new RegExp(`^${AI_QUIZ_CONFIG.MARKDOWN_JSON_START}\\s*`),
+          new RegExp(`^${AI_QUIZZ_CONFIG.MARKDOWN_JSON_START}\\s*`),
           '',
         );
       }
-      if (cleanedText.startsWith(AI_QUIZ_CONFIG.MARKDOWN_CODE_START)) {
+      if (cleanedText.startsWith(AI_QUIZZ_CONFIG.MARKDOWN_CODE_START)) {
         cleanedText = cleanedText.replace(
-          new RegExp(`^${AI_QUIZ_CONFIG.MARKDOWN_CODE_START}\\s*`),
+          new RegExp(`^${AI_QUIZZ_CONFIG.MARKDOWN_CODE_START}\\s*`),
           '',
         );
       }
-      if (cleanedText.endsWith(AI_QUIZ_CONFIG.MARKDOWN_CODE_END)) {
+      if (cleanedText.endsWith(AI_QUIZZ_CONFIG.MARKDOWN_CODE_END)) {
         cleanedText = cleanedText.replace(
-          new RegExp(`\\s*${AI_QUIZ_CONFIG.MARKDOWN_CODE_END}$`),
+          new RegExp(`\\s*${AI_QUIZZ_CONFIG.MARKDOWN_CODE_END}$`),
           '',
         );
       }
 
-      const jsonMatch = cleanedText.match(new RegExp(AI_QUIZ_CONFIG.JSON_REGEX_PATTERN));
+      const jsonMatch = cleanedText.match(new RegExp(AI_QUIZZ_CONFIG.JSON_REGEX_PATTERN));
       if (jsonMatch) {
         cleanedText = jsonMatch[0];
       }
@@ -615,7 +617,7 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
       // Calculate results for each question
       const results = questions.map((question) => {
         const userAnswer = answers.find((a) => a.questionId === question.id);
-        const selectedAnswer = userAnswer?.selectedAnswer || AI_QUIZ_CONFIG.DEFAULT_ANSWER;
+        const selectedAnswer = userAnswer?.selectedAnswer || AI_QUIZZ_CONFIG.DEFAULT_ANSWER;
         const isCorrect = selectedAnswer === question.correctAnswer;
 
         return {
@@ -637,7 +639,7 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
           parsed.score ||
           Math.round((results.filter((r) => r.isCorrect).length / questions.length) * 100),
         results,
-        overallFeedback: parsed.overallFeedback || AI_QUIZ_ERRORS.QUIZ_COMPLETED_SUCCESS,
+        overallFeedback: parsed.overallFeedback || AI_QUIZZ_ERRORS.QUIZZ_COMPLETED_SUCCESS,
         areasForImprovement: parsed.areasForImprovement || [],
         strengths: parsed.strengths || [],
         performanceByTopic: parsed.performanceByTopic || {},
@@ -645,7 +647,7 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
     } catch (_error) {
       const results = questions.map((question) => {
         const userAnswer = answers.find((a) => a.questionId === question.id);
-        const selectedAnswer = userAnswer?.selectedAnswer || AI_QUIZ_CONFIG.DEFAULT_ANSWER;
+        const selectedAnswer = userAnswer?.selectedAnswer || AI_QUIZZ_CONFIG.DEFAULT_ANSWER;
         const isCorrect = selectedAnswer === question.correctAnswer;
 
         return {
@@ -667,7 +669,7 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
         correctAnswers: correctCount,
         score: Math.round((correctCount / questions.length) * 100),
         results,
-        overallFeedback: AI_QUIZ_ERRORS.QUIZ_COMPLETED_FALLBACK,
+        overallFeedback: AI_QUIZZ_ERRORS.QUIZZ_COMPLETED_FALLBACK,
         areasForImprovement: [],
         strengths: [],
         performanceByTopic: {},
@@ -686,7 +688,7 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
     } catch {
       controller.enqueue({
         type: 'error',
-        content: AI_QUIZ_ERRORS.FAILED_TO_PARSE_QUESTIONS,
+        content: AI_QUIZZ_ERRORS.FAILED_TO_PARSE_QUESTIONS,
         finished: true,
       });
     } finally {
@@ -695,11 +697,12 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
   }
 
   private handleStreamError(controller: IStreamController, error: unknown): void {
-    const errorMessage = error instanceof Error ? error.message : AI_QUIZ_ERRORS.FAILED_TO_GENERATE;
+    const errorMessage =
+      error instanceof Error ? error.message : AI_QUIZZ_ERRORS.FAILED_TO_GENERATE;
 
     controller.enqueue({
       type: 'error',
-      content: `${AI_QUIZ_ERRORS.FAILED_TO_GENERATE}: ${errorMessage}`,
+      content: `${AI_QUIZZ_ERRORS.FAILED_TO_GENERATE}: ${errorMessage}`,
       finished: true,
     });
 
@@ -723,4 +726,4 @@ ${AI_QUIZ_PROMPTS.EVALUATION_FOCUS}`;
   }
 }
 
-export const quizService = new QuizService();
+export const quizService = new QuizzService();

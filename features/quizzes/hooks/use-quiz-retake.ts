@@ -4,7 +4,7 @@ import { useState, useCallback, useRef } from 'react';
 import { useAction } from 'next-safe-action/hooks';
 import { evaluateQuizAction } from '../actions';
 
-import { AI_QUIZ_CONFIG } from '@/config/constants';
+import { AI_QUIZZ_CONFIG } from '@/config/constants';
 import { IQuizSession, IQuizState } from '../types';
 
 type ExtendedQuizState = IQuizState & {
@@ -53,8 +53,8 @@ export const useQuizRetake = (videoId: string, existingSession?: IQuizSession) =
       sessionId: null,
       isRetakeMode: false,
       settings: {
-        questionCount: AI_QUIZ_CONFIG.DEFAULT_QUESTION_COUNT,
-        difficulty: AI_QUIZ_CONFIG.DEFAULT_DIFFICULTY,
+        questionCount: AI_QUIZZ_CONFIG.DEFAULT_QUESTION_COUNT,
+        difficulty: AI_QUIZZ_CONFIG.DEFAULT_DIFFICULTY,
         provider: null,
         aiModelId: '',
       },

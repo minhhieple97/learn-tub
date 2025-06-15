@@ -81,8 +81,8 @@ export const AI_EVALUATION = {
 
 export const AI_COMMANDS = {
   EVALUATE_NOTE: 'evaluate_note',
-  GENERATE_QUIZ_QUESTIONS: 'generate_quiz_questions',
-  EVALUATE_QUIZ_ANSWERS: 'evaluate_quiz_answers',
+  GENERATE_QUIZZ_QUESTIONS: 'generate_quizz_questions',
+  EVALUATE_QUIZZ_ANSWERS: 'evaluate_quizz_answers',
   CHAT_COMPLETION: 'chat_completion',
   TEXT_GENERATION: 'text_generation',
 } as const;
@@ -171,31 +171,31 @@ export const AI_FORMAT = {
   TIMESTAMP_PAD_CHAR: '0',
 } as const;
 
-export const AI_QUIZ_CONFIG = {
+export const AI_QUIZZ_CONFIG = {
   DEFAULT_QUESTION_COUNT: 10,
   DEFAULT_DIFFICULTY: 'mixed',
   DEFAULT_QUESTION_ID_PREFIX: 'question_',
   DEFAULT_TOPIC: 'General',
   DEFAULT_ANSWER: 'A',
-  DEFAULT_QUIZ_DIFFICULTY: 'medium',
+  DEFAULT_QUIZZ_DIFFICULTY: 'medium',
   MARKDOWN_JSON_START: '```json',
   MARKDOWN_CODE_START: '```',
   MARKDOWN_CODE_END: '```',
   JSON_REGEX_PATTERN: '\\{[\\s\\S]*\\}',
 } as const;
 
-export const AI_QUIZ_ERRORS = {
+export const AI_QUIZZ_ERRORS = {
   FAILED_TO_GENERATE: 'Failed to generate questions',
   FAILED_TO_EVALUATE: 'Failed to evaluate quiz',
   FAILED_TO_PARSE_QUESTIONS: 'Failed to parse questions from AI response',
   FAILED_TO_PARSE_FEEDBACK: 'Failed to parse feedback from AI response',
   INVALID_RESPONSE_FORMAT: 'Invalid response format: missing questions array',
   UNSUPPORTED_PROVIDER: 'Unsupported provider',
-  QUIZ_COMPLETED_FALLBACK: 'Quiz completed. AI feedback parsing failed, showing basic results.',
-  QUIZ_COMPLETED_SUCCESS: 'Quiz completed successfully.',
+  QUIZZ_COMPLETED_FALLBACK: 'Quiz completed. AI feedback parsing failed, showing basic results.',
+  QUIZZ_COMPLETED_SUCCESS: 'Quiz completed successfully.',
 } as const;
 
-export const AI_QUIZ_PROMPTS = {
+export const AI_QUIZZ_PROMPTS = {
   GENERATION_INTRO:
     'Please generate {count} multiple-choice questions based on the following video content:',
   GENERATION_REQUIREMENTS: `Requirements:
@@ -249,7 +249,7 @@ export const AI_QUIZ_PROMPTS = {
 - Strengths and areas for improvement
 - Specific recommendations for further learning
 - Topic-based performance analysis`,
-  QUIZ_RESULTS_PREFIX: 'Quiz Results:',
+  QUIZZ_RESULTS_PREFIX: 'Quiz Results:',
   TOPICS_PREFIX: 'Focus on these topics: ',
   DIFFICULTY_MIXED: 'Mix of easy, medium, and hard questions',
   DIFFICULTY_SUFFIX: ' level questions',
@@ -264,4 +264,38 @@ export const STATUS_STREAMING = {
   STREAMING: 'streaming',
   COMPLETED: 'completed',
   ERROR: 'error',
+} as const;
+
+export const QUIZZ_DASHBOARD_CONFIG = {
+  SEARCH_DEBOUNCE_DELAY: 500,
+  PAGINATION_LIMIT: 10,
+  DEFAULT_PAGE: 1,
+} as const;
+
+export const QUIZZ_FILTER_DEFAULTS = {
+  SEARCH: '',
+  DIFFICULTY: 'all',
+  VIDEO_ID: '',
+  SORT_BY: 'created_at',
+  SORT_ORDER: 'desc',
+} as const;
+
+export const QUIZZ_FILTER_VALUES = {
+  ALL: 'all',
+  DIFFICULTIES: {
+    ALL: 'all',
+    EASY: 'easy',
+    MEDIUM: 'medium',
+    HARD: 'hard',
+    MIXED: 'mixed',
+  },
+  SORT_OPTIONS: {
+    CREATED_AT: 'created_at',
+    SCORE: 'score',
+    ATTEMPTS: 'attempts',
+  },
+  SORT_ORDERS: {
+    ASC: 'asc',
+    DESC: 'desc',
+  },
 } as const;

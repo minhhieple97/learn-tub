@@ -1,7 +1,7 @@
 'use server';
 import { ActionError, authAction } from '@/lib/safe-action';
 import { z } from 'zod';
-import { quizService } from '../services/quiz-service';
+import { quizService } from '../services/quizz-service';
 import { createQuizSession } from '../queries';
 
 import { getVideoById } from '@/features/videos/queries';

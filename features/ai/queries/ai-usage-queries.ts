@@ -238,8 +238,8 @@ export const getAIUsageByCommand = async (
 ): Promise<IAIUsageByCommand[]> => {
   const commands: IAICommand[] = [
     'evaluate_note',
-    'generate_quiz_questions',
-    'evaluate_quiz_answers',
+    'generate_quizz_questions',
+    'evaluate_quizz_answers',
     'chat_completion',
     'text_generation',
   ];

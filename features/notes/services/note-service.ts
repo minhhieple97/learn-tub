@@ -5,7 +5,7 @@ import {
   AI_FORMAT,
   ERROR_MESSAGES,
   EVALUATION_ERRORS,
-  AI_QUIZ_CONFIG,
+  AI_QUIZZ_CONFIG,
 } from '@/config/constants';
 import { INoteEvaluationRequest } from '@/features/notes/types';
 import { IFeedback, StreamChunk } from '@/types';
@@ -222,26 +222,26 @@ ${feedback.detailed_analysis}`;
     try {
       let cleanedText = responseText.trim();
 
-      if (cleanedText.startsWith(AI_QUIZ_CONFIG.MARKDOWN_JSON_START)) {
+      if (cleanedText.startsWith(AI_QUIZZ_CONFIG.MARKDOWN_JSON_START)) {
         cleanedText = cleanedText.replace(
-          new RegExp(`^${AI_QUIZ_CONFIG.MARKDOWN_JSON_START}\\s*`),
+          new RegExp(`^${AI_QUIZZ_CONFIG.MARKDOWN_JSON_START}\\s*`),
           '',
         );
       }
-      if (cleanedText.startsWith(AI_QUIZ_CONFIG.MARKDOWN_CODE_START)) {
+      if (cleanedText.startsWith(AI_QUIZZ_CONFIG.MARKDOWN_CODE_START)) {
         cleanedText = cleanedText.replace(
-          new RegExp(`^${AI_QUIZ_CONFIG.MARKDOWN_CODE_START}\\s*`),
+          new RegExp(`^${AI_QUIZZ_CONFIG.MARKDOWN_CODE_START}\\s*`),
           '',
         );
       }
-      if (cleanedText.endsWith(AI_QUIZ_CONFIG.MARKDOWN_CODE_END)) {
+      if (cleanedText.endsWith(AI_QUIZZ_CONFIG.MARKDOWN_CODE_END)) {
         cleanedText = cleanedText.replace(
-          new RegExp(`\\s*${AI_QUIZ_CONFIG.MARKDOWN_CODE_END}$`),
+          new RegExp(`\\s*${AI_QUIZZ_CONFIG.MARKDOWN_CODE_END}$`),
           '',
         );
       }
 
-      const jsonMatch = cleanedText.match(new RegExp(AI_QUIZ_CONFIG.JSON_REGEX_PATTERN));
+      const jsonMatch = cleanedText.match(new RegExp(AI_QUIZZ_CONFIG.JSON_REGEX_PATTERN));
       if (jsonMatch) {
         cleanedText = jsonMatch[0];
       }

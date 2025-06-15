@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useAction } from 'next-safe-action/hooks';
 import { generateQuizQuestionsAction, evaluateQuizAction } from '../actions';
-import { AI_QUIZ_CONFIG } from '@/config/constants';
+import { AI_QUIZZ_CONFIG } from '@/config/constants';
 import { IQuizAnswerOption, IQuizSettings, IQuizState } from '../types';
 
 type IExtendedQuizState = IQuizState & {
@@ -25,8 +25,8 @@ export const useQuiz = (videoId: string) => {
     timeTakenSeconds: 0,
     sessionId: null,
     settings: {
-      questionCount: AI_QUIZ_CONFIG.DEFAULT_QUESTION_COUNT,
-      difficulty: AI_QUIZ_CONFIG.DEFAULT_DIFFICULTY,
+      questionCount: AI_QUIZZ_CONFIG.DEFAULT_QUESTION_COUNT,
+      difficulty: AI_QUIZZ_CONFIG.DEFAULT_DIFFICULTY,
       provider: null,
       aiModelId: '',
     },
@@ -56,7 +56,9 @@ export const useQuiz = (videoId: string) => {
     }
     setState((prev) => {
       if (prev.startTime) {
-        const timeTakenSeconds = Math.floor((Date.now() - prev.startTime) / 1000);
+        const timeTakenSeconds = Math.floor(
+          (Date.now() - prev.startTime) / 1000,
+        );
         return { ...prev, timeTakenSeconds };
       }
       return prev;
@@ -71,9 +73,8 @@ export const useQuiz = (videoId: string) => {
     };
   }, []);
 
-  const { execute: executeGenerate, isExecuting: isGeneratingQuestions } = useAction(
-    generateQuizQuestionsAction,
-    {
+  const { execute: executeGenerate, isExecuting: isGeneratingQuestions } =
+    useAction(generateQuizQuestionsAction, {
       onSuccess: (result) => {
         setState((prev) => ({
           ...prev,
@@ -96,8 +97,7 @@ export const useQuiz = (videoId: string) => {
         console.error('Failed to generate questions:', error);
         setState((prev) => ({ ...prev, isGenerating: false }));
       },
-    },
-  );
+    });
 
   const { execute: executeEvaluate, isExecuting: isEvaluatingQuiz } = useAction(
     evaluateQuizAction,
@@ -141,28 +141,36 @@ export const useQuiz = (videoId: string) => {
     [videoId, state.settings, executeGenerate],
   );
 
-  const answerQuestion = useCallback((questionId: string, selectedAnswer: IQuizAnswerOption) => {
-    setState((prev) => {
-      const existingAnswerIndex = prev.answers.findIndex((a) => a.questionId === questionId);
-      const newAnswers = [...prev.answers];
+  const answerQuestion = useCallback(
+    (questionId: string, selectedAnswer: IQuizAnswerOption) => {
+      setState((prev) => {
+        const existingAnswerIndex = prev.answers.findIndex(
+          (a) => a.questionId === questionId,
+        );
+        const newAnswers = [...prev.answers];
 
-      if (existingAnswerIndex >= 0) {
-        newAnswers[existingAnswerIndex] = { questionId, selectedAnswer };
-      } else {
-        newAnswers.push({ questionId, selectedAnswer });
-      }
+        if (existingAnswerIndex >= 0) {
+          newAnswers[existingAnswerIndex] = { questionId, selectedAnswer };
+        } else {
+          newAnswers.push({ questionId, selectedAnswer });
+        }
 
-      return {
-        ...prev,
-        answers: newAnswers,
-      };
-    });
-  }, []);
+        return {
+          ...prev,
+          answers: newAnswers,
+        };
+      });
+    },
+    [],
+  );
 
   const nextQuestion = useCallback(() => {
     setState((prev) => ({
       ...prev,
-      currentQuestionIndex: Math.min(prev.currentQuestionIndex + 1, prev.questions.length - 1),
+      currentQuestionIndex: Math.min(
+        prev.currentQuestionIndex + 1,
+        prev.questions.length - 1,
+      ),
     }));
   }, []);
 
@@ -176,12 +184,19 @@ export const useQuiz = (videoId: string) => {
   const goToQuestion = useCallback((index: number) => {
     setState((prev) => ({
       ...prev,
-      currentQuestionIndex: Math.max(0, Math.min(index, prev.questions.length - 1)),
+      currentQuestionIndex: Math.max(
+        0,
+        Math.min(index, prev.questions.length - 1),
+      ),
     }));
   }, []);
 
   const submitQuiz = useCallback(
-    async (videoTitle?: string, videoDescription?: string, videoTutorial?: string) => {
+    async (
+      videoTitle?: string,
+      videoDescription?: string,
+      videoTutorial?: string,
+    ) => {
       if (state.questions.length === 0 || state.answers.length === 0) {
         return;
       }
@@ -248,7 +263,9 @@ export const useQuiz = (videoId: string) => {
   }, []);
 
   const currentQuestion = state.questions[state.currentQuestionIndex];
-  const currentAnswer = state.answers.find((a) => a.questionId === currentQuestion?.id);
+  const currentAnswer = state.answers.find(
+    (a) => a.questionId === currentQuestion?.id,
+  );
   const hasAnsweredAll = state.answers.length === state.questions.length;
   const canGoNext = state.currentQuestionIndex < state.questions.length - 1;
   const canGoPrevious = state.currentQuestionIndex > 0;

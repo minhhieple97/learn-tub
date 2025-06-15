@@ -1,6 +1,6 @@
 'use server';
 import { authAction, ActionError } from '@/lib/safe-action';
-import { quizService } from '../services/quiz-service';
+import { quizService } from '../services/quizz-service';
 import { saveQuizAttempt } from '../queries';
 import { z } from 'zod';
 import { EvaluateQuizSchema } from '../schema';
