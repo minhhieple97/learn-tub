@@ -6,16 +6,16 @@ import { routes } from "@/routes";
 
 export function Header() {
   return (
-    <header className="bg-neutral-pearl/80 border-neutral-stone sticky top-0 z-50 border-b backdrop-blur-sm">
+    <header className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-b border-slate-200 dark:border-slate-700 sticky top-0 z-50">
       <div className="container mx-auto p-4">
         <nav className="flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="bg-neutral-sage rounded-xl p-2">
-              <BookOpen className="text-neutral-sage-foreground size-6" />
+            <div className="bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl p-2 shadow-lg">
+              <BookOpen className="text-white size-6" />
             </div>
             <Link
               href={routes.home}
-              className="text-neutral-pearl-foreground text-2xl font-bold"
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-2xl font-bold text-transparent"
             >
               LearnTub
             </Link>
@@ -24,13 +24,13 @@ export function Header() {
             <ThemeToggle />
             <Button
               variant="ghost"
-              className="text-neutral-pearl-foreground hover:bg-neutral-stone hover:text-neutral-stone-foreground"
+              className="text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100"
               asChild
             >
               <Link href={routes.login}>Login</Link>
             </Button>
             <Button
-              className="bg-neutral-sage text-neutral-sage-foreground hover:bg-neutral-sage/90"
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-lg"
               asChild
             >
               <Link href={routes.register}>Get Started</Link>
