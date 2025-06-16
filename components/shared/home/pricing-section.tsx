@@ -4,11 +4,11 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { BookOpen, Check, Zap, Star, Crown } from "lucide-react";
-import Link from "next/link";
-import { routes } from "@/routes";
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { BookOpen, Check, Zap, Star, Crown } from 'lucide-react';
+import Link from 'next/link';
+import { routes } from '@/routes';
 
 export const PricingSection = () => {
   return (
@@ -84,7 +84,7 @@ export const PricingSection = () => {
                   className="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700"
                   asChild
                 >
-                  <Link href={routes.register}>Get Started Free</Link>
+                  <Link href={routes.login}>Get Started Free</Link>
                 </Button>
               </CardContent>
             </Card>
@@ -154,7 +154,7 @@ export const PricingSection = () => {
                   className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white hover:from-indigo-600 hover:to-purple-700"
                   asChild
                 >
-                  <Link href={routes.register}>Start Pro Trial</Link>
+                  <Link href={routes.login}>Start Pro Trial</Link>
                 </Button>
               </CardContent>
             </Card>
@@ -220,7 +220,7 @@ export const PricingSection = () => {
                   className="w-full border-purple-200 bg-white/50 text-slate-700 hover:bg-purple-50 hover:text-purple-700 dark:border-purple-400/30 dark:bg-slate-800/50 dark:text-slate-300 dark:hover:bg-purple-900/20 dark:hover:text-purple-300"
                   asChild
                 >
-                  <Link href={routes.register}>Go Premium</Link>
+                  <Link href={routes.login}>Go Premium</Link>
                 </Button>
               </CardContent>
             </Card>
@@ -236,7 +236,7 @@ export const PricingSection = () => {
                     Need More Credits?
                   </h3>
                   <p className="text-slate-600 dark:text-slate-300">
-                    Purchase additional credits anytime for just{" "}
+                    Purchase additional credits anytime for just{' '}
                     <span className="font-semibold">$1 for 200 credits</span>
                   </p>
                 </div>

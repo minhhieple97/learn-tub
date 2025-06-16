@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { BookOpen, Home, Play, ChevronLeft, Menu } from "lucide-react";
+import { BookOpen, Home, Play, ChevronLeft, Menu, Settings } from 'lucide-react';
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -9,8 +9,9 @@ import { routes } from "@/routes";
 import { useState } from "react";
 
 const navigation = [
-  { name: "Learn", href: routes.learn, icon: Play },
-  { name: "Dashboard", href: routes.dashboard.root, icon: Home },
+  { name: 'Learn', href: routes.learn, icon: Play },
+  { name: 'Dashboard', href: routes.dashboard.root, icon: Home },
+  { name: 'Settings', href: routes.settings.root, icon: Settings },
 ];
 
 export const Sidebar = () => {
