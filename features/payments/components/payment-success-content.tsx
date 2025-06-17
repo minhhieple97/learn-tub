@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import Link from 'next/link';
 import { routes } from '@/routes';
-import { IPaymentDetails, usePaymentDetails } from '../hooks/use-payment-detail';
+import { usePaymentDetails } from '../hooks/use-payment-detail';
+import { IPaymentDetails } from '../types';
 
 export function PaymentSuccessContent() {
   const searchParams = useSearchParams();
