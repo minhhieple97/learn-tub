@@ -1,4 +1,3 @@
-import { PricingPlans } from '@/components/pricing-plans';
 import { checkAuth } from '@/lib/require-auth';
 
 export default async function SettingsPage() {
@@ -14,8 +13,6 @@ export default async function SettingsPage() {
             Manage your subscription and unlock powerful AI-driven learning features
           </p>
         </div>
-
-        <PricingPlans />
       </div>
     </div>
   );

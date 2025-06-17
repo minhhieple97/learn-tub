@@ -1,8 +1,8 @@
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
-import { BookOpen } from 'lucide-react';
-import Link from 'next/link';
-import { routes } from '@/routes';
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { BookOpen } from "lucide-react";
+import Link from "next/link";
+import { routes } from "@/routes";
 
 export default function AuthLoading() {
   return (
@@ -29,7 +29,7 @@ export default function AuthLoading() {
         <CardContent className="px-4 sm:px-6 space-y-4">
           {/* Google Auth Button Skeleton */}
           <Skeleton className="h-10 w-full" />
-          
+
           {/* Divider */}
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
@@ -41,7 +41,7 @@ export default function AuthLoading() {
               </span>
             </div>
           </div>
-          
+
           {/* Form Fields Skeleton */}
           <div className="space-y-3 sm:space-y-4">
             <div className="space-y-1.5 sm:space-y-2">
@@ -56,7 +56,7 @@ export default function AuthLoading() {
               <Skeleton className="h-10 sm:h-11 w-full" />
             </div>
           </div>
-          
+
           {/* Bottom Link Skeleton */}
           <div className="mt-4 sm:mt-6 text-center">
             <Skeleton className="h-4 w-48 mx-auto" />

@@ -18,7 +18,7 @@ export default async function LoginPage() {
   if (user) {
     redirect(routes.learn);
   }
-  
+
   return (
     <div className="w-full max-w-md">
       <div className="mb-6 sm:mb-8 text-center">
