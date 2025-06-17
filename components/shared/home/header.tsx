@@ -3,14 +3,8 @@ import { ThemeToggle } from "@/components/shared/react-query/theme-toggle";
 import { BookOpen } from "lucide-react";
 import Link from "next/link";
 import { routes } from "@/routes";
-import { getUserInSession } from "@/features/profile/queries";
-import { redirect } from "next/navigation";
 
-export async function Header() {
-  const user = await getUserInSession();
-  if (user) {
-    redirect(routes.learn);
-  }
+export function Header() {
   return (
     <header className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-b border-slate-200 dark:border-slate-700 sticky top-0 z-50">
       <div className="container mx-auto p-4">
