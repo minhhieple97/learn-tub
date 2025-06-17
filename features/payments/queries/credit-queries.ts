@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { Tables } from '@/database.types';
+import { ICreditTransactionType } from '@/types';
 
 export async function getUserCredits(userId: string) {
   const supabase = await createClient();
@@ -34,7 +35,11 @@ export async function updateUserCredits(
   updates: Partial<
     Pick<
       Tables<'user_credits'>,
-      'credits_available' | 'credits_used_this_month' | 'last_reset_date'
+      | 'credits_purchase'
+      | 'credits_subscription'
+      | 'credits_used_this_month'
+      | 'last_reset_purchase_date'
+      | 'last_reset_subscription_date'
     >
   >,
 ) {
@@ -59,7 +64,8 @@ export async function upsertUserCredits(userId: string, credits: number) {
 
   if (existingCredits) {
     return updateUserCredits(userId, {
-      credits_available: existingCredits.credits_available + credits,
+      credits_purchase: (existingCredits?.credits_purchase ?? 0) + credits,
+      credits_subscription: existingCredits.credits_subscription + credits,
     });
   } else {
     return createUserCredits(userId, credits);
@@ -79,7 +85,7 @@ export async function addCreditsToUser(userId: string, creditsAmount: number) {
     const { error } = await supabase
       .from('user_credits')
       .update({
-        credits_available: userCredits.credits_available + creditsAmount,
+        credits_purchase: (userCredits?.credits_purchase ?? 0) + creditsAmount,
       })
       .eq('user_id', userId);
 
@@ -99,12 +105,20 @@ export async function addCreditsToUser(userId: string, creditsAmount: number) {
 export async function createCreditTransaction(
   userId: string,
   amount: number,
-  type: 'purchase' | 'subscription_grant' | 'usage' | 'refund',
+  type:
+    | 'monthly_reset'
+    | 'purchase'
+    | 'evaluate_note'
+    | 'generate_quizz_questions'
+    | 'evaluate_quizz_answers'
+    | 'refund'
+    | 'bonus'
+    | 'subscription_grant'
+    | 'admin_adjustment',
   description: string,
   stripePaymentIntentId?: string,
 ) {
   const supabase = await createClient();
-
   const { data, error } = await supabase.from('credit_transactions').insert({
     user_id: userId,
     amount,

@@ -1,4 +1,4 @@
-import { CHUNK_TYPES, CREDIT_ACTION_COUNTS } from './config/constants';
+import { AI_COMMANDS, CHUNK_TYPES, CREDIT_ACTION_COUNTS } from '@/config/constants';
 
 export type StreamChunk = {
   type: typeof CHUNK_TYPES.FEEDBACK | typeof CHUNK_TYPES.COMPLETE | typeof CHUNK_TYPES.ERROR;
@@ -76,3 +76,16 @@ export type ISearchHookReturn<T = unknown> = {
 };
 
 export type ICreditActionCount = typeof CREDIT_ACTION_COUNTS;
+
+export type ICreditTransactionType =
+  | 'evaluate_note'
+  | 'generate_quizz_questions'
+  | 'evaluate_quizz_answers'
+  | 'chat_completion'
+  | 'text_generation'
+  | 'monthly_reset'
+  | 'purchase'
+  | 'refund'
+  | 'bonus'
+  | 'subscription_grant'
+  | 'admin_adjustment';

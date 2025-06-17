@@ -1,6 +1,6 @@
-import Link from 'next/link';
-import { BookOpen } from 'lucide-react';
-import { routes } from '@/routes';
+import Link from "next/link";
+import { BookOpen } from "lucide-react";
+import { routes } from "@/routes";
 
 export function HeaderLogo() {
   return (

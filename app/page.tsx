@@ -1,4 +1,9 @@
-import { Header, HeroSection, FeaturesSection, CTASection } from '@/components/shared/home';
+import {
+  Header,
+  HeroSection,
+  FeaturesSection,
+  CTASection,
+} from "@/components/shared/home";
 
 export default function LandingPage() {
   return (

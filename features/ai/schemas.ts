@@ -5,8 +5,6 @@ export const IAICommandSchema = z.enum([
   AI_COMMANDS.EVALUATE_NOTE,
   AI_COMMANDS.GENERATE_QUIZZ_QUESTIONS,
   AI_COMMANDS.EVALUATE_QUIZZ_ANSWERS,
-  AI_COMMANDS.CHAT_COMPLETION,
-  AI_COMMANDS.TEXT_GENERATION,
 ]);
 
 export const IAIUsageStatusSchema = z.enum(['success', 'error']);

@@ -4,7 +4,7 @@ import { BookOpen } from "lucide-react";
 import Link from "next/link";
 import { routes } from "@/routes";
 import { getUserInSession } from "@/features/profile/queries";
-import { redirect } from 'next/navigation';
+import { redirect } from "next/navigation";
 
 export async function Header() {
   const user = await getUserInSession();

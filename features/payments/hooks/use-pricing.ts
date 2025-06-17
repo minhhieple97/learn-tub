@@ -69,35 +69,35 @@ export const pricingData: PricingData = {
       gradient: 'from-indigo-500 to-purple-600',
       productId: 'prod_SVCVKAQ94lH5CT',
     },
-    {
-      id: 'premium',
-      name: 'Premium',
-      price: '$5',
-      color: 'text-purple-600 dark:text-purple-400',
-      gradient: 'from-purple-500 to-pink-600',
-      productId: 'prod_SVCVlnJamuzLk2',
-    },
+    // {
+    //   id: 'premium',
+    //   name: 'Premium',
+    //   price: '$5',
+    //   color: 'text-purple-600 dark:text-purple-400',
+    //   gradient: 'from-purple-500 to-pink-600',
+    //   productId: 'prod_SVCVlnJamuzLk2',
+    // },
   ],
   features: [
     {
       name: 'AI Credits',
-      values: ['50 credits/month', '500 credits/month', '1,500 credits/month'],
+      values: ['50 credits/month', '500 credits/month'],
     },
     {
       name: 'Note Taking',
-      values: ['Unlimited', 'Unlimited', 'Unlimited'],
+      values: ['Unlimited', 'Unlimited'],
     },
     {
       name: 'AI Analysis',
-      values: ['Basic', 'Advanced', 'Premium'],
+      values: ['Basic', 'Advanced'],
     },
     {
       name: 'Support',
-      values: ['Email', 'Priority', 'Premium'],
+      values: ['Email', 'Priority'],
     },
     {
       name: 'Export',
-      values: [false, true, true],
+      values: [false, true],
     },
   ],
 };

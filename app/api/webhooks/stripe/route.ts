@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
-import { env } from "@/env.mjs";
-import { createClient } from "@/lib/supabase/server";
+import { env } from '@/env.mjs';
 import {
   addCreditsToUser,
   createCreditTransaction,
