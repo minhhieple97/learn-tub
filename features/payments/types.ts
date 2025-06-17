@@ -76,3 +76,12 @@ export type ICreateCheckoutSessionInput = z.infer<
 export type IPurchaseCreditsInput = z.infer<typeof PurchaseCreditsSchema>;
 export type ICancelSubscriptionInput = z.infer<typeof CancelSubscriptionSchema>;
 export type IUpdateSubscriptionInput = z.infer<typeof UpdateSubscriptionSchema>;
+
+
+export type IPaymentDetails = {
+  amount: number;
+  currency: string;
+  paymentType: 'subscription' | 'credits';
+  planName?: string;
+  creditsAmount?: number;
+};
