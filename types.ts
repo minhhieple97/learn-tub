@@ -1,4 +1,4 @@
-import { CHUNK_TYPES } from './config/constants';
+import { CHUNK_TYPES, CREDIT_ACTION_COUNTS } from './config/constants';
 
 export type StreamChunk = {
   type: typeof CHUNK_TYPES.FEEDBACK | typeof CHUNK_TYPES.COMPLETE | typeof CHUNK_TYPES.ERROR;
@@ -74,3 +74,5 @@ export type ISearchHookReturn<T = unknown> = {
   hasResults: boolean;
   resultCount: number;
 };
+
+export type ICreditActionCount = typeof CREDIT_ACTION_COUNTS;
