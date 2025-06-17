@@ -1,10 +1,4 @@
-import {
-  Header,
-  HeroSection,
-  FeaturesSection,
-  PricingSection,
-  CTASection,
-} from '@/components/shared/home';
+import { Header, HeroSection, FeaturesSection, CTASection } from '@/components/shared/home';
 
 export default function LandingPage() {
   return (
@@ -13,7 +7,6 @@ export default function LandingPage() {
       <main>
         <HeroSection />
         <FeaturesSection />
-        <PricingSection />
         <CTASection />
       </main>
     </div>

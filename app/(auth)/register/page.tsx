@@ -1,16 +1,16 @@
-import { RegisterForm } from '@/features/auth/components';
+import { RegisterForm } from "@/features/auth/components";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { BookOpen } from 'lucide-react';
-import Link from 'next/link';
-import { routes } from '@/routes';
-import { redirect } from 'next/navigation';
-import { getUserInSession } from '@/features/profile/queries';
+} from "@/components/ui/card";
+import { BookOpen } from "lucide-react";
+import Link from "next/link";
+import { routes } from "@/routes";
+import { redirect } from "next/navigation";
+import { getUserInSession } from "@/features/profile/queries";
 
 export default async function RegisterPage() {
   const user = await getUserInSession();
@@ -48,7 +48,7 @@ export default async function RegisterPage() {
           <RegisterForm />
           <div className="mt-4 sm:mt-6 text-center text-sm">
             <span className="text-slate-600 dark:text-slate-400">
-              Already have an account?{' '}
+              Already have an account?{" "}
             </span>
             <Link
               href={routes.login}

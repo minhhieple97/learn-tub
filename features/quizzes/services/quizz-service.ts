@@ -3,6 +3,7 @@ import {
   AI_QUIZZ_CONFIG,
   AI_QUIZZ_ERRORS,
   AI_QUIZZ_PROMPTS,
+  AI_COMMANDS,
 } from '@/config/constants';
 import type {
   IEvaluateQuizRequest,
@@ -15,7 +16,7 @@ import type {
 } from '../types';
 import { aiUsageTracker } from '@/features/ai';
 import { AIClientFactory } from '@/features/ai/services/ai-client';
-import { createClient } from '@/lib/supabase/client';
+import { createClient } from '@/lib/supabase/server';
 
 type IStreamController = ReadableStreamDefaultController<IQuizStreamChunk>;
 
@@ -57,7 +58,7 @@ class QuizzService {
       const response = await aiUsageTracker.wrapAIOperationWithTokens(
         {
           user_id: userId,
-          command: 'generate_quizz_questions',
+          command: AI_COMMANDS.GENERATE_QUIZZ_QUESTIONS,
           ai_model_id: aiModelId,
           request_payload: { prompt_length: prompt.length },
         },
@@ -248,7 +249,7 @@ ${AI_QUIZZ_PROMPTS.EVALUATION_FOCUS}`;
     return aiUsageTracker.wrapAIOperationWithTokens(
       {
         user_id: userId,
-        command: 'generate_quizz_questions',
+        command: AI_COMMANDS.GENERATE_QUIZZ_QUESTIONS,
         ai_model_id: aiModelId,
         request_payload: { prompt_length: prompt.length },
       },
@@ -294,7 +295,7 @@ ${AI_QUIZZ_PROMPTS.EVALUATION_FOCUS}`;
     return aiUsageTracker.wrapAIOperationWithTokens(
       {
         user_id: userId,
-        command: 'evaluate_quizz_answers',
+        command: AI_COMMANDS.EVALUATE_QUIZZ_ANSWERS,
         ai_model_id: aiModelId,
         request_payload: { prompt_length: prompt.length },
       },
@@ -340,7 +341,7 @@ ${AI_QUIZZ_PROMPTS.EVALUATION_FOCUS}`;
     return aiUsageTracker.wrapStreamingOperation(
       {
         user_id: userId,
-        command: 'generate_quizz_questions',
+        command: AI_COMMANDS.GENERATE_QUIZZ_QUESTIONS,
         ai_model_id: aiModelId,
         request_payload: { prompt_length: prompt.length },
       },
@@ -391,7 +392,7 @@ ${AI_QUIZZ_PROMPTS.EVALUATION_FOCUS}`;
     return aiUsageTracker.wrapStreamingOperation(
       {
         user_id: userId,
-        command: 'generate_quizz_questions',
+        command: AI_COMMANDS.GENERATE_QUIZZ_QUESTIONS,
         ai_model_id: aiModelId,
         request_payload: { prompt_length: prompt.length },
       },

@@ -1,4 +1,4 @@
-import { Skeleton } from '@/components/ui/skeleton';
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function SettingsLoading() {
   return (
@@ -48,12 +48,14 @@ export default function SettingsLoading() {
 
                 {/* Features */}
                 <div className="space-y-4 mb-6">
-                  {Array.from({ length: index === 0 ? 6 : 8 }).map((_, featureIndex) => (
-                    <div key={featureIndex} className="flex items-start">
-                      <Skeleton className="h-5 w-5 mr-3 rounded-sm mt-0.5" />
-                      <Skeleton className="h-5 flex-1" />
-                    </div>
-                  ))}
+                  {Array.from({ length: index === 0 ? 6 : 8 }).map(
+                    (_, featureIndex) => (
+                      <div key={featureIndex} className="flex items-start">
+                        <Skeleton className="h-5 w-5 mr-3 rounded-sm mt-0.5" />
+                        <Skeleton className="h-5 flex-1" />
+                      </div>
+                    ),
+                  )}
                 </div>
 
                 {/* Button */}
