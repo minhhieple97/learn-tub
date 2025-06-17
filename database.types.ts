@@ -196,7 +196,7 @@ export type Database = {
           id: string
           related_action_id: string | null
           stripe_payment_intent_id: string | null
-          type: string
+          type: Database["public"]["Enums"]["transaction_type_enum"]
           user_id: string
         }
         Insert: {
@@ -206,7 +206,7 @@ export type Database = {
           id?: string
           related_action_id?: string | null
           stripe_payment_intent_id?: string | null
-          type: string
+          type: Database["public"]["Enums"]["transaction_type_enum"]
           user_id: string
         }
         Update: {
@@ -216,7 +216,7 @@ export type Database = {
           id?: string
           related_action_id?: string | null
           stripe_payment_intent_id?: string | null
-          type?: string
+          type?: Database["public"]["Enums"]["transaction_type_enum"]
           user_id?: string
         }
         Relationships: [
@@ -631,28 +631,34 @@ export type Database = {
       user_credits: {
         Row: {
           created_at: string | null
-          credits_available: number
+          credits_purchase: number | null
+          credits_subscription: number
           credits_used_this_month: number
           id: string
-          last_reset_date: string | null
+          last_reset_purchase_date: string | null
+          last_reset_subscription_date: string | null
           updated_at: string | null
           user_id: string
         }
         Insert: {
           created_at?: string | null
-          credits_available?: number
+          credits_purchase?: number | null
+          credits_subscription?: number
           credits_used_this_month?: number
           id?: string
-          last_reset_date?: string | null
+          last_reset_purchase_date?: string | null
+          last_reset_subscription_date?: string | null
           updated_at?: string | null
           user_id: string
         }
         Update: {
           created_at?: string | null
-          credits_available?: number
+          credits_purchase?: number | null
+          credits_subscription?: number
           credits_used_this_month?: number
           id?: string
-          last_reset_date?: string | null
+          last_reset_purchase_date?: string | null
+          last_reset_subscription_date?: string | null
           updated_at?: string | null
           user_id?: string
         }
@@ -807,7 +813,16 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      transaction_type_enum:
+        | "monthly_reset"
+        | "purchase"
+        | "evaluate_note"
+        | "generate_quizz_questions"
+        | "evaluate_quizz_answers"
+        | "refund"
+        | "bonus"
+        | "subscription_grant"
+        | "admin_adjustment"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -922,6 +937,18 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      transaction_type_enum: [
+        "monthly_reset",
+        "purchase",
+        "evaluate_note",
+        "generate_quizz_questions",
+        "evaluate_quizz_answers",
+        "refund",
+        "bonus",
+        "subscription_grant",
+        "admin_adjustment",
+      ],
+    },
   },
 } as const

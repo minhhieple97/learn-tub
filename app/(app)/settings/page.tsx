@@ -1,4 +1,4 @@
-import { checkAuth } from '@/lib/require-auth';
+import { checkAuth } from "@/lib/require-auth";
 
 export default async function SettingsPage() {
   await checkAuth();
@@ -10,7 +10,8 @@ export default async function SettingsPage() {
             Account Settings
           </h1>
           <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-            Manage your subscription and unlock powerful AI-driven learning features
+            Manage your subscription and unlock powerful AI-driven learning
+            features
           </p>
         </div>
       </div>

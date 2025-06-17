@@ -1,9 +1,9 @@
-import { HeaderContainer } from '@/components/home/header-container';
-import { HeaderLogo } from '@/components/home/header-logo';
-import { HeaderActions } from '@/components/home/header-actions';
+import { HeaderContainer } from "@/components/home/header-container";
+import { HeaderLogo } from "@/components/home/header-logo";
+import { HeaderActions } from "@/components/home/header-actions";
 
-import { getUserCredits } from '@/features/payments/queries';
-import { checkAuth } from '@/lib/require-auth';
+import { getUserCredits } from "@/features/payments/queries";
+import { checkAuth } from "@/lib/require-auth";
 
 export async function Header() {
   const user = await checkAuth();
@@ -11,7 +11,14 @@ export async function Header() {
   return (
     <HeaderContainer>
       <HeaderLogo />
-      <HeaderActions user={{ ...user, credits: userCredits.data?.credits_available ?? 0 }} />
+      <HeaderActions
+        user={{
+          ...user,
+          credits:
+            (userCredits.data?.credits_subscription ?? 0) +
+            (userCredits.data?.credits_purchase ?? 0),
+        }}
+      />
     </HeaderContainer>
   );
 }

@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { ThemeToggle } from '@/components/shared/react-query/theme-toggle';
-import { User } from '@supabase/supabase-js';
-import { UserMenu } from './user-menu';
+import { ThemeToggle } from "@/components/shared/react-query/theme-toggle";
+import { User } from "@supabase/supabase-js";
+import { UserMenu } from "./user-menu";
 
 type HeaderActionsProps = {
   user: User & {

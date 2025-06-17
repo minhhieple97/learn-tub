@@ -83,16 +83,12 @@ export const AI_COMMANDS = {
   EVALUATE_NOTE: 'evaluate_note',
   GENERATE_QUIZZ_QUESTIONS: 'generate_quizz_questions',
   EVALUATE_QUIZZ_ANSWERS: 'evaluate_quizz_answers',
-  CHAT_COMPLETION: 'chat_completion',
-  TEXT_GENERATION: 'text_generation',
 } as const;
 
 export const CREDIT_ACTION_COUNTS = {
   [AI_COMMANDS.EVALUATE_NOTE]: 1,
   [AI_COMMANDS.GENERATE_QUIZZ_QUESTIONS]: 1,
   [AI_COMMANDS.EVALUATE_QUIZZ_ANSWERS]: 1,
-  [AI_COMMANDS.CHAT_COMPLETION]: 1,
-  [AI_COMMANDS.TEXT_GENERATION]: 1,
 } as const;
 
 

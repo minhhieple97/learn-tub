@@ -1,24 +1,22 @@
-'use client';
+"use client";
 
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuTrigger,
   DropdownMenuItem,
   DropdownMenuSeparator,
-} from '@/components/ui/dropdown-menu';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { LogOut, CreditCard, Settings, Coins } from 'lucide-react';
-import { User } from '@supabase/supabase-js';
-import { signOutAction } from '@/features/auth/actions';
-import { useAction } from 'next-safe-action/hooks';
-import { toast } from '@/hooks/use-toast';
-import { useRouter } from 'next/navigation';
-import { routes } from '@/routes';
-import { useState } from 'react';
-import { Dialog, DialogContent, DialogOverlay } from '@/components/ui/dialog';
-import { PricingDialog } from '@/features/payments/components/pricing-dialog';
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { LogOut, CreditCard, Settings, Coins } from "lucide-react";
+import { User } from "@supabase/supabase-js";
+import { signOutAction } from "@/features/auth/actions";
+import { useAction } from "next-safe-action/hooks";
+import { toast } from "@/hooks/use-toast";
+import { useState } from "react";
+import { Dialog, DialogContent, DialogOverlay } from "@/components/ui/dialog";
+import { PricingDialog } from "@/features/payments/components/pricing-dialog";
 
 type UserMenuProps = {
   user: User & {
@@ -33,13 +31,13 @@ export function UserMenu({ user }: UserMenuProps) {
   const { execute, isPending } = useAction(signOutAction, {
     onError: ({ error }) => {
       toast.error({
-        title: 'Error',
-        description: error.serverError || 'Failed to sign out',
+        title: "Error",
+        description: error.serverError || "Failed to sign out",
       });
     },
     onSuccess: () => {
       toast.success({
-        description: 'Successfully signed out!',
+        description: "Successfully signed out!",
       });
     },
   });
@@ -69,9 +67,12 @@ export function UserMenu({ user }: UserMenuProps) {
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="relative h-10 w-10 rounded-full">
             <Avatar className="h-10 w-10">
-              <AvatarImage src={user.user_metadata?.avatar_url} alt={user.email || ''} />
+              <AvatarImage
+                src={user.user_metadata?.avatar_url}
+                alt={user.email || ""}
+              />
               <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold">
-                {getUserInitials(user.email || 'US')}
+                {getUserInitials(user.email || "US")}
               </AvatarFallback>
             </Avatar>
           </Button>
@@ -81,7 +82,7 @@ export function UserMenu({ user }: UserMenuProps) {
             <div className="flex flex-col space-y-1 leading-none">
               <p className="font-medium text-sm">{user.email}</p>
               <p className="text-xs text-muted-foreground">
-                {user.user_metadata?.full_name || 'User'}
+                {user.user_metadata?.full_name || "User"}
               </p>
             </div>
           </div>
@@ -104,7 +105,10 @@ export function UserMenu({ user }: UserMenuProps) {
           </div>
 
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={handlePricingClick} className="cursor-pointer">
+          <DropdownMenuItem
+            onClick={handlePricingClick}
+            className="cursor-pointer"
+          >
             <CreditCard className="mr-2 size-4" />
             <span>Pricing & Billing</span>
           </DropdownMenuItem>
@@ -119,7 +123,7 @@ export function UserMenu({ user }: UserMenuProps) {
             className="cursor-pointer text-red-600 focus:text-red-700 dark:text-red-400 dark:focus:text-red-300"
           >
             <LogOut className="mr-2 size-4" />
-            <span>{isPending ? 'Signing out...' : 'Sign Out'}</span>
+            <span>{isPending ? "Signing out..." : "Sign Out"}</span>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
