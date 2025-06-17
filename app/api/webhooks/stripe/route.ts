@@ -1,10 +1,13 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-require-imports */
+
 import { NextRequest, NextResponse } from "next/server";
 import { headers } from "next/headers";
-import { env } from '@/env.mjs';
+import { env } from "@/env.mjs";
 import {
   addCreditsToUser,
   createCreditTransaction,
-} from '@/features/payments/queries/credit-queries';
+} from "@/features/payments/queries/credit-queries";
 import {
   getUserByStripeCustomerId,
   upsertUserSubscription,
@@ -12,7 +15,7 @@ import {
   getPlanByStripePrice,
   createPaymentHistory,
   getSubscriptionPlan,
-} from '@/features/payments/queries/subscription-queries';
+} from "@/features/payments/queries/subscription-queries";
 
 const stripe = require("stripe")(env.STRIPE_SECRET_KEY);
 
@@ -102,22 +105,25 @@ async function handleCheckoutSessionCompleted(session: any) {
   const userId = session.metadata?.user_id;
 
   if (!userId) {
-    throw new Error('User ID not found in session metadata');
+    throw new Error("User ID not found in session metadata");
   }
 
-  console.log(`✅ Checkout completed for user: ${userId}, mode: ${session.mode}`);
+  console.log(
+    `✅ Checkout completed for user: ${userId}, mode: ${session.mode}`,
+  );
 
-  if (session.mode === 'subscription') {
+  if (session.mode === "subscription") {
     await handleSubscriptionCheckout(session);
-  } else if (session.mode === 'payment') {
+  } else if (session.mode === "payment") {
     await handleCreditsPurchase(session);
   }
 
   // Create payment history record
-  const paymentType = session.mode === 'subscription' ? 'subscription' : 'credits';
+  const paymentType =
+    session.mode === "subscription" ? "subscription" : "credits";
   const description =
-    session.mode === 'subscription'
-      ? 'Subscription purchase'
+    session.mode === "subscription"
+      ? "Subscription purchase"
       : `Purchase of ${session.metadata?.credits_amount || 0} AI credits`;
 
   await createPaymentHistory(
@@ -125,7 +131,7 @@ async function handleCheckoutSessionCompleted(session: any) {
     session.amount_total,
     session.currency,
     paymentType,
-    'completed',
+    "completed",
     description,
     session.payment_intent,
   );
@@ -136,13 +142,21 @@ async function handleSubscriptionCheckout(session: any) {
   const planId = session.metadata.plan_id;
 
   // Get the subscription from Stripe
-  const subscription = await stripe.subscriptions.retrieve(session.subscription);
+  const subscription = await stripe.subscriptions.retrieve(
+    session.subscription,
+  );
 
   // Update or create user subscription
-  const { error: subscriptionError } = await upsertUserSubscription(userId, planId, subscription);
+  const { error: subscriptionError } = await upsertUserSubscription(
+    userId,
+    planId,
+    subscription,
+  );
 
   if (subscriptionError) {
-    throw new Error(`Failed to update subscription: ${subscriptionError.message}`);
+    throw new Error(
+      `Failed to update subscription: ${subscriptionError.message}`,
+    );
   }
 
   // Grant monthly credits
@@ -166,13 +180,15 @@ async function handleCreditsPurchase(session: any) {
   const { error: transactionError } = await createCreditTransaction(
     userId,
     creditsAmount,
-    'purchase',
+    "purchase",
     `Purchased ${creditsAmount} AI credits`,
     session.payment_intent,
   );
 
   if (transactionError) {
-    throw new Error(`Failed to create credit transaction: ${transactionError.message}`);
+    throw new Error(
+      `Failed to create credit transaction: ${transactionError.message}`,
+    );
   }
 
   console.log(`💰 ${creditsAmount} credits added to user: ${userId}`);
@@ -181,40 +197,50 @@ async function handleCreditsPurchase(session: any) {
 async function handleInvoicePaymentSucceeded(invoice: any) {
   // Skip if this is not a subscription invoice
   if (!invoice.subscription) {
-    console.log('ℹ️ Non-subscription invoice payment succeeded, skipping credit grant');
+    console.log(
+      "ℹ️ Non-subscription invoice payment succeeded, skipping credit grant",
+    );
     return;
   }
 
-  const subscription = await stripe.subscriptions.retrieve(invoice.subscription);
+  const subscription = await stripe.subscriptions.retrieve(
+    invoice.subscription,
+  );
   const customerId = subscription.customer;
 
   // Find user by customer ID
-  const { data: userSubscription, error: userError } = await getUserByStripeCustomerId(customerId);
+  const { data: userSubscription, error: userError } =
+    await getUserByStripeCustomerId(customerId);
 
   if (userError || !userSubscription) {
     throw new Error(`User not found for customer: ${customerId}`);
   }
 
   // Only grant credits for recurring payments (not the initial payment)
-  const isRecurringPayment = invoice.billing_reason === 'subscription_cycle';
+  const isRecurringPayment = invoice.billing_reason === "subscription_cycle";
 
   if (isRecurringPayment) {
     // Grant monthly credits for recurring payment
-    await grantMonthlyCredits(userSubscription.user_id, userSubscription.plan_id);
-    console.log(`🔄 Monthly credits granted for user: ${userSubscription.user_id}`);
+    await grantMonthlyCredits(
+      userSubscription.user_id,
+      userSubscription.plan_id,
+    );
+    console.log(
+      `🔄 Monthly credits granted for user: ${userSubscription.user_id}`,
+    );
   }
 
   // Create payment history for all successful payments
   const paymentDescription = isRecurringPayment
-    ? 'Monthly subscription renewal'
-    : `Subscription payment - ${invoice.billing_reason || 'subscription_create'}`;
+    ? "Monthly subscription renewal"
+    : `Subscription payment - ${invoice.billing_reason || "subscription_create"}`;
 
   await createPaymentHistory(
     userSubscription.user_id,
     invoice.amount_paid,
     invoice.currency,
-    'subscription_renewal',
-    'completed',
+    "subscription_renewal",
+    "completed",
     paymentDescription,
     undefined,
     invoice.id,
@@ -228,29 +254,32 @@ async function handleInvoicePaymentSucceeded(invoice: any) {
 async function handleInvoicePaymentFailed(invoice: any) {
   // Skip if this is not a subscription invoice
   if (!invoice.subscription) {
-    console.log('⚠️ Non-subscription invoice payment failed, skipping');
+    console.log("⚠️ Non-subscription invoice payment failed, skipping");
     return;
   }
 
-  const subscription = await stripe.subscriptions.retrieve(invoice.subscription);
+  const subscription = await stripe.subscriptions.retrieve(
+    invoice.subscription,
+  );
   const customerId = subscription.customer;
 
   // Find user by customer ID
-  const { data: userSubscription, error: userError } = await getUserByStripeCustomerId(customerId);
+  const { data: userSubscription, error: userError } =
+    await getUserByStripeCustomerId(customerId);
 
   if (userError || !userSubscription) {
     throw new Error(`User not found for customer: ${customerId}`);
   }
 
   // Create payment history record for failed payment
-  const description = `Failed subscription renewal payment - ${invoice.billing_reason || 'subscription_cycle'}`;
+  const description = `Failed subscription renewal payment - ${invoice.billing_reason || "subscription_cycle"}`;
 
   await createPaymentHistory(
     userSubscription.user_id,
     invoice.amount_due,
     invoice.currency,
-    'subscription_renewal',
-    'failed',
+    "subscription_renewal",
+    "failed",
     description,
     undefined,
     invoice.id,
@@ -266,7 +295,10 @@ async function handleInvoicePaymentFailed(invoice: any) {
 }
 
 async function handleSubscriptionCreated(subscription: any) {
-  console.log('🔍 Subscription created:', JSON.stringify(subscription, null, 2));
+  console.log(
+    "🔍 Subscription created:",
+    JSON.stringify(subscription, null, 2),
+  );
 
   const customerId = subscription.customer;
 
@@ -280,7 +312,9 @@ async function handleSubscriptionCreated(subscription: any) {
   }
 
   if (!planId) {
-    throw new Error(`Plan not found for price ID: ${subscription.items?.data?.[0]?.price?.id}`);
+    throw new Error(
+      `Plan not found for price ID: ${subscription.items?.data?.[0]?.price?.id}`,
+    );
   }
 
   // Step 2: Find user ID - since metadata might be empty, we need to get it from Stripe customer
@@ -290,17 +324,18 @@ async function handleSubscriptionCreated(subscription: any) {
     // Get the customer from Stripe to access its metadata
     const customer = await stripe.customers.retrieve(customerId);
     userId = (customer.metadata?.user_id as string) || null;
-    console.log('🔍 Customer metadata:', customer.metadata);
+    console.log("🔍 Customer metadata:", customer.metadata);
   } catch (error) {
-    console.error('❌ Failed to retrieve customer:', error);
+    console.error("❌ Failed to retrieve customer:", error);
   }
 
   // Step 3: If no user ID from customer metadata, try to find from existing subscriptions
   if (!userId) {
-    const { data: existingSubscription } = await getUserByStripeCustomerId(customerId);
+    const { data: existingSubscription } =
+      await getUserByStripeCustomerId(customerId);
     if (existingSubscription) {
       userId = existingSubscription.user_id;
-      console.log('🔍 Found user from existing subscription:', userId);
+      console.log("🔍 Found user from existing subscription:", userId);
     }
   }
 
@@ -314,13 +349,15 @@ async function handleSubscriptionCreated(subscription: any) {
       });
 
       // Find the most recent session with user metadata
-      const sessionWithMetadata = sessions.data.find((s: any) => s.metadata?.user_id);
+      const sessionWithMetadata = sessions.data.find(
+        (s: any) => s.metadata?.user_id,
+      );
       if (sessionWithMetadata) {
         userId = sessionWithMetadata.metadata.user_id;
-        console.log('🔍 Found user from checkout session:', userId);
+        console.log("🔍 Found user from checkout session:", userId);
       }
     } catch (error) {
-      console.error('❌ Failed to retrieve checkout sessions:', error);
+      console.error("❌ Failed to retrieve checkout sessions:", error);
     }
   }
 
@@ -331,16 +368,24 @@ async function handleSubscriptionCreated(subscription: any) {
   }
 
   // Step 5: Create or update subscription record
-  const { error: subscriptionError } = await upsertUserSubscription(userId, planId, subscription);
+  const { error: subscriptionError } = await upsertUserSubscription(
+    userId,
+    planId,
+    subscription,
+  );
 
   if (subscriptionError) {
-    throw new Error(`Failed to create subscription: ${subscriptionError.message}`);
+    throw new Error(
+      `Failed to create subscription: ${subscriptionError.message}`,
+    );
   }
 
   // Step 6: Grant initial monthly credits
   await grantMonthlyCredits(userId, planId);
 
-  console.log(`🎉 Subscription created for user: ${userId}, subscription: ${subscription.id}`);
+  console.log(
+    `🎉 Subscription created for user: ${userId}, subscription: ${subscription.id}`,
+  );
 }
 
 async function handleSubscriptionUpdated(subscription: any) {
@@ -362,7 +407,7 @@ async function handleSubscriptionUpdated(subscription: any) {
 
 async function handleSubscriptionDeleted(subscription: any) {
   // Update subscription status to canceled
-  const { error } = await updateSubscriptionStatus(subscription.id, 'canceled');
+  const { error } = await updateSubscriptionStatus(subscription.id, "canceled");
 
   if (error) {
     throw new Error(`Failed to cancel subscription: ${error.message}`);
@@ -380,7 +425,10 @@ async function grantMonthlyCredits(userId: string, planId: string) {
   }
 
   // Update user credits
-  const { error: creditsError } = await addCreditsToUser(userId, plan.credits_per_month);
+  const { error: creditsError } = await addCreditsToUser(
+    userId,
+    plan.credits_per_month,
+  );
 
   if (creditsError) {
     throw new Error(`Failed to add credits: ${creditsError.message}`);
@@ -390,11 +438,11 @@ async function grantMonthlyCredits(userId: string, planId: string) {
   const { error: transactionError } = await createCreditTransaction(
     userId,
     plan.credits_per_month,
-    'subscription_grant',
-    'Monthly subscription credit grant',
+    "subscription_grant",
+    "Monthly subscription credit grant",
   );
 
   if (transactionError) {
-    console.error('Failed to create credit transaction:', transactionError);
+    console.error("Failed to create credit transaction:", transactionError);
   }
 }
