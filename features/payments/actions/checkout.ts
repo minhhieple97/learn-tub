@@ -6,6 +6,11 @@ import { redirect } from 'next/navigation';
 import { env } from '@/env.mjs';
 import { checkProfileByUserId } from '@/lib/require-auth';
 import { getSubscriptionPlan, getUserSubscription, getUserStripeCustomerId } from '../queries';
+import {
+  PAYMENT_CONFIG_MODES,
+  PAYMENT_CONFIG_TYPES,
+  PAYMENT_CONFIG_URLS,
+} from '@/config/constants';
 
 const stripe = require('stripe')(env.STRIPE_SECRET_KEY);
 
@@ -46,12 +51,12 @@ export const createCheckoutSessionAction = authAction
           quantity: 1,
         },
       ],
-      mode: 'subscription',
-      success_url: `${env.NEXT_PUBLIC_APP_URL}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${env.NEXT_PUBLIC_APP_URL}/payment/cancel?credits_canceled=true`,
+      mode: PAYMENT_CONFIG_MODES.SUBSCRIPTION,
+      ...PAYMENT_CONFIG_URLS,
       metadata: {
         user_id: profile.id,
         plan_id: plan.id,
+        payment_type: PAYMENT_CONFIG_TYPES.SUBSCRIPTION,
       },
     });
 
@@ -101,13 +106,12 @@ export const purchaseCreditsAction = authAction
           quantity: 1,
         },
       ],
-      mode: 'payment',
-      success_url: `${env.NEXT_PUBLIC_APP_URL}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${env.NEXT_PUBLIC_APP_URL}/payment/cancel?credits_canceled=true`,
+      mode: PAYMENT_CONFIG_MODES.PAYMENT,
+      ...PAYMENT_CONFIG_URLS,
       metadata: {
         user_id: profile.id,
         credits_amount: amount.toString(),
-        payment_type: 'credits',
+        payment_type: PAYMENT_CONFIG_TYPES.CREDITS,
       },
     });
 

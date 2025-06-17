@@ -1,3 +1,5 @@
+import { env } from '@/env.mjs';
+
 export const YOUTUBE_API = {
   BASE_URL: 'https://www.googleapis.com/youtube/v3/videos',
   THUMBNAIL_URL: 'https://img.youtube.com/vi',
@@ -90,7 +92,6 @@ export const CREDIT_ACTION_COUNTS = {
   [AI_COMMANDS.GENERATE_QUIZZ_QUESTIONS]: 1,
   [AI_COMMANDS.EVALUATE_QUIZZ_ANSWERS]: 1,
 } as const;
-
 
 export const AI_API = {
   EVALUATE_NOTE_PATH: '/api/evaluate-note',
@@ -303,4 +304,19 @@ export const QUIZZ_FILTER_VALUES = {
     ASC: 'asc',
     DESC: 'desc',
   },
+} as const;
+
+export const PAYMENT_CONFIG_URLS = {
+  SUCCESS_URL: `${env.NEXT_PUBLIC_APP_URL}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
+  CANCEL_URL: `${env.NEXT_PUBLIC_APP_URL}/payment/cancel?credits_canceled=true`,
+} as const;
+
+export const PAYMENT_CONFIG_MODES = {
+  SUBSCRIPTION: 'subscription',
+  PAYMENT: 'payment',
+} as const;
+
+export const PAYMENT_CONFIG_TYPES = {
+  SUBSCRIPTION: 'subscription',
+  CREDITS: 'credits',
 } as const;

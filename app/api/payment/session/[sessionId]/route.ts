@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 import { NextRequest, NextResponse } from "next/server";
 import { env } from "@/env.mjs";
 import { createClient } from "@/lib/supabase/server";
