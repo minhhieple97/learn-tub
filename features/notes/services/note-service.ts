@@ -6,6 +6,7 @@ import {
   ERROR_MESSAGES,
   EVALUATION_ERRORS,
   AI_QUIZZ_CONFIG,
+  AI_COMMANDS,
 } from '@/config/constants';
 import { INoteEvaluationRequest } from '@/features/notes/types';
 import { IFeedback, StreamChunk } from '@/types';
@@ -36,7 +37,7 @@ class NoteService {
     return aiUsageTracker.wrapStreamingOperation(
       {
         user_id: userId,
-        command: 'evaluate_note',
+        command: AI_COMMANDS.EVALUATE_NOTE,
         ai_model_id: aiModelId,
         request_payload: { prompt_length: prompt.length },
       },
