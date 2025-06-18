@@ -3,10 +3,10 @@ import {
   HeroSection,
   FeaturesSection,
   CTASection,
-} from '@/components/shared/home';
-import { getUserInSession } from '@/features/profile/queries';
-import { routes } from '@/routes';
-import { redirect } from 'next/navigation';
+} from "@/components/shared/home";
+import { getUserInSession } from "@/features/profile/queries";
+import { routes } from "@/routes";
+import { redirect } from "next/navigation";
 
 export default async function LandingPage() {
   const user = await getUserInSession();
