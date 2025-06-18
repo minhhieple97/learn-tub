@@ -10,7 +10,7 @@ import {
   IAIUsageLog,
   IAIUsageLogInsert,
 } from '../types';
-
+import { AI_COMMANDS } from '@/config/constants';
 
 export const createAIUsageLog = async (data: IAIUsageLogInsert): Promise<IAIUsageLog> => {
   const supabase = await createClient();
@@ -136,10 +136,13 @@ export const getAIUsageAnalytics = async (
     durations.length > 0 ? durations.reduce((sum, dur) => sum + dur, 0) / durations.length : 0;
 
   // TODO: Implement provider and model counting after database migration
-  const commandCounts = filteredData.reduce((acc, log) => {
-    acc[log.command] = (acc[log.command] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
+  const commandCounts = filteredData.reduce(
+    (acc, log) => {
+      acc[log.command] = (acc[log.command] || 0) + 1;
+      return acc;
+    },
+    {} as Record<string, number>,
+  );
 
   const mostUsedCommand =
     Object.entries(commandCounts).sort(([, a], [, b]) => (b as number) - (a as number))[0]?.[0] ||
@@ -192,8 +195,6 @@ export const getAIUsageByModel = async (
   filters: Omit<IAIUsageFilters, 'limit' | 'offset' | 'model'> = {},
 ): Promise<IAIUsageByModel[]> => {
   const supabase = await createClient();
-
-  // Get unique model and provider combinations from ai_model_pricing
   const { data: modelData, error: modelError } = await supabase
     .from('ai_model_pricing')
     .select(
@@ -237,11 +238,9 @@ export const getAIUsageByCommand = async (
   filters: Omit<IAIUsageFilters, 'limit' | 'offset' | 'command'> = {},
 ): Promise<IAIUsageByCommand[]> => {
   const commands: IAICommand[] = [
-    'evaluate_note',
-    'generate_quizz_questions',
-    'evaluate_quizz_answers',
-    'chat_completion',
-    'text_generation',
+    AI_COMMANDS.EVALUATE_NOTE,
+    AI_COMMANDS.GENERATE_QUIZZ_QUESTIONS,
+    AI_COMMANDS.EVALUATE_QUIZZ_ANSWERS,
   ];
 
   const results = await Promise.all(

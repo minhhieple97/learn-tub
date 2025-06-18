@@ -2,12 +2,9 @@ import { NextRequest } from "next/server";
 import { z } from "zod";
 import { getQuizDashboardData } from "@/features/dashboard/queries/quiz-dashboard-queries";
 import { IQuizFilters } from "@/features/dashboard/types";
-import {
-  RESPONSE_HEADERS,
-  ERROR_MESSAGES,
-  HTTP_STATUS,
-} from "@/config/constants";
+import { RESPONSE_HEADERS, ERROR_MESSAGES } from "@/config/constants";
 import { getProfileInSession } from "@/features/profile/queries";
+import { StatusCodes } from "http-status-codes";
 
 const QuizDashboardQuerySchema = z.object({
   search: z.string().optional(),
@@ -55,7 +52,7 @@ export async function GET(request: NextRequest) {
           details: errorMessage,
         }),
         {
-          status: HTTP_STATUS.BAD_REQUEST,
+          status: StatusCodes.BAD_REQUEST,
           headers: { "Content-Type": RESPONSE_HEADERS.JSON_CONTENT_TYPE },
         },
       );
@@ -65,7 +62,7 @@ export async function GET(request: NextRequest) {
 
     if (!profile) {
       return new Response(ERROR_MESSAGES.UNAUTHORIZED, {
-        status: HTTP_STATUS.UNAUTHORIZED,
+        status: StatusCodes.UNAUTHORIZED,
       });
     }
 
@@ -96,7 +93,7 @@ export async function GET(request: NextRequest) {
         details: error instanceof Error ? error.message : "Unknown error",
       }),
       {
-        status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+        status: StatusCodes.INTERNAL_SERVER_ERROR,
         headers: { "Content-Type": RESPONSE_HEADERS.JSON_CONTENT_TYPE },
       },
     );

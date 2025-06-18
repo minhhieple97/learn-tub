@@ -1,7 +1,7 @@
-"use client"
+'use client';
 
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   Form,
   FormControl,
@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/form';
 import { GoogleAuthButton } from './google-auth-button';
 import { useRegister } from '@/features/auth/hooks/use-register';
-import { CheckCircle2, Circle, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 
 export const RegisterForm = () => {
   const { form, onSubmit, isSubmitting, isLoading } = useRegister();
@@ -26,7 +26,9 @@ export const RegisterForm = () => {
           <span className="w-full border-t" />
         </div>
         <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-background px-2 text-muted-foreground">Or continue with email</span>
+          <span className="bg-background px-2 text-muted-foreground">
+            Or continue with email
+          </span>
         </div>
       </div>
 
@@ -50,9 +52,7 @@ export const RegisterForm = () => {
                     disabled={isLoading || isSubmitting}
                   />
                 </FormControl>
-                <FormMessage className="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
-                  <Circle className="h-3 w-3 fill-current" />
-                </FormMessage>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -75,9 +75,7 @@ export const RegisterForm = () => {
                     disabled={isLoading || isSubmitting}
                   />
                 </FormControl>
-                <FormMessage className="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
-                  <Circle className="h-3 w-3 fill-current" />
-                </FormMessage>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -100,9 +98,7 @@ export const RegisterForm = () => {
                     disabled={isLoading || isSubmitting}
                   />
                 </FormControl>
-                <FormMessage className="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
-                  <Circle className="h-3 w-3 fill-current" />
-                </FormMessage>
+                <FormMessage />
               </FormItem>
             )}
           />
@@ -112,7 +108,10 @@ export const RegisterForm = () => {
             name="confirmPassword"
             render={({ field }) => (
               <FormItem className="space-y-2 mb-4">
-                <FormLabel htmlFor="confirmPassword" className="text-sm font-medium">
+                <FormLabel
+                  htmlFor="confirmPassword"
+                  className="text-sm font-medium"
+                >
                   Confirm Password
                 </FormLabel>
                 <FormControl>
@@ -125,9 +124,7 @@ export const RegisterForm = () => {
                     disabled={isLoading || isSubmitting}
                   />
                 </FormControl>
-                <FormMessage className="text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
-                  <Circle className="h-3 w-3 fill-current" />
-                </FormMessage>
+                <FormMessage />
               </FormItem>
             )}
           />
