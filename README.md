@@ -16,9 +16,11 @@ LearnTub is a modern learning platform that transforms passive YouTube video wat
 - 🧠 **AI-Powered Notes** - Get intelligent feedback and insights with advanced AI analysis
 - 🎯 **AI Quiz Assistant** - Test knowledge with auto-generated questions and personalized feedback
 - 📊 **AI Usage Analytics** - Comprehensive tracking and analytics for all AI interactions
+- 💰 **Flexible Pricing** - Start free with 50 AI credits/month, upgrade to Pro for 500 credits at $2/month
 - ⏰ **Timestamp Sync** - Notes automatically sync with video timestamps for seamless navigation
 - 📚 **Smart Organization** - Organize learning with courses, tags, and intelligent categorization
 - 📈 **Progress Tracking** - Monitor your learning progress with detailed analytics and insights
+
 
 ## 🛠️ Tech Stack
 
@@ -320,6 +322,32 @@ The comprehensive AI usage tracking system provides insights into your AI intera
 - **Provider Comparison**: Compare performance and costs across different AI providers
 - **Historical Data**: Access detailed usage history and trends over time
 - **Privacy-First**: All tracking data is user-specific and secure
+
+## 💰 Pricing Plans
+
+LearnTub offers flexible pricing to match your learning needs:
+
+### Free Plan - $0/month
+- **50 AI credits** per month
+- **Unlimited note-taking**
+- **Basic AI analysis**
+- **Email support**
+- Perfect for trying out AI-powered learning
+
+### Pro Plan - $2/month
+- **500 AI credits** per month (10x more than free!)
+- **Unlimited note-taking**
+- **Advanced AI analysis** with detailed insights
+- **Priority support**
+- **Export functionality** for notes and data
+- **All AI features** including note evaluation and quiz generation
+
+### Additional Credits
+- Purchase extra credits anytime: **$1 for 100 credits**
+- No monthly commitment required
+- Credits never expire
+
+> **What are AI Credits?** Credits are used for AI-powered features like note evaluation and quiz generation. Each AI interaction consumes credits based on the complexity and length of the content.
 
 ## 💡 Potential Future Enhancements
 
