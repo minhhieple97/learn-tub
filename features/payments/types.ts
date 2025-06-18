@@ -85,3 +85,33 @@ export type IPaymentDetails = {
   planName?: string;
   creditsAmount?: number;
 };
+
+export type ICreditResetResult = {
+  userId: string;
+  subscriptionReset: boolean;
+  purchaseReset: boolean;
+  creditsGranted: number;
+  error?: string;
+};
+
+export type ICreditResetSummary = {
+  totalProcessed: number;
+  successfulResets: number;
+  errors: string[];
+  subscriptionResetsCount: number;
+  purchaseResetsCount: number;
+  totalCreditsGranted: number;
+};
+
+export type IUserWithSubscription = {
+  user_id: string;
+  plan_id: string;
+  status: string;
+  current_period_end: string | null;
+  cancel_at_period_end: boolean | null;
+  subscription_plans: {
+    id: string;
+    name: string;
+    credits_per_month: number;
+  };
+};

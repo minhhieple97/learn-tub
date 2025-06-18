@@ -4,7 +4,6 @@ import {
   RESPONSE_HEADERS,
   CHUNK_TYPES,
   ERROR_MESSAGES,
-  HTTP_STATUS,
 } from "@/config/constants";
 import { INoteEvaluationRequest } from "@/features/notes/types";
 import { IFeedback, StreamChunk } from "@/types";
@@ -17,6 +16,7 @@ import {
   getUserInSession,
 } from "@/features/profile/queries";
 import { z } from "zod";
+import { StatusCodes } from "http-status-codes";
 
 const EvaluateNoteQuerySchema = z.object({
   noteId: z.string().uuid("Invalid note ID format"),
@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
           details: errorMessage,
         }),
         {
-          status: HTTP_STATUS.BAD_REQUEST,
+          status: StatusCodes.BAD_REQUEST,
           headers: { "Content-Type": RESPONSE_HEADERS.JSON_CONTENT_TYPE },
         },
       );
@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
     ]);
     if (!user || !profile) {
       return new Response(ERROR_MESSAGES.UNAUTHORIZED, {
-        status: HTTP_STATUS.UNAUTHORIZED,
+        status: StatusCodes.UNAUTHORIZED,
       });
     }
 
@@ -81,7 +81,7 @@ export async function GET(request: NextRequest) {
 
     if (noteError || !note) {
       return new Response(ERROR_MESSAGES.NOTE_NOT_FOUND, {
-        status: HTTP_STATUS.NOT_FOUND,
+        status: StatusCodes.NOT_FOUND,
       });
     }
 
@@ -164,7 +164,7 @@ export async function GET(request: NextRequest) {
         details: error instanceof Error ? error.message : "Unknown error",
       }),
       {
-        status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+        status: StatusCodes.INTERNAL_SERVER_ERROR,
         headers: { "Content-Type": RESPONSE_HEADERS.JSON_CONTENT_TYPE },
       },
     );

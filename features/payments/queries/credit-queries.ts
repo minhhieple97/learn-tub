@@ -105,16 +105,7 @@ export async function addCreditsToUser(userId: string, creditsAmount: number) {
 export async function createCreditTransaction(
   userId: string,
   amount: number,
-  type:
-    | 'monthly_reset'
-    | 'purchase'
-    | 'evaluate_note'
-    | 'generate_quizz_questions'
-    | 'evaluate_quizz_answers'
-    | 'refund'
-    | 'bonus'
-    | 'subscription_grant'
-    | 'admin_adjustment',
+  type: ICreditTransactionType,
   description: string,
   stripePaymentIntentId?: string,
 ) {
@@ -126,6 +117,82 @@ export async function createCreditTransaction(
     description,
     stripe_payment_intent_id: stripePaymentIntentId,
   });
+
+  return { data, error };
+}
+
+export async function getAllUsersForCreditReset() {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase.from('user_credits').select(`
+      *,
+      profiles!user_credits_user_id_fkey(id, email)
+    `);
+
+  return { data, error };
+}
+
+export async function getUsersWithActiveSubscriptions() {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from('user_subscriptions')
+    .select(
+      `
+      user_id,
+      plan_id,
+      status,
+      current_period_end,
+      cancel_at_period_end,
+      subscription_plans!user_subscriptions_plan_id_fkey(
+        id,
+        name,
+        credits_per_month
+      )
+    `,
+    )
+    .eq('status', 'active')
+    .eq('cancel_at_period_end', false);
+
+  return { data, error };
+}
+
+export async function resetUserCredits(
+  userId: string,
+  updates: {
+    credits_subscription?: number;
+    credits_purchase?: number;
+    credits_used_this_month?: number;
+    last_reset_subscription_date?: string;
+    last_reset_purchase_date?: string;
+  },
+) {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from('user_credits')
+    .update({
+      ...updates,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('user_id', userId)
+    .select()
+    .single();
+
+  return { data, error };
+}
+
+export async function bulkCreateCreditTransactions(
+  transactions: Array<{
+    user_id: string;
+    amount: number;
+    type: ICreditTransactionType;
+    description: string;
+  }>,
+) {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase.from('credit_transactions').insert(transactions);
 
   return { data, error };
 }
