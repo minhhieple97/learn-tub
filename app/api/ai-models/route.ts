@@ -7,12 +7,9 @@ import {
   getAIProviders,
   getAIModelData,
 } from "@/features/ai/queries/ai-model-pricing-queries";
-import {
-  RESPONSE_HEADERS,
-  ERROR_MESSAGES,
-  HTTP_STATUS,
-} from "@/config/constants";
+import { RESPONSE_HEADERS, ERROR_MESSAGES } from "@/config/constants";
 import { getUserInSession } from "@/features/profile/queries";
+import { StatusCodes } from "http-status-codes";
 
 const AIModelsQuerySchema = z.object({
   provider_id: z.string().uuid().optional(),
@@ -33,7 +30,7 @@ export async function GET(request: NextRequest) {
 
     if (!user) {
       return new Response(ERROR_MESSAGES.UNAUTHORIZED, {
-        status: HTTP_STATUS.UNAUTHORIZED,
+        status: StatusCodes.UNAUTHORIZED,
         headers: RESPONSE_HEADERS,
       });
     }
@@ -55,7 +52,7 @@ export async function GET(request: NextRequest) {
           return new Response(
             JSON.stringify({ error: "Provider ID is required" }),
             {
-              status: HTTP_STATUS.BAD_REQUEST,
+              status: StatusCodes.BAD_REQUEST,
               headers: RESPONSE_HEADERS,
             },
           );
@@ -71,7 +68,7 @@ export async function GET(request: NextRequest) {
         });
         if (!result.success) {
           return new Response(JSON.stringify({ error: result.error.message }), {
-            status: HTTP_STATUS.BAD_REQUEST,
+            status: StatusCodes.BAD_REQUEST,
             headers: RESPONSE_HEADERS,
           });
         }
@@ -86,7 +83,7 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error("Error in AI models API:", error);
     return new Response(ERROR_MESSAGES.INTERNAL_SERVER_ERROR, {
-      status: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+      status: StatusCodes.INTERNAL_SERVER_ERROR,
       headers: RESPONSE_HEADERS,
     });
   }

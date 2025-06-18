@@ -81,10 +81,22 @@ export const AI_EVALUATION = {
   SCORE_GOOD_THRESHOLD: 6,
 } as const;
 
-export const AI_COMMANDS = {
+export const TRANSACTION_TYPES = {
+  MONTHLY_RESET: 'monthly_reset',
+  PURCHASE: 'purchase',
+  REFUND: 'refund',
+  BONUS: 'bonus',
+  SUBSCRIPTION_GRANT: 'subscription_grant',
+  ADMIN_ADJUSTMENT: 'admin_adjustment',
   EVALUATE_NOTE: 'evaluate_note',
   GENERATE_QUIZZ_QUESTIONS: 'generate_quizz_questions',
   EVALUATE_QUIZZ_ANSWERS: 'evaluate_quizz_answers',
+} as const;
+
+export const AI_COMMANDS = {
+  EVALUATE_NOTE: TRANSACTION_TYPES.EVALUATE_NOTE,
+  GENERATE_QUIZZ_QUESTIONS: TRANSACTION_TYPES.GENERATE_QUIZZ_QUESTIONS,
+  EVALUATE_QUIZZ_ANSWERS: TRANSACTION_TYPES.EVALUATE_QUIZZ_ANSWERS,
 } as const;
 
 export const CREDIT_ACTION_COUNTS = {
@@ -126,12 +138,6 @@ export const RESPONSE_HEADERS = {
   CONNECTION: 'keep-alive',
 } as const;
 
-export const HTTP_STATUS = {
-  BAD_REQUEST: 400,
-  UNAUTHORIZED: 401,
-  NOT_FOUND: 404,
-  INTERNAL_SERVER_ERROR: 500,
-} as const;
 
 export const ERROR_MESSAGES = {
   MISSING_REQUIRED_PARAMETERS: 'Missing required parameters',
@@ -320,3 +326,22 @@ export const PAYMENT_CONFIG_TYPES = {
   SUBSCRIPTION: 'subscription',
   CREDITS: 'credits',
 } as const;
+
+export const CREDIT_RESET_CONFIG = {
+  RESET_INTERVAL_DAYS: 30,
+  BATCH_SIZE: 100,
+  MAX_RETRIES: 3,
+} as const;
+
+export const CREDIT_RESET_MESSAGES = {
+  SUBSCRIPTION_RESET: 'Monthly subscription credits reset',
+  PURCHASE_RESET: 'Monthly purchase credits reset',
+  SUBSCRIPTION_GRANT: 'Monthly subscription credits granted',
+  UNAUTHORIZED: 'Unauthorized: Invalid cron secret',
+  SUCCESS: 'Credit reset completed successfully',
+  PARTIAL_SUCCESS: 'Credit reset completed with some errors',
+  ERROR: 'Credit reset failed',
+} as const;
+
+// Export all transaction type values as a union type helper
+export const TRANSACTION_TYPE_VALUES = Object.values(TRANSACTION_TYPES);
