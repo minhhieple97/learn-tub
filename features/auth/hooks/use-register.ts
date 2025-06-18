@@ -37,7 +37,7 @@ export const useRegister = (): UseRegisterReturn => {
     onSuccess: () => {
       toast.success({
         title: 'Account created successfully!',
-        description: 'Welcome to LearnTub. You can now start learning.',
+        description: 'Sign up successful. Please check your email for verification.',
       });
       router.push(routes.auth.login);
     },
