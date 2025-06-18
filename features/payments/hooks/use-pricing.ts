@@ -4,25 +4,8 @@ import { useState } from 'react';
 import { useAction } from 'next-safe-action/hooks';
 import { createCheckoutSessionAction } from '@/features/payments/actions';
 import { routes } from '@/routes';
-
-export type PricingPlan = {
-  id: string;
-  name: string;
-  price: string;
-  color: string;
-  gradient: string;
-  productId: string | null;
-};
-
-export type PricingFeature = {
-  name: string;
-  values: (string | boolean)[];
-};
-
-export type PricingData = {
-  plans: PricingPlan[];
-  features: PricingFeature[];
-};
+import { IPricingData } from '../types';
+import { toast } from '@/hooks/use-toast';
 
 export const usePricing = () => {
   const [processingPlan, setProcessingPlan] = useState<string | null>(null);
@@ -31,8 +14,12 @@ export const usePricing = () => {
     onSuccess: () => {
       setProcessingPlan(null);
     },
-    onError: () => {
+    onError: ({ error }) => {
       setProcessingPlan(null);
+      toast.error({
+        title: 'Failed to create checkout session',
+        description: error.serverError || 'Please try again later',
+      });
     },
   });
 
@@ -51,7 +38,7 @@ export const usePricing = () => {
   };
 };
 
-export const pricingData: PricingData = {
+export const pricingData: IPricingData = {
   plans: [
     {
       id: 'free',
@@ -69,14 +56,6 @@ export const pricingData: PricingData = {
       gradient: 'from-indigo-500 to-purple-600',
       productId: 'prod_SVCVKAQ94lH5CT',
     },
-    // {
-    //   id: 'premium',
-    //   name: 'Premium',
-    //   price: '$5',
-    //   color: 'text-purple-600 dark:text-purple-400',
-    //   gradient: 'from-purple-500 to-pink-600',
-    //   productId: 'prod_SVCVlnJamuzLk2',
-    // },
   ],
   features: [
     {
