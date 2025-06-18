@@ -115,3 +115,24 @@ export type IUserWithSubscription = {
     credits_per_month: number;
   };
 };
+
+
+
+export type IPricingPlan = {
+  id: string;
+  name: string;
+  price: string;
+  color: string;
+  gradient: string;
+  productId: string | null;
+};
+
+export type IPricingFeature = {
+  name: string;
+  values: (string | boolean)[];
+};
+
+export type IPricingData = {
+  plans: IPricingPlan[];
+  features: IPricingFeature[];
+};

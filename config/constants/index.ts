@@ -313,8 +313,8 @@ export const QUIZZ_FILTER_VALUES = {
 } as const;
 
 export const PAYMENT_CONFIG_URLS = {
-  SUCCESS_URL: `${env.NEXT_PUBLIC_APP_URL}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
-  CANCEL_URL: `${env.NEXT_PUBLIC_APP_URL}/payment/cancel?credits_canceled=true`,
+  success_url: `${env.NEXT_PUBLIC_APP_URL}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
+  cancel_url: `${env.NEXT_PUBLIC_APP_URL}/payment/cancel?credits_canceled=true`,
 } as const;
 
 export const PAYMENT_CONFIG_MODES = {

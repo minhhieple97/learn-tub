@@ -130,7 +130,7 @@ function PaymentSuccessDetails({ paymentDetails }: { paymentDetails?: IPaymentDe
 
         <div className="space-y-3">
           <Button asChild className="w-full">
-            <Link href={routes.dashboard.root}>Continue to Dashboard</Link>
+            <Link href={routes.learn}>Continue to Learning</Link>
           </Button>
           <Button variant="outline" asChild className="w-full">
             <Link href={routes.settings.root}>Manage Account</Link>

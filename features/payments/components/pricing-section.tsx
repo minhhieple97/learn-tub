@@ -13,13 +13,14 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { usePricing, pricingData, PricingPlan } from '../hooks/use-pricing';
+import { usePricing, pricingData } from '../hooks/use-pricing';
+import { IPricingPlan } from '../types';
 
-type PricingSectionProps = {
+type IPricingSectionProps = {
   compact?: boolean;
 };
 
-export const PricingSection = ({ compact = false }: PricingSectionProps) => {
+export const PricingSection = ({ compact = false }: IPricingSectionProps) => {
   const { processingPlan, handleSubscribe } = usePricing();
 
   const renderHeader = () => {
@@ -44,7 +45,7 @@ export const PricingSection = ({ compact = false }: PricingSectionProps) => {
     );
   };
 
-  const renderPlanHeader = (plan: PricingPlan) => (
+  const renderPlanHeader = (plan: IPricingPlan) => (
     <div className="flex flex-col items-center">
       <span className={`${compact ? 'text-lg' : 'text-xl'} font-bold ${plan.color}`}>
         {plan.name}
@@ -71,7 +72,7 @@ export const PricingSection = ({ compact = false }: PricingSectionProps) => {
     return <span className="text-foreground">{value}</span>;
   };
 
-  const renderPlanButton = (plan: PricingPlan, index: number) => {
+  const renderPlanButton = (plan: IPricingPlan, index: number) => {
     if (index === 0) return null;
 
     const isProcessing = processingPlan === plan.id;
