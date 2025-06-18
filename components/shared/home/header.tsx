@@ -29,12 +29,6 @@ export function Header() {
             >
               <Link href={routes.login}>Login</Link>
             </Button>
-            <Button
-              className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-lg"
-              asChild
-            >
-              <Link href={routes.register}>Get Started</Link>
-            </Button>
           </div>
         </nav>
       </div>
