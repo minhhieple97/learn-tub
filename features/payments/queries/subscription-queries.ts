@@ -53,6 +53,11 @@ export async function getUserByStripeCustomerId(customerId: string) {
 export async function upsertUserSubscription(userId: string, planId: string, subscription: any) {
   const supabase = await createClient();
 
+  // Extract period dates from the first subscription item (where they're actually located)
+  const firstItem = subscription.items?.data?.[0];
+  const currentPeriodStart = firstItem?.current_period_start || subscription.current_period_start;
+  const currentPeriodEnd = firstItem?.current_period_end || subscription.current_period_end;
+
   const { data, error } = await supabase
     .from('user_subscriptions')
     .upsert({
@@ -61,13 +66,11 @@ export async function upsertUserSubscription(userId: string, planId: string, sub
       stripe_subscription_id: subscription.id,
       stripe_customer_id: subscription.customer,
       status: subscription.status,
-      current_period_start: subscription.current_period_start
-        ? new Date(subscription.current_period_start * 1000).toISOString()
+      current_period_start: currentPeriodStart
+        ? new Date(currentPeriodStart * 1000).toISOString()
         : null,
-      current_period_end: subscription.current_period_end
-        ? new Date(subscription.current_period_end * 1000).toISOString()
-        : null,
-      cancel_at_period_end: subscription.cancel_at_period_end,
+      current_period_end: currentPeriodEnd ? new Date(currentPeriodEnd * 1000).toISOString() : null,
+      cancel_at_period_end: subscription.cancel_at_period_end || false,
     })
     .select();
 

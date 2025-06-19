@@ -242,86 +242,150 @@ export class StripeWebhookService {
       `💳 Payment failed for user: ${userSubscription.user_id}, invoice: ${invoice.id}, amount: ${invoice.amount_due}`,
     );
 
-    // Note: We don't automatically cancel the subscription here as Stripe handles retries
-    // The subscription status will be updated via subscription.updated event when Stripe changes it
+
   }
 
   private static async handleSubscriptionCreated(subscription: any): Promise<void> {
-    console.log('🔍 Subscription created:', JSON.stringify(subscription, null, 2));
+    console.log('🔍 Subscription created:', {
+      id: subscription.id,
+      customer: subscription.customer,
+      status: subscription.status,
+      items: subscription.items?.data?.length || 0,
+    });
 
     const customerId = subscription.customer;
 
-    // Step 1: Get plan ID from subscription items (this is always available)
+    // Step 1: Get plan ID from subscription items (with multiple fallback options)
     let planId: string | null = null;
+    let priceId: string | null = null;
 
+    // Try to get price ID from subscription items first
     if (subscription.items?.data?.[0]?.price?.id) {
-      const priceId = subscription.items.data[0].price.id;
+      priceId = subscription.items.data[0].price.id;
+    }
+    // Fallback to the deprecated plan field for older Stripe integrations
+    else if (subscription.plan?.id) {
+      priceId = subscription.plan.id;
+    }
+
+    if (priceId) {
       const { data: plan } = await getPlanByStripePrice(priceId);
       planId = plan?.id || null;
+      console.log(`🔍 Plan lookup for price ${priceId}:`, planId ? 'found' : 'not found');
     }
 
     if (!planId) {
-      throw new Error(`Plan not found for price ID: ${subscription.items?.data?.[0]?.price?.id}`);
+      throw new Error(`Plan not found for price ID: ${priceId || 'unknown'}`);
     }
 
-    // Step 2: Find user ID - since metadata might be empty, we need to get it from Stripe customer
+    // Step 2: Find user ID using multiple strategies
     let userId: string | null = null;
+    const userLookupStrategies = [];
 
-    try {
-      // Get the customer from Stripe to access its metadata
-      const customer = await stripe.customers.retrieve(customerId);
-      userId = (customer.metadata?.user_id as string) || null;
-      console.log('🔍 Customer metadata:', customer.metadata);
-    } catch (error) {
-      console.error('❌ Failed to retrieve customer:', error);
+    // Strategy 1: Check subscription metadata (rarely populated for webhook events)
+    if (subscription.metadata?.user_id) {
+      userId = subscription.metadata.user_id;
+      userLookupStrategies.push('subscription_metadata');
+      console.log('🔍 Found user ID from subscription metadata:', userId);
     }
 
-    // Step 3: If no user ID from customer metadata, try to find from existing subscriptions
+    // Strategy 2: Get customer from Stripe and check its metadata
+    if (!userId) {
+      try {
+        const customer = await stripe.customers.retrieve(customerId);
+        if (customer.metadata?.user_id) {
+          userId = customer.metadata.user_id;
+          userLookupStrategies.push('customer_metadata');
+          console.log('🔍 Found user ID from customer metadata:', userId);
+        }
+        console.log('🔍 Customer metadata:', customer.metadata);
+      } catch (error) {
+        console.error('❌ Failed to retrieve customer:', error);
+        userLookupStrategies.push('customer_metadata_failed');
+      }
+    }
+
+    // Strategy 3: Look up existing subscription records for this customer
     if (!userId) {
       const { data: existingSubscription } = await getUserByStripeCustomerId(customerId);
       if (existingSubscription) {
         userId = existingSubscription.user_id;
-        console.log('🔍 Found user from existing subscription:', userId);
+        userLookupStrategies.push('existing_subscription');
+        console.log('🔍 Found user ID from existing subscription:', userId);
       }
     }
 
-    // Step 4: If still no user ID, try to find by looking up recent checkout sessions
+    // Strategy 4: Check recent checkout sessions for this customer
     if (!userId) {
       try {
-        // Get recent checkout sessions for this customer
         const sessions = await stripe.checkout.sessions.list({
           customer: customerId,
-          limit: 10,
+          limit: 20, // Increased limit for better coverage
+          expand: ['data.subscription'], // Include subscription data if available
         });
 
-        // Find the most recent session with user metadata
-        const sessionWithMetadata = sessions.data.find((s: any) => s.metadata?.user_id);
+        console.log(`🔍 Found ${sessions.data.length} checkout sessions for customer`);
+
+        // Look for the most recent session with user metadata
+        const sessionWithMetadata = sessions.data
+          .filter((s: any) => s.metadata?.user_id)
+          .sort((a: any, b: any) => b.created - a.created)[0]; // Sort by creation time, newest first
+
         if (sessionWithMetadata) {
           userId = sessionWithMetadata.metadata.user_id;
-          console.log('🔍 Found user from checkout session:', userId);
+          userLookupStrategies.push('checkout_session');
+          console.log('🔍 Found user ID from checkout session:', userId);
         }
       } catch (error) {
         console.error('❌ Failed to retrieve checkout sessions:', error);
+        userLookupStrategies.push('checkout_session_failed');
       }
     }
 
-    if (!userId) {
-      throw new Error(
-        `User ID not found for customer: ${customerId}. Please check customer metadata.`,
-      );
+    // Strategy 5: Check if this subscription is linked to an invoice with customer info
+    if (!userId && subscription.latest_invoice) {
+      try {
+        const invoice = await stripe.invoices.retrieve(subscription.latest_invoice);
+        if (invoice.metadata?.user_id) {
+          userId = invoice.metadata.user_id;
+          userLookupStrategies.push('invoice_metadata');
+          console.log('🔍 Found user ID from invoice metadata:', userId);
+        }
+      } catch (error) {
+        console.error('❌ Failed to retrieve latest invoice:', error);
+        userLookupStrategies.push('invoice_metadata_failed');
+      }
     }
 
-    // Step 5: Create or update subscription record
+    console.log('🔍 User lookup strategies tried:', userLookupStrategies);
+
+    if (!userId) {
+      const errorMessage = `User ID not found for customer: ${customerId}. Tried strategies: ${userLookupStrategies.join(', ')}`;
+      console.error('❌', errorMessage);
+      throw new Error(errorMessage);
+    }
+
+    // Step 3: Create or update subscription record
+    console.log(`🔄 Creating/updating subscription for user ${userId}, plan ${planId}`);
     const { error: subscriptionError } = await upsertUserSubscription(userId, planId, subscription);
 
     if (subscriptionError) {
       throw new Error(`Failed to create subscription: ${subscriptionError.message}`);
     }
 
-    // Step 6: Grant initial monthly credits
-    await this.grantMonthlyCredits(userId, planId);
+    // Step 4: Grant initial monthly credits
+    try {
+      await this.grantMonthlyCredits(userId, planId);
+      console.log(`💰 Monthly credits granted for user: ${userId}`);
+    } catch (error) {
+      console.error('❌ Failed to grant monthly credits:', error);
+      // Don't throw error here as the subscription was created successfully
+      // Credits can be granted manually or via retry mechanism
+    }
 
-    console.log(`🎉 Subscription created for user: ${userId}, subscription: ${subscription.id}`);
+    console.log(
+      `🎉 Subscription successfully created for user: ${userId}, subscription: ${subscription.id}`,
+    );
   }
 
   private static async handleSubscriptionUpdated(subscription: any): Promise<void> {

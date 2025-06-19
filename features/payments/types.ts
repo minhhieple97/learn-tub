@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import type { CREDIT_SOURCE_TYPES, CREDIT_BUCKET_STATUS } from '@/config/constants';
 import {
   CancelSubscriptionSchema,
   CreateCheckoutSessionSchema,
@@ -36,14 +37,19 @@ export type IUserSubscription = {
   plan?: ISubscriptionPlan;
 };
 
-export type IUserCredits = {
+export type ICreditBucket = {
   id: string;
   user_id: string;
-  credits_available: number;
-  credits_used_this_month: number;
-  last_reset_date: string;
-  created_at: string;
-  updated_at: string;
+  credits_total: number;
+  credits_used: number;
+  credits_remaining: number | null;
+  source_type: ICreditSourceType;
+  status: ICreditBucketStatus;
+  description: string | null;
+  expires_at: string | null;
+  metadata: Record<string, any> | null;
+  created_at: string | null;
+  updated_at: string | null;
 };
 
 export type ICreditTransaction = {
@@ -70,13 +76,10 @@ export type IPaymentHistory = {
   created_at: string;
 };
 
-export type ICreateCheckoutSessionInput = z.infer<
-  typeof CreateCheckoutSessionSchema
->;
+export type ICreateCheckoutSessionInput = z.infer<typeof CreateCheckoutSessionSchema>;
 export type IPurchaseCreditsInput = z.infer<typeof PurchaseCreditsSchema>;
 export type ICancelSubscriptionInput = z.infer<typeof CancelSubscriptionSchema>;
 export type IUpdateSubscriptionInput = z.infer<typeof UpdateSubscriptionSchema>;
-
 
 export type IPaymentDetails = {
   amount: number;
@@ -116,8 +119,6 @@ export type IUserWithSubscription = {
   };
 };
 
-
-
 export type IPricingPlan = {
   id: string;
   name: string;
@@ -136,3 +137,8 @@ export type IPricingData = {
   plans: IPricingPlan[];
   features: IPricingFeature[];
 };
+
+export type ICreditSourceType = (typeof CREDIT_SOURCE_TYPES)[keyof typeof CREDIT_SOURCE_TYPES];
+export type ICreditBucketStatus = (typeof CREDIT_BUCKET_STATUS)[keyof typeof CREDIT_BUCKET_STATUS];
+
+
