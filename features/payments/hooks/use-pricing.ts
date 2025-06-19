@@ -6,6 +6,7 @@ import { useAction } from 'next-safe-action/hooks';
 import { createCheckoutSessionAction } from '@/features/payments/actions';
 import { routes } from '@/routes';
 import { toast } from '@/hooks/use-toast';
+import { USER_SUBSCRIPTION_QUERY_KEY, USER_SUBSCRIPTION_QUERY_URL } from '../constants';
 
 type IUserSubscriptionResponse = {
   subscription: {
@@ -33,7 +34,7 @@ const PLAN_ID_MAPPING: Record<string, string> = {
 };
 
 async function fetchUserSubscription(): Promise<IUserSubscriptionResponse> {
-  const response = await fetch('/api/user/subscription');
+  const response = await fetch(USER_SUBSCRIPTION_QUERY_URL);
 
   if (!response.ok) {
     throw new Error('Failed to fetch subscription');
@@ -50,7 +51,7 @@ export const usePricing = () => {
     isLoading: subscriptionLoading,
     error: subscriptionError,
   } = useQuery({
-    queryKey: ['user-subscription'],
+    queryKey: [USER_SUBSCRIPTION_QUERY_KEY],
     queryFn: fetchUserSubscription,
     retry: 3,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
