@@ -366,3 +366,10 @@ export const CREDIT_EXPIRATION_CONFIG = {
   PURCHASE_DAYS: 365,
   NEVER_EXPIRES: null,
 } as const;
+
+export const USER_SUBSCRIPTION_STATUS = {
+  ACTIVE: 'active',
+  EXHAUSTED: 'exhausted',
+  EXPIRED: 'expired',
+  CANCELLED: 'cancelled',
+} as const;

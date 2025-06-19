@@ -7,15 +7,15 @@ import { redirect } from "next/navigation";
 import { routes } from "@/routes";
 
 const ConfirmParamsSchema = z.object({
-  token_hash: z.string().min(1, 'Token hash is required'),
+  token_hash: z.string().min(1, "Token hash is required"),
   type: z.enum([
-    'signup',
-    'invite',
-    'magiclink',
-    'recovery',
-    'email_change',
-    'phone_change',
-    'email',
+    "signup",
+    "invite",
+    "magiclink",
+    "recovery",
+    "email_change",
+    "phone_change",
+    "email",
   ] as const),
 });
 
@@ -23,15 +23,17 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
 
   const rawParams = {
-    token_hash: searchParams.get('token_hash'),
-    type: searchParams.get('type'),
+    token_hash: searchParams.get("token_hash"),
+    type: searchParams.get("type"),
   };
-
 
   const validationResult = ConfirmParamsSchema.safeParse(rawParams);
 
   if (!validationResult.success) {
-    console.error('Invalid confirmation parameters:', validationResult.error.errors);
+    console.error(
+      "Invalid confirmation parameters:",
+      validationResult.error.errors,
+    );
     redirect(routes.auth.authCodeError);
   }
 
