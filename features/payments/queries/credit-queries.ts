@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { Tables, Database } from '@/database.types';
 import { ICreditTransactionType } from '@/types';
+import { CREDIT_BUCKET_STATUS } from '@/config/constants';
 
 type CreditSourceType = Database['public']['Enums']['credit_source_type_enum'];
 type CreditBucketStatus = Database['public']['Enums']['credit_bucket_status_enum'];
@@ -193,7 +194,7 @@ export async function getUserTotalCredits(userId: string) {
     .from('credit_buckets')
     .select('credits_remaining')
     .eq('user_id', userId)
-    .eq('status', 'active');
+    .eq('status', CREDIT_BUCKET_STATUS.ACTIVE);
 
   if (error) return { totalCredits: 0, error };
 
