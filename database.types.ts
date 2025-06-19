@@ -699,7 +699,7 @@ export type Database = {
           current_period_start: string | null
           id: string
           plan_id: string
-          status: string
+          status: Database["public"]["Enums"]["subscription_status"]
           stripe_customer_id: string | null
           stripe_subscription_id: string | null
           updated_at: string | null
@@ -712,7 +712,7 @@ export type Database = {
           current_period_start?: string | null
           id?: string
           plan_id: string
-          status?: string
+          status: Database["public"]["Enums"]["subscription_status"]
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
           updated_at?: string | null
@@ -725,7 +725,7 @@ export type Database = {
           current_period_start?: string | null
           id?: string
           plan_id?: string
-          status?: string
+          status?: Database["public"]["Enums"]["subscription_status"]
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
           updated_at?: string | null
@@ -847,6 +847,7 @@ export type Database = {
         | "referral_bonus"
         | "promotional"
         | "compensation"
+      subscription_status: "active" | "exhausted" | "expired" | "cancelled"
       transaction_type_enum:
         | "monthly_reset"
         | "purchase"
@@ -989,6 +990,7 @@ export const Constants = {
         "promotional",
         "compensation",
       ],
+      subscription_status: ["active", "exhausted", "expired", "cancelled"],
       transaction_type_enum: [
         "monthly_reset",
         "purchase",

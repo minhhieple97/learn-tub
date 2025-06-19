@@ -1,7 +1,11 @@
 import { createClient } from '@/lib/supabase/server';
 import { Tables, Database } from '@/database.types';
 import { ICreditTransactionType } from '@/types';
-import { CREDIT_BUCKET_STATUS, TRANSACTION_TYPES } from '@/config/constants';
+import {
+  CREDIT_BUCKET_STATUS,
+  TRANSACTION_TYPES,
+  USER_SUBSCRIPTION_STATUS,
+} from '@/config/constants';
 
 type CreditSourceType = Database['public']['Enums']['credit_source_type_enum'];
 type CreditBucketStatus = Database['public']['Enums']['credit_bucket_status_enum'];
@@ -149,7 +153,7 @@ export async function getUsersWithActiveSubscriptions() {
       )
     `,
     )
-    .eq('status', 'active')
+    .eq('status', USER_SUBSCRIPTION_STATUS.ACTIVE)
     .eq('cancel_at_period_end', false);
 
   return { data, error };

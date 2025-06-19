@@ -1,5 +1,10 @@
-import { Tables, Database } from '@/database.types';
-import { CREDIT_RESET_CONFIG, CREDIT_RESET_MESSAGES, TRANSACTION_TYPES } from '@/config/constants';
+import { Tables } from '@/database.types';
+import {
+  CREDIT_RESET_CONFIG,
+  CREDIT_RESET_MESSAGES,
+  CREDIT_SOURCE_TYPES,
+  TRANSACTION_TYPES,
+} from '@/config/constants';
 import {
   getAllUsersForCreditReset,
   getUsersWithActiveSubscriptions,
@@ -9,49 +14,16 @@ import {
 } from '../queries';
 import { ICreditResetResult, ICreditResetSummary, IUserWithSubscription } from '../types';
 
-type CreditSourceType = Database['public']['Enums']['credit_source_type_enum'];
 type ICreditBucket = Tables<'credit_buckets'> & {
   profiles: { id: string; email: string } | null;
 };
 
 export class CreditResetService {
-  private static shouldResetCredits(lastResetDate: string | null): boolean {
-    if (!lastResetDate) return true;
-
-    const lastReset = new Date(lastResetDate);
-    const now = new Date();
-    const daysSinceReset = Math.floor(
-      (now.getTime() - lastReset.getTime()) / (1000 * 60 * 60 * 24),
-    );
-
-    return daysSinceReset >= CREDIT_RESET_CONFIG.RESET_INTERVAL_DAYS;
-  }
-
   private static shouldResetBucket(bucket: ICreditBucket): boolean {
-    // Check if bucket has expired or needs monthly reset
     if (bucket.expires_at) {
       const expiryDate = new Date(bucket.expires_at);
       const now = new Date();
-      if (now >= expiryDate) {
-        return true;
-      }
-    }
-
-    // For subscription buckets, check if it's time for monthly reset
-    if (bucket.source_type === 'subscription') {
-      // Check metadata for last reset date or use created_at
-      const metadata = bucket.metadata as any;
-      const lastResetDate = metadata?.last_reset_date || bucket.created_at;
-      return this.shouldResetCredits(lastResetDate);
-    }
-
-    // For purchase buckets, they typically don't reset monthly unless specified
-    if (bucket.source_type === 'purchase') {
-      const metadata = bucket.metadata as any;
-      if (metadata?.monthly_reset === true) {
-        const lastResetDate = metadata?.last_reset_date || bucket.created_at;
-        return this.shouldResetCredits(lastResetDate);
-      }
+      return now >= expiryDate;
     }
 
     return false;
@@ -87,14 +59,15 @@ export class CreditResetService {
         description: string;
       }> = [];
 
-      // Group buckets by source type
-      const subscriptionBuckets = userBuckets.filter((b) => b.source_type === 'subscription');
-      const purchaseBuckets = userBuckets.filter((b) => b.source_type === 'purchase');
+      const subscriptionBuckets = userBuckets.filter(
+        (b) => b.source_type === CREDIT_SOURCE_TYPES.SUBSCRIPTION,
+      );
+      const purchaseBuckets = userBuckets.filter(
+        (b) => b.source_type === CREDIT_SOURCE_TYPES.PURCHASE,
+      );
 
-      // Process subscription buckets
       for (const bucket of subscriptionBuckets) {
         if (this.shouldResetBucket(bucket)) {
-          // Mark old bucket as expired
           const { error: resetError } = await resetCreditBuckets(userId, 'subscription');
           if (resetError) {
             throw new Error(`Failed to reset subscription buckets: ${resetError.message}`);
@@ -102,7 +75,6 @@ export class CreditResetService {
 
           result.subscriptionReset = true;
 
-          // Add transaction for removing old credits
           if (bucket.credits_remaining && bucket.credits_remaining > 0) {
             transactions.push({
               user_id: userId,
@@ -112,7 +84,6 @@ export class CreditResetService {
             });
           }
 
-          // Create new subscription bucket if user has active subscription
           const userSubscription = userSubscriptions.get(userId);
           if (userSubscription) {
             const creditsToAdd = userSubscription.subscription_plans.credits_per_month;
@@ -149,7 +120,6 @@ export class CreditResetService {
         }
       }
 
-      // Process purchase buckets that need monthly reset
       for (const bucket of purchaseBuckets) {
         if (this.shouldResetBucket(bucket)) {
           const { error: resetError } = await resetCreditBuckets(userId, 'purchase');
@@ -170,7 +140,6 @@ export class CreditResetService {
         }
       }
 
-      // Create transactions
       if (transactions.length > 0) {
         const { error: transactionError } = await bulkCreateCreditTransactions(transactions);
 

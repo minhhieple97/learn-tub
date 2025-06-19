@@ -1,4 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
+import { IUserSubscriptionStatus } from '../types';
+import { USER_SUBSCRIPTION_STATUS } from '@/config/constants';
 
 export async function getSubscriptionPlan(stripeProductId: string) {
   const supabase = await createClient();
@@ -65,7 +67,7 @@ export async function upsertUserSubscription(userId: string, planId: string, sub
       plan_id: planId,
       stripe_subscription_id: subscription.id,
       stripe_customer_id: subscription.customer,
-      status: subscription.status,
+      status: USER_SUBSCRIPTION_STATUS.ACTIVE,
       current_period_start: currentPeriodStart
         ? new Date(currentPeriodStart * 1000).toISOString()
         : null,
@@ -79,7 +81,7 @@ export async function upsertUserSubscription(userId: string, planId: string, sub
 
 export async function updateSubscriptionStatus(
   subscriptionId: string,
-  status: string,
+  status: IUserSubscriptionStatus,
   periodStart?: number,
   periodEnd?: number,
   cancelAtPeriodEnd?: boolean,

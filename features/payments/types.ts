@@ -1,5 +1,9 @@
 import { z } from 'zod';
-import type { CREDIT_SOURCE_TYPES, CREDIT_BUCKET_STATUS } from '@/config/constants';
+import type {
+  CREDIT_SOURCE_TYPES,
+  CREDIT_BUCKET_STATUS,
+  USER_SUBSCRIPTION_STATUS,
+} from '@/config/constants';
 import {
   CancelSubscriptionSchema,
   CreateCheckoutSessionSchema,
@@ -109,7 +113,7 @@ export type ICreditResetSummary = {
 export type IUserWithSubscription = {
   user_id: string;
   plan_id: string;
-  status: string;
+  status: IUserSubscriptionStatus;
   current_period_end: string | null;
   cancel_at_period_end: boolean | null;
   subscription_plans: {
@@ -140,5 +144,6 @@ export type IPricingData = {
 
 export type ICreditSourceType = (typeof CREDIT_SOURCE_TYPES)[keyof typeof CREDIT_SOURCE_TYPES];
 export type ICreditBucketStatus = (typeof CREDIT_BUCKET_STATUS)[keyof typeof CREDIT_BUCKET_STATUS];
-
+export type IUserSubscriptionStatus =
+  (typeof USER_SUBSCRIPTION_STATUS)[keyof typeof USER_SUBSCRIPTION_STATUS];
 

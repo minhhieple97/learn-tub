@@ -15,9 +15,9 @@ import {
   PAYMENT_CONFIG_MODES,
   PAYMENT_CONFIG_TYPES,
   TRANSACTION_TYPES,
-  CREDIT_RESET_CONFIG,
   CREDIT_SOURCE_TYPES,
   CREDIT_EXPIRATION_CONFIG,
+  USER_SUBSCRIPTION_STATUS,
 } from '@/config/constants';
 
 const stripe = require('stripe')(env.STRIPE_SECRET_KEY);
@@ -129,17 +129,14 @@ export class StripeWebhookService {
     const userId = session.metadata.user_id;
     const planId = session.metadata.plan_id;
 
-    // Get the subscription from Stripe
     const subscription = await stripe.subscriptions.retrieve(session.subscription);
 
-    // Update or create user subscription
     const { error: subscriptionError } = await upsertUserSubscription(userId, planId, subscription);
 
     if (subscriptionError) {
       throw new Error(`Failed to update subscription: ${subscriptionError.message}`);
     }
 
-    // Grant monthly credits
     await this.grantMonthlyCredits(userId, planId);
 
     console.log(`🎯 Subscription created/updated for user: ${userId}`);
@@ -153,10 +150,8 @@ export class StripeWebhookService {
       throw new Error('Invalid credits amount in session metadata');
     }
 
-    // Calculate expiration date for purchased credits
     const expiresAt = this.calculateExpirationDate(CREDIT_EXPIRATION_CONFIG.PURCHASE_DAYS);
 
-    // Create credit bucket for purchased credits
     const { error: bucketError } = await createCreditBucket(
       userId,
       creditsAmount,
@@ -176,7 +171,6 @@ export class StripeWebhookService {
       throw new Error(`Failed to create credit bucket: ${bucketError.message}`);
     }
 
-    // Create credit transaction record
     const { error: transactionError } = await createCreditTransaction(
       userId,
       creditsAmount,
@@ -187,14 +181,12 @@ export class StripeWebhookService {
 
     if (transactionError) {
       console.error('Failed to create credit transaction:', transactionError);
-      // Don't throw error as credit bucket was created successfully
     }
 
     console.log(`💰 ${creditsAmount} credits added to user: ${userId} (expires: ${expiresAt})`);
   }
 
   private static async handleInvoicePaymentSucceeded(invoice: any): Promise<void> {
-    // Skip if this is not a subscription invoice
     if (!invoice.subscription) {
       console.log('ℹ️ Non-subscription invoice payment succeeded, skipping credit grant');
       return;
@@ -203,7 +195,6 @@ export class StripeWebhookService {
     const subscription = await stripe.subscriptions.retrieve(invoice.subscription);
     const customerId = subscription.customer;
 
-    // Find user by customer ID
     const { data: userSubscription, error: userError } =
       await getUserByStripeCustomerId(customerId);
 
@@ -211,16 +202,13 @@ export class StripeWebhookService {
       throw new Error(`User not found for customer: ${customerId}`);
     }
 
-    // Only grant credits for recurring payments (not the initial payment)
     const isRecurringPayment = invoice.billing_reason === 'subscription_cycle';
 
     if (isRecurringPayment) {
-      // Grant monthly credits for recurring payment
       await this.grantMonthlyCredits(userSubscription.user_id, userSubscription.plan_id);
       console.log(`🔄 Monthly credits granted for user: ${userSubscription.user_id}`);
     }
 
-    // Create payment history for all successful payments
     const paymentDescription = isRecurringPayment
       ? 'Monthly subscription renewal'
       : `Subscription payment - ${invoice.billing_reason || 'subscription_create'}`;
@@ -238,7 +226,6 @@ export class StripeWebhookService {
   }
 
   private static async handleInvoicePaymentFailed(invoice: any): Promise<void> {
-    // Skip if this is not a subscription invoice
     if (!invoice.subscription) {
       console.log('ℹ️ Non-subscription invoice payment failed, skipping');
       return;
@@ -247,7 +234,6 @@ export class StripeWebhookService {
     const subscription = await stripe.subscriptions.retrieve(invoice.subscription);
     const customerId = subscription.customer;
 
-    // Find user by customer ID
     const { data: userSubscription, error: userError } =
       await getUserByStripeCustomerId(customerId);
 
@@ -256,7 +242,6 @@ export class StripeWebhookService {
       return;
     }
 
-    // Create payment history record for failed payment
     await createPaymentHistory(
       userSubscription.user_id,
       invoice.amount_due,
@@ -281,16 +266,12 @@ export class StripeWebhookService {
 
     const customerId = subscription.customer;
 
-    // Step 1: Get plan ID from subscription items (with multiple fallback options)
     let planId: string | null = null;
     let priceId: string | null = null;
 
-    // Try to get price ID from subscription items first
     if (subscription.items?.data?.[0]?.price?.id) {
       priceId = subscription.items.data[0].price.id;
-    }
-    // Fallback to the deprecated plan field for older Stripe integrations
-    else if (subscription.plan?.id) {
+    } else if (subscription.plan?.id) {
       priceId = subscription.plan.id;
     }
 
@@ -304,18 +285,15 @@ export class StripeWebhookService {
       throw new Error(`Plan not found for price ID: ${priceId || 'unknown'}`);
     }
 
-    // Step 2: Find user ID using multiple strategies
     let userId: string | null = null;
     const userLookupStrategies = [];
 
-    // Strategy 1: Check subscription metadata (rarely populated for webhook events)
     if (subscription.metadata?.user_id) {
       userId = subscription.metadata.user_id;
       userLookupStrategies.push('subscription_metadata');
       console.log('🔍 Found user ID from subscription metadata:', userId);
     }
 
-    // Strategy 2: Get customer from Stripe and check its metadata
     if (!userId) {
       try {
         const customer = await stripe.customers.retrieve(customerId);
@@ -331,7 +309,6 @@ export class StripeWebhookService {
       }
     }
 
-    // Strategy 3: Look up existing subscription records for this customer
     if (!userId) {
       const { data: existingSubscription } = await getUserByStripeCustomerId(customerId);
       if (existingSubscription) {
@@ -341,21 +318,19 @@ export class StripeWebhookService {
       }
     }
 
-    // Strategy 4: Check recent checkout sessions for this customer
     if (!userId) {
       try {
         const sessions = await stripe.checkout.sessions.list({
           customer: customerId,
-          limit: 20, // Increased limit for better coverage
-          expand: ['data.subscription'], // Include subscription data if available
+          limit: 20,
+          expand: ['data.subscription'],
         });
 
         console.log(`🔍 Found ${sessions.data.length} checkout sessions for customer`);
 
-        // Look for the most recent session with user metadata
         const sessionWithMetadata = sessions.data
           .filter((s: any) => s.metadata?.user_id)
-          .sort((a: any, b: any) => b.created - a.created)[0]; // Sort by creation time, newest first
+          .sort((a: any, b: any) => b.created - a.created)[0];
 
         if (sessionWithMetadata) {
           userId = sessionWithMetadata.metadata.user_id;
@@ -368,7 +343,6 @@ export class StripeWebhookService {
       }
     }
 
-    // Strategy 5: Check if this subscription is linked to an invoice with customer info
     if (!userId && subscription.latest_invoice) {
       try {
         const invoice = await stripe.invoices.retrieve(subscription.latest_invoice);
@@ -391,7 +365,6 @@ export class StripeWebhookService {
       throw new Error(errorMessage);
     }
 
-    // Step 3: Create or update subscription record
     console.log(`🔄 Creating/updating subscription for user ${userId}, plan ${planId}`);
     const { error: subscriptionError } = await upsertUserSubscription(userId, planId, subscription);
 
@@ -399,14 +372,11 @@ export class StripeWebhookService {
       throw new Error(`Failed to create subscription: ${subscriptionError.message}`);
     }
 
-    // Step 4: Grant initial monthly credits
     try {
       await this.grantMonthlyCredits(userId, planId);
       console.log(`💰 Monthly credits granted for user: ${userId}`);
     } catch (error) {
       console.error('❌ Failed to grant monthly credits:', error);
-      // Don't throw error here as the subscription was created successfully
-      // Credits can be granted manually or via retry mechanism
     }
 
     console.log(
@@ -415,7 +385,6 @@ export class StripeWebhookService {
   }
 
   private static async handleSubscriptionUpdated(subscription: any): Promise<void> {
-    // Update subscription status in database
     const { error } = await updateSubscriptionStatus(
       subscription.id,
       subscription.status,
@@ -432,8 +401,10 @@ export class StripeWebhookService {
   }
 
   private static async handleSubscriptionDeleted(subscription: any): Promise<void> {
-    // Update subscription status to canceled
-    const { error } = await updateSubscriptionStatus(subscription.id, 'canceled');
+    const { error } = await updateSubscriptionStatus(
+      subscription.id,
+      USER_SUBSCRIPTION_STATUS.CANCELLED,
+    );
 
     if (error) {
       throw new Error(`Failed to cancel subscription: ${error.message}`);
@@ -443,17 +414,14 @@ export class StripeWebhookService {
   }
 
   private static async grantMonthlyCredits(userId: string, planId: string): Promise<void> {
-    // Get plan details
     const { data: plan } = await getSubscriptionPlan(planId);
 
     if (!plan) {
       throw new Error(`Plan not found: ${planId}`);
     }
 
-    // Calculate expiration date for subscription credits (monthly reset)
     const expiresAt = this.calculateExpirationDate(CREDIT_EXPIRATION_CONFIG.SUBSCRIPTION_DAYS);
 
-    // Create credit bucket for subscription credits
     const { error: bucketError } = await createCreditBucket(
       userId,
       plan.credits_per_month,
@@ -472,7 +440,6 @@ export class StripeWebhookService {
       throw new Error(`Failed to create subscription credit bucket: ${bucketError.message}`);
     }
 
-    // Create credit transaction
     const { error: transactionError } = await createCreditTransaction(
       userId,
       plan.credits_per_month,
@@ -482,7 +449,6 @@ export class StripeWebhookService {
 
     if (transactionError) {
       console.error('Failed to create credit transaction:', transactionError);
-      // Don't throw error as credit bucket was created successfully
     }
 
     console.log(
