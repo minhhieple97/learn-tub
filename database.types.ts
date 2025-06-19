@@ -202,6 +202,7 @@ export type Database = {
           status: Database["public"]["Enums"]["credit_bucket_status_enum"]
           updated_at: string | null
           user_id: string
+          user_subscription_id: string | null
         }
         Insert: {
           created_at?: string | null
@@ -216,6 +217,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["credit_bucket_status_enum"]
           updated_at?: string | null
           user_id: string
+          user_subscription_id?: string | null
         }
         Update: {
           created_at?: string | null
@@ -230,6 +232,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["credit_bucket_status_enum"]
           updated_at?: string | null
           user_id?: string
+          user_subscription_id?: string | null
         }
         Relationships: [
           {
@@ -237,6 +240,13 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_user_subscription"
+            columns: ["user_subscription_id"]
+            isOneToOne: false
+            referencedRelation: "user_subscriptions"
             referencedColumns: ["id"]
           },
         ]
@@ -732,7 +742,7 @@ export type Database = {
           {
             foreignKeyName: "user_subscriptions_user_id_fkey"
             columns: ["user_id"]
-            isOneToOne: true
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
