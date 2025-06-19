@@ -13,15 +13,22 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { usePricing, pricingData } from '../hooks/use-pricing';
+import { usePricing } from '../hooks/use-pricing';
 import { IPricingPlan } from '../types';
+import { pricingData } from '@/config/constants';
 
 type IPricingSectionProps = {
   compact?: boolean;
 };
 
 export const PricingSection = ({ compact = false }: IPricingSectionProps) => {
-  const { processingPlan, handleSubscribe } = usePricing();
+  const {
+    handleSubscribe,
+    getButtonText,
+    isButtonDisabled,
+    processingPlan,
+    isLoading: subscriptionLoading,
+  } = usePricing();
 
   const renderHeader = () => {
     if (compact) return null;
@@ -75,16 +82,22 @@ export const PricingSection = ({ compact = false }: IPricingSectionProps) => {
   const renderPlanButton = (plan: IPricingPlan, index: number) => {
     if (index === 0) return null;
 
+    const defaultButtonText = index === 1 ? 'Go Pro' : 'Go Premium';
+    const buttonText = getButtonText(plan.id, defaultButtonText);
+    const disabled = isButtonDisabled(plan.id);
     const isProcessing = processingPlan === plan.id;
-    const buttonText = index === 1 ? 'Go Pro' : 'Go Premium';
 
     return (
       <Button
         className={`w-full ${compact ? 'text-xs' : 'text-sm'} bg-gradient-to-r ${plan.gradient} text-white shadow-md hover:shadow-lg transition-all`}
         variant="default"
         size={compact ? 'sm' : 'default'}
-        onClick={() => handleSubscribe(plan.productId, plan.id)}
-        disabled={isProcessing}
+        onClick={() => {
+          if (plan.productId && plan.id) {
+            handleSubscribe(plan.productId, plan.id);
+          }
+        }}
+        disabled={disabled}
       >
         {isProcessing ? (
           <div className="flex items-center">
@@ -142,6 +155,13 @@ export const PricingSection = ({ compact = false }: IPricingSectionProps) => {
     <section className={`${compact ? 'py-0' : 'py-24'}`}>
       <div className={`${compact ? 'px-6' : 'container mx-auto px-4'}`}>
         {renderHeader()}
+
+        {subscriptionLoading && (
+          <div className="flex justify-center items-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <span className="ml-3 text-muted-foreground">Loading subscription data...</span>
+          </div>
+        )}
 
         <div className={`${compact ? 'max-w-full' : 'mx-auto max-w-5xl'}`}>
           <Card className="border-border bg-card shadow-sm">

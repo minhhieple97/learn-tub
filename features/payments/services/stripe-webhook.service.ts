@@ -9,7 +9,8 @@ import {
   updateSubscriptionStatus,
   getPlanByStripePrice,
   createPaymentHistory,
-  getSubscriptionPlan,
+  getSubscriptionPlanById,
+  checkUserHasActivePlan,
 } from '../queries/subscription-queries';
 import {
   PAYMENT_CONFIG_MODES,
@@ -128,6 +129,21 @@ export class StripeWebhookService {
   private static async handleSubscriptionCheckout(session: any): Promise<void> {
     const userId = session.metadata.user_id;
     const planId = session.metadata.plan_id;
+
+    // Check if user already has an active subscription to this plan
+    const { hasActivePlan, error: checkError } = await checkUserHasActivePlan(userId, planId);
+
+    if (checkError) {
+      console.error(`❌ Error checking active plan for user ${userId}:`, checkError);
+      throw new Error(`Failed to check existing subscription: ${checkError.message}`);
+    }
+
+    if (hasActivePlan) {
+      console.log(
+        `⚠️ User ${userId} already has an active subscription to plan ${planId}. Skipping subscription creation.`,
+      );
+      return;
+    }
 
     const subscription = await stripe.subscriptions.retrieve(session.subscription);
 
@@ -261,7 +277,7 @@ export class StripeWebhookService {
       id: subscription.id,
       customer: subscription.customer,
       status: subscription.status,
-      items: subscription.items?.data?.length || 0,
+      items: subscription.items,
     });
 
     const customerId = subscription.customer;
@@ -365,6 +381,21 @@ export class StripeWebhookService {
       throw new Error(errorMessage);
     }
 
+    // Check if user already has an active subscription to this plan
+    const { hasActivePlan, error: checkError } = await checkUserHasActivePlan(userId, planId);
+
+    if (checkError) {
+      console.error(`❌ Error checking active plan for user ${userId}:`, checkError);
+      throw new Error(`Failed to check existing subscription: ${checkError.message}`);
+    }
+
+    if (hasActivePlan) {
+      console.log(
+        `⚠️ User ${userId} already has an active subscription to plan ${planId}. Skipping subscription creation.`,
+      );
+      return;
+    }
+
     console.log(`🔄 Creating/updating subscription for user ${userId}, plan ${planId}`);
     const { error: subscriptionError } = await upsertUserSubscription(userId, planId, subscription);
 
@@ -414,7 +445,7 @@ export class StripeWebhookService {
   }
 
   private static async grantMonthlyCredits(userId: string, planId: string): Promise<void> {
-    const { data: plan } = await getSubscriptionPlan(planId);
+    const { data: plan } = await getSubscriptionPlanById(planId);
 
     if (!plan) {
       throw new Error(`Plan not found: ${planId}`);

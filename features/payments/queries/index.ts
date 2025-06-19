@@ -1,2 +1,2 @@
-export * from './subscription-queries';
 export * from './credit-queries';
+export * from './subscription-queries';

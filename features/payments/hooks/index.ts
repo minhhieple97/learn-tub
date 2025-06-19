@@ -1,2 +1,2 @@
-export * from './use-payment-detail';
-export * from './use-pricing';
+export { usePricing } from './use-pricing';
+export { usePaymentDetails } from './use-payment-detail';
