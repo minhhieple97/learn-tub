@@ -138,7 +138,6 @@ export const RESPONSE_HEADERS = {
   CONNECTION: 'keep-alive',
 } as const;
 
-
 export const ERROR_MESSAGES = {
   MISSING_REQUIRED_PARAMETERS: 'Missing required parameters',
   UNAUTHORIZED: 'Unauthorized',
@@ -343,5 +342,22 @@ export const CREDIT_RESET_MESSAGES = {
   ERROR: 'Credit reset failed',
 } as const;
 
-// Export all transaction type values as a union type helper
-export const TRANSACTION_TYPE_VALUES = Object.values(TRANSACTION_TYPES);
+export const CREDIT_SOURCE_TYPES = {
+  SUBSCRIPTION: 'subscription',
+  PURCHASE: 'purchase',
+  BONUS: 'bonus',
+  GIFT: 'gift',
+  REFUND: 'refund',
+  ADMIN_ADJUSTMENT: 'admin_adjustment',
+  REFERRAL_BONUS: 'referral_bonus',
+  PROMOTIONAL: 'promotional',
+  COMPENSATION: 'compensation',
+} as const;
+
+export const CREDIT_BUCKET_STATUS = {
+  ACTIVE: 'active',
+  EXHAUSTED: 'exhausted',
+  EXPIRED: 'expired',
+  CANCELLED: 'cancelled',
+} as const;
+

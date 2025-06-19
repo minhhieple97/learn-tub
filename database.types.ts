@@ -188,6 +188,59 @@ export type Database = {
           },
         ]
       }
+      credit_buckets: {
+        Row: {
+          created_at: string | null
+          credits_remaining: number | null
+          credits_total: number
+          credits_used: number
+          description: string | null
+          expires_at: string | null
+          id: string
+          metadata: Json | null
+          source_type: Database["public"]["Enums"]["credit_source_type_enum"]
+          status: Database["public"]["Enums"]["credit_bucket_status_enum"]
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          credits_remaining?: number | null
+          credits_total: number
+          credits_used?: number
+          description?: string | null
+          expires_at?: string | null
+          id?: string
+          metadata?: Json | null
+          source_type: Database["public"]["Enums"]["credit_source_type_enum"]
+          status?: Database["public"]["Enums"]["credit_bucket_status_enum"]
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          credits_remaining?: number | null
+          credits_total?: number
+          credits_used?: number
+          description?: string | null
+          expires_at?: string | null
+          id?: string
+          metadata?: Json | null
+          source_type?: Database["public"]["Enums"]["credit_source_type_enum"]
+          status?: Database["public"]["Enums"]["credit_bucket_status_enum"]
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "credit_buckets_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       credit_transactions: {
         Row: {
           amount: number
@@ -628,50 +681,6 @@ export type Database = {
         }
         Relationships: []
       }
-      user_credits: {
-        Row: {
-          created_at: string | null
-          credits_purchase: number | null
-          credits_subscription: number
-          credits_used_this_month: number
-          id: string
-          last_reset_purchase_date: string | null
-          last_reset_subscription_date: string | null
-          updated_at: string | null
-          user_id: string
-        }
-        Insert: {
-          created_at?: string | null
-          credits_purchase?: number | null
-          credits_subscription?: number
-          credits_used_this_month?: number
-          id?: string
-          last_reset_purchase_date?: string | null
-          last_reset_subscription_date?: string | null
-          updated_at?: string | null
-          user_id: string
-        }
-        Update: {
-          created_at?: string | null
-          credits_purchase?: number | null
-          credits_subscription?: number
-          credits_used_this_month?: number
-          id?: string
-          last_reset_purchase_date?: string | null
-          last_reset_subscription_date?: string | null
-          updated_at?: string | null
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "user_credits_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       user_subscriptions: {
         Row: {
           cancel_at_period_end: boolean | null
@@ -813,6 +822,21 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      credit_bucket_status_enum:
+        | "active"
+        | "exhausted"
+        | "expired"
+        | "cancelled"
+      credit_source_type_enum:
+        | "subscription"
+        | "purchase"
+        | "bonus"
+        | "gift"
+        | "refund"
+        | "admin_adjustment"
+        | "referral_bonus"
+        | "promotional"
+        | "compensation"
       transaction_type_enum:
         | "monthly_reset"
         | "purchase"
@@ -938,6 +962,23 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      credit_bucket_status_enum: [
+        "active",
+        "exhausted",
+        "expired",
+        "cancelled",
+      ],
+      credit_source_type_enum: [
+        "subscription",
+        "purchase",
+        "bonus",
+        "gift",
+        "refund",
+        "admin_adjustment",
+        "referral_bonus",
+        "promotional",
+        "compensation",
+      ],
       transaction_type_enum: [
         "monthly_reset",
         "purchase",

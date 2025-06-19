@@ -1,28 +1,59 @@
 import { createClient } from '@/lib/supabase/server';
-import { Tables } from '@/database.types';
+import { Tables, Database } from '@/database.types';
 import { ICreditTransactionType } from '@/types';
 
-export async function getUserCredits(userId: string) {
+type CreditSourceType = Database['public']['Enums']['credit_source_type_enum'];
+type CreditBucketStatus = Database['public']['Enums']['credit_bucket_status_enum'];
+
+export async function getUserCreditBuckets(userId: string) {
   const supabase = await createClient();
 
   const { data, error } = await supabase
-    .from('user_credits')
+    .from('credit_buckets')
     .select('*')
     .eq('user_id', userId)
-    .single();
+    .eq('status', 'active')
+    .order('created_at', { ascending: true });
 
   return { data, error };
 }
 
-export async function createUserCredits(userId: string, initialCredits = 0) {
+export async function getUserCreditBucketsByType(userId: string, sourceType: CreditSourceType) {
   const supabase = await createClient();
 
   const { data, error } = await supabase
-    .from('user_credits')
+    .from('credit_buckets')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('source_type', sourceType)
+    .eq('status', 'active')
+    .order('created_at', { ascending: true });
+
+  return { data, error };
+}
+
+export async function createCreditBucket(
+  userId: string,
+  creditsTotal: number,
+  sourceType: CreditSourceType,
+  description?: string,
+  expiresAt?: string,
+  metadata?: Record<string, any>,
+) {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from('credit_buckets')
     .insert({
       user_id: userId,
-      credits_available: initialCredits,
-      credits_used_this_month: 0,
+      credits_total: creditsTotal,
+      credits_used: 0,
+      credits_remaining: creditsTotal,
+      source_type: sourceType,
+      status: 'active' as CreditBucketStatus,
+      description,
+      expires_at: expiresAt,
+      metadata: metadata ? JSON.parse(JSON.stringify(metadata)) : null,
     })
     .select()
     .single();
@@ -30,76 +61,35 @@ export async function createUserCredits(userId: string, initialCredits = 0) {
   return { data, error };
 }
 
-export async function updateUserCredits(
-  userId: string,
+export async function updateCreditBucket(
+  bucketId: string,
   updates: Partial<
-    Pick<
-      Tables<'user_credits'>,
-      | 'credits_purchase'
-      | 'credits_subscription'
-      | 'credits_used_this_month'
-      | 'last_reset_purchase_date'
-      | 'last_reset_subscription_date'
-    >
+    Pick<Tables<'credit_buckets'>, 'credits_used' | 'credits_remaining' | 'status' | 'updated_at'>
   >,
 ) {
   const supabase = await createClient();
 
   const { data, error } = await supabase
-    .from('user_credits')
+    .from('credit_buckets')
     .update({
       ...updates,
       updated_at: new Date().toISOString(),
     })
-    .eq('user_id', userId)
+    .eq('id', bucketId)
     .select()
     .single();
 
   return { data, error };
 }
 
-export async function upsertUserCredits(userId: string, credits: number) {
-  // First try to get existing record
-  const { data: existingCredits } = await getUserCredits(userId);
-
-  if (existingCredits) {
-    return updateUserCredits(userId, {
-      credits_purchase: (existingCredits?.credits_purchase ?? 0) + credits,
-      credits_subscription: existingCredits.credits_subscription + credits,
-    });
-  } else {
-    return createUserCredits(userId, credits);
-  }
-}
-
-export async function addCreditsToUser(userId: string, creditsAmount: number) {
-  const supabase = await createClient();
-  const { data: userCredits } = await supabase
-    .from('user_credits')
-    .select('*')
-    .eq('user_id', userId)
-    .single();
-
-  if (userCredits) {
-    // Update existing credits
-    const { error } = await supabase
-      .from('user_credits')
-      .update({
-        credits_purchase: (userCredits?.credits_purchase ?? 0) + creditsAmount,
-      })
-      .eq('user_id', userId);
-
-    return { error };
-  } else {
-    // Create new credits record
-    const { error } = await supabase.from('user_credits').insert({
-      user_id: userId,
-      credits_available: creditsAmount,
-      credits_used_this_month: 0,
-    });
-
-    return { error };
-  }
+export async function addCreditsToUser(
+  userId: string,
+  creditsAmount: number,
+  sourceType: CreditSourceType = 'purchase',
+  description?: string,
+  expiresAt?: string,
+) {
+  return createCreditBucket(userId, creditsAmount, sourceType, description, expiresAt);
 }
 
 export async function createCreditTransaction(
@@ -124,10 +114,17 @@ export async function createCreditTransaction(
 export async function getAllUsersForCreditReset() {
   const supabase = await createClient();
 
-  const { data, error } = await supabase.from('user_credits').select(`
+  // Get all users who have credit buckets that need resetting
+  const { data, error } = await supabase
+    .from('credit_buckets')
+    .select(
+      `
       *,
-      profiles!user_credits_user_id_fkey(id, email)
-    `);
+      profiles!credit_buckets_user_id_fkey(id, email)
+    `,
+    )
+    .eq('status', 'active')
+    .in('source_type', ['subscription', 'purchase']);
 
   return { data, error };
 }
@@ -157,29 +154,21 @@ export async function getUsersWithActiveSubscriptions() {
   return { data, error };
 }
 
-export async function resetUserCredits(
-  userId: string,
-  updates: {
-    credits_subscription?: number;
-    credits_purchase?: number;
-    credits_used_this_month?: number;
-    last_reset_subscription_date?: string;
-    last_reset_purchase_date?: string;
-  },
-) {
+export async function resetCreditBuckets(userId: string, sourceType: CreditSourceType) {
   const supabase = await createClient();
 
-  const { data, error } = await supabase
-    .from('user_credits')
+  // Mark existing buckets of this type as expired
+  const { error } = await supabase
+    .from('credit_buckets')
     .update({
-      ...updates,
+      status: 'expired' as CreditBucketStatus,
       updated_at: new Date().toISOString(),
     })
     .eq('user_id', userId)
-    .select()
-    .single();
+    .eq('source_type', sourceType)
+    .eq('status', 'active');
 
-  return { data, error };
+  return { error };
 }
 
 export async function bulkCreateCreditTransactions(
@@ -196,3 +185,27 @@ export async function bulkCreateCreditTransactions(
 
   return { data, error };
 }
+
+export async function getUserTotalCredits(userId: string) {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from('credit_buckets')
+    .select('credits_remaining')
+    .eq('user_id', userId)
+    .eq('status', 'active');
+
+  if (error) return { totalCredits: 0, error };
+
+  const totalCredits = data?.reduce((sum, bucket) => sum + (bucket.credits_remaining || 0), 0) || 0;
+
+  return { totalCredits, error: null };
+}
+
+// Legacy function names for backward compatibility
+export const getUserCredits = getUserCreditBuckets;
+export const createUserCredits = (userId: string, initialCredits = 0) =>
+  createCreditBucket(userId, initialCredits, 'bonus', 'Initial credits');
+export const updateUserCredits = updateCreditBucket;
+export const upsertUserCredits = addCreditsToUser;
+export const resetUserCredits = resetCreditBuckets;

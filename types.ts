@@ -4,6 +4,7 @@ import {
   CREDIT_ACTION_COUNTS,
   TRANSACTION_TYPES,
 } from '@/config/constants';
+import { Database } from '@/database.types';
 
 export type StreamChunk = {
   type: typeof CHUNK_TYPES.FEEDBACK | typeof CHUNK_TYPES.COMPLETE | typeof CHUNK_TYPES.ERROR;
@@ -82,4 +83,4 @@ export type ISearchHookReturn<T = unknown> = {
 
 export type ICreditActionCount = typeof CREDIT_ACTION_COUNTS;
 
-export type ICreditTransactionType = (typeof TRANSACTION_TYPES)[keyof typeof TRANSACTION_TYPES];
+export type ICreditTransactionType = Database['public']['Enums']['transaction_type_enum'];

@@ -2,7 +2,7 @@ import { env } from "@/env.mjs";
 import { CronCreditResetService } from "@/features/payments/services";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(request: NextRequest) {
+export async function GET(request: NextRequest) {
   const authHeader = request.headers.get("authorization");
 
   if (!CronCreditResetService.validateCronSecret(authHeader, env.CRON_SECRET)) {

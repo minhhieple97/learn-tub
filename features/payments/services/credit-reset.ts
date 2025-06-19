@@ -1,14 +1,16 @@
-import { Tables } from '@/database.types';
+import { Tables, Database } from '@/database.types';
 import { CREDIT_RESET_CONFIG, CREDIT_RESET_MESSAGES, TRANSACTION_TYPES } from '@/config/constants';
 import {
   getAllUsersForCreditReset,
   getUsersWithActiveSubscriptions,
-  resetUserCredits,
+  resetCreditBuckets,
   bulkCreateCreditTransactions,
+  createCreditBucket,
 } from '../queries';
 import { ICreditResetResult, ICreditResetSummary, IUserWithSubscription } from '../types';
 
-type IUserCredits = Tables<'user_credits'> & {
+type CreditSourceType = Database['public']['Enums']['credit_source_type_enum'];
+type ICreditBucket = Tables<'credit_buckets'> & {
   profiles: { id: string; email: string } | null;
 };
 
@@ -25,20 +27,59 @@ export class CreditResetService {
     return daysSinceReset >= CREDIT_RESET_CONFIG.RESET_INTERVAL_DAYS;
   }
 
+  private static shouldResetBucket(bucket: ICreditBucket): boolean {
+    // Check if bucket has expired or needs monthly reset
+    if (bucket.expires_at) {
+      const expiryDate = new Date(bucket.expires_at);
+      const now = new Date();
+      if (now >= expiryDate) {
+        return true;
+      }
+    }
+
+    // For subscription buckets, check if it's time for monthly reset
+    if (bucket.source_type === 'subscription') {
+      // Check metadata for last reset date or use created_at
+      const metadata = bucket.metadata as any;
+      const lastResetDate = metadata?.last_reset_date || bucket.created_at;
+      return this.shouldResetCredits(lastResetDate);
+    }
+
+    // For purchase buckets, they typically don't reset monthly unless specified
+    if (bucket.source_type === 'purchase') {
+      const metadata = bucket.metadata as any;
+      if (metadata?.monthly_reset === true) {
+        const lastResetDate = metadata?.last_reset_date || bucket.created_at;
+        return this.shouldResetCredits(lastResetDate);
+      }
+    }
+
+    return false;
+  }
+
   private static async processUserCreditReset(
-    userCredits: IUserCredits,
+    userBuckets: ICreditBucket[],
     userSubscriptions: Map<string, IUserWithSubscription>,
   ): Promise<ICreditResetResult> {
+    if (userBuckets.length === 0) {
+      return {
+        userId: '',
+        subscriptionReset: false,
+        purchaseReset: false,
+        creditsGranted: 0,
+        error: 'No buckets to process',
+      };
+    }
+
+    const userId = userBuckets[0].user_id;
     const result: ICreditResetResult = {
-      userId: userCredits.user_id,
+      userId,
       subscriptionReset: false,
       purchaseReset: false,
       creditsGranted: 0,
     };
 
     try {
-      const now = new Date().toISOString();
-      const updates: Parameters<typeof resetUserCredits>[1] = {};
       const transactions: Array<{
         user_id: string;
         amount: number;
@@ -46,71 +87,95 @@ export class CreditResetService {
         description: string;
       }> = [];
 
-      const shouldResetSubscription = this.shouldResetCredits(
-        userCredits.last_reset_subscription_date,
-      );
+      // Group buckets by source type
+      const subscriptionBuckets = userBuckets.filter((b) => b.source_type === 'subscription');
+      const purchaseBuckets = userBuckets.filter((b) => b.source_type === 'purchase');
 
-      if (shouldResetSubscription) {
-        updates.credits_subscription = 0;
-        updates.credits_used_this_month = 0;
-        updates.last_reset_subscription_date = now;
-        result.subscriptionReset = true;
+      // Process subscription buckets
+      for (const bucket of subscriptionBuckets) {
+        if (this.shouldResetBucket(bucket)) {
+          // Mark old bucket as expired
+          const { error: resetError } = await resetCreditBuckets(userId, 'subscription');
+          if (resetError) {
+            throw new Error(`Failed to reset subscription buckets: ${resetError.message}`);
+          }
 
-        if (userCredits.credits_subscription > 0) {
-          transactions.push({
-            user_id: userCredits.user_id,
-            amount: -userCredits.credits_subscription,
-            type: TRANSACTION_TYPES.MONTHLY_RESET,
-            description: CREDIT_RESET_MESSAGES.SUBSCRIPTION_RESET,
-          });
-        }
+          result.subscriptionReset = true;
 
-        const userSubscription = userSubscriptions.get(userCredits.user_id);
-        if (userSubscription) {
-          const creditsToAdd = userSubscription.subscription_plans.credits_per_month;
-          updates.credits_subscription = creditsToAdd;
-          result.creditsGranted += creditsToAdd;
+          // Add transaction for removing old credits
+          if (bucket.credits_remaining && bucket.credits_remaining > 0) {
+            transactions.push({
+              user_id: userId,
+              amount: -bucket.credits_remaining,
+              type: TRANSACTION_TYPES.MONTHLY_RESET,
+              description: CREDIT_RESET_MESSAGES.SUBSCRIPTION_RESET,
+            });
+          }
 
-          transactions.push({
-            user_id: userCredits.user_id,
-            amount: creditsToAdd,
-            type: TRANSACTION_TYPES.SUBSCRIPTION_GRANT,
-            description: `${CREDIT_RESET_MESSAGES.SUBSCRIPTION_GRANT} - ${userSubscription.subscription_plans.name}`,
-          });
+          // Create new subscription bucket if user has active subscription
+          const userSubscription = userSubscriptions.get(userId);
+          if (userSubscription) {
+            const creditsToAdd = userSubscription.subscription_plans.credits_per_month;
+            const nextResetDate = new Date();
+            nextResetDate.setDate(
+              nextResetDate.getDate() + CREDIT_RESET_CONFIG.RESET_INTERVAL_DAYS,
+            );
+
+            const { error: createError } = await createCreditBucket(
+              userId,
+              creditsToAdd,
+              'subscription',
+              `${CREDIT_RESET_MESSAGES.SUBSCRIPTION_GRANT} - ${userSubscription.subscription_plans.name}`,
+              nextResetDate.toISOString(),
+              {
+                subscription_plan_id: userSubscription.plan_id,
+                last_reset_date: new Date().toISOString(),
+              },
+            );
+
+            if (createError) {
+              throw new Error(`Failed to create new subscription bucket: ${createError.message}`);
+            }
+
+            result.creditsGranted += creditsToAdd;
+
+            transactions.push({
+              user_id: userId,
+              amount: creditsToAdd,
+              type: TRANSACTION_TYPES.SUBSCRIPTION_GRANT,
+              description: `${CREDIT_RESET_MESSAGES.SUBSCRIPTION_GRANT} - ${userSubscription.subscription_plans.name}`,
+            });
+          }
         }
       }
 
-      const shouldResetPurchase = this.shouldResetCredits(userCredits.last_reset_purchase_date);
+      // Process purchase buckets that need monthly reset
+      for (const bucket of purchaseBuckets) {
+        if (this.shouldResetBucket(bucket)) {
+          const { error: resetError } = await resetCreditBuckets(userId, 'purchase');
+          if (resetError) {
+            throw new Error(`Failed to reset purchase buckets: ${resetError.message}`);
+          }
 
-      if (shouldResetPurchase && userCredits.credits_purchase) {
-        updates.credits_purchase = 0;
-        updates.last_reset_purchase_date = now;
-        result.purchaseReset = true;
+          result.purchaseReset = true;
 
-        transactions.push({
-          user_id: userCredits.user_id,
-          amount: -userCredits.credits_purchase,
-          type: TRANSACTION_TYPES.MONTHLY_RESET,
-          description: CREDIT_RESET_MESSAGES.PURCHASE_RESET,
-        });
-      }
-
-      if (Object.keys(updates).length > 0) {
-        const { error: updateError } = await resetUserCredits(userCredits.user_id, updates);
-
-        if (updateError) {
-          throw new Error(`Failed to update credits: ${updateError.message}`);
+          if (bucket.credits_remaining && bucket.credits_remaining > 0) {
+            transactions.push({
+              user_id: userId,
+              amount: -bucket.credits_remaining,
+              type: TRANSACTION_TYPES.MONTHLY_RESET,
+              description: CREDIT_RESET_MESSAGES.PURCHASE_RESET,
+            });
+          }
         }
       }
 
+      // Create transactions
       if (transactions.length > 0) {
         const { error: transactionError } = await bulkCreateCreditTransactions(transactions);
 
         if (transactionError) {
-          console.error(
-            `Failed to create transactions for user ${userCredits.user_id}:`,
-            transactionError,
-          );
+          console.error(`Failed to create transactions for user ${userId}:`, transactionError);
         }
       }
     } catch (error) {
@@ -131,13 +196,13 @@ export class CreditResetService {
     };
 
     try {
-      const { data: allUsers, error: usersError } = await getAllUsersForCreditReset();
+      const { data: allBuckets, error: bucketsError } = await getAllUsersForCreditReset();
 
-      if (usersError) {
-        throw new Error(`Failed to fetch users: ${usersError.message}`);
+      if (bucketsError) {
+        throw new Error(`Failed to fetch credit buckets: ${bucketsError.message}`);
       }
 
-      if (!allUsers || allUsers.length === 0) {
+      if (!allBuckets || allBuckets.length === 0) {
         return summary;
       }
 
@@ -153,16 +218,27 @@ export class CreditResetService {
         subscriptionMap.set(sub.user_id, sub);
       });
 
+      // Group buckets by user_id
+      const userBucketsMap = new Map<string, ICreditBucket[]>();
+      allBuckets.forEach((bucket) => {
+        const userId = bucket.user_id;
+        if (!userBucketsMap.has(userId)) {
+          userBucketsMap.set(userId, []);
+        }
+        userBucketsMap.get(userId)!.push(bucket);
+      });
+
+      const userBucketEntries = Array.from(userBucketsMap.entries());
       const batchSize = CREDIT_RESET_CONFIG.BATCH_SIZE;
       const batches = [];
 
-      for (let i = 0; i < allUsers.length; i += batchSize) {
-        batches.push(allUsers.slice(i, i + batchSize));
+      for (let i = 0; i < userBucketEntries.length; i += batchSize) {
+        batches.push(userBucketEntries.slice(i, i + batchSize));
       }
 
       for (const batch of batches) {
-        const batchPromises = batch.map((user) =>
-          this.processUserCreditReset(user, subscriptionMap),
+        const batchPromises = batch.map(([userId, buckets]) =>
+          this.processUserCreditReset(buckets, subscriptionMap),
         );
 
         const batchResults = await Promise.allSettled(batchPromises);
