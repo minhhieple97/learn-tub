@@ -1,4 +1,5 @@
 import { env } from '@/env.mjs';
+import { IPricingData } from '@/features/payments';
 
 export const YOUTUBE_API = {
   BASE_URL: 'https://www.googleapis.com/youtube/v3/videos',
@@ -373,3 +374,46 @@ export const USER_SUBSCRIPTION_STATUS = {
   EXPIRED: 'expired',
   CANCELLED: 'cancelled',
 } as const;
+
+export const pricingData: IPricingData = {
+  plans: [
+    {
+      id: 'free',
+      name: 'Free',
+      price: '$0',
+      color: 'text-blue-600 dark:text-blue-400',
+      gradient: 'from-blue-500 to-blue-600',
+      productId: null,
+    },
+    {
+      id: 'pro',
+      name: 'Pro',
+      price: '$2',
+      color: 'text-indigo-600 dark:text-indigo-400',
+      gradient: 'from-indigo-500 to-purple-600',
+      productId: 'prod_SVCVKAQ94lH5CT',
+    },
+  ],
+  features: [
+    {
+      name: 'AI Credits',
+      values: ['50 credits/month', '500 credits/month'],
+    },
+    {
+      name: 'Note Taking',
+      values: ['Unlimited', 'Unlimited'],
+    },
+    {
+      name: 'AI Analysis',
+      values: ['Basic', 'Advanced'],
+    },
+    {
+      name: 'Support',
+      values: ['Email', 'Priority'],
+    },
+    {
+      name: 'Export',
+      values: [false, true],
+    },
+  ],
+};

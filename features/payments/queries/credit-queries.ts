@@ -45,6 +45,7 @@ export async function createCreditBucket(
   expiresAt: string | null,
   metadata?: Record<string, any>,
 ) {
+
   const supabase = await createClient();
 
   const { data, error } = await supabase
@@ -53,7 +54,6 @@ export async function createCreditBucket(
       user_id: userId,
       credits_total: creditsTotal,
       credits_used: 0,
-      credits_remaining: creditsTotal,
       source_type: sourceType,
       status: CREDIT_BUCKET_STATUS.ACTIVE,
       description,

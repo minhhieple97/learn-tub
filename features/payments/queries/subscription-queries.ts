@@ -15,6 +15,19 @@ export async function getSubscriptionPlan(stripeProductId: string) {
   return { data, error };
 }
 
+export async function getSubscriptionPlanById(id: string) {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from('subscription_plans')
+    .select('*')
+    .eq('id', id)
+    .eq('is_active', true)
+    .single();
+
+  return { data, error };
+}
+
 export async function getUserSubscription(userId: string) {
   const supabase = await createClient();
 
@@ -107,7 +120,7 @@ export async function getPlanByStripePrice(priceId: string) {
 
   const { data, error } = await supabase
     .from('subscription_plans')
-    .select('id, credits_per_month')
+    .select('*')
     .eq('stripe_price_id', priceId)
     .eq('is_active', true)
     .single();
@@ -139,4 +152,71 @@ export async function createPaymentHistory(
   });
 
   return { data, error };
+}
+
+export async function getUserActiveSubscription(userId: string) {
+  const supabase = await createClient();
+  const now = new Date().toISOString();
+
+  const { data, error } = await supabase
+    .from('user_subscriptions')
+    .select(
+      `
+      *,
+      subscription_plans (
+        id,
+        name,
+        price_cents,
+        credits_per_month,
+        stripe_price_id,
+        stripe_product_id
+      )
+    `,
+    )
+    .eq('user_id', userId)
+    .eq('status', 'active')
+    .gte('current_period_end', now)
+    .single();
+
+  return { data, error };
+}
+
+export async function checkUserHasActivePlan(userId: string, planId: string) {
+  const supabase = await createClient();
+  const now = new Date().toISOString();
+
+  const { data, error } = await supabase
+    .from('user_subscriptions')
+    .select('id')
+    .eq('user_id', userId)
+    .eq('plan_id', planId)
+    .eq('status', USER_SUBSCRIPTION_STATUS.ACTIVE)
+    .lte('current_period_start', now)
+    .gte('current_period_end', now)
+    .single();
+
+  return {
+    hasActivePlan: !!data && !error,
+    error: error?.code === 'PGRST116' ? null : error,
+  };
+}
+
+export async function checkUserHasAnyActiveSubscription(userId: string) {
+  const supabase = await createClient();
+  const now = new Date().toISOString();
+
+  const { data, error } = await supabase
+    .from('user_subscriptions')
+    .select('id, plan_id, current_period_start, current_period_end')
+    .eq('user_id', userId)
+    .eq('status', USER_SUBSCRIPTION_STATUS.ACTIVE)
+    .lte('current_period_start', now)
+    .gte('current_period_end', now)
+    .single();
+
+  return {
+    hasActiveSubscription: !!data && !error,
+    subscription: data,
+    error: error?.code === 'PGRST116' ? null : error,
+  };
 }

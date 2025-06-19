@@ -131,7 +131,7 @@ export function UserMenu({ user }: UserMenuProps) {
       <Dialog open={isPricingOpen} onOpenChange={handlePricingClose}>
         <DialogOverlay className="bg-black/50 backdrop-blur-sm" />
         <DialogContent className="max-w-5xl p-2 overflow-y-auto max-h-[90vh] bg-transparent border-0 shadow-none">
-          <PricingDialog onClose={handlePricingClose} />
+          <PricingDialog />
         </DialogContent>
       </Dialog>
     </>
