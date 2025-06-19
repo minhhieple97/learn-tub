@@ -15,6 +15,7 @@ const ConfirmParamsSchema = z.object({
     "recovery",
     "email_change",
     "phone_change",
+    "email",
   ] as const),
   next: z.string().optional().default("/"),
 });
