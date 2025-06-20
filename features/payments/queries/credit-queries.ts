@@ -449,6 +449,41 @@ export async function expireCreditBucketsByUserSubscriptionId(userSubscriptionId
   return { expiredBuckets: buckets, error: null };
 }
 
+export async function markCreditBucketsAsCancelled(userSubscriptionId: string) {
+  const supabase = await createClient();
+
+  // Get all active credit buckets for this subscription
+  const { data: buckets, error: fetchError } = await supabase
+    .from('credit_buckets')
+    .select('id, user_id, credits_remaining, description')
+    .eq('user_subscription_id', userSubscriptionId)
+    .eq('status', CREDIT_BUCKET_STATUS.ACTIVE);
+
+  if (fetchError) {
+    return { cancelledBuckets: [], error: fetchError };
+  }
+
+  if (!buckets || buckets.length === 0) {
+    return { cancelledBuckets: [], error: null };
+  }
+
+  // Update source_type to cancelled_plan for all buckets
+  const { error: updateError } = await supabase
+    .from('credit_buckets')
+    .update({
+      source_type: CREDIT_SOURCE_TYPES.CANCELLED_PLAN,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('user_subscription_id', userSubscriptionId)
+    .eq('status', CREDIT_BUCKET_STATUS.ACTIVE);
+
+  if (updateError) {
+    return { cancelledBuckets: [], error: updateError };
+  }
+
+  return { cancelledBuckets: buckets, error: null };
+}
+
 // Legacy function names for backward compatibility
 export const getUserCredits = getUserCreditBuckets;
 export const createUserCredits = (userId: string, initialCredits = 0, description: string | null = null) =>

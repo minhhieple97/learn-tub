@@ -171,9 +171,10 @@ export async function getUserActiveSubscription(userId: string) {
     `,
     )
     .eq('user_id', userId)
-    .eq('status', 'active')
+    .eq('status', USER_SUBSCRIPTION_STATUS.ACTIVE)
+    .eq('cancel_at_period_end', false)
     .gte('current_period_end', now)
-    .single();
+    .maybeSingle();
 
   return { data, error };
 }
@@ -283,6 +284,28 @@ export async function createNewUserSubscription(
       current_period_end: periodEnd.toISOString(),
       cancel_at_period_end: false,
     })
+    .select()
+    .single();
+
+  return { data, error };
+}
+
+export async function updateSubscriptionCancellation(
+  stripeCustomerId: string,
+  stripeSubscriptionId: string,
+  cancelAtPeriodEnd: boolean,
+) {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from('user_subscriptions')
+    .update({
+      cancel_at_period_end: cancelAtPeriodEnd,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('stripe_customer_id', stripeCustomerId)
+    .eq('stripe_subscription_id', stripeSubscriptionId)
+    .eq('status', USER_SUBSCRIPTION_STATUS.ACTIVE)
     .select()
     .single();
 
