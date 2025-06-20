@@ -4,6 +4,7 @@ import {
   RESPONSE_HEADERS,
   CHUNK_TYPES,
   ERROR_MESSAGES,
+  AI_COMMANDS,
 } from "@/config/constants";
 import { INoteEvaluationRequest } from "@/features/notes/types";
 import { IFeedback, StreamChunk } from "@/types";
@@ -15,6 +16,7 @@ import {
   getProfileInSession,
   getUserInSession,
 } from "@/features/profile/queries";
+import { deductCredits } from "@/features/payments/services/deduction-credit";
 import { z } from "zod";
 import { StatusCodes } from "http-status-codes";
 
@@ -122,6 +124,20 @@ export async function GET(request: NextRequest) {
                   aiModelId,
                   feedback,
                 );
+
+                const creditResult = await deductCredits({
+                  userId: profile.id,
+                  command: AI_COMMANDS.EVALUATE_NOTE,
+                  description: `Note evaluation for note: ${noteId}`,
+                  relatedActionId: noteId,
+                });
+
+                if (!creditResult.success) {
+                  console.error(
+                    "Failed to deduct credits:",
+                    creditResult.error,
+                  );
+                }
               } catch (parseError) {
                 console.error(
                   ERROR_MESSAGES.FAILED_TO_PARSE_AI_FEEDBACK,

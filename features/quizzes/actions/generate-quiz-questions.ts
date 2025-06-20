@@ -3,10 +3,11 @@ import { ActionError, authAction } from '@/lib/safe-action';
 import { z } from 'zod';
 import { quizService } from '../services/quizz-service';
 import { createQuizSession } from '../queries';
-
 import { getVideoById } from '@/features/videos/queries';
 import { RateLimiter } from '@/lib/rate-limiter';
 import { checkProfileByUserId } from '@/lib/require-auth';
+import { deductCredits } from '@/features/payments/services/deduction-credit';
+import { AI_COMMANDS } from '@/config/constants';
 
 const GenerateQuizQuestionsSchema = z.object({
   videoId: z.string().min(1, 'Video ID is required'),
@@ -71,6 +72,17 @@ export const generateQuizQuestionsAction = authAction
       aiModelId: data.aiModelId,
       questions: response.data || [],
     });
+
+    const creditResult = await deductCredits({
+      userId: profile.id,
+      command: AI_COMMANDS.GENERATE_QUIZZ_QUESTIONS,
+      description: `Quiz generation for video: ${data.videoId}`,
+      relatedActionId: quizSession.id,
+    });
+
+    if (!creditResult.success) {
+      console.error('Failed to deduct credits after quiz generation:', creditResult.error);
+    }
 
     return {
       success: true,
