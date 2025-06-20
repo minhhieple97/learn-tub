@@ -2,7 +2,12 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 
 import { env } from '@/env.mjs';
-import { createCreditBucket, createCreditTransaction } from '../queries/credit-queries';
+import {
+  createCreditBucket,
+  createCreditTransaction,
+  expireCreditBucketsByUserSubscriptionId,
+  bulkCreateCreditTransactions,
+} from '../queries/credit-queries';
 import {
   getUserByStripeCustomerId,
   upsertUserSubscription,
@@ -11,6 +16,9 @@ import {
   createPaymentHistory,
   getSubscriptionPlanById,
   checkUserHasActivePlan,
+  getActiveSubscriptionByStripeIds,
+  expireUserSubscription,
+  createNewUserSubscription,
 } from '../queries/subscription-queries';
 import {
   PAYMENT_CONFIG_MODES,
@@ -20,7 +28,8 @@ import {
   CREDIT_EXPIRATION_CONFIG,
   USER_SUBSCRIPTION_STATUS,
 } from '@/config/constants';
-import { IStripeSubscription } from '../types';
+import { STRIPE_BILLING_REASON } from '../constants';
+import { IStripeSubscription, IStripeInvoice } from '../types';
 
 const stripe = require('stripe')(env.STRIPE_SECRET_KEY);
 
@@ -79,6 +88,10 @@ export class StripeWebhookService {
         await this.handleInvoicePaymentFailed(event.data.object);
         break;
 
+      case WEBHOOK_EVENTS.INVOICE_PAID:
+        await this.handleInvoicePaid(event.data.object);
+        break;
+
       default:
         console.log(`🤷 Unhandled event type: ${event.type}`);
     }
@@ -90,6 +103,21 @@ export class StripeWebhookService {
     const expirationDate = new Date();
     expirationDate.setDate(expirationDate.getDate() + days);
     return expirationDate.toISOString();
+  }
+
+  private static async getSubscriptionDataWithPlan(customerId: string, subscriptionId: string) {
+    const { data: currentSubscription, error: subscriptionError } =
+      await getActiveSubscriptionByStripeIds(customerId, subscriptionId);
+
+    if (subscriptionError || !currentSubscription || !currentSubscription.subscription_plans) {
+      return { currentSubscription: null, plan: null, error: subscriptionError };
+    }
+
+    return {
+      currentSubscription,
+      plan: currentSubscription.subscription_plans,
+      error: null,
+    };
   }
 
   private static extractSubscriptionData(subscription: IStripeSubscription) {
@@ -480,38 +508,189 @@ export class StripeWebhookService {
 
     const expiresAt = this.calculateExpirationDate(CREDIT_EXPIRATION_CONFIG.SUBSCRIPTION_DAYS);
 
-    const { error: bucketError } = await createCreditBucket({
-      userId,
-      creditsTotal: plan.credits_per_month,
-      sourceType: CREDIT_SOURCE_TYPES.SUBSCRIPTION,
-      description: `Monthly subscription credits - ${plan.name}`,
-      expiresAt,
-      metadata: {
-        subscription_plan_id: planId,
-        plan_name: plan.name,
-        granted_date: new Date().toISOString(),
-        credits_per_month: plan.credits_per_month,
-      },
-      user_subscription_id: userSubscriptionId,
-    });
+    const [bucketResult, transactionResult] = await Promise.allSettled([
+      createCreditBucket({
+        userId,
+        creditsTotal: plan.credits_per_month,
+        sourceType: CREDIT_SOURCE_TYPES.SUBSCRIPTION,
+        description: `Monthly subscription credits - ${plan.name}`,
+        expiresAt,
+        metadata: {
+          subscription_plan_id: planId,
+          plan_name: plan.name,
+          granted_date: new Date().toISOString(),
+          credits_per_month: plan.credits_per_month,
+        },
+        user_subscription_id: userSubscriptionId,
+      }),
+      createCreditTransaction(
+        userId,
+        plan.credits_per_month,
+        TRANSACTION_TYPES.SUBSCRIPTION_GRANT,
+        `Monthly subscription credit grant - ${plan.name}`,
+      ),
+    ]);
 
-    if (bucketError) {
-      throw new Error(`Failed to create subscription credit bucket: ${bucketError.message}`);
+    if (bucketResult.status === 'rejected') {
+      throw new Error(`Failed to create subscription credit bucket: ${bucketResult.reason}`);
     }
 
-    const { error: transactionError } = await createCreditTransaction(
-      userId,
-      plan.credits_per_month,
-      TRANSACTION_TYPES.SUBSCRIPTION_GRANT,
-      `Monthly subscription credit grant - ${plan.name}`,
-    );
+    if (bucketResult.status === 'fulfilled' && bucketResult.value.error) {
+      throw new Error(
+        `Failed to create subscription credit bucket: ${bucketResult.value.error.message}`,
+      );
+    }
 
-    if (transactionError) {
-      console.error('Failed to create credit transaction:', transactionError);
+    if (transactionResult.status === 'rejected') {
+      console.error('Failed to create credit transaction:', transactionResult.reason);
+    } else if (transactionResult.status === 'fulfilled' && transactionResult.value.error) {
+      console.error('Failed to create credit transaction:', transactionResult.value.error);
     }
 
     console.log(
       `🎁 ${plan.credits_per_month} subscription credits granted to user: ${userId} (expires: ${expiresAt})`,
     );
+  }
+
+  private static async handleInvoicePaid(invoice: IStripeInvoice): Promise<void> {
+    const startTime = Date.now();
+    console.log(`💰 Invoice paid: ${invoice.id}`);
+
+    if (invoice.billing_reason !== STRIPE_BILLING_REASON.SUBSCRIPTION_CYCLE) {
+      console.log(`ℹ️ Skipping invoice.paid for billing_reason: ${invoice.billing_reason}`);
+      return;
+    }
+
+    const subscriptionId = invoice.parent?.subscription_details?.subscription;
+    if (!subscriptionId) {
+      console.log('ℹ️ Non-subscription invoice paid, skipping renewal processing');
+      return;
+    }
+
+    console.log(`🔄 Processing subscription renewal for invoice: ${invoice.id}`);
+
+    try {
+      const [subscription, subscriptionData] = await Promise.all([
+        stripe.subscriptions.retrieve(subscriptionId),
+        this.getSubscriptionDataWithPlan(invoice.customer, subscriptionId),
+      ]);
+
+      if (subscriptionData.error || !subscriptionData.currentSubscription) {
+        console.error(
+          `❌ Active subscription not found for customer: ${invoice.customer}, subscription: ${subscriptionId}`,
+        );
+        throw new Error(
+          `Active subscription not found: ${subscriptionData.error?.message || 'Unknown error'}`,
+        );
+      }
+
+      const { currentSubscription, plan } = subscriptionData;
+
+      console.log(`✅ Found active subscription for user: ${currentSubscription.user_id}`);
+
+      const periodStart = new Date(invoice.period_start * 1000);
+      const periodEnd = new Date(invoice.period_end * 1000);
+      const customerId = subscription.customer;
+
+      const [expireResult, bucketExpireResult] = await Promise.all([
+        expireUserSubscription(currentSubscription.id),
+        expireCreditBucketsByUserSubscriptionId(currentSubscription.id),
+      ]);
+
+      if (expireResult.error) {
+        throw new Error(`Failed to expire current subscription: ${expireResult.error.message}`);
+      }
+
+      const { data: newSubscription, error: createError } = await createNewUserSubscription(
+        currentSubscription.user_id,
+        currentSubscription.plan_id,
+        customerId,
+        subscriptionId,
+        periodStart,
+        periodEnd,
+      );
+
+      if (createError || !newSubscription) {
+        throw new Error(`Failed to create new subscription: ${createError?.message}`);
+      }
+
+      console.log(`🎯 Created new subscription record: ${newSubscription.id}`);
+
+      const parallelOperations: Promise<any>[] = [];
+
+      if (bucketExpireResult.error) {
+        console.error('❌ Failed to expire credit buckets:', bucketExpireResult.error);
+      } else if (bucketExpireResult.expiredBuckets.length > 0) {
+        const transactions = bucketExpireResult.expiredBuckets
+          .filter((bucket) => bucket.credits_remaining && bucket.credits_remaining > 0)
+          .map((bucket) => ({
+            user_id: bucket.user_id,
+            amount: -(bucket.credits_remaining || 0),
+            type: TRANSACTION_TYPES.MONTHLY_RESET,
+            description: `Credits expired during subscription renewal - ${bucket.description || 'Subscription credits'}`,
+          }));
+
+        if (transactions.length > 0) {
+          parallelOperations.push(
+            bulkCreateCreditTransactions(transactions).catch((error) => {
+              console.error('❌ Failed to create bulk credit transactions:', error);
+              return { error };
+            }),
+          );
+        }
+
+        console.log(
+          `🔄 Expired ${bucketExpireResult.expiredBuckets.length} credit buckets from previous subscription`,
+        );
+      }
+
+      if (plan) {
+        parallelOperations.push(
+          this.grantMonthlyCredits(
+            currentSubscription.user_id,
+            currentSubscription.plan_id,
+            newSubscription.id,
+          ).catch((error) => {
+            console.error('❌ Failed to grant monthly credits:', error);
+            return { error };
+          }),
+        );
+      }
+
+      parallelOperations.push(
+        createPaymentHistory(
+          currentSubscription.user_id,
+          invoice.amount_paid,
+          invoice.currency,
+          'subscription_renewal',
+          'completed',
+          `Subscription renewal - ${plan?.name || 'Unknown Plan'}`,
+          undefined,
+          invoice.id,
+        ).catch((error) => {
+          console.error('❌ Failed to create payment history:', error);
+          return { error };
+        }),
+      );
+
+      const results = await Promise.allSettled(parallelOperations);
+
+      results.forEach((result, index) => {
+        if (result.status === 'rejected') {
+          console.error(`❌ Parallel operation ${index} failed:`, result.reason);
+        }
+      });
+
+      console.log(`💰 Granted monthly credits for renewed subscription`);
+
+      const processingTime = Date.now() - startTime;
+      console.log(
+        `🎉 Subscription renewal completed successfully for user: ${currentSubscription.user_id} (${processingTime}ms)`,
+      );
+    } catch (error) {
+      const processingTime = Date.now() - startTime;
+      console.error(`❌ Failed to process subscription renewal (${processingTime}ms):`, error);
+      throw error;
+    }
   }
 }
