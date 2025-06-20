@@ -52,3 +52,34 @@ export const PRICING_DATA: IPricingData = {
   ],
 };
 
+export const STRIPE_SUBSCRIPTION_STATUS = {
+  INCOMPLETE: 'incomplete',
+  INCOMPLETE_EXPIRED: 'incomplete_expired',
+  TRIALING: 'trialing',
+  ACTIVE: 'active',
+  PAST_DUE: 'past_due',
+  CANCELED: 'canceled',
+  UNPAID: 'unpaid',
+  PAUSED: 'paused',
+} as const;
+
+export const STRIPE_BILLING_REASON = {
+  AUTOMATIC_PENDING_INVOICE_ITEM_INVOICE: 'automatic_pending_invoice_item_invoice',
+  MANUAL: 'manual',
+  QUOTE_ACCEPT: 'quote_accept',
+  SUBSCRIPTION: 'subscription',
+  SUBSCRIPTION_CREATE: 'subscription_create',
+  SUBSCRIPTION_CYCLE: 'subscription_cycle',
+  SUBSCRIPTION_THRESHOLD: 'subscription_threshold',
+  SUBSCRIPTION_UPDATE: 'subscription_update',
+  UPCOMING: 'upcoming',
+} as const;
+
+export const STRIPE_INVOICE_STATUS = {
+  DRAFT: 'draft',
+  OPEN: 'open',
+  PAID: 'paid',
+  UNCOLLECTIBLE: 'uncollectible',
+  VOID: 'void',
+} as const;
+
