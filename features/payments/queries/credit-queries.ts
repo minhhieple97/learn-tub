@@ -340,6 +340,53 @@ export async function bulkExpireCreditBuckets() {
   return { expiredCount: expiredBuckets.length, error: null };
 }
 
+export async function getCreditBucketsByUserSubscriptionId(userSubscriptionId: string) {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from('credit_buckets')
+    .select('*')
+    .eq('user_subscription_id', userSubscriptionId)
+    .eq('status', CREDIT_BUCKET_STATUS.ACTIVE);
+
+  return { data, error };
+}
+
+export async function expireCreditBucketsByUserSubscriptionId(userSubscriptionId: string) {
+  const supabase = await createClient();
+
+  // First get the buckets to know how many credits to deduct
+  const { data: buckets, error: fetchError } = await supabase
+    .from('credit_buckets')
+    .select('id, user_id, credits_remaining, description')
+    .eq('user_subscription_id', userSubscriptionId)
+    .eq('status', CREDIT_BUCKET_STATUS.ACTIVE);
+
+  if (fetchError) {
+    return { expiredBuckets: [], error: fetchError };
+  }
+
+  if (!buckets || buckets.length === 0) {
+    return { expiredBuckets: [], error: null };
+  }
+
+  // Update all buckets to expired
+  const { error: updateError } = await supabase
+    .from('credit_buckets')
+    .update({
+      status: CREDIT_BUCKET_STATUS.EXPIRED,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('user_subscription_id', userSubscriptionId)
+    .eq('status', CREDIT_BUCKET_STATUS.ACTIVE);
+
+  if (updateError) {
+    return { expiredBuckets: [], error: updateError };
+  }
+
+  return { expiredBuckets: buckets, error: null };
+}
+
 // Legacy function names for backward compatibility
 export const getUserCredits = getUserCreditBuckets;
 export const createUserCredits = (userId: string, initialCredits = 0, description: string | null = null) =>

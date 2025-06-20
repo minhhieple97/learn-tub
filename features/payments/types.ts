@@ -269,7 +269,14 @@ export type IStripeInvoice = {
   next_payment_attempt: number | null;
   number: string | null;
   on_behalf_of: string | null;
-  parent: string | null;
+  parent: {
+    quote_details: any | null;
+    subscription_details: {
+      metadata: Record<string, any>;
+      subscription: string;
+    } | null;
+    type: string;
+  } | null;
   payment_settings: IStripePaymentSettings;
   period_end: number;
   period_start: number;

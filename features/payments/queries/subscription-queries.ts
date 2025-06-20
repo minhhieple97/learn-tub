@@ -217,3 +217,74 @@ export async function checkUserHasAnyActiveSubscription(userId: string) {
     error: error?.code === 'PGRST116' ? null : error,
   };
 }
+
+export async function getActiveSubscriptionByStripeIds(
+  stripeCustomerId: string,
+  stripeSubscriptionId: string,
+) {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from('user_subscriptions')
+    .select(
+      `
+      *,
+      subscription_plans (
+        id,
+        name,
+        credits_per_month
+      )
+    `,
+    )
+    .eq('stripe_customer_id', stripeCustomerId)
+    .eq('stripe_subscription_id', stripeSubscriptionId)
+    .eq('status', USER_SUBSCRIPTION_STATUS.ACTIVE)
+    .eq('cancel_at_period_end', false)
+    .single();
+
+  return { data, error };
+}
+
+export async function expireUserSubscription(subscriptionId: string) {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from('user_subscriptions')
+    .update({
+      status: USER_SUBSCRIPTION_STATUS.EXPIRED,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', subscriptionId)
+    .select()
+    .single();
+
+  return { data, error };
+}
+
+export async function createNewUserSubscription(
+  userId: string,
+  planId: string,
+  stripeCustomerId: string,
+  stripeSubscriptionId: string,
+  periodStart: Date,
+  periodEnd: Date,
+) {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from('user_subscriptions')
+    .insert({
+      user_id: userId,
+      plan_id: planId,
+      stripe_customer_id: stripeCustomerId,
+      stripe_subscription_id: stripeSubscriptionId,
+      status: USER_SUBSCRIPTION_STATUS.ACTIVE,
+      current_period_start: periodStart.toISOString(),
+      current_period_end: periodEnd.toISOString(),
+      cancel_at_period_end: false,
+    })
+    .select()
+    .single();
+
+  return { data, error };
+}
