@@ -7,6 +7,7 @@ import {
   createCreditTransaction,
   expireCreditBucketsByUserSubscriptionId,
   bulkCreateCreditTransactions,
+  markCreditBucketsAsCancelled,
 } from '../queries/credit-queries';
 import {
   getUserByStripeCustomerId,
@@ -19,6 +20,7 @@ import {
   getActiveSubscriptionByStripeIds,
   expireUserSubscription,
   createNewUserSubscription,
+  updateSubscriptionCancellation,
 } from '../queries/subscription-queries';
 import {
   PAYMENT_CONFIG_MODES,
@@ -467,6 +469,7 @@ export class StripeWebhookService {
   }
 
   private static async handleSubscriptionUpdated(subscription: any): Promise<void> {
+    // First update the subscription status
     const { error } = await updateSubscriptionStatus(
       subscription.id,
       subscription.status,
@@ -477,6 +480,34 @@ export class StripeWebhookService {
 
     if (error) {
       throw new Error(`Failed to update subscription: ${error.message}`);
+    }
+
+    // Handle subscription cancellation
+    if (subscription.cancel_at_period_end) {
+      console.log(`🚫 Subscription marked for cancellation: ${subscription.id}`);
+
+      try {
+        // Update the user_subscriptions table with cancellation info
+        const { data: updatedSubscription, error: updateError } =
+          await updateSubscriptionCancellation(subscription.customer, subscription.id, true);
+
+        if (updateError) {
+          console.error('❌ Failed to update subscription cancellation:', updateError);
+        } else if (updatedSubscription) {
+          // Mark credit buckets as cancelled_plan
+          const { error: bucketError } = await markCreditBucketsAsCancelled(updatedSubscription.id);
+
+          if (bucketError) {
+            console.error('❌ Failed to mark credit buckets as cancelled:', bucketError);
+          } else {
+            console.log(
+              `✅ Marked credit buckets as cancelled for subscription: ${updatedSubscription.id}`,
+            );
+          }
+        }
+      } catch (error) {
+        console.error('❌ Error handling subscription cancellation:', error);
+      }
     }
 
     console.log(`📝 Subscription updated: ${subscription.id}`);

@@ -17,20 +17,22 @@ export async function GET() {
       user.id,
     );
 
-    if (error && error.code !== "PGRST116") {
-      console.error("Error fetching user subscription:", error);
+    if (error) {
+      console.error("❌ Failed to fetch user subscription:", error);
       return NextResponse.json(
         { error: "Failed to fetch subscription" },
         { status: StatusCodes.INTERNAL_SERVER_ERROR },
       );
     }
 
-    return NextResponse.json({
-      subscription: subscription || null,
+    const response = {
+      subscription,
       hasActiveSubscription: !!subscription,
-    });
+    };
+
+    return NextResponse.json(response);
   } catch (error) {
-    console.error("Error in subscription API:", error);
+    console.error("❌ User subscription API error:", error);
     return NextResponse.json(
       { error: "Failed to fetch subscription" },
       { status: StatusCodes.INTERNAL_SERVER_ERROR },
