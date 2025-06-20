@@ -4,14 +4,15 @@ export const USER_SUBSCRIPTION_QUERY_KEY = 'user-subscription';
 export const USER_SUBSCRIPTION_QUERY_URL = '/api/user/subscription';
 
 export const PLAN_ID_MAPPING: Record<string, string> = {
-  pro: 'b06b6ec8-6a58-4035-9f5c-a281a7aa8e10',
-  premium: 'c2a6edeb-a5aa-4c2a-aa3f-e810c44962f4',
+  FREE: '207cd634-648a-44a3-982a-5605ef25fb7c',
+  PRO: 'b06b6ec8-6a58-4035-9f5c-a281a7aa8e10',
+  PREMIUM: 'c2a6edeb-a5aa-4c2a-aa3f-e810c44962f4',
 };
 
 export const PRICING_DATA: IPricingData = {
   plans: [
     {
-      id: 'free',
+      id: 'FREE',
       name: 'Free',
       price: '$0',
       color: 'text-blue-600 dark:text-blue-400',
@@ -19,7 +20,7 @@ export const PRICING_DATA: IPricingData = {
       productId: null,
     },
     {
-      id: 'pro',
+      id: 'PRO',
       name: 'Pro',
       price: '$2',
       color: 'text-indigo-600 dark:text-indigo-400',
@@ -50,3 +51,4 @@ export const PRICING_DATA: IPricingData = {
     },
   ],
 };
+
