@@ -147,13 +147,18 @@ export class StripeWebhookService {
 
     const subscription = await stripe.subscriptions.retrieve(session.subscription);
 
-    const { error: subscriptionError } = await upsertUserSubscription(userId, planId, subscription);
+    const { data: userSubscription, error: subscriptionError } = await upsertUserSubscription(
+      userId,
+      planId,
+      subscription,
+    );
 
     if (subscriptionError) {
       throw new Error(`Failed to update subscription: ${subscriptionError.message}`);
     }
 
-    await this.grantMonthlyCredits(userId, planId);
+    const userSubscriptionId = userSubscription?.[0]?.id;
+    await this.grantMonthlyCredits(userId, planId, userSubscriptionId);
 
     console.log(`🎯 Subscription created/updated for user: ${userId}`);
   }
@@ -168,20 +173,20 @@ export class StripeWebhookService {
 
     const expiresAt = this.calculateExpirationDate(CREDIT_EXPIRATION_CONFIG.PURCHASE_DAYS);
 
-    const { error: bucketError } = await createCreditBucket(
+    const { error: bucketError } = await createCreditBucket({
       userId,
-      creditsAmount,
-      CREDIT_SOURCE_TYPES.PURCHASE,
-      `Purchased ${creditsAmount} AI credits`,
+      creditsTotal: creditsAmount,
+      sourceType: CREDIT_SOURCE_TYPES.PURCHASE,
+      description: `Purchased ${creditsAmount} AI credits`,
       expiresAt,
-      {
+      metadata: {
         stripe_payment_intent_id: session.payment_intent,
         stripe_session_id: session.id,
         purchase_date: new Date().toISOString(),
         amount_paid_cents: session.amount_total,
         currency: session.currency,
       },
-    );
+    });
 
     if (bucketError) {
       throw new Error(`Failed to create credit bucket: ${bucketError.message}`);
@@ -221,7 +226,11 @@ export class StripeWebhookService {
     const isRecurringPayment = invoice.billing_reason === 'subscription_cycle';
 
     if (isRecurringPayment) {
-      await this.grantMonthlyCredits(userSubscription.user_id, userSubscription.plan_id);
+      await this.grantMonthlyCredits(
+        userSubscription.user_id,
+        userSubscription.plan_id,
+        userSubscription.id,
+      );
       console.log(`🔄 Monthly credits granted for user: ${userSubscription.user_id}`);
     }
 
@@ -273,13 +282,6 @@ export class StripeWebhookService {
   }
 
   private static async handleSubscriptionCreated(subscription: any): Promise<void> {
-    console.log('🔍 Subscription created:', {
-      id: subscription.id,
-      customer: subscription.customer,
-      status: subscription.status,
-      items: subscription.items,
-    });
-
     const customerId = subscription.customer;
 
     let planId: string | null = null;
@@ -397,14 +399,19 @@ export class StripeWebhookService {
     }
 
     console.log(`🔄 Creating/updating subscription for user ${userId}, plan ${planId}`);
-    const { error: subscriptionError } = await upsertUserSubscription(userId, planId, subscription);
+    const { data: userSubscription, error: subscriptionError } = await upsertUserSubscription(
+      userId,
+      planId,
+      subscription,
+    );
 
     if (subscriptionError) {
       throw new Error(`Failed to create subscription: ${subscriptionError.message}`);
     }
 
     try {
-      await this.grantMonthlyCredits(userId, planId);
+      const userSubscriptionId = userSubscription?.[0]?.id;
+      await this.grantMonthlyCredits(userId, planId, userSubscriptionId);
       console.log(`💰 Monthly credits granted for user: ${userId}`);
     } catch (error) {
       console.error('❌ Failed to grant monthly credits:', error);
@@ -444,7 +451,11 @@ export class StripeWebhookService {
     console.log(`❌ Subscription canceled: ${subscription.id}`);
   }
 
-  private static async grantMonthlyCredits(userId: string, planId: string): Promise<void> {
+  private static async grantMonthlyCredits(
+    userId: string,
+    planId: string,
+    userSubscriptionId?: string,
+  ): Promise<void> {
     const { data: plan } = await getSubscriptionPlanById(planId);
 
     if (!plan) {
@@ -453,19 +464,20 @@ export class StripeWebhookService {
 
     const expiresAt = this.calculateExpirationDate(CREDIT_EXPIRATION_CONFIG.SUBSCRIPTION_DAYS);
 
-    const { error: bucketError } = await createCreditBucket(
+    const { error: bucketError } = await createCreditBucket({
       userId,
-      plan.credits_per_month,
-      CREDIT_SOURCE_TYPES.SUBSCRIPTION,
-      `Monthly subscription credits - ${plan.name}`,
+      creditsTotal: plan.credits_per_month,
+      sourceType: CREDIT_SOURCE_TYPES.SUBSCRIPTION,
+      description: `Monthly subscription credits - ${plan.name}`,
       expiresAt,
-      {
+      metadata: {
         subscription_plan_id: planId,
         plan_name: plan.name,
         granted_date: new Date().toISOString(),
         credits_per_month: plan.credits_per_month,
       },
-    );
+      user_subscription_id: userSubscriptionId,
+    });
 
     if (bucketError) {
       throw new Error(`Failed to create subscription credit bucket: ${bucketError.message}`);
