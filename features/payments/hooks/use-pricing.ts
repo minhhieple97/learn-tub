@@ -6,32 +6,15 @@ import { useAction } from 'next-safe-action/hooks';
 import { createCheckoutSessionAction } from '@/features/payments/actions';
 import { routes } from '@/routes';
 import { toast } from '@/hooks/use-toast';
-import { USER_SUBSCRIPTION_QUERY_KEY, USER_SUBSCRIPTION_QUERY_URL } from '../constants';
+import {
+  PLAN_ID_MAPPING,
+  USER_SUBSCRIPTION_QUERY_KEY,
+  USER_SUBSCRIPTION_QUERY_URL,
+} from '../constants';
+import { IUserSubscriptionResponse } from '../types';
 
-type IUserSubscriptionResponse = {
-  subscription: {
-    id: string;
-    plan_id: string;
-    status: string;
-    current_period_start: string | null;
-    current_period_end: string | null;
-    cancel_at_period_end: boolean | null;
-    subscription_plans: {
-      id: string;
-      name: string;
-      price_cents: number;
-      credits_per_month: number;
-      stripe_price_id: string;
-      stripe_product_id: string;
-    };
-  } | null;
-  hasActiveSubscription: boolean;
-};
 
-const PLAN_ID_MAPPING: Record<string, string> = {
-  pro: 'b06b6ec8-6a58-4035-9f5c-a281a7aa8e10',
-  premium: 'c2a6edeb-a5aa-4c2a-aa3f-e810c44962f4',
-};
+
 
 async function fetchUserSubscription(): Promise<IUserSubscriptionResponse> {
   const response = await fetch(USER_SUBSCRIPTION_QUERY_URL);

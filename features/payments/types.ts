@@ -147,3 +147,23 @@ export type ICreditBucketStatus = (typeof CREDIT_BUCKET_STATUS)[keyof typeof CRE
 export type IUserSubscriptionStatus =
   (typeof USER_SUBSCRIPTION_STATUS)[keyof typeof USER_SUBSCRIPTION_STATUS];
 
+export type IUserSubscriptionResponse = {
+  subscription: {
+    id: string;
+    plan_id: string;
+    status: string;
+    current_period_start: string | null;
+    current_period_end: string | null;
+    cancel_at_period_end: boolean | null;
+    subscription_plans: {
+      id: string;
+      name: string;
+      price_cents: number;
+      credits_per_month: number;
+      stripe_price_id: string;
+      stripe_product_id: string;
+    };
+  } | null;
+  hasActiveSubscription: boolean;
+};
+

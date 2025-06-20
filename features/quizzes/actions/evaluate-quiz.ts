@@ -6,6 +6,8 @@ import { z } from 'zod';
 import { EvaluateQuizSchema } from '../schema';
 import { RateLimiter } from '@/lib/rate-limiter';
 import { checkProfileByUserId } from '@/lib/require-auth';
+import { deductCredits } from '@/features/payments/services/deduction-credit';
+import { AI_COMMANDS } from '@/config/constants';
 
 export const evaluateQuizAction = authAction
   .inputSchema(EvaluateQuizSchema)
@@ -42,6 +44,17 @@ export const evaluateQuizAction = authAction
       feedback: response.data,
       timeTakenSeconds: data.timeTakenSeconds,
     });
+
+    const creditResult = await deductCredits({
+      userId: profile.id,
+      command: AI_COMMANDS.EVALUATE_QUIZZ_ANSWERS,
+      description: `Quiz evaluation for session: ${data.quizSessionId}`,
+      relatedActionId: attempt.id,
+    });
+
+    if (!creditResult.success) {
+      console.error('Failed to deduct credits after quiz evaluation:', creditResult.error);
+    }
 
     return {
       success: true,

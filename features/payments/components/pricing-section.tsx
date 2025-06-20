@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/table';
 import { usePricing } from '../hooks/use-pricing';
 import { IPricingPlan } from '../types';
-import { pricingData } from '@/config/constants';
+import { PRICING_DATA } from '../constants';
 
 type IPricingSectionProps = {
   compact?: boolean;
@@ -173,7 +173,7 @@ export const PricingSection = ({ compact = false }: IPricingSectionProps) => {
                   >
                     Features
                   </TableHead>
-                  {pricingData.plans.map((plan) => (
+                  {PRICING_DATA.plans.map((plan) => (
                     <TableHead
                       key={plan.id}
                       className={`text-center relative ${compact ? 'py-4' : 'py-6'}`}
@@ -184,7 +184,7 @@ export const PricingSection = ({ compact = false }: IPricingSectionProps) => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {pricingData.features.map((feature) => (
+                {PRICING_DATA.features.map((feature) => (
                   <TableRow key={feature.name} className="border-border">
                     <TableCell className={`font-medium ${compact ? 'py-3 text-sm' : 'py-4'}`}>
                       {feature.name}
@@ -203,7 +203,7 @@ export const PricingSection = ({ compact = false }: IPricingSectionProps) => {
                 ))}
                 <TableRow className="border-border">
                   <TableCell className={compact ? 'py-4' : 'py-6'} />
-                  {pricingData.plans.map((plan, index) => (
+                  {PRICING_DATA.plans.map((plan, index) => (
                     <TableCell
                       key={plan.id}
                       className={`text-center ${compact ? 'py-4 px-2' : 'py-6 px-4'} ${
