@@ -86,7 +86,7 @@ export const getAIProviders = cache(async (): Promise<IAIModelProvider[]> => {
     .from('ai_providers')
     .select('id, name, display_name, is_active')
     .eq('is_active', true)
-    .order('display_name', { ascending: true });
+    .order('display_name', { ascending: false });
 
   if (error) {
     console.error('Error fetching AI providers:', error);
