@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
-import { IUserSubscriptionStatus } from '../types';
+import { IUserSubscriptionStatus, ISubscriptionData } from '../types';
 import { USER_SUBSCRIPTION_STATUS } from '@/config/constants';
 
 export async function getSubscriptionPlan(stripeProductId: string) {
@@ -65,27 +65,24 @@ export async function getUserByStripeCustomerId(customerId: string) {
   return { data, error };
 }
 
-export async function upsertUserSubscription(userId: string, planId: string, subscription: any) {
+export async function upsertUserSubscription(
+  userId: string,
+  planId: string,
+  subscriptionData: ISubscriptionData,
+) {
   const supabase = await createClient();
-
-  // Extract period dates from the first subscription item (where they're actually located)
-  const firstItem = subscription.items?.data?.[0];
-  const currentPeriodStart = firstItem?.current_period_start || subscription.current_period_start;
-  const currentPeriodEnd = firstItem?.current_period_end || subscription.current_period_end;
 
   const { data, error } = await supabase
     .from('user_subscriptions')
     .upsert({
       user_id: userId,
       plan_id: planId,
-      stripe_subscription_id: subscription.id,
-      stripe_customer_id: subscription.customer,
-      status: USER_SUBSCRIPTION_STATUS.ACTIVE,
-      current_period_start: currentPeriodStart
-        ? new Date(currentPeriodStart * 1000).toISOString()
-        : null,
-      current_period_end: currentPeriodEnd ? new Date(currentPeriodEnd * 1000).toISOString() : null,
-      cancel_at_period_end: subscription.cancel_at_period_end || false,
+      stripe_subscription_id: subscriptionData.stripeSubscriptionId,
+      stripe_customer_id: subscriptionData.stripeCustomerId,
+      status: subscriptionData.status || USER_SUBSCRIPTION_STATUS.ACTIVE,
+      current_period_start: subscriptionData.currentPeriodStart?.toISOString() || null,
+      current_period_end: subscriptionData.currentPeriodEnd?.toISOString() || null,
+      cancel_at_period_end: subscriptionData.cancelAtPeriodEnd || false,
     })
     .select();
 

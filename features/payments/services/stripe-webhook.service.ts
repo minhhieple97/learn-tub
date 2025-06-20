@@ -20,10 +20,11 @@ import {
   CREDIT_EXPIRATION_CONFIG,
   USER_SUBSCRIPTION_STATUS,
 } from '@/config/constants';
+import { IStripeSubscription } from '../types';
 
 const stripe = require('stripe')(env.STRIPE_SECRET_KEY);
 
-type StripeEvent = {
+type IStripeEvent = {
   id: string;
   type: string;
   data: {
@@ -38,10 +39,11 @@ const WEBHOOK_EVENTS = {
   CUSTOMER_SUBSCRIPTION_DELETED: 'customer.subscription.deleted',
   INVOICE_PAYMENT_SUCCEEDED: 'invoice.payment_succeeded',
   INVOICE_PAYMENT_FAILED: 'invoice.payment_failed',
+  INVOICE_PAID: 'invoice.paid',
 } as const;
 
 export class StripeWebhookService {
-  static constructEvent(body: string, signature: string): StripeEvent {
+  static constructEvent(body: string, signature: string): IStripeEvent {
     try {
       return stripe.webhooks.constructEvent(body, signature, env.STRIPE_WEBHOOK_SECRET);
     } catch (error) {
@@ -49,7 +51,7 @@ export class StripeWebhookService {
     }
   }
 
-  static async processWebhookEvent(event: StripeEvent): Promise<void> {
+  static async processWebhookEvent(event: IStripeEvent): Promise<void> {
     console.log(`🎣 Processing webhook event: ${event.type}`);
 
     switch (event.type) {
@@ -88,6 +90,20 @@ export class StripeWebhookService {
     const expirationDate = new Date();
     expirationDate.setDate(expirationDate.getDate() + days);
     return expirationDate.toISOString();
+  }
+
+  private static extractSubscriptionData(subscription: IStripeSubscription) {
+    const firstItem = subscription.items?.data?.[0];
+    const currentPeriodStart = firstItem?.current_period_start;
+    const currentPeriodEnd = firstItem?.current_period_end;
+
+    return {
+      stripeSubscriptionId: subscription.id,
+      stripeCustomerId: subscription.customer,
+      currentPeriodStart: currentPeriodStart ? new Date(currentPeriodStart * 1000) : null,
+      currentPeriodEnd: currentPeriodEnd ? new Date(currentPeriodEnd * 1000) : null,
+      cancelAtPeriodEnd: subscription.cancel_at_period_end || false,
+    };
   }
 
   private static async handleCheckoutSessionCompleted(session: any): Promise<void> {
@@ -130,7 +146,6 @@ export class StripeWebhookService {
     const userId = session.metadata.user_id;
     const planId = session.metadata.plan_id;
 
-    // Check if user already has an active subscription to this plan
     const { hasActivePlan, error: checkError } = await checkUserHasActivePlan(userId, planId);
 
     if (checkError) {
@@ -146,11 +161,12 @@ export class StripeWebhookService {
     }
 
     const subscription = await stripe.subscriptions.retrieve(session.subscription);
+    const subscriptionData = this.extractSubscriptionData(subscription);
 
     const { data: userSubscription, error: subscriptionError } = await upsertUserSubscription(
       userId,
       planId,
-      subscription,
+      subscriptionData,
     );
 
     if (subscriptionError) {
@@ -281,7 +297,7 @@ export class StripeWebhookService {
     console.log(`❌ Subscription payment failed for user: ${userSubscription.user_id}`);
   }
 
-  private static async handleSubscriptionCreated(subscription: any): Promise<void> {
+  private static async handleSubscriptionCreated(subscription: IStripeSubscription): Promise<void> {
     const customerId = subscription.customer;
 
     let planId: string | null = null;
@@ -289,8 +305,6 @@ export class StripeWebhookService {
 
     if (subscription.items?.data?.[0]?.price?.id) {
       priceId = subscription.items.data[0].price.id;
-    } else if (subscription.plan?.id) {
-      priceId = subscription.plan.id;
     }
 
     if (priceId) {
@@ -399,10 +413,12 @@ export class StripeWebhookService {
     }
 
     console.log(`🔄 Creating/updating subscription for user ${userId}, plan ${planId}`);
+    const subscriptionData = this.extractSubscriptionData(subscription);
+
     const { data: userSubscription, error: subscriptionError } = await upsertUserSubscription(
       userId,
       planId,
-      subscription,
+      subscriptionData,
     );
 
     if (subscriptionError) {

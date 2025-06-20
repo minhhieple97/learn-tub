@@ -18,10 +18,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verify and construct event
     const event = StripeWebhookService.constructEvent(body, signature);
 
-    // Process the webhook event
     await StripeWebhookService.processWebhookEvent(event);
 
     return NextResponse.json({ received: true });
