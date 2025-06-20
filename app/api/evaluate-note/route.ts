@@ -5,7 +5,8 @@ import {
   CHUNK_TYPES,
   ERROR_MESSAGES,
   AI_COMMANDS,
-} from "@/config/constants";
+  CREDIT_ACTION_COUNTS,
+} from '@/config/constants';
 import { INoteEvaluationRequest } from "@/features/notes/types";
 import { IFeedback, StreamChunk } from "@/types";
 import { createNoteInteraction } from "@/features/notes/queries";
@@ -17,12 +18,13 @@ import {
   getUserInSession,
 } from "@/features/profile/queries";
 import { deductCredits } from "@/features/payments/services/deduction-credit";
-import { z } from "zod";
-import { StatusCodes } from "http-status-codes";
+import { validateUserCreditsForOperation } from '@/features/payments/queries/credit-queries';
+import { z } from 'zod';
+import { StatusCodes } from 'http-status-codes';
 
 const EvaluateNoteQuerySchema = z.object({
-  noteId: z.string().uuid("Invalid note ID format"),
-  aiModelId: z.string().uuid("Invalid AI Model ID"),
+  noteId: z.string().uuid('Invalid note ID format'),
+  aiModelId: z.string().uuid('Invalid AI Model ID'),
 });
 
 export async function GET(request: NextRequest) {
@@ -30,35 +32,32 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
 
     const queryParams = {
-      noteId: searchParams.get("noteId"),
-      aiModelId: searchParams.get("aiModelId"),
+      noteId: searchParams.get('noteId'),
+      aiModelId: searchParams.get('aiModelId'),
     };
 
     const validationResult = EvaluateNoteQuerySchema.safeParse(queryParams);
 
     if (!validationResult.success) {
       const errorMessage = validationResult.error.errors
-        .map((err) => `${err.path.join(".")}: ${err.message}`)
-        .join(", ");
+        .map((err) => `${err.path.join('.')}: ${err.message}`)
+        .join(', ');
 
       return new Response(
         JSON.stringify({
-          error: "Validation failed",
+          error: 'Validation failed',
           details: errorMessage,
         }),
         {
           status: StatusCodes.BAD_REQUEST,
-          headers: { "Content-Type": RESPONSE_HEADERS.JSON_CONTENT_TYPE },
+          headers: { 'Content-Type': RESPONSE_HEADERS.JSON_CONTENT_TYPE },
         },
       );
     }
 
     const { noteId, aiModelId } = validationResult.data;
 
-    const [user, profile] = await Promise.all([
-      getUserInSession(),
-      getProfileInSession(),
-    ]);
+    const [user, profile] = await Promise.all([getUserInSession(), getProfileInSession()]);
     if (!user || !profile) {
       return new Response(ERROR_MESSAGES.UNAUTHORIZED, {
         status: StatusCodes.UNAUTHORIZED,
@@ -74,11 +73,29 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    const creditValidation = await validateUserCreditsForOperation(
+      profile.id,
+      CREDIT_ACTION_COUNTS[AI_COMMANDS.EVALUATE_NOTE],
+    );
+    if (!creditValidation.success) {
+      return new Response(
+        JSON.stringify({
+          error: 'Insufficient credits',
+          details:
+            creditValidation.message || "You don't have enough credits to evaluate this note",
+        }),
+        {
+          status: StatusCodes.BAD_REQUEST,
+          headers: { 'Content-Type': RESPONSE_HEADERS.JSON_CONTENT_TYPE },
+        },
+      );
+    }
+
     const { data: note, error: noteError } = await supabase
-      .from("notes")
-      .select("content, timestamp_seconds")
-      .eq("id", noteId)
-      .eq("user_id", profile.id)
+      .from('notes')
+      .select('content, timestamp_seconds')
+      .eq('id', noteId)
+      .eq('user_id', profile.id)
       .single();
 
     if (noteError || !note) {
@@ -111,19 +128,12 @@ export async function GET(request: NextRequest) {
             const { done, value } = await reader.read();
             if (done) break;
 
-            controller.enqueue(
-              encoder.encode(`data: ${JSON.stringify(value)}\n\n`),
-            );
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify(value)}\n\n`));
 
             if (value.type === CHUNK_TYPES.COMPLETE && value.content) {
               try {
                 feedback = JSON.parse(value.content) as IFeedback;
-                await createNoteInteraction(
-                  profile.id,
-                  noteId,
-                  aiModelId,
-                  feedback,
-                );
+                await createNoteInteraction(profile.id, noteId, aiModelId, feedback);
 
                 const creditResult = await deductCredits({
                   userId: profile.id,
@@ -133,32 +143,21 @@ export async function GET(request: NextRequest) {
                 });
 
                 if (!creditResult.success) {
-                  console.error(
-                    "Failed to deduct credits:",
-                    creditResult.error,
-                  );
+                  console.error('Failed to deduct credits:', creditResult.error);
                 }
               } catch (parseError) {
-                console.error(
-                  ERROR_MESSAGES.FAILED_TO_PARSE_AI_FEEDBACK,
-                  parseError,
-                );
+                console.error(ERROR_MESSAGES.FAILED_TO_PARSE_AI_FEEDBACK, parseError);
               }
             }
           }
         } catch (error) {
           const errorChunk: StreamChunk = {
             type: CHUNK_TYPES.ERROR,
-            content:
-              error instanceof Error
-                ? error.message
-                : ERROR_MESSAGES.UNKNOWN_ERROR,
+            content: error instanceof Error ? error.message : ERROR_MESSAGES.UNKNOWN_ERROR,
             finished: true,
           };
 
-          controller.enqueue(
-            encoder.encode(`data: ${JSON.stringify(errorChunk)}\n\n`),
-          );
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify(errorChunk)}\n\n`));
         } finally {
           controller.close();
         }
@@ -167,21 +166,21 @@ export async function GET(request: NextRequest) {
 
     return new Response(stream, {
       headers: {
-        "Content-Type": RESPONSE_HEADERS.SSE_CONTENT_TYPE,
-        "Cache-Control": RESPONSE_HEADERS.CACHE_CONTROL,
+        'Content-Type': RESPONSE_HEADERS.SSE_CONTENT_TYPE,
+        'Cache-Control': RESPONSE_HEADERS.CACHE_CONTROL,
         Connection: RESPONSE_HEADERS.CONNECTION,
       },
     });
   } catch (error) {
-    console.error("Error in evaluate-note route:", error);
+    console.error('Error in evaluate-note route:', error);
     return new Response(
       JSON.stringify({
         error: ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
-        details: error instanceof Error ? error.message : "Unknown error",
+        details: error instanceof Error ? error.message : 'Unknown error',
       }),
       {
         status: StatusCodes.INTERNAL_SERVER_ERROR,
-        headers: { "Content-Type": RESPONSE_HEADERS.JSON_CONTENT_TYPE },
+        headers: { 'Content-Type': RESPONSE_HEADERS.JSON_CONTENT_TYPE },
       },
     );
   }

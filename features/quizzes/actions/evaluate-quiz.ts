@@ -7,7 +7,8 @@ import { EvaluateQuizSchema } from '../schema';
 import { RateLimiter } from '@/lib/rate-limiter';
 import { checkProfileByUserId } from '@/lib/require-auth';
 import { deductCredits } from '@/features/payments/services/deduction-credit';
-import { AI_COMMANDS } from '@/config/constants';
+import { validateUserCreditsForOperation } from '@/features/payments/queries/credit-queries';
+import { AI_COMMANDS, CREDIT_ACTION_COUNTS } from '@/config/constants';
 
 export const evaluateQuizAction = authAction
   .inputSchema(EvaluateQuizSchema)
@@ -21,6 +22,14 @@ export const evaluateQuizAction = authAction
     }
 
     const profile = await checkProfileByUserId(user.id);
+
+    const creditValidation = await validateUserCreditsForOperation(
+      profile.id,
+      CREDIT_ACTION_COUNTS[AI_COMMANDS.EVALUATE_QUIZZ_ANSWERS],
+    );
+    if (!creditValidation.success) {
+      throw new ActionError(creditValidation.message || 'Insufficient credits to evaluate quiz');
+    }
 
     const response = await quizService.evaluateQuiz({
       questions: data.questions,

@@ -7,7 +7,8 @@ import { getVideoById } from '@/features/videos/queries';
 import { RateLimiter } from '@/lib/rate-limiter';
 import { checkProfileByUserId } from '@/lib/require-auth';
 import { deductCredits } from '@/features/payments/services/deduction-credit';
-import { AI_COMMANDS } from '@/config/constants';
+import { validateUserCreditsForOperation } from '@/features/payments/queries/credit-queries';
+import { AI_COMMANDS, CREDIT_ACTION_COUNTS } from '@/config/constants';
 
 const GenerateQuizQuestionsSchema = z.object({
   videoId: z.string().min(1, 'Video ID is required'),
@@ -32,6 +33,16 @@ export const generateQuizQuestionsAction = authAction
     }
 
     const profile = await checkProfileByUserId(user.id);
+
+    const creditValidation = await validateUserCreditsForOperation(
+      profile.id,
+      CREDIT_ACTION_COUNTS[AI_COMMANDS.GENERATE_QUIZZ_QUESTIONS],
+    );
+    if (!creditValidation.success) {
+      throw new ActionError(
+        creditValidation.message || 'Insufficient credits to generate quiz questions',
+      );
+    }
 
     let videoTitle = data.videoTitle;
     let videoDescription = data.videoDescription;
