@@ -131,7 +131,7 @@ function PaymentSuccessDetails({ paymentDetails }: { paymentDetails?: IPaymentDe
         <div className="space-y-3">
           <Button
             asChild
-            className="w-full flex items-center gap-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white rounded-md transition-all"
+            className="w-full flex items-center gap-2  rounded-md transition-all bg-blue-600 text-white"
           >
             <Link href={routes.learn}>Continue to Learning</Link>
           </Button>

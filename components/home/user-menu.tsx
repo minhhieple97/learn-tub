@@ -88,21 +88,44 @@ export function UserMenu({ user }: UserMenuProps) {
           </div>
           <DropdownMenuSeparator />
 
-          <div className="p-3 mx-2 my-1.5 bg-gradient-to-r from-amber-50 to-yellow-100 dark:from-amber-950/40 dark:to-yellow-900/30 rounded-lg border border-yellow-200 dark:border-yellow-900/50">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="p-1.5 bg-yellow-200 dark:bg-yellow-700/60 rounded-full">
-                  <Coins className="h-4 w-4 text-yellow-700 dark:text-yellow-300" />
+          {(user.credits || 0) > 0 ? (
+            <div className="p-3 mx-2 my-1.5 bg-gradient-to-r from-amber-50 to-yellow-100 dark:from-amber-950/40 dark:to-yellow-900/30 rounded-lg border border-yellow-200 dark:border-yellow-900/50">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 bg-yellow-200 dark:bg-yellow-700/60 rounded-full">
+                    <Coins className="h-4 w-4 text-yellow-700 dark:text-yellow-300" />
+                  </div>
+                  <span className="font-medium text-sm text-yellow-800 dark:text-yellow-200">
+                    Credits
+                  </span>
                 </div>
-                <span className="font-medium text-sm text-yellow-800 dark:text-yellow-200">
-                  Credits
+                <span className="font-bold text-base tabular-nums bg-white dark:bg-black/20 px-2 py-0.5 rounded-md text-yellow-700 dark:text-yellow-300 shadow-sm">
+                  {user.credits || 0}
                 </span>
               </div>
-              <span className="font-bold text-base tabular-nums bg-white dark:bg-black/20 px-2 py-0.5 rounded-md text-yellow-700 dark:text-yellow-300 shadow-sm">
-                {user.credits || 0}
-              </span>
             </div>
-          </div>
+          ) : (
+            <div className="p-3 mx-2 my-1.5 bg-gradient-to-r from-red-50 to-orange-100 dark:from-red-950/40 dark:to-orange-900/30 rounded-lg border border-red-200 dark:border-red-900/50">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 bg-red-200 dark:bg-red-700/60 rounded-full">
+                    <Coins className="h-4 w-4 text-red-700 dark:text-red-300" />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="font-medium text-sm text-red-800 dark:text-red-200">
+                      Out of Credits
+                    </span>
+                    <span className="text-xs text-red-600 dark:text-red-400">
+                      Purchase more to continue
+                    </span>
+                  </div>
+                </div>
+                <span className="font-bold text-base bg-white dark:bg-black/20 px-2 py-0.5 rounded-md text-red-700 dark:text-red-300 shadow-sm">
+                  0
+                </span>
+              </div>
+            </div>
+          )}
 
           <DropdownMenuSeparator />
           <DropdownMenuItem

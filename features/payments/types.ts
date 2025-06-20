@@ -15,6 +15,7 @@ import {
   PurchaseCreditsSchema,
   UpdateSubscriptionSchema,
 } from './schemas';
+import { Database } from '@/database.types';
 
 export type ISubscriptionPlan = {
   id: string;
@@ -147,8 +148,8 @@ export type IPricingData = {
   features: IPricingFeature[];
 };
 
-export type ICreditSourceType = (typeof CREDIT_SOURCE_TYPES)[keyof typeof CREDIT_SOURCE_TYPES];
-export type ICreditBucketStatus = (typeof CREDIT_BUCKET_STATUS)[keyof typeof CREDIT_BUCKET_STATUS];
+export type ICreditSourceType = Database['public']['Enums']['credit_source_type_enum'];
+export type ICreditBucketStatus = Database['public']['Enums']['credit_bucket_status_enum'];
 export type IUserSubscriptionStatus =
   (typeof USER_SUBSCRIPTION_STATUS)[keyof typeof USER_SUBSCRIPTION_STATUS];
 
