@@ -3,9 +3,9 @@ import { getLearnPageData } from "@/features/videos/queries";
 import { LearnTabs } from "@/features/videos/components/learn-tabs";
 import { learnPageCache } from "@/features/videos/search-params";
 import type { SearchParams } from "nuqs/server";
-import { getQueryClient } from '@/components/shared/react-query/get-query-client';
-import { userSubscriptionOptions } from '@/features/payments/query-options';
-import { dehydrate, HydrationBoundary } from '@tanstack/react-query';
+import { getQueryClient } from "@/components/shared/react-query/get-query-client";
+import { userSubscriptionOptions } from "@/features/payments/query-options";
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 
 type PageProps = {
   searchParams: Promise<SearchParams>;
@@ -31,8 +31,8 @@ export default async function LearnPage({ searchParams }: PageProps) {
                 Learn
               </h2>
               <p className="mt-1 text-base text-slate-600 dark:text-slate-300">
-                Transform YouTube videos into interactive learning experiences with AI-powered
-                insights
+                Transform YouTube videos into interactive learning experiences
+                with AI-powered insights
               </p>
             </div>
           </div>
