@@ -1,10 +1,12 @@
 import { Tables } from '@/database.types';
 import {
+  CREDIT_BUCKET_STATUS,
   CREDIT_RESET_CONFIG,
   CREDIT_RESET_MESSAGES,
   CREDIT_SOURCE_TYPES,
   TRANSACTION_TYPES,
 } from '@/config/constants';
+import { PLAN_ID_MAPPING } from '../constants';
 import {
   getAllUsersForCreditReset,
   getUsersWithActiveSubscriptions,
@@ -16,17 +18,48 @@ import { ICreditResetResult, ICreditResetSummary, IUserWithSubscription } from '
 
 type ICreditBucket = Tables<'credit_buckets'> & {
   profiles: { id: string; email: string } | null;
+  user_subscriptions: {
+    id: string;
+    plan_id: string;
+    status: string;
+    subscription_plans: {
+      id: string;
+      name: string;
+      credits_per_month: number;
+    };
+  } | null;
 };
 
 export class CreditResetService {
   private static shouldResetBucket(bucket: ICreditBucket): boolean {
-    if (bucket.expires_at) {
-      const expiryDate = new Date(bucket.expires_at);
-      const now = new Date();
-      return now >= expiryDate;
+    if (!bucket.expires_at) {
+      return false;
     }
 
-    return false;
+    const expiryDate = new Date(bucket.expires_at);
+    const now = new Date();
+    const isExpired = now >= expiryDate;
+
+    if (!isExpired) {
+      return false;
+    }
+
+    if (bucket.source_type === CREDIT_SOURCE_TYPES.SUBSCRIPTION) {
+      return this.isFreePlanBucket(bucket);
+    }
+
+    return true;
+  }
+
+  private static isFreePlanBucket(bucket: ICreditBucket): boolean {
+    if (!bucket.user_subscriptions?.subscription_plans?.id) {
+      return false;
+    }
+
+    const planId = bucket.user_subscriptions.subscription_plans.id;
+    const freePlanId = PLAN_ID_MAPPING.FREE;
+
+    return planId === freePlanId;
   }
 
   private static async processUserCreditReset(
@@ -92,17 +125,17 @@ export class CreditResetService {
               nextResetDate.getDate() + CREDIT_RESET_CONFIG.RESET_INTERVAL_DAYS,
             );
 
-            const { error: createError } = await createCreditBucket(
+            const { error: createError } = await createCreditBucket({
               userId,
-              creditsToAdd,
-              'subscription',
-              `${CREDIT_RESET_MESSAGES.SUBSCRIPTION_GRANT} - ${userSubscription.subscription_plans.name}`,
-              nextResetDate.toISOString(),
-              {
+              creditsTotal: creditsToAdd,
+              sourceType: CREDIT_SOURCE_TYPES.SUBSCRIPTION,
+              description: `${CREDIT_RESET_MESSAGES.SUBSCRIPTION_GRANT} - ${userSubscription.subscription_plans.name}`,
+              expiresAt: nextResetDate.toISOString(),
+              metadata: {
                 subscription_plan_id: userSubscription.plan_id,
                 last_reset_date: new Date().toISOString(),
               },
-            );
+            });
 
             if (createError) {
               throw new Error(`Failed to create new subscription bucket: ${createError.message}`);

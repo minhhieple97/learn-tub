@@ -21,7 +21,6 @@ export class CronCreditResetService {
       console.log('Starting monthly credit reset process...');
       const startTime = Date.now();
 
-      // Execute credit reset for all users
       const summary = await CreditResetService.resetCreditsForAllUsers();
 
       const endTime = Date.now();
@@ -32,7 +31,6 @@ export class CronCreditResetService {
         ...summary,
       });
 
-      // Determine response based on results
       const hasErrors = summary.errors.length > 0;
       const hasSuccesses = summary.successfulResets > 0;
 

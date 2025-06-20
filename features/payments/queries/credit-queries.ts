@@ -10,6 +10,16 @@ import {
 type CreditSourceType = Database['public']['Enums']['credit_source_type_enum'];
 type CreditBucketStatus = Database['public']['Enums']['credit_bucket_status_enum'];
 
+export type CreateCreditBucketInput = {
+  userId: string;
+  creditsTotal: number;
+  sourceType: CreditSourceType;
+  description: string | null;
+  expiresAt: string | null;
+  metadata?: Record<string, any> | null;
+  user_subscription_id?: string | null;
+};
+
 export async function getUserCreditBuckets(userId: string) {
   const supabase = await createClient();
 
@@ -37,17 +47,17 @@ export async function getUserCreditBucketsByType(userId: string, sourceType: Cre
   return { data, error };
 }
 
-export async function createCreditBucket(
-  userId: string,
-  creditsTotal: number,
-  sourceType: CreditSourceType,
-  description: string | null,
-  expiresAt: string | null,
-  metadata?: Record<string, any>,
-) {
-
+export async function createCreditBucket(input: CreateCreditBucketInput) {
   const supabase = await createClient();
-
+  const {
+    userId,
+    creditsTotal,
+    sourceType,
+    description,
+    expiresAt,
+    metadata,
+    user_subscription_id,
+  } = input;
   const { data, error } = await supabase
     .from('credit_buckets')
     .insert({
@@ -59,6 +69,7 @@ export async function createCreditBucket(
       description,
       expires_at: expiresAt,
       metadata: metadata ? JSON.parse(JSON.stringify(metadata)) : null,
+      user_subscription_id,
     })
     .select()
     .single();
@@ -94,7 +105,13 @@ export async function addCreditsToUser(
   description: string | null,
   expiresAt: string | null,
 ) {
-  return createCreditBucket(userId, creditsAmount, sourceType, description, expiresAt);
+  return createCreditBucket({
+    userId,
+    creditsTotal: creditsAmount,
+    sourceType,
+    description,
+    expiresAt,
+  });
 }
 
 export async function createCreditTransaction(
@@ -125,7 +142,17 @@ export async function getAllUsersForCreditReset() {
     .select(
       `
       *,
-      profiles!credit_buckets_user_id_fkey(id, email)
+      profiles!credit_buckets_user_id_fkey(id, email),
+      user_subscriptions!fk_user_subscription(
+        id,
+        plan_id,
+        status,
+        subscription_plans!user_subscriptions_plan_id_fkey(
+          id,
+          name,
+          credits_per_month
+        )
+      )
     `,
     )
     .eq('status', 'active')
@@ -315,11 +342,14 @@ export async function bulkExpireCreditBuckets() {
 
 // Legacy function names for backward compatibility
 export const getUserCredits = getUserCreditBuckets;
-export const createUserCredits = (
-  userId: string,
-  initialCredits = 0,
-  description: string | null = null,
-) => createCreditBucket(userId, initialCredits, 'bonus', description, null);
+export const createUserCredits = (userId: string, initialCredits = 0, description: string | null = null) =>
+  createCreditBucket({
+    userId,
+    creditsTotal: initialCredits,
+    sourceType: 'bonus',
+    description,
+    expiresAt: null,
+  });
 export const updateUserCredits = updateCreditBucket;
 export const upsertUserCredits = addCreditsToUser;
 export const resetUserCredits = resetCreditBuckets;

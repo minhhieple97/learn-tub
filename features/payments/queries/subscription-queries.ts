@@ -58,7 +58,7 @@ export async function getUserByStripeCustomerId(customerId: string) {
 
   const { data, error } = await supabase
     .from('user_subscriptions')
-    .select('user_id, plan_id')
+    .select('id, user_id, plan_id')
     .eq('stripe_customer_id', customerId)
     .single();
 
