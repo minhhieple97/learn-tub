@@ -3,12 +3,11 @@ import { Tables, Database } from '@/database.types';
 import { ICreditTransactionType } from '@/types';
 import {
   CREDIT_BUCKET_STATUS,
+  CREDIT_SOURCE_TYPES,
   TRANSACTION_TYPES,
   USER_SUBSCRIPTION_STATUS,
 } from '@/config/constants';
-
-export type ICreditSourceType = Database['public']['Enums']['credit_source_type_enum'];
-export type ICreditBucketStatus = Database['public']['Enums']['credit_bucket_status_enum'];
+import { ICreditSourceType } from '../types';
 
 export type ICreateCreditBucketInput = {
   userId: string;
@@ -155,8 +154,12 @@ export async function getAllUsersForCreditReset() {
       )
     `,
     )
-    .eq('status', 'active')
-    .in('source_type', ['subscription', 'purchase']);
+    .eq('status', CREDIT_BUCKET_STATUS.ACTIVE)
+    .in('source_type', [
+      CREDIT_SOURCE_TYPES.SUBSCRIPTION,
+      CREDIT_SOURCE_TYPES.PURCHASE,
+      CREDIT_SOURCE_TYPES.CANCELLED_PLAN,
+    ]);
 
   return { data, error };
 }
@@ -189,11 +192,10 @@ export async function getUsersWithActiveSubscriptions() {
 export async function resetCreditBuckets(userId: string, sourceType: ICreditSourceType) {
   const supabase = await createClient();
 
-  // Mark existing buckets of this type as expired
   const { error } = await supabase
     .from('credit_buckets')
     .update({
-      status: 'expired' as ICreditBucketStatus,
+      status: CREDIT_BUCKET_STATUS.EXPIRED,
       updated_at: new Date().toISOString(),
     })
     .eq('user_id', userId)

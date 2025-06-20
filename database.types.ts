@@ -847,6 +847,7 @@ export type Database = {
         | "referral_bonus"
         | "promotional"
         | "compensation"
+        | "cancelled_plan"
       subscription_status: "active" | "exhausted" | "expired" | "cancelled"
       transaction_type_enum:
         | "monthly_reset"
@@ -989,6 +990,7 @@ export const Constants = {
         "referral_bonus",
         "promotional",
         "compensation",
+        "cancelled_plan",
       ],
       subscription_status: ["active", "exhausted", "expired", "cancelled"],
       transaction_type_enum: [

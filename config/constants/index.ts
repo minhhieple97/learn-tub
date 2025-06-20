@@ -353,6 +353,7 @@ export const CREDIT_SOURCE_TYPES = {
   REFERRAL_BONUS: 'referral_bonus',
   PROMOTIONAL: 'promotional',
   COMPENSATION: 'compensation',
+  CANCELLED_PLAN: 'cancelled_plan',
 } as const;
 
 export const CREDIT_BUCKET_STATUS = {
