@@ -7,13 +7,13 @@ import {
   USER_SUBSCRIPTION_STATUS,
 } from '@/config/constants';
 
-type CreditSourceType = Database['public']['Enums']['credit_source_type_enum'];
-type CreditBucketStatus = Database['public']['Enums']['credit_bucket_status_enum'];
+export type ICreditSourceType = Database['public']['Enums']['credit_source_type_enum'];
+export type ICreditBucketStatus = Database['public']['Enums']['credit_bucket_status_enum'];
 
-export type CreateCreditBucketInput = {
+export type ICreateCreditBucketInput = {
   userId: string;
   creditsTotal: number;
-  sourceType: CreditSourceType;
+  sourceType: ICreditSourceType;
   description: string | null;
   expiresAt: string | null;
   metadata?: Record<string, any> | null;
@@ -33,7 +33,7 @@ export async function getUserCreditBuckets(userId: string) {
   return { data, error };
 }
 
-export async function getUserCreditBucketsByType(userId: string, sourceType: CreditSourceType) {
+export async function getUserCreditBucketsByType(userId: string, sourceType: ICreditSourceType) {
   const supabase = await createClient();
 
   const { data, error } = await supabase
@@ -47,7 +47,7 @@ export async function getUserCreditBucketsByType(userId: string, sourceType: Cre
   return { data, error };
 }
 
-export async function createCreditBucket(input: CreateCreditBucketInput) {
+export async function createCreditBucket(input: ICreateCreditBucketInput) {
   const supabase = await createClient();
   const {
     userId,
@@ -101,7 +101,7 @@ export async function updateCreditBucket(
 export async function addCreditsToUser(
   userId: string,
   creditsAmount: number,
-  sourceType: CreditSourceType = 'purchase',
+  sourceType: ICreditSourceType = 'purchase',
   description: string | null,
   expiresAt: string | null,
 ) {
@@ -186,14 +186,14 @@ export async function getUsersWithActiveSubscriptions() {
   return { data, error };
 }
 
-export async function resetCreditBuckets(userId: string, sourceType: CreditSourceType) {
+export async function resetCreditBuckets(userId: string, sourceType: ICreditSourceType) {
   const supabase = await createClient();
 
   // Mark existing buckets of this type as expired
   const { error } = await supabase
     .from('credit_buckets')
     .update({
-      status: 'expired' as CreditBucketStatus,
+      status: 'expired' as ICreditBucketStatus,
       updated_at: new Date().toISOString(),
     })
     .eq('user_id', userId)
@@ -282,6 +282,66 @@ export async function getUserValidCredits(userId: string) {
     .order('created_at', { ascending: true });
 
   return { data, error };
+}
+
+export async function checkSufficientCredits(
+  userId: string,
+  requiredCredits: number = 1,
+): Promise<{
+  hasSufficientCredits: boolean;
+  availableCredits: number;
+  error: any;
+}> {
+  const { totalCredits, error } = await getUserTotalCredits(userId);
+
+  if (error) {
+    return {
+      hasSufficientCredits: false,
+      availableCredits: 0,
+      error,
+    };
+  }
+
+  return {
+    hasSufficientCredits: totalCredits >= requiredCredits,
+    availableCredits: totalCredits,
+    error: null,
+  };
+}
+
+export async function validateUserCreditsForOperation(
+  userId: string,
+  requiredCredits: number = 1,
+): Promise<{
+  success: boolean;
+  message?: string;
+  availableCredits: number;
+}> {
+  const { hasSufficientCredits, availableCredits, error } = await checkSufficientCredits(
+    userId,
+    requiredCredits,
+  );
+
+  if (error) {
+    return {
+      success: false,
+      message: 'Failed to check credit balance',
+      availableCredits: 0,
+    };
+  }
+
+  if (!hasSufficientCredits) {
+    return {
+      success: false,
+      message: `Insufficient credits. Required: ${requiredCredits}, Available: ${availableCredits}`,
+      availableCredits,
+    };
+  }
+
+  return {
+    success: true,
+    availableCredits,
+  };
 }
 
 export async function bulkExpireCreditBuckets() {
