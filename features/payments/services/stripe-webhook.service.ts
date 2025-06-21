@@ -8,8 +8,6 @@ import {
   expireCreditBucketsByUserSubscriptionId,
   bulkCreateCreditTransactions,
   markCreditBucketsAsCancelled,
-} from '../queries/credit-queries';
-import {
   getUserByStripeCustomerId,
   upsertUserSubscription,
   updateSubscriptionStatus,
@@ -21,7 +19,7 @@ import {
   expireUserSubscription,
   createNewUserSubscription,
   updateSubscriptionCancellation,
-} from '../queries/subscription-queries';
+} from '../queries';
 import {
   PAYMENT_CONFIG_MODES,
   PAYMENT_CONFIG_TYPES,

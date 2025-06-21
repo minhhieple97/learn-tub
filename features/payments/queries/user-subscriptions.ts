@@ -2,32 +2,6 @@ import { createClient } from '@/lib/supabase/server';
 import { IUserSubscriptionStatus, ISubscriptionData } from '../types';
 import { USER_SUBSCRIPTION_STATUS } from '@/config/constants';
 
-export async function getSubscriptionPlan(stripeProductId: string) {
-  const supabase = await createClient();
-
-  const { data, error } = await supabase
-    .from('subscription_plans')
-    .select('*')
-    .eq('stripe_product_id', stripeProductId)
-    .eq('is_active', true)
-    .single();
-
-  return { data, error };
-}
-
-export async function getSubscriptionPlanById(id: string) {
-  const supabase = await createClient();
-
-  const { data, error } = await supabase
-    .from('subscription_plans')
-    .select('*')
-    .eq('id', id)
-    .eq('is_active', true)
-    .single();
-
-  return { data, error };
-}
-
 export async function getUserSubscription(userId: string) {
   const supabase = await createClient();
 
@@ -112,45 +86,6 @@ export async function updateSubscriptionStatus(
   return { data, error };
 }
 
-export async function getPlanByStripePrice(priceId: string) {
-  const supabase = await createClient();
-
-  const { data, error } = await supabase
-    .from('subscription_plans')
-    .select('*')
-    .eq('stripe_price_id', priceId)
-    .eq('is_active', true)
-    .single();
-
-  return { data, error };
-}
-
-export async function createPaymentHistory(
-  userId: string,
-  amountCents: number,
-  currency: string,
-  paymentType: string,
-  status: 'completed' | 'failed',
-  description: string,
-  stripePaymentIntentId?: string,
-  stripeInvoiceId?: string,
-) {
-  const supabase = await createClient();
-
-  const { data, error } = await supabase.from('payment_history').insert({
-    user_id: userId,
-    amount_cents: amountCents,
-    currency,
-    payment_type: paymentType,
-    status,
-    stripe_payment_intent_id: stripePaymentIntentId,
-    stripe_invoice_id: stripeInvoiceId,
-    description,
-  });
-
-  return { data, error };
-}
-
 export async function getUserActiveSubscription(userId: string) {
   const supabase = await createClient();
   const now = new Date().toISOString();
@@ -178,7 +113,6 @@ export async function getUserActiveSubscription(userId: string) {
   return { data, error };
 }
 
-// New function to get user subscription with more detailed status
 export async function getUserSubscriptionWithStatus(userId: string) {
   const supabase = await createClient();
   const now = new Date().toISOString();
@@ -359,6 +293,31 @@ export async function updateSubscriptionCancellation(
     .eq('status', USER_SUBSCRIPTION_STATUS.ACTIVE)
     .select()
     .single();
+
+  return { data, error };
+}
+
+export async function getUsersWithActiveSubscriptions() {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from('user_subscriptions')
+    .select(
+      `
+      user_id,
+      plan_id,
+      status,
+      current_period_end,
+      cancel_at_period_end,
+      subscription_plans!user_subscriptions_plan_id_fkey(
+        id,
+        name,
+        credits_per_month
+      )
+    `,
+    )
+    .eq('status', USER_SUBSCRIPTION_STATUS.ACTIVE)
+    .eq('cancel_at_period_end', false);
 
   return { data, error };
 }

@@ -18,9 +18,10 @@ import {
   getUserInSession,
 } from "@/features/profile/queries";
 import { deductCredits } from "@/features/payments/services/deduction-credit";
-import { validateUserCreditsForOperation } from "@/features/payments/queries/credit-queries";
+
 import { z } from "zod";
 import { StatusCodes } from "http-status-codes";
+import { validateUserCreditsForOperation } from "@/features/payments";
 
 const EvaluateNoteQuerySchema = z.object({
   noteId: z.string().uuid("Invalid note ID format"),

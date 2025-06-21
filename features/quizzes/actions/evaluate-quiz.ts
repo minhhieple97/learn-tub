@@ -2,12 +2,11 @@
 import { authAction, ActionError } from '@/lib/safe-action';
 import { quizService } from '../services/quizz-service';
 import { saveQuizAttempt } from '../queries';
-import { z } from 'zod';
 import { EvaluateQuizSchema } from '../schema';
 import { RateLimiter } from '@/lib/rate-limiter';
 import { checkProfileByUserId } from '@/lib/require-auth';
-import { deductCredits } from '@/features/payments/services/deduction-credit';
-import { validateUserCreditsForOperation } from '@/features/payments/queries/credit-queries';
+import { deductCredits } from '@/features/payments/services';
+import { validateUserCreditsForOperation } from '@/features/payments/queries';
 import { AI_COMMANDS, CREDIT_ACTION_COUNTS } from '@/config/constants';
 
 export const evaluateQuizAction = authAction
