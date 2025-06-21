@@ -1,7 +1,11 @@
 'use server';
 
 import { ActionError, authAction } from '@/lib/safe-action';
-import { CreateCheckoutSessionSchema, PurchaseCreditsSchema } from '../schemas';
+import {
+  CreateCheckoutSessionSchema,
+  PurchaseCreditsSchema,
+  PurchaseCreditPackageSchema,
+} from '../schemas';
 import { redirect } from 'next/navigation';
 import { env } from '@/env.mjs';
 import { checkProfileByUserId } from '@/lib/require-auth';
@@ -57,6 +61,54 @@ export const createCheckoutSessionAction = authAction
         user_id: profile.id,
         plan_id: plan.id,
         payment_type: PAYMENT_CONFIG_TYPES.SUBSCRIPTION,
+      },
+    });
+
+    if (!session.url) {
+      throw new ActionError('Failed to create checkout session');
+    }
+
+    redirect(session.url);
+  });
+
+export const purchaseCreditPackageAction = authAction
+  .inputSchema(PurchaseCreditPackageSchema)
+  .action(async ({ parsedInput: { packageId, credits, productId }, ctx: { user } }) => {
+    const profile = await checkProfileByUserId(user.id);
+
+    const { data: subscription } = await getUserStripeCustomerId(profile.id);
+
+    let customerId: string;
+
+    if (subscription?.stripe_customer_id) {
+      customerId = subscription.stripe_customer_id;
+    } else {
+      const customer = await stripe.customers.create({
+        email: user.email,
+        metadata: {
+          user_id: profile.id,
+        },
+      });
+      customerId = customer.id;
+    }
+
+    const session = await stripe.checkout.sessions.create({
+      customer: customerId,
+      payment_method_types: ['card'],
+      line_items: [
+        {
+          price: productId,
+          quantity: 1,
+        },
+      ],
+      mode: PAYMENT_CONFIG_MODES.PAYMENT,
+      ...PAYMENT_CONFIG_URLS,
+      metadata: {
+        user_id: profile.id,
+        package_id: packageId,
+        credits_amount: credits.toString(),
+        payment_type: PAYMENT_CONFIG_TYPES.CREDITS,
+        purchase_type: 'credit_package',
       },
     });
 

@@ -9,6 +9,18 @@ export const PLAN_ID_MAPPING: Record<string, string> = {
   PREMIUM: 'c2a6edeb-a5aa-4c2a-aa3f-e810c44962f4',
 };
 
+export const CREDIT_PACKAGES = {
+  CREDITS_100: {
+    id: '2cda6e65-5d13-4038-ad13-6fae26dd4fa2',
+    name: '100 Credits Package',
+    stripe_product_id: 'prod_SXUn0QcGHtWXp2',
+    stripe_price_id: 'price_1RcPo9ISq0Ei8V9buvaGh8yr',
+    credits: 100,
+    price_cents: 20,
+    price_display: '$0.20',
+  },
+} as const;
+
 export const PRICING_DATA: IPricingData = {
   plans: [
     {

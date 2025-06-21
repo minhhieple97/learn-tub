@@ -10,19 +10,19 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { LogOut, CreditCard, Settings, Coins } from "lucide-react";
-import { User } from "@supabase/supabase-js";
 import { signOutAction } from "@/features/auth/actions";
 import { useAction } from "next-safe-action/hooks";
 import { toast } from "@/hooks/use-toast";
-import { useState, useEffect } from "react";
+import { useState, useRef, useCallback } from "react";
 import { Dialog, DialogContent, DialogOverlay } from "@/components/ui/dialog";
 import { PricingDialog } from "@/features/payments/components/pricing-dialog";
 import Link from "next/link";
 import { routes } from "@/routes";
 import { useUserProfileWithRefetch } from "@/components/queries-client/user-profile";
+import { IUserProfile } from "@/features/auth/types";
 
 type UserMenuProps = {
-  user: User & {
+  user: IUserProfile & {
     credits: number;
   };
 };
@@ -30,6 +30,7 @@ type UserMenuProps = {
 export function UserMenu({ user: initialUser }: UserMenuProps) {
   const [isPricingOpen, setIsPricingOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const hasRefetchedRef = useRef(false);
 
   const { data: latestUser, refetchUserProfile } = useUserProfileWithRefetch();
 
@@ -50,11 +51,23 @@ export function UserMenu({ user: initialUser }: UserMenuProps) {
     },
   });
 
-  useEffect(() => {
-    if (isDropdownOpen) {
-      refetchUserProfile();
-    }
-  }, [isDropdownOpen, refetchUserProfile]);
+  const handleDropdownOpenChange = useCallback(
+    (open: boolean) => {
+      setIsDropdownOpen(open);
+
+      // Only refetch once when dropdown opens
+      if (open && !hasRefetchedRef.current) {
+        refetchUserProfile();
+        hasRefetchedRef.current = true;
+      }
+
+      // Reset flag when dropdown closes
+      if (!open) {
+        hasRefetchedRef.current = false;
+      }
+    },
+    [refetchUserProfile],
+  );
 
   const handleSignOut = () => {
     execute({});
@@ -77,7 +90,10 @@ export function UserMenu({ user: initialUser }: UserMenuProps) {
 
   return (
     <>
-      <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
+      <DropdownMenu
+        open={isDropdownOpen}
+        onOpenChange={handleDropdownOpenChange}
+      >
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" className="relative h-10 w-10 rounded-full">
             <Avatar className="h-10 w-10">
