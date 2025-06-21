@@ -6,25 +6,13 @@ import { useAction } from 'next-safe-action/hooks';
 import { createCheckoutSessionAction } from '@/features/payments/actions';
 import { routes } from '@/routes';
 import { toast } from '@/hooks/use-toast';
+import { PLAN_ID_MAPPING } from '../constants';
+import { userSubscriptionWithRetryOptions } from '../queries-client';
 import {
-  PLAN_ID_MAPPING,
-  USER_SUBSCRIPTION_QUERY_KEY,
-  USER_SUBSCRIPTION_QUERY_URL,
-} from '../constants';
-import { IUserSubscriptionResponse } from '../types';
-
-
-
-
-async function fetchUserSubscription(): Promise<IUserSubscriptionResponse> {
-  const response = await fetch(USER_SUBSCRIPTION_QUERY_URL);
-
-  if (!response.ok) {
-    throw new Error('Failed to fetch subscription');
-  }
-
-  return response.json();
-}
+  calculateDaysRemaining,
+  isSubscriptionCancelled,
+  isSubscriptionPeriodValid,
+} from '../utils/subscription-utils';
 
 export const usePricing = () => {
   const [processingPlan, setProcessingPlan] = useState<string | null>(null);
@@ -33,12 +21,7 @@ export const usePricing = () => {
     data: subscriptionData,
     isLoading: subscriptionLoading,
     error: subscriptionError,
-  } = useQuery({
-    queryKey: [USER_SUBSCRIPTION_QUERY_KEY],
-    queryFn: fetchUserSubscription,
-    retry: 3,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
-  });
+  } = useQuery(userSubscriptionWithRetryOptions);
 
   const currentSubscription = subscriptionData?.subscription;
   const hasActiveSubscription = subscriptionData?.hasActiveSubscription ?? false;
@@ -62,18 +45,20 @@ export const usePricing = () => {
 
       const actualPlanId = PLAN_ID_MAPPING[planId] || planId;
 
-      if (currentSubscription.plan_id === actualPlanId) return false;
+      if (currentSubscription.plan_id === actualPlanId) {
+        if (isSubscriptionCancelled(currentSubscription)) {
+          return false;
+        }
+        return false;
+      }
 
-      if (currentSubscription.current_period_end) {
-        const now = new Date();
-        const periodEnd = new Date(currentSubscription.current_period_end);
-
-        if (now < periodEnd) return false;
+      if (hasActiveSubscription && !isSubscriptionCancelled(currentSubscription)) {
+        return false;
       }
 
       return true;
     };
-  }, [currentSubscription]);
+  }, [currentSubscription, hasActiveSubscription]);
 
   const getSubscriptionStatus = useMemo(() => {
     return (planId: string) => {
@@ -84,22 +69,41 @@ export const usePricing = () => {
       const actualPlanId = PLAN_ID_MAPPING[planId] || planId;
 
       if (currentSubscription.plan_id === actualPlanId) {
-        if (currentSubscription.current_period_end) {
-          const now = new Date();
-          const periodEnd = new Date(currentSubscription.current_period_end);
-
-          if (now < periodEnd) {
-            return currentSubscription.cancel_at_period_end ? 'active-cancelling' : 'active';
-          }
+        if (isSubscriptionCancelled(currentSubscription)) {
+          return isSubscriptionPeriodValid(currentSubscription) ? 'active-cancelled' : 'expired';
         }
+
+        if (isSubscriptionPeriodValid(currentSubscription)) {
+          return 'active';
+        }
+
         return 'expired';
       }
 
-      if (hasActiveSubscription) return 'has-other-plan';
+      if (hasActiveSubscription && !isSubscriptionCancelled(currentSubscription)) {
+        return 'has-other-plan';
+      }
 
       return 'can-subscribe';
     };
   }, [currentSubscription, hasActiveSubscription, subscriptionLoading, subscriptionError]);
+
+  const getDaysUntilResubscribe = useMemo(() => {
+    return (planId: string): number => {
+      if (!currentSubscription) return 0;
+
+      const actualPlanId = PLAN_ID_MAPPING[planId] || planId;
+
+      if (
+        currentSubscription.plan_id === actualPlanId &&
+        isSubscriptionCancelled(currentSubscription)
+      ) {
+        return calculateDaysRemaining(currentSubscription.current_period_end);
+      }
+
+      return 0;
+    };
+  }, [currentSubscription]);
 
   const handleSubscribe = async (productId: string | null, planId: string) => {
     if (!productId) {
@@ -124,8 +128,9 @@ export const usePricing = () => {
         return 'Loading...';
       case 'active':
         return 'Current Plan';
-      case 'active-cancelling':
-        return 'Cancelling';
+      case 'active-cancelled':
+        const daysRemaining = getDaysUntilResubscribe(planId);
+        return `You can subscribe to this plan again after ${daysRemaining} days`;
       case 'has-other-plan':
         return 'Switch Plan';
       case 'expired':
@@ -141,7 +146,7 @@ export const usePricing = () => {
     return (
       status === 'loading' ||
       status === 'active' ||
-      status === 'active-cancelling' ||
+      status === 'active-cancelled' ||
       processingPlan === planId
     );
   };
@@ -157,6 +162,7 @@ export const usePricing = () => {
     getSubscriptionStatus,
     getButtonText,
     isButtonDisabled,
+    getDaysUntilResubscribe,
   };
 };
 

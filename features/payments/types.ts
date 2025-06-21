@@ -179,6 +179,8 @@ export type IUserSubscriptionResponse = {
     };
   } | null;
   hasActiveSubscription: boolean;
+  isCancelled: boolean;
+  daysRemaining: number;
 };
 
 export type ISubscriptionData = {

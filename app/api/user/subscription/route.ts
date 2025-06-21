@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { StatusCodes } from "http-status-codes";
-import { getUserActiveSubscription } from "@/features/payments/queries/subscription-queries";
+import { getUserSubscriptionWithStatus } from "@/features/payments/queries/subscription-queries";
 import { getUserInSession } from "@/features/profile/queries";
 
 export async function GET() {
@@ -13,9 +13,8 @@ export async function GET() {
       );
     }
 
-    const { data: subscription, error } = await getUserActiveSubscription(
-      user.id,
-    );
+    const { data: subscriptionData, error } =
+      await getUserSubscriptionWithStatus(user.id);
 
     if (error) {
       console.error("❌ Failed to fetch user subscription:", error);
@@ -26,8 +25,10 @@ export async function GET() {
     }
 
     const response = {
-      subscription,
-      hasActiveSubscription: !!subscription,
+      subscription: subscriptionData?.subscription,
+      hasActiveSubscription: subscriptionData?.hasActiveSubscription || false,
+      isCancelled: subscriptionData?.isCancelled || false,
+      daysRemaining: subscriptionData?.daysRemaining || 0,
     };
 
     return NextResponse.json(response);
