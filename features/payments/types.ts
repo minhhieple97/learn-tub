@@ -13,6 +13,7 @@ import {
   CancelSubscriptionSchema,
   CreateCheckoutSessionSchema,
   PurchaseCreditsSchema,
+  PurchaseCreditPackageSchema,
   UpdateSubscriptionSchema,
 } from './schemas';
 import { Database } from '@/database.types';
@@ -88,6 +89,7 @@ export type IPaymentHistory = {
 
 export type ICreateCheckoutSessionInput = z.infer<typeof CreateCheckoutSessionSchema>;
 export type IPurchaseCreditsInput = z.infer<typeof PurchaseCreditsSchema>;
+export type IPurchaseCreditPackageInput = z.infer<typeof PurchaseCreditPackageSchema>;
 export type ICancelSubscriptionInput = z.infer<typeof CancelSubscriptionSchema>;
 export type IUpdateSubscriptionInput = z.infer<typeof UpdateSubscriptionSchema>;
 
@@ -442,5 +444,21 @@ export type IStripeSubscription = {
   trial_end: number | null;
   trial_settings: IStripeTrialSettings | null;
   trial_start: number | null;
+};
+
+export type ICreditPackage = {
+  id: string;
+  name: string;
+  stripe_product_id: string;
+  stripe_price_id: string;
+  credits: number;
+  price_cents: number;
+  price_display: string;
+};
+
+export type ICreditPurchaseInput = {
+  packageId: string;
+  credits: number;
+  priceId: string;
 };
 

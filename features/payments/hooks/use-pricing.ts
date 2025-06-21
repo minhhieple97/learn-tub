@@ -3,10 +3,13 @@
 import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useAction } from 'next-safe-action/hooks';
-import { createCheckoutSessionAction } from '@/features/payments/actions';
+import {
+  createCheckoutSessionAction,
+  purchaseCreditPackageAction,
+} from '@/features/payments/actions';
 import { routes } from '@/routes';
 import { toast } from '@/hooks/use-toast';
-import { PLAN_ID_MAPPING } from '../constants';
+import { PLAN_ID_MAPPING, CREDIT_PACKAGES } from '../constants';
 import { userSubscriptionWithRetryOptions } from '../queries-client';
 import {
   calculateDaysRemaining,
@@ -16,6 +19,7 @@ import {
 
 export const usePricing = () => {
   const [processingPlan, setProcessingPlan] = useState<string | null>(null);
+  const [processingCreditPackage, setProcessingCreditPackage] = useState<boolean>(false);
 
   const {
     data: subscriptionData,
@@ -34,6 +38,19 @@ export const usePricing = () => {
       setProcessingPlan(null);
       toast.error({
         title: 'Failed to create checkout session',
+        description: error.serverError || 'Please try again later',
+      });
+    },
+  });
+
+  const { execute: purchaseCreditPackage } = useAction(purchaseCreditPackageAction, {
+    onSuccess: () => {
+      setProcessingCreditPackage(false);
+    },
+    onError: ({ error }) => {
+      setProcessingCreditPackage(false);
+      toast.error({
+        title: 'Failed to create credit package checkout',
         description: error.serverError || 'Please try again later',
       });
     },
@@ -120,6 +137,17 @@ export const usePricing = () => {
     createCheckoutSession({ productId });
   };
 
+  const handlePurchaseCredits = async () => {
+    setProcessingCreditPackage(true);
+    const creditPackage = CREDIT_PACKAGES.CREDITS_100;
+
+    purchaseCreditPackage({
+      packageId: creditPackage.id,
+      credits: creditPackage.credits,
+      productId: creditPackage.stripe_price_id,
+    });
+  };
+
   const getButtonText = (planId: string, defaultText: string) => {
     const status = getSubscriptionStatus(planId);
 
@@ -153,7 +181,9 @@ export const usePricing = () => {
 
   return {
     processingPlan,
+    processingCreditPackage,
     handleSubscribe,
+    handlePurchaseCredits,
     currentSubscription,
     hasActiveSubscription,
     isLoading: subscriptionLoading,

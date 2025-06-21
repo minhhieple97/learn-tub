@@ -2,8 +2,6 @@
 
 import { Button } from '@/components/ui/button';
 import { Zap, Check, ArrowRight, Clock } from 'lucide-react';
-import Link from 'next/link';
-import { routes } from '@/routes';
 import { Card, CardContent } from '@/components/ui/card';
 import {
   Table,
@@ -24,9 +22,11 @@ type IPricingSectionProps = {
 export const PricingSection = ({ compact = false }: IPricingSectionProps) => {
   const {
     handleSubscribe,
+    handlePurchaseCredits,
     getButtonText,
     isButtonDisabled,
     processingPlan,
+    processingCreditPackage,
     getSubscriptionStatus,
     getDaysUntilResubscribe,
     isLoading: subscriptionLoading,
@@ -175,7 +175,7 @@ export const PricingSection = ({ compact = false }: IPricingSectionProps) => {
               </h3>
               <p className={`${compact ? 'text-xs' : 'text-sm'} text-muted-foreground`}>
                 Purchase additional credits anytime for just{' '}
-                <span className="font-semibold text-foreground">$1 for 100 credits</span>
+                <span className="font-semibold text-foreground">$0.20 for 100 credits</span>
               </p>
             </div>
           </div>
@@ -183,12 +183,22 @@ export const PricingSection = ({ compact = false }: IPricingSectionProps) => {
             variant="outline"
             className="border-blue-300 text-blue-600 hover:bg-blue-50 hover:text-blue-700 dark:border-blue-600 dark:text-blue-400 dark:hover:bg-blue-900/20 shrink-0"
             size={compact ? 'sm' : 'default'}
-            asChild
+            onClick={handlePurchaseCredits}
+            disabled={processingCreditPackage}
           >
-            <Link href={routes.register} className="flex items-center whitespace-nowrap">
-              Learn More
-              <ArrowRight className="ml-1 size-4" />
-            </Link>
+            <div className="flex items-center whitespace-nowrap">
+              {processingCreditPackage ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
+                  Processing...
+                </>
+              ) : (
+                <>
+                  Buy Credits
+                  <ArrowRight className="ml-1 size-4" />
+                </>
+              )}
+            </div>
           </Button>
         </CardContent>
       </Card>
