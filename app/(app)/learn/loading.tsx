@@ -5,7 +5,7 @@ import { Play, Plus, Library, Youtube, Rocket } from "lucide-react";
 
 function AddVideoFormSkeleton() {
   return (
-    <Card className="relative overflow-hidden border-0 bg-gradient-to-br from-red-500 via-red-600 to-red-700 shadow-xl dark:from-red-600 dark:via-red-700 dark:to-red-800">
+    <Card className="relative overflow-hidden border-0 bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 shadow-xl dark:from-blue-600 dark:via-blue-700 dark:to-blue-800">
       <CardHeader className="relative pb-6 pt-8 text-center">
         <div className="mx-auto mb-6 flex size-20 items-center justify-center rounded-full border border-white/30 bg-white/20 shadow-lg backdrop-blur-sm">
           <Youtube className="size-10 text-white" />
@@ -56,6 +56,29 @@ function HowItWorksSkeleton() {
   );
 }
 
+function VideoCardSkeleton() {
+  return (
+    <Card className="group flex h-full flex-col overflow-hidden rounded-2xl border-0 bg-gradient-to-br from-white via-slate-50/90 to-slate-100/80 shadow-xl backdrop-blur-sm dark:from-slate-800/95 dark:via-slate-850/90 dark:to-slate-900/85">
+      <div className="relative aspect-video shrink-0 overflow-hidden rounded-t-2xl">
+        <Skeleton className="size-full bg-slate-200 dark:bg-slate-700" />
+      </div>
+      <CardContent className="flex flex-1 flex-col p-6">
+        <div className="flex-1 space-y-3">
+          <Skeleton className="h-6 w-full bg-slate-200 dark:bg-slate-700" />
+          <Skeleton className="h-4 w-3/4 bg-slate-100 dark:bg-slate-800" />
+        </div>
+        <div className="mt-auto flex flex-wrap items-center justify-between gap-2 pt-4">
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-6 w-16 rounded-lg bg-blue-100 dark:bg-blue-900/50" />
+            <Skeleton className="h-6 w-20 rounded-lg bg-slate-100 dark:bg-slate-800" />
+          </div>
+          <Skeleton className="h-5 w-24 rounded-md bg-slate-100 dark:bg-slate-800" />
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function Loading() {
   return (
     <div className="bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/30 dark:from-slate-900 dark:via-blue-950/20 dark:to-indigo-950/20">
@@ -99,8 +122,7 @@ export default function Loading() {
               <div className="lg:col-span-2">
                 <AddVideoFormSkeleton />
               </div>
-
-              <div className="space-y-4 lg:col-span-1">
+              <div className="lg:col-span-1">
                 <HowItWorksSkeleton />
               </div>
             </div>
@@ -113,26 +135,7 @@ export default function Loading() {
             <div className="space-y-6">
               <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {Array.from({ length: 8 }).map((_, i) => (
-                  <div key={i} className="space-y-3">
-                    <Card className="dark:via-slate-850/90 group flex h-full flex-col overflow-hidden rounded-2xl border-0 bg-gradient-to-br from-white via-slate-50/90 to-slate-100/80 shadow-xl backdrop-blur-sm dark:from-slate-800/95 dark:to-slate-900/85">
-                      <div className="relative aspect-video shrink-0 overflow-hidden rounded-t-2xl">
-                        <Skeleton className="size-full" />
-                      </div>
-                      <CardContent className="flex flex-1 flex-col p-6">
-                        <div className="flex-1 space-y-3">
-                          <Skeleton className="h-6 w-full" />
-                          <Skeleton className="h-4 w-3/4" />
-                        </div>
-                        <div className="mt-auto flex flex-wrap items-center justify-between gap-2 pt-4">
-                          <div className="flex items-center gap-2">
-                            <Skeleton className="h-6 w-16 rounded-lg" />
-                            <Skeleton className="h-6 w-20 rounded-lg" />
-                          </div>
-                          <Skeleton className="h-5 w-24 rounded-md" />
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
+                  <VideoCardSkeleton key={i} />
                 ))}
               </div>
             </div>
