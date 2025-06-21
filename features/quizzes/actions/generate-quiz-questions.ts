@@ -7,7 +7,7 @@ import { getVideoById } from '@/features/videos/queries';
 import { RateLimiter } from '@/lib/rate-limiter';
 import { checkProfileByUserId } from '@/lib/require-auth';
 import { deductCredits } from '@/features/payments/services/deduction-credit';
-import { validateUserCreditsForOperation } from '@/features/payments/queries/credit-queries';
+import { validateUserCreditsForOperation } from '@/features/payments/queries';
 import { AI_COMMANDS, CREDIT_ACTION_COUNTS } from '@/config/constants';
 
 const GenerateQuizQuestionsSchema = z.object({

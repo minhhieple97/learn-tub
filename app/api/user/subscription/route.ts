@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { StatusCodes } from "http-status-codes";
-import { getUserSubscriptionWithStatus } from "@/features/payments/queries/subscription-queries";
+import { getUserSubscriptionWithStatus } from "@/features/payments/queries";
 import { getUserInSession } from "@/features/profile/queries";
 
 export async function GET() {
