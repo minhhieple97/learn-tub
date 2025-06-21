@@ -228,7 +228,7 @@ importers:
         specifier: ^0.9.6
         version: 0.9.6(@types/react-dom@19.0.0)(@types/react@19.0.0)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       zod:
-        specifier: ^3.25.23
+        specifier: ^3.25.42
         version: 3.25.42
       zustand:
         specifier: ^5.0.5
