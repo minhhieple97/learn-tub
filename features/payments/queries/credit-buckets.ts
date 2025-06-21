@@ -1,8 +1,22 @@
 import { createClient } from '@/lib/supabase/server';
-import { Tables } from '@/database.types';
-import { CREDIT_BUCKET_STATUS, CREDIT_SOURCE_TYPES, TRANSACTION_TYPES } from '@/config/constants';
+import { Tables, TablesInsert, TablesUpdate } from '@/database.types';
+import {
+  CREDIT_BUCKET_STATUS,
+  CREDIT_SOURCE_TYPES,
+  CREDIT_ACTION_COUNTS,
+  USER_SUBSCRIPTION_STATUS,
+} from '@/config/constants';
 import { ICreditSourceType } from '../types';
-import { ICreditTransactionType } from '@/types';
+import { CacheClient } from '@/lib/cache-client';
+import {
+  invalidateUserCacheOnCreditChange,
+  invalidateMultipleUsersCacheOnCreditChange,
+} from './cache-utils';
+
+// Credit deduction types
+type CreditBucket = Tables<'credit_buckets'>;
+type CreditTransaction = TablesInsert<'credit_transactions'>;
+type TransactionType = keyof typeof CREDIT_ACTION_COUNTS;
 
 export type ICreateCreditBucketInput = {
   userId: string;
@@ -68,6 +82,10 @@ export async function createCreditBucket(input: ICreateCreditBucketInput) {
     .select()
     .single();
 
+  if (!error && data) {
+    await invalidateUserCacheOnCreditChange(userId);
+  }
+
   return { data, error };
 }
 
@@ -88,6 +106,10 @@ export async function updateCreditBucket(
     .eq('id', bucketId)
     .select()
     .single();
+
+  if (!error && data) {
+    await invalidateUserCacheOnCreditChange(data.user_id);
+  }
 
   return { data, error };
 }
@@ -111,7 +133,6 @@ export async function addCreditsToUser(
 export async function getAllUsersForCreditReset() {
   const supabase = await createClient();
 
-  // Get all users who have credit buckets that need resetting
   const { data, error } = await supabase
     .from('credit_buckets')
     .select(
@@ -153,10 +174,19 @@ export async function resetCreditBuckets(userId: string, sourceType: ICreditSour
     .eq('source_type', sourceType)
     .eq('status', 'active');
 
+  if (!error) {
+    await invalidateUserCacheOnCreditChange(userId);
+  }
+
   return { error };
 }
 
 export async function getUserTotalCredits(userId: string) {
+  const cachedCredits = await CacheClient.getUserCredits(userId);
+  if (cachedCredits !== null) {
+    return { totalCredits: cachedCredits, error: null };
+  }
+
   const supabase = await createClient();
   const now = new Date().toISOString();
 
@@ -170,6 +200,8 @@ export async function getUserTotalCredits(userId: string) {
   if (error) return { totalCredits: 0, error };
 
   const totalCredits = data?.reduce((sum, bucket) => sum + (bucket.credits_remaining || 0), 0) || 0;
+
+  await CacheClient.setUserCredits(userId, totalCredits);
 
   return { totalCredits, error: null };
 }
@@ -203,6 +235,11 @@ export async function expireCreditBuckets(bucketIds: string[]) {
     })
     .in('id', bucketIds)
     .select();
+
+  if (!error && data) {
+    const userIds = data.map((bucket) => bucket.user_id);
+    await invalidateMultipleUsersCacheOnCreditChange(userIds);
+  }
 
   return { data, error };
 }
@@ -362,6 +399,142 @@ export async function markCreditBucketsAsCancelled(userSubscriptionId: string) {
   }
 
   return { cancelledBuckets: buckets, error: null };
+}
+
+// Credit deduction functions
+export async function checkAvailableCreditsForDeduction(
+  userId: string,
+  requiredCredits: number,
+): Promise<{ hasCredits: boolean; availableCredits: number }> {
+  const supabase = await createClient();
+  const { data: buckets, error } = await supabase
+    .from('credit_buckets')
+    .select('credits_remaining')
+    .eq('user_id', userId)
+    .eq('status', 'active')
+    .gt('credits_remaining', 0)
+    .order('expires_at', { ascending: true, nullsFirst: false });
+
+  if (error) {
+    console.error('Error checking available credits:', error);
+    return { hasCredits: false, availableCredits: 0 };
+  }
+
+  const totalCredits = (buckets || []).reduce(
+    (sum: number, bucket: { credits_remaining: number | null }) =>
+      sum + (bucket.credits_remaining || 0),
+    0,
+  );
+
+  return {
+    hasCredits: totalCredits >= requiredCredits,
+    availableCredits: totalCredits,
+  };
+}
+
+export async function getActiveCreditBucketsForDeduction(userId: string): Promise<CreditBucket[]> {
+  const supabase = await createClient();
+  const { data: buckets, error } = await supabase
+    .from('credit_buckets')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('status', 'active')
+    .gt('credits_remaining', 0)
+    .order('expires_at', { ascending: true, nullsFirst: false });
+
+  if (error) {
+    throw new Error(`Failed to fetch credit buckets: ${error.message}`);
+  }
+
+  return buckets || [];
+}
+
+export async function executeCreditDeduction(
+  userId: string,
+  command: TransactionType,
+  creditsToDeduct: number,
+  description?: string,
+  relatedActionId?: string,
+): Promise<{
+  success: boolean;
+  transactionId?: string;
+  remainingCredits?: number;
+  error?: string;
+}> {
+  const supabase = await createClient();
+
+  const activeBuckets = await getActiveCreditBucketsForDeduction(userId);
+
+  if (activeBuckets.length === 0) {
+    return {
+      success: false,
+      error: 'No active credit buckets found',
+    };
+  }
+
+  const transactionData: CreditTransaction = {
+    user_id: userId,
+    type: command,
+    amount: -creditsToDeduct,
+    description: description || `Credit deducted for ${command}`,
+    related_action_id: relatedActionId,
+  };
+
+  const { data: transaction, error: transactionError } = await supabase
+    .from('credit_transactions')
+    .insert(transactionData)
+    .select('id')
+    .single();
+
+  if (transactionError) {
+    throw new Error(`Failed to create transaction: ${transactionError.message}`);
+  }
+
+  let remainingToDeduct = creditsToDeduct;
+  const bucketUpdates: Array<{ id: string; update: TablesUpdate<'credit_buckets'> }> = [];
+
+  for (const bucket of activeBuckets) {
+    if (remainingToDeduct <= 0) break;
+
+    const currentRemaining = bucket.credits_remaining || 0;
+    const deductFromBucket = Math.min(remainingToDeduct, currentRemaining);
+    const newRemaining = currentRemaining - deductFromBucket;
+    const newUsed = (bucket.credits_used || 0) + deductFromBucket;
+
+    bucketUpdates.push({
+      id: bucket.id,
+      update: {
+        credits_used: newUsed,
+        status:
+          newRemaining <= 0 ? USER_SUBSCRIPTION_STATUS.EXHAUSTED : USER_SUBSCRIPTION_STATUS.ACTIVE,
+        updated_at: new Date().toISOString(),
+      },
+    });
+
+    remainingToDeduct -= deductFromBucket;
+  }
+
+  for (const { id, update } of bucketUpdates) {
+    const { error: updateError } = await supabase
+      .from('credit_buckets')
+      .update(update)
+      .eq('id', id);
+
+    if (updateError) {
+      throw new Error(`Failed to update credit bucket ${id}: ${updateError.message}`);
+    }
+  }
+
+  // Invalidate cache after successful deduction
+  await invalidateUserCacheOnCreditChange(userId);
+
+  const { availableCredits } = await checkAvailableCreditsForDeduction(userId, 0);
+
+  return {
+    success: true,
+    transactionId: transaction.id,
+    remainingCredits: availableCredits,
+  };
 }
 
 // Legacy function names for backward compatibility

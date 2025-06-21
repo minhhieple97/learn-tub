@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { IUserSubscriptionStatus, ISubscriptionData } from '../types';
 import { USER_SUBSCRIPTION_STATUS } from '@/config/constants';
+import { CacheClient } from '@/lib/cache-client';
 
 export async function getUserSubscription(userId: string) {
   const supabase = await createClient();
@@ -60,6 +61,13 @@ export async function upsertUserSubscription(
     })
     .select();
 
+  if (!error && data) {
+    await Promise.all([
+      CacheClient.invalidateUserSubscription(userId),
+      CacheClient.invalidateUserProfile(userId),
+    ]);
+  }
+
   return { data, error };
 }
 
@@ -83,10 +91,32 @@ export async function updateSubscriptionStatus(
     .eq('stripe_subscription_id', subscriptionId)
     .select();
 
+  if (!error && data) {
+    const userIds = [...new Set(data.map((sub) => sub.user_id))];
+    await Promise.all(
+      userIds.map((userId) =>
+        Promise.all([
+          CacheClient.invalidateUserSubscription(userId),
+          CacheClient.invalidateUserProfile(userId),
+        ]),
+      ),
+    );
+  }
+
   return { data, error };
 }
 
-export async function getUserActiveSubscription(userId: string) {
+export async function getUserActiveSubscription(
+  userId: string,
+): Promise<{ data: any; error: any }> {
+  const cachedSubscription = await CacheClient.getUserSubscription<{ data: any; error: any }>(
+    userId,
+  );
+  if (cachedSubscription) {
+    return cachedSubscription;
+  }
+
+  // If not cached, fetch from database
   const supabase = await createClient();
   const now = new Date().toISOString();
 
@@ -110,7 +140,14 @@ export async function getUserActiveSubscription(userId: string) {
     .gte('current_period_end', now)
     .maybeSingle();
 
-  return { data, error };
+  const result = { data, error };
+
+  // Cache the subscription data
+  if (!error) {
+    await CacheClient.setUserSubscription(userId, result);
+  }
+
+  return result;
 }
 
 export async function getUserSubscriptionWithStatus(userId: string) {
@@ -293,6 +330,14 @@ export async function updateSubscriptionCancellation(
     .eq('status', USER_SUBSCRIPTION_STATUS.ACTIVE)
     .select()
     .single();
+
+
+  if (!error && data) {
+    await Promise.all([
+      CacheClient.invalidateUserSubscription(data.user_id),
+      CacheClient.invalidateUserProfile(data.user_id),
+    ]);
+  }
 
   return { data, error };
 }
