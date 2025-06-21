@@ -14,11 +14,12 @@ import { User } from "@supabase/supabase-js";
 import { signOutAction } from "@/features/auth/actions";
 import { useAction } from "next-safe-action/hooks";
 import { toast } from "@/hooks/use-toast";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogOverlay } from "@/components/ui/dialog";
 import { PricingDialog } from "@/features/payments/components/pricing-dialog";
 import Link from "next/link";
 import { routes } from "@/routes";
+import { useUserProfileWithRefetch } from "@/components/queries-client/user-profile";
 
 type UserMenuProps = {
   user: User & {
@@ -26,23 +27,34 @@ type UserMenuProps = {
   };
 };
 
-export function UserMenu({ user }: UserMenuProps) {
+export function UserMenu({ user: initialUser }: UserMenuProps) {
   const [isPricingOpen, setIsPricingOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
+  const { data: latestUser, refetchUserProfile } = useUserProfileWithRefetch();
+
+  const user = latestUser || initialUser;
+
   const { execute, isPending } = useAction(signOutAction, {
     onError: ({ error }) => {
-      toast.error({
+      toast({
         title: "Error",
         description: error.serverError || "Failed to sign out",
+        variant: "destructive",
       });
     },
     onSuccess: () => {
-      toast.success({
+      toast({
         description: "Successfully signed out!",
       });
     },
   });
+
+  useEffect(() => {
+    if (isDropdownOpen) {
+      refetchUserProfile();
+    }
+  }, [isDropdownOpen, refetchUserProfile]);
 
   const handleSignOut = () => {
     execute({});

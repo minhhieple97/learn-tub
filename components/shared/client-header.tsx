@@ -1,23 +1,13 @@
 "use client";
-import { useQuery } from "@tanstack/react-query";
+
 import { HeaderContainer } from "@/components/home/header-container";
 import { HeaderLogo } from "@/components/home/header-logo";
 import { HeaderActions } from "@/components/home/header-actions";
-import { IUserProfile } from "@/features/auth/types";
 import { Skeleton } from "@/components/ui/skeleton";
-
-const fetchUserProfile = async (): Promise<IUserProfile> => {
-  const response = await fetch("/api/user/profile");
-  if (!response.ok) throw new Error("Failed to fetch user data");
-  return response.json();
-};
+import { useUserProfile } from "@/components/queries-client/user-profile";
 
 export function ClientHeader() {
-  const { data, isLoading, error } = useQuery({
-    queryKey: ["userProfile"],
-    queryFn: fetchUserProfile,
-    staleTime: 5 * 60 * 1000,
-  });
+  const { data, isLoading, error } = useUserProfile();
 
   return (
     <HeaderContainer>

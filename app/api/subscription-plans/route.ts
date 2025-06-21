@@ -2,6 +2,16 @@ import { NextResponse } from "next/server";
 import { StatusCodes } from "http-status-codes";
 import { createClient } from "@/lib/supabase/server";
 import { getUserInSession } from "@/features/profile/queries";
+import { CacheClient } from "@/lib/cache-client";
+
+type SubscriptionPlan = {
+  id: string;
+  name: string;
+  stripe_product_id: string;
+  stripe_price_id: string;
+  price_cents: number;
+  credits_per_month: number;
+};
 
 export async function GET() {
   try {
@@ -12,6 +22,14 @@ export async function GET() {
         { error: "User not found" },
         { status: StatusCodes.UNAUTHORIZED },
       );
+    }
+
+    const cachedPlans = await CacheClient.getSubscriptionPlans<{
+      plans: SubscriptionPlan[];
+    }>();
+
+    if (cachedPlans) {
+      return NextResponse.json(cachedPlans);
     }
 
     const supabase = await createClient();
@@ -32,7 +50,11 @@ export async function GET() {
       );
     }
 
-    return NextResponse.json({ plans: plans || [] });
+    const response = { plans: plans || [] };
+
+    await CacheClient.setSubscriptionPlans(response);
+
+    return NextResponse.json(response);
   } catch (error) {
     console.error("Error in subscription plans API:", error);
     return NextResponse.json(
