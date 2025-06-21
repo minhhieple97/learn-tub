@@ -1,8 +1,13 @@
-import { NextResponse } from "next/server";
 import { getUserTotalCredits } from "@/features/payments/queries";
-import { getUserInSession } from "@/features/profile/queries";
+import {
+  getUserInSession,
+  updateProfileSettings,
+} from "@/features/profile/queries";
 import { IUserProfile } from "@/features/auth/types";
 import { CacheClient } from "@/lib/cache-client";
+import type { IProfileUpdate } from "@/types";
+import { StatusCodes } from "http-status-codes";
+import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
@@ -10,7 +15,7 @@ export async function GET() {
     if (!user) {
       return NextResponse.json(
         { error: "Authentication required" },
-        { status: 401 },
+        { status: StatusCodes.UNAUTHORIZED },
       );
     }
 
@@ -42,6 +47,49 @@ export async function GET() {
     return NextResponse.json(
       { error: "Authentication required" },
       { status: 401 },
+    );
+  }
+}
+
+export async function PUT(request: Request) {
+  try {
+    const user = await getUserInSession();
+    if (!user) {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: StatusCodes.UNAUTHORIZED },
+      );
+    }
+
+    const body: IProfileUpdate = await request.json();
+
+    if (!body.full_name && !body.avatar_url) {
+      return NextResponse.json(
+        { error: "At least one field must be provided" },
+        { status: 400 },
+      );
+    }
+
+    const result = await updateProfileSettings(user.id, body);
+
+    if (!result.success) {
+      return NextResponse.json(
+        { error: result.error || "Failed to update profile" },
+        { status: 500 },
+      );
+    }
+
+    await CacheClient.invalidateUserProfile(user.id);
+
+    return NextResponse.json({
+      success: true,
+      message: "Profile updated successfully",
+    });
+  } catch (error) {
+    console.error("Profile update error:", error);
+    return NextResponse.json(
+      { error: "Failed to update profile" },
+      { status: StatusCodes.INTERNAL_SERVER_ERROR },
     );
   }
 }

@@ -53,7 +53,7 @@ export type IActionResult<T = unknown> = {
 };
 
 export type IAsyncHookReturn<T = unknown> = {
-  data: T;
+  data?: T;
   isLoading: boolean;
   error?: string | null;
 };
@@ -84,3 +84,42 @@ export type ISearchHookReturn<T = unknown> = {
 export type ICreditActionCount = typeof CREDIT_ACTION_COUNTS;
 
 export type ICreditTransactionType = Database['public']['Enums']['transaction_type_enum'];
+
+// Profile management types
+export type IProfileUpdate = {
+  full_name?: string;
+  avatar_url?: string;
+};
+
+export type IProfileSettings = {
+  id: string;
+  email: string;
+  full_name: string | null;
+  avatar_url: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+};
+
+export type IProfileFormData = {
+  full_name: string;
+  avatar_url?: string;
+};
+
+export type IProfileHookReturn = IAsyncHookReturn<IProfileSettings> & {
+  updateProfile: (data: IProfileUpdate) => Promise<void>;
+  isUpdating: boolean;
+  updateError?: string | null;
+};
+
+export type IFileUploadResult = {
+  url: string;
+  error?: string;
+};
+
+export type IAvatarUploadHookReturn = {
+  uploadAvatar: (file: File) => Promise<IFileUploadResult>;
+  isUploading: boolean;
+  uploadError?: string | null;
+};
+
+export {};

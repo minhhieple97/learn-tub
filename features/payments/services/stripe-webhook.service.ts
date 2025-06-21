@@ -651,8 +651,11 @@ export class StripeWebhookService {
         console.error('❌ Failed to expire credit buckets:', bucketExpireResult.error);
       } else if (bucketExpireResult.expiredBuckets.length > 0) {
         const transactions = bucketExpireResult.expiredBuckets
-          .filter((bucket) => bucket.credits_remaining && bucket.credits_remaining > 0)
-          .map((bucket) => ({
+          .filter(
+            (bucket: { credits_remaining: number }) =>
+              bucket.credits_remaining && bucket.credits_remaining > 0,
+          )
+          .map((bucket: { user_id: string; credits_remaining: number; description: string }) => ({
             user_id: bucket.user_id,
             amount: -(bucket.credits_remaining || 0),
             type: TRANSACTION_TYPES.MONTHLY_RESET,
