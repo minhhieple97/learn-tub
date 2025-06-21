@@ -17,6 +17,8 @@ import { toast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogOverlay } from "@/components/ui/dialog";
 import { PricingDialog } from "@/features/payments/components/pricing-dialog";
+import Link from "next/link";
+import { routes } from "@/routes";
 
 type UserMenuProps = {
   user: User & {
@@ -137,7 +139,9 @@ export function UserMenu({ user }: UserMenuProps) {
           </DropdownMenuItem>
           <DropdownMenuItem className="cursor-pointer">
             <Settings className="mr-2 size-4" />
-            <span>Account Settings</span>
+            <span>
+              <Link href={routes.settings.root}>Account Settings</Link>
+            </span>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem

@@ -172,11 +172,62 @@ export async function getUserActiveSubscription(userId: string) {
     )
     .eq('user_id', userId)
     .eq('status', USER_SUBSCRIPTION_STATUS.ACTIVE)
-    .eq('cancel_at_period_end', false)
     .gte('current_period_end', now)
     .maybeSingle();
 
   return { data, error };
+}
+
+// New function to get user subscription with more detailed status
+export async function getUserSubscriptionWithStatus(userId: string) {
+  const supabase = await createClient();
+  const now = new Date().toISOString();
+
+  const { data, error } = await supabase
+    .from('user_subscriptions')
+    .select(
+      `
+      *,
+      subscription_plans (
+        id,
+        name,
+        price_cents,
+        credits_per_month,
+        stripe_price_id,
+        stripe_product_id
+      )
+    `,
+    )
+    .eq('user_id', userId)
+    .eq('status', USER_SUBSCRIPTION_STATUS.ACTIVE)
+    .gte('current_period_end', now)
+    .maybeSingle();
+
+  if (error) {
+    return { data: null, error };
+  }
+
+  // Calculate subscription status details
+  const subscription = data;
+  const hasActiveSubscription = !!subscription;
+  const isCancelled = subscription?.cancel_at_period_end === true;
+
+  let daysRemaining = 0;
+  if (subscription?.current_period_end) {
+    const endDate = new Date(subscription.current_period_end);
+    const diffTime = endDate.getTime() - new Date().getTime();
+    daysRemaining = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+  }
+
+  return {
+    data: {
+      subscription,
+      hasActiveSubscription,
+      isCancelled,
+      daysRemaining,
+    },
+    error: null,
+  };
 }
 
 export async function checkUserHasActivePlan(userId: string, planId: string) {
