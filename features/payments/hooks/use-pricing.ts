@@ -69,8 +69,9 @@ export const usePricing = () => {
         return false;
       }
 
+
       if (hasActiveSubscription && !isSubscriptionCancelled(currentSubscription)) {
-        return false;
+        return true;
       }
 
       return true;
@@ -128,8 +129,10 @@ export const usePricing = () => {
       return;
     }
 
-    if (!canSubscribeToPlan(planId)) {
-      console.warn(`Cannot subscribe to plan ${planId}: user already has an active subscription`);
+    const status = getSubscriptionStatus(planId);
+
+    if (status === 'active' || status === 'active-cancelled') {
+      console.warn(`Cannot subscribe to plan ${planId}: user already has this plan`);
       return;
     }
 
