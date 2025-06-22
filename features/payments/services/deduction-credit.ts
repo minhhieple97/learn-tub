@@ -3,12 +3,11 @@ import {
   checkAvailableCreditsForDeduction,
   executeCreditDeduction,
 } from '@/features/payments/queries';
-
-type TransactionType = keyof typeof CREDIT_ACTION_COUNTS;
+import { ITransactionType } from '@/types';
 
 export type ICreditDeductionRequest = {
   userId: string;
-  command: TransactionType;
+  command: ITransactionType;
   description?: string;
   relatedActionId?: string;
 };
@@ -72,7 +71,7 @@ export class CreditDeductionService {
 
   static async validateUserAction(
     userId: string,
-    command: TransactionType,
+    command: ITransactionType,
   ): Promise<{ canProceed: boolean; error?: string; availableCredits?: number }> {
     const requiredCredits = CREDIT_ACTION_COUNTS[command];
 

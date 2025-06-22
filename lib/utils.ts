@@ -41,7 +41,6 @@ export const isValidYouTubeUrl = (url: string): boolean => {
 export const dotPatternUrl =
   "data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fillRule='evenodd'%3E%3Cg fill='%23ffffff' fillOpacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E";
 
-// Simple utility to format relative time
 export const formatDistanceToNow = (date: Date): string => {
   const now = new Date();
   const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
@@ -65,9 +64,7 @@ export const formatDuration = (seconds: number): string => {
   const secs = Math.floor(seconds % 60);
 
   if (hours > 0) {
-    return `${hours}:${minutes.toString().padStart(2, "0")}:${secs
-      .toString()
-      .padStart(2, "0")}`;
+    return `${hours}:${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   }
 
   return `${minutes}:${secs.toString().padStart(2, "0")}`;
@@ -138,9 +135,7 @@ Points to Review:
 ${feedback.incorrect_points.map((point) => `• ${point}`).join("\n")}
 
 Improvement Suggestions:
-${feedback.improvement_suggestions
-  .map((suggestion) => `• ${suggestion}`)
-  .join("\n")}
+${feedback.improvement_suggestions.map((suggestion) => `• ${suggestion}`).join("\n")}
 
 Detailed Analysis:
 ${feedback.detailed_analysis}`;

@@ -1,5 +1,6 @@
 import { env } from '@/env.mjs';
-import { IPricingData } from '@/features/payments';
+import { Database, Constants } from '@/database.types';
+import { createEnumConstants } from '@/lib/enum-utils';
 
 export const YOUTUBE_API = {
   BASE_URL: 'https://www.googleapis.com/youtube/v3/videos',
@@ -82,17 +83,7 @@ export const AI_EVALUATION = {
   SCORE_GOOD_THRESHOLD: 6,
 } as const;
 
-export const TRANSACTION_TYPES = {
-  MONTHLY_RESET: 'monthly_reset',
-  PURCHASE: 'purchase',
-  REFUND: 'refund',
-  BONUS: 'bonus',
-  SUBSCRIPTION_GRANT: 'subscription_grant',
-  ADMIN_ADJUSTMENT: 'admin_adjustment',
-  EVALUATE_NOTE: 'evaluate_note',
-  GENERATE_QUIZZ_QUESTIONS: 'generate_quizz_questions',
-  EVALUATE_QUIZZ_ANSWERS: 'evaluate_quizz_answers',
-} as const;
+export const TRANSACTION_TYPES = createEnumConstants(Constants.public.Enums.transaction_type_enum);
 
 export const AI_COMMANDS = {
   EVALUATE_NOTE: TRANSACTION_TYPES.EVALUATE_NOTE,
@@ -343,25 +334,13 @@ export const CREDIT_RESET_MESSAGES = {
   ERROR: 'Credit reset failed',
 } as const;
 
-export const CREDIT_SOURCE_TYPES = {
-  SUBSCRIPTION: 'subscription',
-  PURCHASE: 'purchase',
-  BONUS: 'bonus',
-  GIFT: 'gift',
-  REFUND: 'refund',
-  ADMIN_ADJUSTMENT: 'admin_adjustment',
-  REFERRAL_BONUS: 'referral_bonus',
-  PROMOTIONAL: 'promotional',
-  COMPENSATION: 'compensation',
-  CANCELLED_PLAN: 'cancelled_plan',
-} as const;
+export const CREDIT_SOURCE_TYPES = createEnumConstants(
+  Constants.public.Enums.credit_source_type_enum,
+);
 
-export const CREDIT_BUCKET_STATUS = {
-  ACTIVE: 'active',
-  EXHAUSTED: 'exhausted',
-  EXPIRED: 'expired',
-  CANCELLED: 'cancelled',
-} as const;
+export const CREDIT_BUCKET_STATUS = createEnumConstants(
+  Constants.public.Enums.credit_bucket_status_enum,
+);
 
 export const CREDIT_EXPIRATION_CONFIG = {
   SUBSCRIPTION_DAYS: CREDIT_RESET_CONFIG.RESET_INTERVAL_DAYS,
@@ -369,10 +348,7 @@ export const CREDIT_EXPIRATION_CONFIG = {
   NEVER_EXPIRES: null,
 } as const;
 
-export const USER_SUBSCRIPTION_STATUS = {
-  ACTIVE: 'active',
-  EXHAUSTED: 'exhausted',
-  EXPIRED: 'expired',
-  CANCELLED: 'cancelled',
-} as const;
 
+export const USER_SUBSCRIPTION_STATUS = createEnumConstants(
+  Constants.public.Enums.subscription_status,
+);

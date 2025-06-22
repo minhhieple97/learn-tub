@@ -3,7 +3,7 @@ import { IUserSubscriptionStatus, ISubscriptionData } from '../types';
 import { USER_SUBSCRIPTION_STATUS } from '@/config/constants';
 import { CacheClient } from '@/lib/cache-client';
 
-export async function getUserSubscription(userId: string) {
+export const getUserSubscription = async (userId: string) => {
   const supabase = await createClient();
 
   const { data, error } = await supabase
@@ -14,9 +14,9 @@ export async function getUserSubscription(userId: string) {
     .single();
 
   return { data, error };
-}
+};
 
-export async function getUserStripeCustomerId(userId: string) {
+export const getUserStripeCustomerId = async (userId: string) => {
   const supabase = await createClient();
 
   const { data, error } = await supabase
@@ -26,9 +26,9 @@ export async function getUserStripeCustomerId(userId: string) {
     .single();
 
   return { data, error };
-}
+};
 
-export async function getUserByStripeCustomerId(customerId: string) {
+export const getUserByStripeCustomerId = async (customerId: string) => {
   const supabase = await createClient();
 
   const { data, error } = await supabase
@@ -38,13 +38,13 @@ export async function getUserByStripeCustomerId(customerId: string) {
     .single();
 
   return { data, error };
-}
+};
 
-export async function upsertUserSubscription(
+export const upsertUserSubscription = async (
   userId: string,
   planId: string,
   subscriptionData: ISubscriptionData,
-) {
+) => {
   const supabase = await createClient();
 
   const { data, error } = await supabase
@@ -69,15 +69,15 @@ export async function upsertUserSubscription(
   }
 
   return { data, error };
-}
+};
 
-export async function updateSubscriptionStatus(
+export const updateSubscriptionStatus = async (
   subscriptionId: string,
   status: IUserSubscriptionStatus,
   periodStart?: number,
   periodEnd?: number,
   cancelAtPeriodEnd?: boolean,
-) {
+) => {
   const supabase = await createClient();
 
   const { data, error } = await supabase
@@ -104,11 +104,9 @@ export async function updateSubscriptionStatus(
   }
 
   return { data, error };
-}
+};
 
-export async function getUserActiveSubscription(
-  userId: string,
-): Promise<{ data: any; error: any }> {
+export const getUserActiveSubscription = async (userId: string): Promise<{ data: any; error: any }> => {
   const cachedSubscription = await CacheClient.getUserSubscription<{ data: any; error: any }>(
     userId,
   );
@@ -148,9 +146,9 @@ export async function getUserActiveSubscription(
   }
 
   return result;
-}
+};
 
-export async function getUserSubscriptionWithStatus(userId: string) {
+export const getUserSubscriptionWithStatus = async (userId: string) => {
   const supabase = await createClient();
   const now = new Date().toISOString();
 
@@ -199,9 +197,9 @@ export async function getUserSubscriptionWithStatus(userId: string) {
     },
     error: null,
   };
-}
+};
 
-export async function checkUserHasActivePlan(userId: string, planId: string) {
+export const checkUserHasActivePlan = async (userId: string, planId: string) => {
   const supabase = await createClient();
   const now = new Date().toISOString();
 
@@ -219,9 +217,9 @@ export async function checkUserHasActivePlan(userId: string, planId: string) {
     hasActivePlan: !!data && !error,
     error: error?.code === 'PGRST116' ? null : error,
   };
-}
+};
 
-export async function checkUserHasAnyActiveSubscription(userId: string) {
+export const checkUserHasAnyActiveSubscription = async (userId: string) => {
   const supabase = await createClient();
   const now = new Date().toISOString();
 
@@ -239,12 +237,12 @@ export async function checkUserHasAnyActiveSubscription(userId: string) {
     subscription: data,
     error: error?.code === 'PGRST116' ? null : error,
   };
-}
+};
 
-export async function getActiveSubscriptionByStripeIds(
+export const getActiveSubscriptionByStripeIds = async (
   stripeCustomerId: string,
   stripeSubscriptionId: string,
-) {
+) => {
   const supabase = await createClient();
 
   const { data, error } = await supabase
@@ -266,9 +264,9 @@ export async function getActiveSubscriptionByStripeIds(
     .single();
 
   return { data, error };
-}
+};
 
-export async function expireUserSubscription(subscriptionId: string) {
+export const expireUserSubscription = async (subscriptionId: string) => {
   const supabase = await createClient();
 
   const { data, error } = await supabase
@@ -282,16 +280,16 @@ export async function expireUserSubscription(subscriptionId: string) {
     .single();
 
   return { data, error };
-}
+};
 
-export async function createNewUserSubscription(
+export const createNewUserSubscription = async (
   userId: string,
   planId: string,
   stripeCustomerId: string,
   stripeSubscriptionId: string,
   periodStart: Date,
   periodEnd: Date,
-) {
+) => {
   const supabase = await createClient();
 
   const { data, error } = await supabase
@@ -310,13 +308,13 @@ export async function createNewUserSubscription(
     .single();
 
   return { data, error };
-}
+};
 
-export async function updateSubscriptionCancellation(
+export const updateSubscriptionCancellation = async (
   stripeCustomerId: string,
   stripeSubscriptionId: string,
   cancelAtPeriodEnd: boolean,
-) {
+) => {
   const supabase = await createClient();
 
   const { data, error } = await supabase
@@ -331,7 +329,6 @@ export async function updateSubscriptionCancellation(
     .select()
     .single();
 
-
   if (!error && data) {
     await Promise.all([
       CacheClient.invalidateUserSubscription(data.user_id),
@@ -340,15 +337,15 @@ export async function updateSubscriptionCancellation(
   }
 
   return { data, error };
-}
+};
 
-export async function getUsersWithActiveSubscriptions() {
-  const supabase = await createClient();
+export const getUsersWithActiveSubscriptions = async () => {
+    const supabase = await createClient();
 
-  const { data, error } = await supabase
-    .from('user_subscriptions')
-    .select(
-      `
+    const { data, error } = await supabase
+      .from('user_subscriptions')
+      .select(
+        `
       user_id,
       plan_id,
       status,
@@ -360,14 +357,14 @@ export async function getUsersWithActiveSubscriptions() {
         credits_per_month
       )
     `,
-    )
-    .eq('status', USER_SUBSCRIPTION_STATUS.ACTIVE)
-    .eq('cancel_at_period_end', false);
+      )
+      .eq('status', USER_SUBSCRIPTION_STATUS.ACTIVE)
+      .eq('cancel_at_period_end', false);
 
-  return { data, error };
-}
+    return { data, error };
+  };
 
-export async function cancelActiveFreePlan(userId: string, freePlanId: string) {
+export const cancelActiveFreePlan = async (userId: string, freePlanId: string) => {
   const supabase = await createClient();
 
   const { data, error } = await supabase
@@ -390,4 +387,4 @@ export async function cancelActiveFreePlan(userId: string, freePlanId: string) {
   }
 
   return { data, error };
-}
+};
