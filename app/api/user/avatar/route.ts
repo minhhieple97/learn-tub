@@ -1,5 +1,10 @@
 import { NextResponse } from "next/server";
-import { getUserInSession, uploadAvatar } from "@/features/profile/queries";
+import {
+  getUserInSession,
+  uploadAvatarFile,
+  updateProfileAvatar,
+} from "@/features/profile/queries";
+import { uploadAvatarSchema } from "@/features/auth/schemas";
 import { StatusCodes } from "http-status-codes";
 
 export async function POST(request: Request) {
@@ -16,7 +21,28 @@ export async function POST(request: Request) {
     const file = formData.get("file") as File;
 
     if (!file) {
-      return NextResponse.json({ error: "No file provided" }, { status: 400 });
+      return NextResponse.json(
+        { error: "No file provided" },
+        { status: StatusCodes.BAD_REQUEST },
+      );
+    }
+
+    // Validate file using Zod schema
+    const validationResult = uploadAvatarSchema.safeParse({ file });
+
+    if (!validationResult.success) {
+      const errors = validationResult.error.errors.map((err) => ({
+        field: err.path.join("."),
+        message: err.message,
+      }));
+
+      return NextResponse.json(
+        {
+          error: "File validation failed",
+          details: errors,
+        },
+        { status: StatusCodes.BAD_REQUEST },
+      );
     }
 
     const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
@@ -26,7 +52,7 @@ export async function POST(request: Request) {
           error:
             "Invalid file type. Please upload a JPEG, PNG, GIF, or WebP image.",
         },
-        { status: 400 },
+        { status: StatusCodes.BAD_REQUEST },
       );
     }
 
@@ -36,26 +62,42 @@ export async function POST(request: Request) {
         {
           error: "File size too large. Please upload a file smaller than 5MB.",
         },
-        { status: 400 },
+        { status: StatusCodes.BAD_REQUEST },
       );
     }
 
-    const result = await uploadAvatar(user.id, file);
+    const uploadResult = await uploadAvatarFile(user.id, file, {
+      bucket: "avatars",
+      cacheControl: "3600",
+      upsert: false,
+    });
 
-    if (result.error) {
-      return NextResponse.json({ error: result.error }, { status: 500 });
+    if (uploadResult.error) {
+      return NextResponse.json(
+        { error: uploadResult.error },
+        { status: StatusCodes.INTERNAL_SERVER_ERROR },
+      );
+    }
+
+    const updateResult = await updateProfileAvatar(user.id, uploadResult.url!);
+
+    if (!updateResult.success) {
+      return NextResponse.json(
+        { error: updateResult.error || "Failed to update profile avatar" },
+        { status: StatusCodes.INTERNAL_SERVER_ERROR },
+      );
     }
 
     return NextResponse.json({
       success: true,
-      url: result.url,
+      url: uploadResult.url,
       message: "Avatar uploaded successfully",
     });
   } catch (error) {
     console.error("Avatar upload error:", error);
     return NextResponse.json(
       { error: "Failed to upload avatar" },
-      { status: 500 },
+      { status: StatusCodes.INTERNAL_SERVER_ERROR },
     );
   }
 }

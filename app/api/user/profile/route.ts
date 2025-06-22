@@ -6,10 +6,10 @@ import { getUserTotalCredits } from "@/features/payments/queries";
 import {
   getProfileInSession,
   getUserInSession,
-  updateProfileSettings,
+  updateProfile,
 } from "@/features/profile/queries";
+import { updateProfileSchema } from "@/features/auth/schemas";
 import { CacheClient } from "@/lib/cache-client";
-import type { IProfileUpdate } from "@/types";
 import { StatusCodes } from "http-status-codes";
 import { NextResponse } from "next/server";
 
@@ -49,8 +49,8 @@ export async function GET() {
   } catch (error) {
     console.error("Profile API error:", error);
     return NextResponse.json(
-      { error: "Authentication required" },
-      { status: 401 },
+      { error: "Internal server error" },
+      { status: StatusCodes.INTERNAL_SERVER_ERROR },
     );
   }
 }
@@ -65,21 +65,44 @@ export async function PUT(request: Request) {
       );
     }
 
-    const body: IProfileUpdate = await request.json();
+    const body = await request.json();
 
-    if (!body.full_name && !body.avatar_url) {
+    const validationResult = updateProfileSchema.safeParse(body);
+
+    if (!validationResult.success) {
+      const errors = validationResult.error.errors.map((err) => ({
+        field: err.path.join("."),
+        message: err.message,
+      }));
+
       return NextResponse.json(
-        { error: "At least one field must be provided" },
-        { status: 400 },
+        {
+          error: "Validation failed",
+          details: errors,
+        },
+        { status: StatusCodes.BAD_REQUEST },
       );
     }
 
-    const result = await updateProfileSettings(user.id, body);
+    const validatedData = validationResult.data;
+
+    if (
+      !validatedData.full_name &&
+      !validatedData.avatar_url &&
+      !validatedData.learning_preferences
+    ) {
+      return NextResponse.json(
+        { error: "At least one field must be provided" },
+        { status: StatusCodes.BAD_REQUEST },
+      );
+    }
+
+    const result = await updateProfile(user.id, validatedData);
 
     if (!result.success) {
       return NextResponse.json(
         { error: result.error || "Failed to update profile" },
-        { status: 500 },
+        { status: StatusCodes.INTERNAL_SERVER_ERROR },
       );
     }
 
