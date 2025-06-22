@@ -1,9 +1,13 @@
+import {
+  IAuthUserProfile,
+  IAuthUserProfileWithCredits,
+} from "@/features/auth/types";
 import { getUserTotalCredits } from "@/features/payments/queries";
 import {
+  getProfileInSession,
   getUserInSession,
   updateProfileSettings,
 } from "@/features/profile/queries";
-import { IUserProfile } from "@/features/auth/types";
 import { CacheClient } from "@/lib/cache-client";
 import type { IProfileUpdate } from "@/types";
 import { StatusCodes } from "http-status-codes";
@@ -11,7 +15,7 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
-    const user = await getUserInSession();
+    const user = await getProfileInSession();
     if (!user) {
       return NextResponse.json(
         { error: "Authentication required" },
@@ -19,7 +23,7 @@ export async function GET() {
       );
     }
 
-    const cachedProfile = await CacheClient.getUserProfile<IUserProfile>(
+    const cachedProfile = await CacheClient.getUserProfile<IAuthUserProfile>(
       user.id,
     );
     if (cachedProfile) {
@@ -34,7 +38,7 @@ export async function GET() {
       console.error("Failed to fetch user credits:", creditsError);
     }
 
-    const payload: IUserProfile = {
+    const payload: IAuthUserProfileWithCredits = {
       ...user,
       credits: totalCredits,
     };

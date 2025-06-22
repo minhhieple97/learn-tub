@@ -1,7 +1,7 @@
 'use client';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useUserProfile } from '@/components/queries-client/user-profile';
+import { useUserProfile } from '@/features/auth/queries-client/user-profile';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { ICurrentUserAvatarProps } from '../types';
 
@@ -39,8 +39,8 @@ export const CurrentUserAvatar = ({ className, size = 'md' }: ICurrentUserAvatar
     );
   }
 
-  const profileImage = userProfile.user_metadata?.avatar_url;
-  const name = userProfile.user_metadata?.full_name;
+  const profileImage = userProfile.avatar_url;
+  const name = userProfile.full_name;
   const email = userProfile.email || '';
   const initials = getUserInitials(name, email);
 

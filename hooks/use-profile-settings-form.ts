@@ -1,13 +1,16 @@
 import { useState, useRef, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useUserProfile } from '@/components/queries-client/user-profile';
 import { useProfileSettings, useAvatarUpload } from '@/hooks/use-profile-settings';
 import { ProfileSchema } from '@/features/settings/schemas';
 import type { ProfileFormData } from '@/features/settings/types';
+import type { IUserProfile } from '@/types';
 
-export const useProfileSettingsForm = () => {
-  const { data: userProfile, isLoading: isProfileLoading } = useUserProfile();
+type UseProfileSettingsFormProps = {
+  userProfile: IUserProfile;
+};
+
+export const useProfileSettingsForm = ({ userProfile }: UseProfileSettingsFormProps) => {
   const { updateProfile, isUpdating } = useProfileSettings();
   const { uploadAvatar, isUploading } = useAvatarUpload();
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
@@ -30,9 +33,9 @@ export const useProfileSettingsForm = () => {
   useEffect(() => {
     if (userProfile) {
       reset({
-        full_name: userProfile.user_metadata?.full_name || '',
+        full_name: userProfile.full_name || '',
       });
-      setAvatarUrl(userProfile.user_metadata?.avatar_url || null);
+      setAvatarUrl(userProfile.avatar_url || null);
     }
   }, [userProfile, reset]);
 
@@ -85,7 +88,6 @@ export const useProfileSettingsForm = () => {
     avatarUrl,
 
     // Loading states
-    isProfileLoading,
     isUpdating,
     isUploading,
 

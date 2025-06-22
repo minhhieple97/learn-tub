@@ -8,15 +8,18 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Spinner } from '@/components/ui/spinner';
 import { Camera, User } from 'lucide-react';
 import { useProfileSettingsForm } from '@/hooks/use-profile-settings-form';
+import { IUserProfile } from '@/types';
 
-export const ProfileSettings = () => {
+type ProfileSettingsProps = {
+  userProfile: IUserProfile;
+};
+
+export const ProfileSettings = ({ userProfile }: ProfileSettingsProps) => {
   const {
     form,
     errors,
     isDirty,
-    userProfile,
     avatarUrl,
-    isProfileLoading,
     isUpdating,
     isUploading,
     fileInputRef,
@@ -25,34 +28,9 @@ export const ProfileSettings = () => {
     handleFileChange,
     handleReset,
     getUserInitials,
-  } = useProfileSettingsForm();
+  } = useProfileSettingsForm({ userProfile });
 
   const { register } = form;
-
-  if (isProfileLoading) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Profile Settings</CardTitle>
-          <CardDescription>Manage your personal information and avatar</CardDescription>
-        </CardHeader>
-        <CardContent className="flex items-center justify-center py-8">
-          <Spinner className="h-6 w-6" />
-        </CardContent>
-      </Card>
-    );
-  }
-
-  if (!userProfile) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Profile Settings</CardTitle>
-          <CardDescription>Unable to load profile information</CardDescription>
-        </CardHeader>
-      </Card>
-    );
-  }
 
   return (
     <Card>
@@ -69,11 +47,11 @@ export const ProfileSettings = () => {
           <div className="relative">
             <Avatar className="h-20 w-20">
               <AvatarImage
-                src={avatarUrl || userProfile.user_metadata?.avatar_url}
-                alt={userProfile.user_metadata?.full_name || userProfile.email || ''}
+                src={avatarUrl || userProfile.avatar_url || undefined}
+                alt={userProfile.full_name || userProfile.email || ''}
               />
               <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold text-lg">
-                {getUserInitials(userProfile.user_metadata?.full_name, userProfile.email || '')}
+                {getUserInitials(userProfile.full_name, userProfile.email || '')}
               </AvatarFallback>
             </Avatar>
             <Button

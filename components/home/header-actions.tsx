@@ -1,13 +1,11 @@
 "use client";
 
 import { ThemeToggle } from "@/components/shared/react-query/theme-toggle";
-import { User } from "@supabase/supabase-js";
 import { UserMenu } from "./user-menu";
+import { IAuthUserProfileWithCredits } from "@/features/auth/types";
 
 type HeaderActionsProps = {
-  user: User & {
-    credits: number;
-  };
+  user: IAuthUserProfileWithCredits;
 };
 
 export function HeaderActions({ user }: HeaderActionsProps) {

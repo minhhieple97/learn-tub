@@ -1,4 +1,4 @@
-import { checkAuth } from "@/lib/require-auth";
+import { checkProfile } from "@/lib/require-auth";
 import {
   SubscriptionManagement,
   ProfileSettings,
@@ -6,7 +6,7 @@ import {
 } from "@/features/settings/components";
 
 export default async function SettingsPage() {
-  await checkAuth();
+  const profile = await checkProfile();
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
       <div className="container mx-auto px-4 py-8">
@@ -14,7 +14,7 @@ export default async function SettingsPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-8">
-            <ProfileSettings />
+            <ProfileSettings userProfile={profile} />
             <SubscriptionManagement />
           </div>
 

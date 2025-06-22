@@ -1,6 +1,6 @@
 import type { z } from 'zod';
 import type { loginSchema, registerSchema } from './schemas';
-import { IActionResult } from '@/types';
+import { IActionResult, IUserProfile } from '@/types';
 import { User } from '@supabase/supabase-js';
 
 export type ILoginFormData = z.infer<typeof loginSchema>;
@@ -15,6 +15,8 @@ export type IAuthError = {
 
 export type IAuthResponse = IActionResult;
 
-export type IUserProfile = User & {
+export type IAuthUserProfile = IUserProfile;
+
+export type IAuthUserProfileWithCredits = IAuthUserProfile & {
   credits: number;
 };
