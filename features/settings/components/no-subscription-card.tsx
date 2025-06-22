@@ -1,24 +1,14 @@
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { CreditCard } from "lucide-react";
-import { PricingDialog } from "@/features/payments/components/pricing-dialog";
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import { CreditCard } from 'lucide-react';
+import { PricingDialog } from '@/features/payments/components/pricing-dialog';
+import type { INoSubscriptionCardProps } from '../types';
 
-type NoSubscriptionCardProps = {
-  onDialogOpenChange: (open: boolean) => void;
-  isDialogOpen: boolean;
-};
-
-export function NoSubscriptionCard({
+export const NoSubscriptionCard = ({
   onDialogOpenChange,
   isDialogOpen,
-}: NoSubscriptionCardProps) {
+}: INoSubscriptionCardProps) => {
   return (
     <Card>
       <CardHeader className="pb-4">
@@ -26,15 +16,12 @@ export function NoSubscriptionCard({
           <CreditCard className="w-5 h-5" />
           Subscription Management
         </CardTitle>
-        <CardDescription>
-          You don&apos;t have an active subscription
-        </CardDescription>
+        <CardDescription>You don&apos;t have an active subscription</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="text-center py-4">
           <p className="text-muted-foreground mb-4">
-            Subscribe to a plan to unlock premium features and get monthly AI
-            credits.
+            Subscribe to a plan to unlock premium features and get monthly AI credits.
           </p>
           <Dialog open={isDialogOpen} onOpenChange={onDialogOpenChange}>
             <DialogTrigger asChild>
@@ -48,4 +35,4 @@ export function NoSubscriptionCard({
       </CardContent>
     </Card>
   );
-}
+};

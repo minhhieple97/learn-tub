@@ -1,6 +1,6 @@
-import { Settings } from "lucide-react";
+import { Settings } from 'lucide-react';
 
-export function SettingsHeader() {
+export const SettingsHeader = () => {
   return (
     <div className="mb-8">
       <div className="flex items-center gap-3 mb-2">
@@ -8,9 +8,8 @@ export function SettingsHeader() {
         <h1 className="text-3xl font-bold text-foreground">Account Settings</h1>
       </div>
       <p className="text-muted-foreground">
-        Manage your account preferences, profile information, and subscription
-        settings
+        Manage your account preferences, profile information, and subscription settings
       </p>
     </div>
   );
-}
+};

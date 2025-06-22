@@ -1,15 +1,8 @@
-import { Button } from "@/components/ui/button";
-import { ExternalLink } from "lucide-react";
+import { Button } from '@/components/ui/button';
+import { ExternalLink } from 'lucide-react';
+import type { IManageBillingButtonProps } from '../types';
 
-type ManageBillingButtonProps = {
-  onExecute: () => void;
-  isPending: boolean;
-};
-
-export function ManageBillingButton({
-  onExecute,
-  isPending,
-}: ManageBillingButtonProps) {
+export const ManageBillingButton = ({ onExecute, isPending }: IManageBillingButtonProps) => {
   return (
     <Button onClick={onExecute} disabled={isPending} className="w-auto">
       {isPending ? (
@@ -25,4 +18,4 @@ export function ManageBillingButton({
       )}
     </Button>
   );
-}
+};

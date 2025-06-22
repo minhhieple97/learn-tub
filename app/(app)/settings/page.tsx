@@ -3,7 +3,7 @@ import {
   SubscriptionManagement,
   ProfileSettings,
   SettingsHeader,
-} from "@/components/settings";
+} from "@/features/settings/components";
 
 export default async function SettingsPage() {
   await checkAuth();

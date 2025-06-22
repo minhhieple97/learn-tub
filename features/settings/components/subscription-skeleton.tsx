@@ -1,6 +1,6 @@
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 
-export function SubscriptionSkeleton() {
+export const SubscriptionSkeleton = () => {
   return (
     <Card>
       <CardHeader className="pb-4">
@@ -30,4 +30,4 @@ export function SubscriptionSkeleton() {
       </CardContent>
     </Card>
   );
-}
+};
