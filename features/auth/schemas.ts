@@ -27,3 +27,19 @@ export const registerSchema = z
     message: "Passwords don't match",
     path: ['confirmPassword'],
   });
+
+export const updateProfileSchema = z.object({
+  full_name: z
+    .string()
+    .min(1, 'Full name is required')
+    .min(2, 'Full name must be at least 2 characters long')
+    .max(50, 'Full name must be less than 50 characters')
+    .nullable()
+    .optional(),
+  avatar_url: z.string().url('Please provide a valid URL').nullable().optional(),
+  learning_preferences: z.any().nullable().optional(),
+});
+
+export const uploadAvatarSchema = z.object({
+  file: z.instanceof(File, { message: 'Please provide a valid file' }),
+});

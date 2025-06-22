@@ -23,7 +23,7 @@ export const getProfileByUserId = cache(async (userId: string) => {
   const supabase = await createClient();
   const { data: profile } = await supabase
     .from('profiles')
-    .select('id')
+    .select('*')
     .eq('id', userId)
     .maybeSingle();
   return profile;
@@ -34,7 +34,7 @@ export const getProfileSettings = async (userId: string): Promise<IProfileSettin
 
   const { data: profile, error } = await supabase
     .from('profiles')
-    .select('id, email, full_name, avatar_url, created_at, updated_at')
+    .select('*')
     .eq('id', userId)
     .single();
 

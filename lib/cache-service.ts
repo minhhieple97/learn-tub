@@ -1,8 +1,8 @@
+import { IAuthUserProfileWithCredits } from "@/features/auth/types";
 import { CacheClient } from "./cache-client";
 import { getUserTotalCredits } from "@/features/payments/queries/credit-buckets";
 import { getUserActiveSubscription } from "@/features/payments/queries/user-subscriptions";
-import { getUserInSession } from "@/features/profile/queries";
-import { IUserProfile } from "@/features/auth/types";
+import { getProfileInSession } from "@/features/profile/queries";
 
 export class CacheService {
   static async warmUserCache(userId: string): Promise<{
@@ -10,16 +10,16 @@ export class CacheService {
     error?: string;
   }> {
     try {
-      const [userResult, creditsResult, subscriptionResult] =
+      const [profileResult, creditsResult, subscriptionResult] =
         await Promise.allSettled([
-          getUserInSession(),
+          getProfileInSession(),
           getUserTotalCredits(userId),
           getUserActiveSubscription(userId),
         ]);
 
-      let user = null;
-      if (userResult.status === "fulfilled") {
-        user = userResult.value;
+      let profile = null;
+      if (profileResult.status === "fulfilled") {
+        profile = profileResult.value;
       }
 
       let credits = 0;
@@ -32,13 +32,18 @@ export class CacheService {
         subscription = subscriptionResult.value;
       }
 
-      if (user) {
-        const profile: IUserProfile = {
-          ...user,
+      if (profile) {
+        const userProfileWithCredits: IAuthUserProfileWithCredits = {
+          ...profile,
           credits,
         };
 
-        await CacheClient.warmUserCache(userId, profile, credits, subscription);
+        await CacheClient.warmUserCache(
+          userId,
+          userProfileWithCredits,
+          credits,
+          subscription,
+        );
       }
 
       return { success: true };

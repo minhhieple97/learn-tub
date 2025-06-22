@@ -4,7 +4,7 @@ import { HeaderContainer } from "@/components/home/header-container";
 import { HeaderLogo } from "@/components/home/header-logo";
 import { HeaderActions } from "@/components/home/header-actions";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useUserProfile } from "@/components/queries-client/user-profile";
+import { useUserProfile } from "@/features/auth/queries-client/user-profile";
 
 export function ClientHeader() {
   const { data, isLoading, error } = useUserProfile();

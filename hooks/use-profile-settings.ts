@@ -1,126 +1,92 @@
-import { useState, useCallback } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useCallback } from 'react';
+import { useAction } from 'next-safe-action/hooks';
+import { useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/hooks/use-toast';
-import type {
-  IProfileUpdate,
-  IFileUploadResult,
-  IProfileHookReturn,
-  IAvatarUploadHookReturn,
-} from '@/types';
-import { USER_PROFILE_QUERY_KEY } from '@/components/queries-client/user-profile';
+import { updateProfileAction, uploadAvatarAction } from '@/features/auth/actions';
+import { USER_PROFILE_QUERY_KEY } from '@/features/auth/constants';
+import type { IProfileUpdate, IFileUploadResult } from '@/types';
 
-export const useProfileSettings = (): IProfileHookReturn => {
-  const [isUpdating, setIsUpdating] = useState(false);
-  const [updateError, setUpdateError] = useState<string | null>(null);
+export const useProfileSettings = () => {
   const queryClient = useQueryClient();
 
-  const updateProfileMutation = useMutation({
-    mutationFn: async (data: IProfileUpdate) => {
-      const response = await fetch('/api/user/profile', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to update profile');
-      }
-
-      return response.json();
-    },
-    onSuccess: () => {
+  const { execute, isPending, result } = useAction(updateProfileAction, {
+    onSuccess: ({ data }) => {
       queryClient.invalidateQueries({ queryKey: USER_PROFILE_QUERY_KEY });
       toast({
         title: 'Success',
-        description: 'Profile updated successfully',
+        description: data?.message || 'Profile updated successfully',
       });
-      setUpdateError(null);
     },
-    onError: (error: Error) => {
-      const errorMessage = error.message || 'Failed to update profile';
-      setUpdateError(errorMessage);
+    onError: ({ error }) => {
       toast({
         title: 'Error',
-        description: errorMessage,
+        description: error.serverError || 'Failed to update profile',
         variant: 'destructive',
       });
-    },
-    onSettled: () => {
-      setIsUpdating(false);
     },
   });
 
   const updateProfile = useCallback(
     async (data: IProfileUpdate) => {
-      setIsUpdating(true);
-      setUpdateError(null);
-      updateProfileMutation.mutate(data);
+      execute(data);
     },
-    [updateProfileMutation],
+    [execute],
   );
 
   return {
     updateProfile,
-    isUpdating,
-    updateError,
-    data: undefined,
-    isLoading: false,
-    error: updateError,
+    isUpdating: isPending,
+    updateError: result?.serverError || null,
+    result,
   };
 };
 
-export const useAvatarUpload = (): IAvatarUploadHookReturn => {
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadError, setUploadError] = useState<string | null>(null);
+export const useAvatarUpload = () => {
+  const queryClient = useQueryClient();
 
-  const uploadAvatar = useCallback(async (file: File): Promise<IFileUploadResult> => {
-    setIsUploading(true);
-    setUploadError(null);
-
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
-
-      const response = await fetch('/api/user/avatar', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to upload avatar');
-      }
-
-      const result = await response.json();
-
+  const { executeAsync, isPending, result } = useAction(uploadAvatarAction, {
+    onSuccess: ({ data }) => {
+      queryClient.invalidateQueries({ queryKey: USER_PROFILE_QUERY_KEY });
       toast({
         title: 'Success',
-        description: 'Avatar uploaded successfully',
+        description: data?.message || 'Avatar uploaded successfully',
       });
-
-      return { url: result.url };
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to upload avatar';
-      setUploadError(errorMessage);
-
+    },
+    onError: ({ error }) => {
       toast({
         title: 'Error',
-        description: errorMessage,
+        description: error.serverError || 'Failed to upload avatar',
         variant: 'destructive',
       });
+    },
+  });
 
-      return { url: '', error: errorMessage };
-    } finally {
-      setIsUploading(false);
-    }
-  }, []);
+  const uploadAvatar = useCallback(
+    async (file: File): Promise<IFileUploadResult> => {
+      try {
+        const actionResult = await executeAsync({ file });
+
+        if (actionResult?.data?.url) {
+          return { url: actionResult.data.url };
+        }
+
+        return {
+          url: '',
+          error: 'Failed to upload avatar',
+        };
+      } catch (error) {
+        return {
+          url: '',
+          error: 'Failed to upload avatar',
+        };
+      }
+    },
+    [executeAsync],
+  );
 
   return {
     uploadAvatar,
-    isUploading,
-    uploadError,
+    isUploading: isPending,
+    uploadError: result?.serverError || null,
   };
 };
