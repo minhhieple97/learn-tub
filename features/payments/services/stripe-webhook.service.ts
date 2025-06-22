@@ -19,6 +19,7 @@ import {
   expireUserSubscription,
   createNewUserSubscription,
   updateSubscriptionCancellation,
+  cancelActiveFreePlan,
 } from '../queries';
 import {
   PAYMENT_CONFIG_MODES,
@@ -28,7 +29,7 @@ import {
   CREDIT_EXPIRATION_CONFIG,
   USER_SUBSCRIPTION_STATUS,
 } from '@/config/constants';
-import { STRIPE_BILLING_REASON } from '../constants';
+import { STRIPE_BILLING_REASON, PLAN_ID_MAPPING } from '../constants';
 import { IStripeSubscription, IStripeInvoice } from '../types';
 
 const stripe = require('stripe')(env.STRIPE_SECRET_KEY);
@@ -149,7 +150,6 @@ export class StripeWebhookService {
       await this.handleCreditsPurchase(session);
     }
 
-    // Create payment history record
     const paymentType =
       session.mode === PAYMENT_CONFIG_MODES.SUBSCRIPTION
         ? PAYMENT_CONFIG_TYPES.SUBSCRIPTION
@@ -203,6 +203,24 @@ export class StripeWebhookService {
 
     const userSubscriptionId = userSubscription?.[0]?.id;
     await this.grantMonthlyCredits(userId, planId, userSubscriptionId);
+
+    const freePlanId = PLAN_ID_MAPPING.FREE;
+    if (planId !== freePlanId) {
+      try {
+        const { data: cancelledFreePlan, error: cancelError } = await cancelActiveFreePlan(
+          userId,
+          freePlanId,
+        );
+
+        if (cancelError) {
+          console.error(`⚠️ Failed to cancel active free plan for user ${userId}:`, cancelError);
+        } else if (cancelledFreePlan && cancelledFreePlan.length > 0) {
+          console.log(`🚫 Cancelled active free plan for user: ${userId}`);
+        }
+      } catch (error) {
+        console.error(`⚠️ Error cancelling active free plan for user ${userId}:`, error);
+      }
+    }
 
     console.log(`🎯 Subscription created/updated for user: ${userId}`);
   }
@@ -459,6 +477,24 @@ export class StripeWebhookService {
       console.log(`💰 Monthly credits granted for user: ${userId}`);
     } catch (error) {
       console.error('❌ Failed to grant monthly credits:', error);
+    }
+
+    const freePlanId = PLAN_ID_MAPPING.FREE;
+    if (planId !== freePlanId) {
+      try {
+        const { data: cancelledFreePlan, error: cancelError } = await cancelActiveFreePlan(
+          userId,
+          freePlanId,
+        );
+
+        if (cancelError) {
+          console.error(`⚠️ Failed to cancel active free plan for user ${userId}:`, cancelError);
+        } else if (cancelledFreePlan && cancelledFreePlan.length > 0) {
+          console.log(`🚫 Cancelled active free plan for user: ${userId}`);
+        }
+      } catch (error) {
+        console.error(`⚠️ Error cancelling active free plan for user ${userId}:`, error);
+      }
     }
 
     console.log(

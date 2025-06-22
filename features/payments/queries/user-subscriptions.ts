@@ -366,3 +366,28 @@ export async function getUsersWithActiveSubscriptions() {
 
   return { data, error };
 }
+
+export async function cancelActiveFreePlan(userId: string, freePlanId: string) {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from('user_subscriptions')
+    .update({
+      status: USER_SUBSCRIPTION_STATUS.CANCELLED,
+      cancel_at_period_end: true,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('user_id', userId)
+    .eq('plan_id', freePlanId)
+    .eq('status', USER_SUBSCRIPTION_STATUS.ACTIVE)
+    .select();
+
+  if (!error && data && data.length > 0) {
+    await Promise.all([
+      CacheClient.invalidateUserSubscription(userId),
+      CacheClient.invalidateUserProfile(userId),
+    ]);
+  }
+
+  return { data, error };
+}
