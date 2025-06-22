@@ -15,28 +15,16 @@ export const getProfileInSession = cache(async () => {
   if (!user) {
     return null;
   }
-  const profile = await getProfileByUserId(user.id);
-  return profile;
+  return await getProfileByUserId(user.id);
 });
 
 export const getProfileByUserId = cache(async (userId: string) => {
   const supabase = await createClient();
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', userId)
-    .maybeSingle();
-  return profile;
-});
-
-export const getProfileSettings = async (userId: string): Promise<IProfileSettings | null> => {
-  const supabase = await createClient();
-
   const { data: profile, error } = await supabase
     .from('profiles')
     .select('*')
     .eq('id', userId)
-    .single();
+    .maybeSingle();
 
   if (error) {
     console.error('Error fetching profile:', error);
@@ -44,48 +32,88 @@ export const getProfileSettings = async (userId: string): Promise<IProfileSettin
   }
 
   return profile;
+});
+
+export const getProfileSettings = async (userId: string): Promise<IProfileSettings | null> => {
+  return await getProfileByUserId(userId);
 };
 
-export const updateProfileSettings = async (
+export const updateProfile = async (
   userId: string,
   updates: IProfileUpdate,
-): Promise<{ success: boolean; error?: string }> => {
+): Promise<{ success: boolean; data?: any; error?: string }> => {
   const supabase = await createClient();
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('profiles')
     .update({
       ...updates,
       updated_at: new Date().toISOString(),
     })
-    .eq('id', userId);
+    .eq('id', userId)
+    .select()
+    .single();
 
   if (error) {
     console.error('Error updating profile:', error);
     return { success: false, error: error.message };
   }
 
-  return { success: true };
+  return { success: true, data };
 };
 
-export const uploadAvatar = async (
+export const uploadAvatarFile = async (
   userId: string,
   file: File,
-): Promise<{ url?: string; error?: string }> => {
+  options: {
+    bucket?: string;
+    cacheControl?: string;
+    upsert?: boolean;
+  } = {},
+): Promise<{ url?: string; filePath?: string; error?: string }> => {
   const supabase = await createClient();
 
-  const fileExt = file.name.split('.').pop();
-  const fileName = `${userId}-${Math.random()}.${fileExt}`;
-  const filePath = `avatars/${fileName}`;
+  const { bucket = 'avatars', cacheControl = '3600', upsert = false } = options;
 
-  const { error: uploadError } = await supabase.storage.from('avatars').upload(filePath, file);
+  const fileExt = file.name.split('.').pop();
+  const fileName = `${userId}-${Date.now()}.${fileExt}`;
+  const filePath = `${fileName}`;
+
+  const { error: uploadError } = await supabase.storage.from(bucket).upload(filePath, file, {
+    cacheControl,
+    upsert,
+  });
 
   if (uploadError) {
     console.error('Error uploading avatar:', uploadError);
     return { error: uploadError.message };
   }
 
-  const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
+  const {
+    data: { publicUrl },
+  } = supabase.storage.from(bucket).getPublicUrl(filePath);
 
-  return { url: data.publicUrl };
+  return { url: publicUrl, filePath };
+};
+
+export const updateProfileAvatar = async (
+  userId: string,
+  avatarUrl: string,
+): Promise<{ success: boolean; error?: string }> => {
+  const supabase = await createClient();
+
+  const { error } = await supabase
+    .from('profiles')
+    .update({
+      avatar_url: avatarUrl,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', userId);
+
+  if (error) {
+    console.error('Error updating profile avatar:', error);
+    return { success: false, error: error.message };
+  }
+
+  return { success: true };
 };
