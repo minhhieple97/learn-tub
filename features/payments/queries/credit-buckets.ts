@@ -3,7 +3,6 @@ import { Tables, TablesInsert, TablesUpdate } from '@/database.types';
 import {
   CREDIT_BUCKET_STATUS,
   CREDIT_SOURCE_TYPES,
-  CREDIT_ACTION_COUNTS,
   USER_SUBSCRIPTION_STATUS,
 } from '@/config/constants';
 import { ICreditSourceType } from '../types';
@@ -12,11 +11,11 @@ import {
   invalidateUserCacheOnCreditChange,
   invalidateMultipleUsersCacheOnCreditChange,
 } from './cache-utils';
+import { ITransactionType } from '@/types';
 
 // Credit deduction types
 type CreditBucket = Tables<'credit_buckets'>;
 type CreditTransaction = TablesInsert<'credit_transactions'>;
-type TransactionType = keyof typeof CREDIT_ACTION_COUNTS;
 
 export type ICreateCreditBucketInput = {
   userId: string;
@@ -451,7 +450,7 @@ export async function getActiveCreditBucketsForDeduction(userId: string): Promis
 
 export async function executeCreditDeduction(
   userId: string,
-  command: TransactionType,
+  command: ITransactionType,
   creditsToDeduct: number,
   description?: string,
   relatedActionId?: string,
