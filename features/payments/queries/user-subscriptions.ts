@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { IUserSubscriptionStatus, ISubscriptionData } from '../types';
-import { USER_SUBSCRIPTION_STATUS } from '@/config/constants';
+import { CREDIT_BUCKET_STATUS, USER_SUBSCRIPTION_STATUS } from '@/config/constants';
 import { CacheClient } from '@/lib/cache-client';
 
 export const getUserSubscription = async (userId: string) => {
@@ -106,7 +106,9 @@ export const updateSubscriptionStatus = async (
   return { data, error };
 };
 
-export const getUserActiveSubscription = async (userId: string): Promise<{ data: any; error: any }> => {
+export const getUserActiveSubscription = async (
+  userId: string,
+): Promise<{ data: any; error: any }> => {
   const cachedSubscription = await CacheClient.getUserSubscription<{ data: any; error: any }>(
     userId,
   );
@@ -340,12 +342,12 @@ export const updateSubscriptionCancellation = async (
 };
 
 export const getUsersWithActiveSubscriptions = async () => {
-    const supabase = await createClient();
+  const supabase = await createClient();
 
-    const { data, error } = await supabase
-      .from('user_subscriptions')
-      .select(
-        `
+  const { data, error } = await supabase
+    .from('user_subscriptions')
+    .select(
+      `
       user_id,
       plan_id,
       status,
@@ -357,12 +359,12 @@ export const getUsersWithActiveSubscriptions = async () => {
         credits_per_month
       )
     `,
-      )
-      .eq('status', USER_SUBSCRIPTION_STATUS.ACTIVE)
-      .eq('cancel_at_period_end', false);
+    )
+    .eq('status', USER_SUBSCRIPTION_STATUS.ACTIVE)
+    .eq('cancel_at_period_end', false);
 
-    return { data, error };
-  };
+  return { data, error };
+};
 
 export const cancelActiveFreePlan = async (userId: string, freePlanId: string) => {
   const supabase = await createClient();
@@ -379,8 +381,20 @@ export const cancelActiveFreePlan = async (userId: string, freePlanId: string) =
     .eq('status', USER_SUBSCRIPTION_STATUS.ACTIVE)
     .select();
 
+  const creditBucketsUpdateStatusPromises = data
+    ? data.map((subscription) => {
+        supabase
+          .from('credit_buckets')
+          .update({
+            status: CREDIT_BUCKET_STATUS.CANCELLED,
+          })
+          .eq('user_subscription_id', subscription.id);
+      })
+    : [];
+
   if (!error && data && data.length > 0) {
     await Promise.all([
+      ...creditBucketsUpdateStatusPromises,
       CacheClient.invalidateUserSubscription(userId),
       CacheClient.invalidateUserProfile(userId),
     ]);
