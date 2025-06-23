@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 import { NextRequest, NextResponse } from "next/server";
 import { env } from "@/env.mjs";
-import { createClient } from "@/lib/supabase/server";
 import { checkAuth } from "@/lib/require-auth";
 import { IPaymentDetails } from "@/features/payments/types";
+import { getSubscriptionPlanById } from "@/features/payments/queries/subscription-plans";
 
 const stripe = require("stripe")(env.STRIPE_SECRET_KEY);
 
@@ -40,12 +40,9 @@ export async function GET(
 
     if (session.mode === "subscription") {
       // Handle subscription payment
-      const supabase = await createClient();
-      const { data: plan } = await supabase
-        .from("subscription_plans")
-        .select("name")
-        .eq("id", session.metadata.plan_id)
-        .single();
+      const { data: plan } = await getSubscriptionPlanById(
+        session.metadata.plan_id,
+      );
 
       paymentDetails = {
         amount: session.amount_total || 0,

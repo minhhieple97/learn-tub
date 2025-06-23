@@ -12,7 +12,7 @@ import { INoteEvaluationRequest } from '@/features/notes/types';
 import { IFeedback, StreamChunk } from '@/types';
 import { aiUsageTracker } from '@/features/ai';
 import { AIClientFactory } from '@/features/ai/services/ai-client';
-import { createClient } from '@/lib/supabase/server';
+import { getAIModelName } from '../queries';
 
 type StreamController = ReadableStreamDefaultController<StreamChunk>;
 
@@ -21,12 +21,7 @@ class NoteService {
     const { aiModelId, content, context, userId } = request;
     const prompt = this.createEvaluationPrompt(content, context);
 
-    const supabase = await createClient();
-    const { data: modelData, error: modelError } = (await supabase
-      .from('ai_model_pricing_view')
-      .select('model_name')
-      .eq('id', aiModelId)
-      .single()) as { data: { model_name: string } | null; error: any };
+    const { data: modelData, error: modelError } = await getAIModelName(aiModelId);
 
     if (modelError || !modelData?.model_name) {
       throw new Error(`${EVALUATION_ERRORS.UNSUPPORTED_PROVIDER}: ${aiModelId}`);

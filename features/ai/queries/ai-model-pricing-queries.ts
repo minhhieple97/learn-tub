@@ -41,6 +41,18 @@ export const getAIModelPricing = cache(
   },
 );
 
+export const getAIModelCostDetails = async (aiModelId: string) => {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from('ai_model_pricing')
+    .select('input_cost_per_million_tokens, output_cost_per_million_tokens')
+    .eq('id', aiModelId)
+    .single();
+
+  return { data, error };
+};
+
 export const getAIModelOptions = cache(async (): Promise<IAIModelOption[]> => {
   const pricing = await getAIModelPricing({ is_active: true });
 
