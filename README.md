@@ -126,37 +126,89 @@ learn-tub/
 ├── app/                  # Next.js App Router: Pages, Layouts, Routes
 │   ├── (app)/            # Authenticated routes (dashboard, learn, settings)
 │   ├── (auth)/           # Authentication routes (login, register)
+│   ├── api/              # API routes for backend functionality
 │   └── auth/             # Auth callback and error pages/routes
 ├── components/           # Shared UI components
+│   ├── home/             # Homepage-specific components
+│   ├── pricing/          # Pricing page components
+│   ├── shared/           # Shared components across features
 │   └── ui/               # Shadcn UI components
-├── features/             # Feature-specific modules (AI, Auth, Notes, Videos)
-│   ├── ai/               # AI Usage Tracking System
-│   │   ├── types.ts      # TypeScript definitions with I prefix
-│   │   ├── schemas.ts    # Zod validation schemas
-│   │   ├── queries/      # Database operations for AI usage analytics
-│   │   ├── services/     # AI usage tracker service (singleton)
-│   │   ├── examples/     # Integration examples and usage patterns
-│   │   └── README.md     # Detailed AI usage tracking documentation
-│   ├── notes/            # Note-taking features with AI evaluation
-│   │   ├── components/   # Note UI components (evaluation, feedback display)
-│   │   ├── hooks/        # Note-related React hooks
-│   │   ├── services/     # Note service with integrated AI tracking
-│   │   └── types/        # Note-related TypeScript types
-│   ├── quizzes/          # Quiz features with AI generation
-│   │   ├── components/   # Quiz UI components
-│   │   ├── hooks/        # Quiz-related React hooks
-│   │   ├── services/     # Quiz service with integrated AI tracking
-│   │   └── types/        # Quiz-related TypeScript types
-│   ├── auth/
-│   └── videos/
-├── hooks/                # Custom React hooks (e.g., use-mobile, use-toast)
-├── lib/                  # Core utilities, Supabase clients, Safe Action setup
-│   ├── supabase/
-│   └── utils/
+├── features/             # Feature-specific modules organized by domain
+│   ├── ai/               # AI Usage Tracking & Integration System
+│   │   ├── components/   # AI model selector and UI components
+│   │   ├── hooks/        # AI-related React hooks (use-ai-models, use-ai-model-pricing)
+│   │   ├── queries/      # Database operations for AI usage analytics and model pricing
+│   │   ├── services/     # AI client service and usage tracker (singleton)
+│   │   ├── schemas.ts    # Zod validation schemas for AI operations
+│   │   └── types.ts      # TypeScript definitions with I prefix
+│   ├── auth/             # Authentication & User Management
+│   │   ├── actions/      # Server actions for auth operations
+│   │   ├── components/   # Login/register forms, Google auth button
+│   │   ├── hooks/        # Auth hooks (use-login, use-register, use-google-auth)
+│   │   ├── queries-client/ # Client-side user profile queries
+│   │   ├── constants.ts  # Auth-related constants
+│   │   ├── schemas.ts    # Auth validation schemas
+│   │   └── types.ts      # Auth-related TypeScript types
+│   ├── dashboard/        # Dashboard & Analytics
+│   │   ├── actions/      # Quiz dashboard actions
+│   │   ├── components/   # Dashboard widgets, quiz dashboard, statistics
+│   │   ├── hooks/        # Dashboard-specific hooks
+│   │   ├── queries/      # Dashboard data queries
+│   │   ├── schemas.ts    # Dashboard validation schemas
+│   │   └── types.ts      # Dashboard-related types
+│   ├── notes/            # Note-taking with AI Evaluation
+│   │   ├── actions/      # Note-related server actions
+│   │   ├── components/   # Note editor, evaluation UI, feedback display
+│   │   ├── hooks/        # Note hooks (use-note-evaluation, use-notes-search)
+│   │   ├── queries/      # Note database operations
+│   │   ├── services/     # Note service with AI integration
+│   │   ├── store/        # Zustand store for note management
+│   │   ├── schemas.ts    # Note validation schemas
+│   │   └── types.ts      # Note-related TypeScript types
+│   ├── payments/         # Payment & Subscription System
+│   │   ├── actions/      # Payment actions (billing, checkout, credits)
+│   │   ├── components/   # Pricing components, payment success
+│   │   ├── hooks/        # Payment hooks (use-pricing, use-payment-detail)
+│   │   ├── queries/      # Payment database operations
+│   │   ├── queries-client/ # Client-side subscription queries
+│   │   ├── services/     # Stripe webhook service, credit management
+│   │   ├── utils/        # Payment utility functions
+│   │   ├── constants.ts  # Payment constants
+│   │   ├── schemas.ts    # Payment validation schemas
+│   │   └── types.ts      # Payment-related TypeScript types
+│   ├── profile/          # User Profile Management
+│   │   └── queries/      # Profile database operations
+│   ├── quizzes/          # AI-Powered Quiz System
+│   │   ├── actions/      # Quiz actions (generate, evaluate)
+│   │   ├── components/   # Quiz UI, question cards, results display
+│   │   ├── hooks/        # Quiz hooks (use-quiz, use-quiz-retake)
+│   │   ├── queries/      # Quiz database operations
+│   │   ├── services/     # Quiz service with AI integration
+│   │   ├── store/        # Zustand store for quiz state management
+│   │   ├── schema.ts     # Quiz validation schemas
+│   │   └── types.ts      # Quiz-related TypeScript types
+│   ├── settings/         # User Settings & Preferences
+│   │   ├── components/   # Settings UI components
+│   │   ├── hooks/        # Settings-related hooks
+│   │   ├── schemas.ts    # Settings validation schemas
+│   │   └── types.ts      # Settings-related types
+│   └── videos/           # Video Management & Player
+│       ├── actions/      # Video-related server actions
+│       ├── components/   # Video player, library, forms
+│       ├── hooks/        # Video hooks (use-youtube-player, use-videos)
+│       ├── queries/      # Video database operations
+│       ├── schemas.ts    # Video validation schemas
+│       ├── search-params.ts # URL search parameter definitions
+│       └── types.ts      # Video-related TypeScript types
+├── hooks/                # Global custom React hooks
+├── lib/                  # Core utilities and configurations
+│   ├── cache/            # Caching utilities
+│   ├── supabase/         # Supabase client configurations
+│   └── utils/            # Utility functions
 ├── public/               # Static assets
-├── supabase/             # Supabase local development files
-│   └── migrations/       # Database schema migrations (includes AI usage logs)
-├── .vscode/              # VSCode specific settings (Deno integration)
+├── supabase/             # Supabase local development
+│   └── migrations/       # Database schema migrations
+├── config/               # Configuration files
 ├── env.mjs               # Environment variable validation (t3-env)
 ├── middleware.ts         # Next.js middleware for route protection
 ├── package.json          # Project dependencies and scripts
@@ -197,15 +249,34 @@ npm run db           # Pull and reset database
 2. **Configure environment variables** in Vercel dashboard
 3. **Deploy** - Vercel will automatically build and deploy your app
 
-### Manual Deployment
+## 🎯 Development Milestones
 
-```bash
-# Build the application
-npm run build
+### Upcoming Features & Improvements
 
-# Start production server
-npm run start
-```
+- **🔄 Idempotent Stripe Event Processing**
+  - Implement idempotent handling for Stripe webhook events to prevent duplicate processing
+  - Add event deduplication mechanism and processing state tracking
+  - Ensure reliable payment and subscription event handling
+
+- **💳 Transaction-Safe Credit Processing**
+  - Set up database transactions for credit processing operations
+  - Implement Prisma wrapper for atomic credit deduction and allocation
+  - Ensure data consistency across credit buckets and user balances
+
+- **📝 Rich Text Editor for Notes**
+  - Implement advanced text editor for note-taking with formatting capabilities
+  - Add support for rich text, markdown, and structured content
+  - Enhance note-taking experience with better editing tools
+
+- **🖼️ Image Support in Notes**
+  - Allow users to paste and insert images directly into the text editor
+  - Implement image upload, storage, and optimization
+  - Support drag-and-drop image functionality
+
+- **📄 Note Export & Review System**
+  - Enable note export to Google Docs and PDF formats
+  - Implement AI review summaries for exported content
+  - Add batch export functionality for multiple notes
 
 ## 🤝 Contributing
 
@@ -216,158 +287,3 @@ We welcome contributions! Please follow these steps:
 3. Commit your changes (`git commit -m 'Add amazing feature'`)
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
-
-### Development Guidelines
-
-- Follow TypeScript best practices
-- Use functional components with hooks
-- Implement proper error handling
-- Write meaningful commit messages
-- Add tests for new features
-
-## 📊 Features in Detail
-
-### 🧠 AI-Powered Learning
-
-#### 📝 AI Note Evaluation
-
-- **Comprehensive Note Evaluation**: AI analyzes your notes for accuracy, completeness, and understanding
-- **Multiple AI Providers**: Choose between OpenAI and Google Gemini models for evaluation
-- **Real-time Streaming**: Get instant feedback as the AI processes your notes
-- **Structured Feedback**: Receive detailed analysis including correct points, areas for improvement, and specific suggestions
-- **Performance Scoring**: Get numerical ratings (1-10) to track your note-taking quality
-- **Copyable Insights**: Save or share AI feedback for future reference
-
-#### 🎯 AI Quiz Assistant
-
-- **Smart Question Generation**: AI creates 5-20 multiple-choice questions based on video content
-- **Adaptive Difficulty**: Choose from easy, medium, hard, or mixed difficulty levels
-- **Interactive Quiz Interface**: Beautiful, responsive UI with progress tracking and navigation
-- **Personalized Feedback**: Get detailed performance analysis with strengths and improvement areas
-- **Question Review**: Review each question with explanations and correct answers
-- **Topic-Based Analytics**: Performance breakdown by subject areas and difficulty levels
-- **Customizable Settings**: Adjust question count, difficulty, and AI provider preferences
-
-### 📝 Smart Note-Taking
-
-- Real-time synchronization with video timestamps
-- Rich text formatting and organization
-- Tag-based categorization system
-- Search and filter capabilities
-
-### 📈 Progress Analytics
-
-- Learning streak tracking
-- Time spent analysis
-- Completion rates and milestones
-- Visual progress dashboards
-
-## 🔒 Security & Privacy
-
-- **Authentication:** Secure user authentication via Supabase Auth
-- **Data Protection:** All user data encrypted and stored securely
-- **AI Usage Privacy:** AI tracking data is user-specific with Row Level Security
-- **Privacy First:** No tracking, no ads, user data stays private
-- **GDPR Compliant:** Full compliance with data protection regulations
-
-## 🤖 AI Features
-
-### AI Note Evaluation
-
-The AI evaluation system provides comprehensive feedback on your learning notes:
-
-- **Multi-Provider Support**: Choose between OpenAI and Google Gemini
-- **Streaming Responses**: Real-time feedback as AI analyzes your notes
-- **Automatic Tracking**: All AI interactions are automatically tracked for analytics
-- **Structured Analysis**: Get detailed feedback including:
-  - Overall summary and assessment
-  - Correct points identification
-  - Areas needing improvement
-  - Specific enhancement suggestions
-  - Numerical scoring (1-10 scale)
-  - Detailed analysis breakdown
-
-### AI Quiz Assistant
-
-The AI Quiz Assistant transforms passive video watching into active learning through intelligent testing:
-
-- **Intelligent Question Generation**: AI analyzes video content to create relevant multiple-choice questions
-- **Automatic Usage Tracking**: All quiz generation and evaluation is tracked for analytics
-- **Flexible Configuration**:
-  - **Question Count**: Generate 5-20 questions per quiz
-  - **Difficulty Levels**: Easy, medium, hard, or mixed difficulty
-  - **AI Provider Choice**: Select between OpenAI GPT models or Google Gemini
-- **Interactive Learning Experience**:
-  - **Progress Tracking**: Visual progress bars and question indicators
-  - **Navigation**: Jump between questions or navigate sequentially
-  - **Answer Validation**: Instant visual feedback for selected answers
-- **Comprehensive Feedback System**:
-  - **Performance Scoring**: Percentage-based scoring with detailed breakdowns
-  - **Personalized Analysis**: AI-generated insights on strengths and weaknesses
-  - **Question-by-Question Review**: Detailed explanations for each answer
-  - **Topic Performance**: Analytics grouped by subject areas
-- **Beautiful UI/UX**:
-  - **Responsive Design**: Works seamlessly on all devices
-  - **Dark/Light Theme**: Full compatibility with theme preferences
-  - **Smooth Animations**: Loading states and transitions for better UX
-  - **Accessibility**: ARIA labels and keyboard navigation support
-
-### AI Usage Analytics
-
-The comprehensive AI usage tracking system provides insights into your AI interactions:
-
-- **Usage Monitoring**: Track all AI operations across note evaluation and quiz features
-- **Cost Analysis**: Real-time cost calculation and budget tracking
-- **Performance Metrics**: Monitor response times, success rates, and error patterns
-- **Provider Comparison**: Compare performance and costs across different AI providers
-- **Historical Data**: Access detailed usage history and trends over time
-- **Privacy-First**: All tracking data is user-specific and secure
-
-## 💰 Pricing Plans
-
-LearnTub offers flexible pricing to match your learning needs:
-
-### Free Plan - $0/month
-- **50 AI credits** per month
-- **Unlimited note-taking**
-- **Basic AI analysis**
-- **Email support**
-- Perfect for trying out AI-powered learning
-
-### Pro Plan - $2/month
-- **500 AI credits** per month (10x more than free!)
-- **Unlimited note-taking**
-- **Advanced AI analysis** with detailed insights
-- **Priority support**
-- **Export functionality** for notes and data
-- **All AI features** including note evaluation and quiz generation
-
-### Additional Credits
-- Purchase extra credits anytime: **$1 for 100 credits**
-- No monthly commitment required
-- Credits never expire
-
-> **What are AI Credits?** Credits are used for AI-powered features like note evaluation and quiz generation. Each AI interaction consumes credits based on the complexity and length of the content.
-
-## 💡 Potential Future Enhancements
-
-- **Courses Feature**: Group videos into courses. (Schema exists)
-- **Advanced Search & Filtering**: For notes and videos.
-- **Spaced Repetition System (SRS)**: For quizzes and key concepts.
-- **Collaborative Note-Taking**: Allow users to share notes or collaborate.
-- **User Profile Customization**: More options for learning preferences.
-- **Enhanced AI Features**:
-  - Content summarization and insights
-  - Personalized learning recommendations
-  - Automated concept extraction
-  - Advanced quiz features (timed quizzes, adaptive difficulty)
-  - AI-powered study plans and learning paths
-- **Advanced AI Analytics**:
-  - Predictive cost modeling
-  - AI performance optimization recommendations
-  - Usage pattern analysis and insights
-  - Automated budget alerts and recommendations
-
-## 🤝 Contributing
-
-Contributions are welcome! Please follow standard Git practices: fork the repository, create a feature branch, and submit a pull request. Ensure your code adheres to the existing linting and formatting rules.
