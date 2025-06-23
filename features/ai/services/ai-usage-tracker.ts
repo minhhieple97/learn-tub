@@ -1,4 +1,5 @@
 import { createAIUsageLog } from '../queries';
+import { getAIModelCostDetails } from '../queries/ai-model-pricing-queries';
 import type {
   ITrackAIUsageRequest,
   IAICommand,
@@ -6,12 +7,10 @@ import type {
   ICostDetails,
   IAIUsageStatus,
 } from '../types';
-import { createClient } from '@/lib/supabase/server';
 
 class AIUsageTracker {
   private static instance: AIUsageTracker;
 
-  // Singleton pattern to ensure single instance
   public static getInstance(): AIUsageTracker {
     if (!AIUsageTracker.instance) {
       AIUsageTracker.instance = new AIUsageTracker();
@@ -19,14 +18,8 @@ class AIUsageTracker {
     return AIUsageTracker.instance;
   }
 
-  // Calculate cost based on provider, model, and token usage
   private async calculateCost(ai_model_id: string, tokenUsage: ITokenUsage): Promise<ICostDetails> {
-    const supabase = await createClient();
-    const { data: modelData, error } = await supabase
-      .from('ai_model_pricing')
-      .select('input_cost_per_million_tokens, output_cost_per_million_tokens')
-      .eq('id', ai_model_id)
-      .single();
+    const { data: modelData, error } = await getAIModelCostDetails(ai_model_id);
 
     if (error || !modelData) {
       return {
@@ -87,12 +80,10 @@ class AIUsageTracker {
 
       await createAIUsageLog(trackingData);
     } catch (error) {
-      // Log error but don't throw to avoid breaking the main AI operation
       console.error('Failed to track AI usage:', error);
     }
   }
 
-  // Create a wrapper function to track AI operations
   public async wrapAIOperation<T>(
     params: {
       user_id: string;
@@ -117,7 +108,6 @@ class AIUsageTracker {
     } finally {
       const duration = Date.now() - startTime;
 
-      // Track the usage
       await this.trackUsage({
         user_id: params.user_id,
         command: params.command,
@@ -131,7 +121,6 @@ class AIUsageTracker {
     }
   }
 
-  // Enhanced wrapper with token usage tracking
   public async wrapAIOperationWithTokens<T>(
     params: {
       user_id: string;
@@ -159,7 +148,6 @@ class AIUsageTracker {
     } finally {
       const duration = Date.now() - startTime;
 
-      // Track the usage with token information
       await this.trackUsage({
         user_id: params.user_id,
         command: params.command,
@@ -174,7 +162,6 @@ class AIUsageTracker {
     }
   }
 
-  // Get cost estimation for a request
   public async estimateCost(
     providerId: string,
     estimatedTokens: { input: number; output: number },
@@ -186,7 +173,6 @@ class AIUsageTracker {
     });
   }
 
-  // Batch tracking for multiple operations
   public async trackBatchUsage(usageData: ITrackAIUsageRequest[]): Promise<void> {
     try {
       await Promise.all(usageData.map((data) => createAIUsageLog(data)));
@@ -214,7 +200,6 @@ class AIUsageTracker {
       const operationResult = await operation();
       result = operationResult.result;
 
-      // Get usage information asynchronously
       try {
         tokenUsage = await operationResult.getUsage();
       } catch (usageError) {
@@ -229,7 +214,6 @@ class AIUsageTracker {
     } finally {
       const duration = Date.now() - startTime;
 
-      // Track the usage with token information
       await this.trackUsage({
         user_id: params.user_id,
         command: params.command,
@@ -263,7 +247,6 @@ class AIUsageTracker {
       const operationResult = await operation();
       result = operationResult.stream;
 
-      // Set up background usage tracking
       operationResult.getUsage().then(
         (tokenUsage) => {
           const duration = Date.now() - startTime;
@@ -309,7 +292,6 @@ class AIUsageTracker {
       status = 'error';
       errorMessage = error instanceof Error ? error.message : 'Unknown error';
 
-      // Track error immediately
       const duration = Date.now() - startTime;
       await this.trackUsage({
         user_id: params.user_id,
@@ -328,5 +310,4 @@ class AIUsageTracker {
   }
 }
 
-// Export singleton instance
 export const aiUsageTracker = AIUsageTracker.getInstance();

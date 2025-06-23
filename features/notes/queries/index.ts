@@ -45,6 +45,31 @@ export async function getNoteById(noteId: string, userId: string): Promise<INote
   return data;
 }
 
+export async function getNoteForEvaluation(noteId: string, userId: string) {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from('notes')
+    .select('content, timestamp_seconds')
+    .eq('id', noteId)
+    .eq('user_id', userId)
+    .single();
+
+  return { data, error };
+}
+
+export async function getAIModelName(aiModelId: string) {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from('ai_model_pricing_view')
+    .select('model_name')
+    .eq('id', aiModelId)
+    .single();
+
+  return { data, error };
+}
+
 export async function getUserNotes(userId: string, limit?: number): Promise<INote[]> {
   const supabase = await createClient();
 

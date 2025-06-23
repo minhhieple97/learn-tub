@@ -1,5 +1,4 @@
 import { NextRequest } from "next/server";
-import { createClient } from "@/lib/supabase/server";
 import {
   RESPONSE_HEADERS,
   CHUNK_TYPES,
@@ -9,7 +8,10 @@ import {
 } from "@/config/constants";
 import { INoteEvaluationRequest } from "@/features/notes/types";
 import { IFeedback, StreamChunk } from "@/types";
-import { createNoteInteraction } from "@/features/notes/queries";
+import {
+  createNoteInteraction,
+  getNoteForEvaluation,
+} from "@/features/notes/queries";
 import { noteService } from "@/features/notes/services/note-service";
 import { ActionError } from "@/lib/safe-action";
 import { RateLimiter } from "@/lib/rate-limiter";
@@ -68,7 +70,6 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    const supabase = await createClient();
     const rateLimitResult = await RateLimiter.checkRateLimit(user.id);
 
     if (!rateLimitResult.allowed) {
@@ -96,12 +97,10 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const { data: note, error: noteError } = await supabase
-      .from("notes")
-      .select("content, timestamp_seconds")
-      .eq("id", noteId)
-      .eq("user_id", profile.id)
-      .single();
+    const { data: note, error: noteError } = await getNoteForEvaluation(
+      noteId,
+      profile.id,
+    );
 
     if (noteError || !note) {
       return new Response(ERROR_MESSAGES.NOTE_NOT_FOUND, {
