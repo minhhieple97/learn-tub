@@ -114,7 +114,7 @@ export const parseDuration = (duration: string): number => {
 
 export const extractYouTubeId = (url: string): string | null => {
   const match = url.match(YOUTUBE_PATTERNS.URL_REGEX);
-  return match ? match[1] : null;
+  return match ? match[1] || null : null;
 };
 
 export const getYouTubeThumbnailUrl = (videoId: string): string => {
