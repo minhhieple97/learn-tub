@@ -1,5 +1,3 @@
-onlyBuiltDependencies:
-  - supabase
 packages:
-  - "apps/*"
-  - "packages/*"
+  - 'apps/*'
+  - 'packages/*'
