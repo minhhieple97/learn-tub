@@ -1,5 +1,4 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { prisma } from '@repo/db';
 import { PrismaService } from '../prisma/prisma.service';
 
 export interface CreatePaymentHistoryDto {

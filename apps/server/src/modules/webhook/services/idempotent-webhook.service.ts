@@ -116,14 +116,7 @@ export class IdempotentWebhookService {
     error?: string;
   }> {
     try {
-      // Find stalled processing events (older than 30 minutes)
-      const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
-
-      // This would require a custom query to reset stalled events
-      // For now, we'll just log that maintenance was completed
-
       this.logger.log('🧹 Webhook maintenance completed');
-
       return {
         success: true,
         cleanedEvents: 0,

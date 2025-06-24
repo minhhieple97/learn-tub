@@ -32,7 +32,7 @@ export class WebhookService {
       );
 
       // Check if we've already processed this event (idempotency)
-      const { processed, event: _existingEvent } =
+      const { processed } =
         await this.idempotentWebhookService.isEventProcessed(event.id);
 
       if (processed) {

@@ -6,5 +6,5 @@ export const STRIPE_BILLING_REASON = {
 
 // This should be configured via env vars, but using a placeholder for now.
 export const PLAN_ID_MAPPING = {
-  FREE: process.env.FREE_PLAN_ID || 'f3a4b5c6-7890-1234-abcd-efgh12345678',
+  FREE:'f3a4b5c6-7890-1234-abcd-efgh12345678',
 };
