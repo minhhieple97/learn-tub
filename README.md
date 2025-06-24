@@ -4,6 +4,7 @@
 [![Built with Next.js](https://img.shields.io/badge/Built%20with-Next.js-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com/)
+[![Turborepo](https://img.shields.io/badge/Built%20with-Turborepo-EF4444?style=for-the-badge&logo=turborepo&logoColor=white)](https://turbo.build/)
 
 > Transform YouTube into your personalized learning platform with AI-powered insights and smart note-taking.
 
@@ -21,11 +22,31 @@ LearnTub is a modern learning platform that transforms passive YouTube video wat
 - 📚 **Smart Organization** - Organize learning with courses, tags, and intelligent categorization
 - 📈 **Progress Tracking** - Monitor your learning progress with detailed analytics and insights
 
-
 ## 🛠️ Tech Stack
+
+### Monorepo Architecture
+
+- **Build System:** [Turborepo](https://turbo.build/) for efficient monorepo management
+- **Package Manager:** [pnpm](https://pnpm.io/) with workspace support
+
+### Frontend (Web App)
 
 - **Framework:** [Next.js 15](https://nextjs.org/) with App Router
 - **Language:** [TypeScript](https://www.typescriptlang.org/)
+- **Styling:** [Tailwind CSS](https://tailwindcss.com/) with custom design system
+- **UI Components:** [Radix UI](https://www.radix-ui.com/) primitives
+- **Icons:** [Lucide React](https://lucide.dev/)
+- **Forms:** React Hook Form with Zod validation
+- **Animations:** Framer Motion
+
+### Backend (Server App)
+
+- **Framework:** [NestJS](https://nestjs.com/) for scalable server-side applications
+- **Language:** [TypeScript](https://www.typescriptlang.org/)
+- **Use Cases:** Heavy task processing, webhook handling, background jobs
+
+### Shared Infrastructure
+
 - **Database:** [PostgreSQL](https://www.postgresql.org/) (Vercel/Neon) + [Supabase](https://supabase.com/)
 - **Authentication:** Supabase Auth
 - **AI Integration:** [OpenAI](https://openai.com/) & [Google Gemini](https://ai.google.dev/) for intelligent note evaluation
@@ -122,98 +143,92 @@ LearnTub is a modern learning platform that transforms passive YouTube video wat
 ## 🏗️ Project Structure
 
 ```
-learn-tub/
-├── app/                  # Next.js App Router: Pages, Layouts, Routes
-│   ├── (app)/            # Authenticated routes (dashboard, learn, settings)
-│   ├── (auth)/           # Authentication routes (login, register)
-│   ├── api/              # API routes for backend functionality
-│   └── auth/             # Auth callback and error pages/routes
-├── components/           # Shared UI components
-│   ├── home/             # Homepage-specific components
-│   ├── pricing/          # Pricing page components
-│   ├── shared/           # Shared components across features
-│   └── ui/               # Shadcn UI components
-├── features/             # Feature-specific modules organized by domain
-│   ├── ai/               # AI Usage Tracking & Integration System
-│   │   ├── components/   # AI model selector and UI components
-│   │   ├── hooks/        # AI-related React hooks (use-ai-models, use-ai-model-pricing)
-│   │   ├── queries/      # Database operations for AI usage analytics and model pricing
-│   │   ├── services/     # AI client service and usage tracker (singleton)
-│   │   ├── schemas.ts    # Zod validation schemas for AI operations
-│   │   └── types.ts      # TypeScript definitions with I prefix
-│   ├── auth/             # Authentication & User Management
-│   │   ├── actions/      # Server actions for auth operations
-│   │   ├── components/   # Login/register forms, Google auth button
-│   │   ├── hooks/        # Auth hooks (use-login, use-register, use-google-auth)
-│   │   ├── queries-client/ # Client-side user profile queries
-│   │   ├── constants.ts  # Auth-related constants
-│   │   ├── schemas.ts    # Auth validation schemas
-│   │   └── types.ts      # Auth-related TypeScript types
-│   ├── dashboard/        # Dashboard & Analytics
-│   │   ├── actions/      # Quiz dashboard actions
-│   │   ├── components/   # Dashboard widgets, quiz dashboard, statistics
-│   │   ├── hooks/        # Dashboard-specific hooks
-│   │   ├── queries/      # Dashboard data queries
-│   │   ├── schemas.ts    # Dashboard validation schemas
-│   │   └── types.ts      # Dashboard-related types
-│   ├── notes/            # Note-taking with AI Evaluation
-│   │   ├── actions/      # Note-related server actions
-│   │   ├── components/   # Note editor, evaluation UI, feedback display
-│   │   ├── hooks/        # Note hooks (use-note-evaluation, use-notes-search)
-│   │   ├── queries/      # Note database operations
-│   │   ├── services/     # Note service with AI integration
-│   │   ├── store/        # Zustand store for note management
-│   │   ├── schemas.ts    # Note validation schemas
-│   │   └── types.ts      # Note-related TypeScript types
-│   ├── payments/         # Payment & Subscription System
-│   │   ├── actions/      # Payment actions (billing, checkout, credits)
-│   │   ├── components/   # Pricing components, payment success
-│   │   ├── hooks/        # Payment hooks (use-pricing, use-payment-detail)
-│   │   ├── queries/      # Payment database operations
-│   │   ├── queries-client/ # Client-side subscription queries
-│   │   ├── services/     # Stripe webhook service, credit management
-│   │   ├── utils/        # Payment utility functions
-│   │   ├── constants.ts  # Payment constants
-│   │   ├── schemas.ts    # Payment validation schemas
-│   │   └── types.ts      # Payment-related TypeScript types
-│   ├── profile/          # User Profile Management
-│   │   └── queries/      # Profile database operations
-│   ├── quizzes/          # AI-Powered Quiz System
-│   │   ├── actions/      # Quiz actions (generate, evaluate)
-│   │   ├── components/   # Quiz UI, question cards, results display
-│   │   ├── hooks/        # Quiz hooks (use-quiz, use-quiz-retake)
-│   │   ├── queries/      # Quiz database operations
-│   │   ├── services/     # Quiz service with AI integration
-│   │   ├── store/        # Zustand store for quiz state management
-│   │   ├── schema.ts     # Quiz validation schemas
-│   │   └── types.ts      # Quiz-related TypeScript types
-│   ├── settings/         # User Settings & Preferences
-│   │   ├── components/   # Settings UI components
-│   │   ├── hooks/        # Settings-related hooks
-│   │   ├── schemas.ts    # Settings validation schemas
-│   │   └── types.ts      # Settings-related types
-│   └── videos/           # Video Management & Player
-│       ├── actions/      # Video-related server actions
-│       ├── components/   # Video player, library, forms
-│       ├── hooks/        # Video hooks (use-youtube-player, use-videos)
-│       ├── queries/      # Video database operations
-│       ├── schemas.ts    # Video validation schemas
-│       ├── search-params.ts # URL search parameter definitions
-│       └── types.ts      # Video-related TypeScript types
-├── hooks/                # Global custom React hooks
-├── lib/                  # Core utilities and configurations
-│   ├── cache/            # Caching utilities
-│   ├── supabase/         # Supabase client configurations
-│   └── utils/            # Utility functions
-├── public/               # Static assets
-├── supabase/             # Supabase local development
-│   └── migrations/       # Database schema migrations
-├── config/               # Configuration files
-├── env.mjs               # Environment variable validation (t3-env)
-├── middleware.ts         # Next.js middleware for route protection
-├── package.json          # Project dependencies and scripts
-├── tsconfig.json         # TypeScript configuration
-└── tailwind.config.ts    # Tailwind CSS configuration
+learn-tub/                           # Turborepo monorepo root
+├── apps/                            # Applications
+│   ├── web/                         # Next.js Frontend Application
+│   │   ├── app/                     # Next.js App Router: Pages, Layouts, Routes
+│   │   │   ├── (app)/               # Authenticated routes (dashboard, learn, settings)
+│   │   │   ├── (auth)/              # Authentication routes (login, register)
+│   │   │   ├── api/                 # API routes for frontend functionality
+│   │   │   └── auth/                # Auth callback and error pages/routes
+│   │   ├── components/              # Shared UI components
+│   │   │   ├── home/                # Homepage-specific components
+│   │   │   ├── pricing/             # Pricing page components
+│   │   │   ├── shared/              # Shared components across features
+│   │   │   └── ui/                  # Shadcn UI components
+│   │   ├── features/                # Feature-specific modules organized by domain
+│   │   │   ├── ai/                  # AI Usage Tracking & Integration System
+│   │   │   │   ├── components/      # AI model selector and UI components
+│   │   │   │   ├── hooks/           # AI-related React hooks
+│   │   │   │   ├── queries/         # Database operations for AI usage analytics
+│   │   │   │   ├── services/        # AI client service and usage tracker
+│   │   │   │   ├── schemas.ts       # Zod validation schemas for AI operations
+│   │   │   │   └── types.ts         # TypeScript definitions
+│   │   │   ├── auth/                # Authentication & User Management
+│   │   │   ├── dashboard/           # Dashboard & Analytics
+│   │   │   ├── notes/               # Note-taking with AI Evaluation
+│   │   │   ├── payments/            # Payment & Subscription System
+│   │   │   ├── profile/             # User Profile Management
+│   │   │   ├── quizzes/             # AI-Powered Quiz System
+│   │   │   ├── settings/            # User Settings & Preferences
+│   │   │   └── videos/              # Video Management & Player
+│   │   ├── hooks/                   # Global custom React hooks
+│   │   ├── lib/                     # Core utilities and configurations
+│   │   │   ├── cache/               # Caching utilities
+│   │   │   ├── supabase/            # Supabase client configurations
+│   │   │   └── utils/               # Utility functions
+│   │   ├── public/                  # Static assets
+│   │   ├── supabase/                # Supabase local development
+│   │   │   └── migrations/          # Database schema migrations
+│   │   ├── config/                  # Configuration files
+│   │   ├── env.mjs                  # Environment variable validation (t3-env)
+│   │   ├── middleware.ts            # Next.js middleware for route protection
+│   │   ├── package.json             # Web app dependencies
+│   │   ├── tsconfig.json            # TypeScript configuration
+│   │   └── tailwind.config.ts       # Tailwind CSS configuration
+│   └── server/                      # NestJS Backend Application
+│       ├── src/                     # Server source code
+│       │   ├── config/              # Configuration management
+│       │   │   ├── configuration.ts # App configuration
+│       │   │   ├── env-validation.* # Environment validation
+│       │   │   └── index.ts         # Config exports
+│       │   ├── modules/             # NestJS modules
+│       │   │   ├── credit/          # Credit management module
+│       │   │   ├── payment/         # Payment processing module
+│       │   │   ├── prisma/          # Database module
+│       │   │   ├── subscription/    # Subscription management module
+│       │   │   └── webhook/         # Webhook handling module
+│       │   ├── app.controller.ts    # Main app controller
+│       │   ├── app.module.ts        # Root application module
+│       │   ├── app.service.ts       # Main app service
+│       │   └── main.ts              # Application entry point
+│       ├── nest-cli.json            # NestJS CLI configuration
+│       ├── package.json             # Server app dependencies
+│       └── tsconfig.json            # TypeScript configuration
+├── packages/                        # Shared packages
+│   ├── database/                    # Shared database package
+│   │   ├── prisma/                  # Prisma schema and migrations
+│   │   ├── src/                     # Database utilities and types
+│   │   └── package.json             # Database package dependencies
+│   ├── eslint-config/               # Shared ESLint configurations
+│   │   ├── base.js                  # Base ESLint config
+│   │   ├── library.js               # Library-specific config
+│   │   ├── nest.js                  # NestJS-specific config
+│   │   ├── next.js                  # Next.js-specific config
+│   │   ├── react-internal.js        # React internal config
+│   │   └── package.json             # ESLint config dependencies
+│   └── typescript-config/           # Shared TypeScript configurations
+│       ├── base.json                # Base TypeScript config
+│       ├── nestjs.json              # NestJS-specific config
+│       ├── nextjs.json              # Next.js-specific config
+│       ├── react-library.json       # React library config
+│       └── package.json             # TypeScript config dependencies
+├── .gitignore                       # Git ignore rules
+├── package.json                     # Root package.json with workspace config
+├── pnpm-lock.yaml                   # pnpm lockfile
+├── pnpm-workspace.yaml              # pnpm workspace configuration
+├── turbo.json                       # Turborepo configuration
+└── tsconfig.json                    # Root TypeScript configuration
 ```
 
 ## 🎨 Design System
