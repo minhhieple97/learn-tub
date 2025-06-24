@@ -3,5 +3,9 @@
   "compilerOptions": {
     "baseUrl": "./",
     "outDir": "./dist",
+    "paths": {
+      "@/*": ["./*"],
+      "@prisma/client": ["@repo/db/client/*"]
+    }
   }
 }

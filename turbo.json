@@ -32,12 +32,12 @@
       ]
     },
     "dev": {
-      "dependsOn": ["^db:generate"],
+      "dependsOn": ["^build", "^db:generate"],
       "cache": false,
       "persistent": true
     },
     "lint": {
-      "dependsOn": ["^build"]
+      "dependsOn": ["^build", "^lint"]
     },
     "test": {
       "dependsOn": ["^build"],

@@ -4,6 +4,14 @@
   "private": true,
   "description": "Modern learning platform that transforms passive YouTube video watching into active learning experiences.",
   "author": "minhhieple97",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "prisma": {
+    "schema": "packages/database/prisma/schema.prisma",
+    "seed": "tsx packages/database/src/seed.ts"
+  },
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
@@ -13,8 +21,6 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
   "devDependencies": {
-    "@repo/eslint-config": "workspace:*",
-    "@repo/typescript-config": "workspace:*",
     "@types/node": "^24.0.3",
     "prettier": "^3.6.0",
     "turbo": "^2.5.4"
@@ -22,5 +28,8 @@
   "packageManager": "pnpm@10.12.2",
   "engines": {
     "node": ">=20"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.10.1"
   }
 }
