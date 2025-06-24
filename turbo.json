@@ -1,0 +1,66 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "ui": "tui",
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build", "^db:generate"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputs": [".next/**", "!.next/cache/**", "dist/**"],
+      "env": [
+        "NODE_ENV",
+        "PORT",
+        "DATABASE_URL",
+        "DIRECT_URL",
+        "STRIPE_SECRET_KEY",
+        "STRIPE_WEBHOOK_SECRET",
+        "UPSTASH_REDIS_REST_URL",
+        "UPSTASH_REDIS_REST_TOKEN",
+        "LOG_LEVEL",
+        "CACHE_TTL",
+        "NEXT_PUBLIC_APP_URL",
+        "YOUTUBE_API_KEY",
+        "NEXT_PUBLIC_SUPABASE_URL",
+        "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+        "SUPABASE_SERVICE_ROLE_KEY",
+        "OPENAI_API_KEY",
+        "GEMINI_API_KEY",
+        "QSTASH_CURRENT_SIGNING_KEY",
+        "QSTASH_NEXT_SIGNING_KEY",
+        "QSTASH_TOKEN",
+        "NEXT_PUBLIC_STRIPE_PUBLIC_KEY",
+        "CRON_SECRET"
+      ]
+    },
+    "dev": {
+      "dependsOn": ["^db:generate"],
+      "cache": false,
+      "persistent": true
+    },
+    "lint": {
+      "dependsOn": ["^build"]
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "outputs": ["coverage/**"]
+    },
+    "clean": {
+      "cache": false
+    },
+    "db:generate": {
+      "cache": false
+    },
+    "db:migrate": {
+      "cache": false,
+      "persistent": true
+    },
+    "db:deploy": {
+      "cache": false
+    },
+    "db:pull": {
+      "cache": false
+    },
+    "db:push": {
+      "cache": false
+    }
+  }
+}

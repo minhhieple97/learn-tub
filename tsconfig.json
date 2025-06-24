@@ -1,38 +1,3 @@
 {
-  "compilerOptions": {
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "allowJs": true,
-    "target": "ES6",
-    "skipLibCheck": true,
-    "strict": true,
-    "noEmit": true,
-    "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "jsx": "preserve",
-    "incremental": true,
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ],
-    "paths": {
-      "@/*": ["./*"],
-      "@/env": ["./env.mjs"],
-      "@/routes": ["./routes.ts"],
-      "@/features/*": ["./features/*"],
-      "@/lib/*": ["./lib/*"],
-      "@/hooks/*": ["./hooks/*"],
-      "@/components/*": ["./components/*"],
-      "@/types/*": ["./types/*"],
-      "@/schemas/*": ["./schemas/*"],
-      "@/utils/*": ["./utils/*"],
-      "@/lib/supabase/*": ["./lib/supabase/*"],
-      "@/constants/*": ["./config/constants/*"]
-    }
-  },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
+  "extends": "@repo/typescript-config/base.json"
 }
