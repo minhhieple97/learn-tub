@@ -21,10 +21,10 @@
     "db:seed": "tsx src/seed.ts",
     "db:pull": "prisma db pull",
     "format": "prisma format",
-    "generate": "prisma generate",
+    "db:generate": "prisma generate",
     "lint": "eslint . --max-warnings 0",
-    "prebuild": "npm run generate",
-    "predev": "npm run generate",
+    "prebuild": "npm run db:generate",
+    "predev": "npm run db:generate",
     "studio": "prisma studio"
   },
   "dependencies": {
