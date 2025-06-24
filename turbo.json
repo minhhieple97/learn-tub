@@ -6,7 +6,18 @@
       "dependsOn": ["^build", "^db:generate"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": [".next/**", "!.next/cache/**", "dist/**"],
-      "env": ["NODE_ENV", "DATABASE_URL", "DIRECT_URL"]
+      "env": [
+        "NODE_ENV",
+        "PORT",
+        "DATABASE_URL",
+        "DIRECT_URL",
+        "STRIPE_SECRET_KEY",
+        "STRIPE_WEBHOOK_SECRET",
+        "UPSTASH_REDIS_REST_URL",
+        "UPSTASH_REDIS_REST_TOKEN",
+        "LOG_LEVEL",
+        "CACHE_TTL"
+      ]
     },
     "dev": {
       "dependsOn": ["^db:generate"],
