@@ -4,8 +4,6 @@
   "installCommand": "pnpm install",
   "framework": null,
   "functions": {
-    "apps/web/app/api/**/*.js": {
-      "runtime": "nodejs22.x"
-    }
+    "apps/web/app/api/**/*.js": {}
   }
 }
