@@ -5,7 +5,7 @@ import {
   credit_source_type_enum,
   transaction_type_enum,
   subscription_plans,
-} from '@repo/db';
+} from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
 export interface CreateCreditBucketDto {

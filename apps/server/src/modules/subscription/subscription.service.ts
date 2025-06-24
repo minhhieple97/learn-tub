@@ -3,7 +3,7 @@ import {
   subscription_plans,
   user_subscriptions,
   subscription_status,
-} from '@repo/db';
+} from '@prisma/client';
 import { ISubscriptionData, UserSubscriptionWithPlan } from '../webhook/types';
 import { CreditService } from '../credit/credit.service';
 import { PaymentService } from '../payment/payment.service';

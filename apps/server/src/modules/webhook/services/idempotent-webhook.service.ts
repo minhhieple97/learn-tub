@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { WebhookEventService } from './webhook-event.service';
 import { ConfigService } from '@nestjs/config';
-import { webhook_event_status } from '@repo/db';
+import { webhook_event_status } from '@prisma/client';
 
 @Injectable()
 export class IdempotentWebhookService {

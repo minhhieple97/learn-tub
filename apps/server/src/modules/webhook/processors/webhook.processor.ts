@@ -5,7 +5,7 @@ import type { Job } from 'bull';
 import { StripeWebhookService } from '../services/stripe-webhook.service';
 import { IdempotentWebhookService } from '../services/idempotent-webhook.service';
 import { WebhookEventService } from '../services/webhook-event.service';
-import { webhook_event_type } from '@repo/db';
+import { webhook_event_type } from '@prisma/client';
 
 interface WebhookJobData {
   eventId: string;

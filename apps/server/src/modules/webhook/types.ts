@@ -1,4 +1,4 @@
-import { Prisma } from '@repo/db';
+import { Prisma } from "@prisma/client";
 
 export interface IStripeEvent {
   id: string;
