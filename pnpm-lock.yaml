@@ -53,6 +53,12 @@ importers:
       '@repo/db':
         specifier: workspace:*
         version: link:../../packages/database
+      '@repo/eslint-config':
+        specifier: workspace:*
+        version: link:../../packages/eslint-config
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../../packages/typescript-config
       '@types/joi':
         specifier: ^17.2.3
         version: 17.2.3
@@ -102,12 +108,6 @@ importers:
       '@prisma/client':
         specifier: ^6.10.1
         version: 6.10.1(prisma@6.10.1(typescript@5.5.4))(typescript@5.5.4)
-      '@repo/eslint-config':
-        specifier: workspace:*
-        version: link:../../packages/eslint-config
-      '@repo/typescript-config':
-        specifier: workspace:*
-        version: link:../../packages/typescript-config
       '@types/express':
         specifier: ^4.17.17
         version: 4.17.23
