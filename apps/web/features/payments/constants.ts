@@ -3,11 +3,11 @@ import { IPricingData } from './types';
 export const USER_SUBSCRIPTION_QUERY_KEY = 'user-subscription';
 export const USER_SUBSCRIPTION_QUERY_URL = '/api/user/subscription';
 
-export const PLAN_ID_MAPPING: Record<string, string> = {
+export const PLAN_ID_MAPPING = {
   FREE: '207cd634-648a-44a3-982a-5605ef25fb7c',
   PRO: 'b06b6ec8-6a58-4035-9f5c-a281a7aa8e10',
   PREMIUM: 'c2a6edeb-a5aa-4c2a-aa3f-e810c44962f4',
-};
+} as const;
 
 export const CREDIT_PACKAGES = {
   CREDITS_100: {

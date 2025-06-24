@@ -60,7 +60,7 @@ export const usePricing = () => {
     return (planId: string) => {
       if (!currentSubscription) return true;
 
-      const actualPlanId = PLAN_ID_MAPPING[planId] || planId;
+      const actualPlanId = PLAN_ID_MAPPING[planId as keyof typeof PLAN_ID_MAPPING] || planId;
 
       if (currentSubscription.plan_id === actualPlanId) {
         if (isSubscriptionCancelled(currentSubscription)) {
@@ -68,7 +68,6 @@ export const usePricing = () => {
         }
         return false;
       }
-
 
       if (hasActiveSubscription && !isSubscriptionCancelled(currentSubscription)) {
         return true;
@@ -84,7 +83,7 @@ export const usePricing = () => {
       if (subscriptionError) return 'error';
       if (!currentSubscription) return 'can-subscribe';
 
-      const actualPlanId = PLAN_ID_MAPPING[planId] || planId;
+      const actualPlanId = PLAN_ID_MAPPING[planId as keyof typeof PLAN_ID_MAPPING] || planId;
 
       if (currentSubscription.plan_id === actualPlanId) {
         if (isSubscriptionCancelled(currentSubscription)) {
@@ -110,7 +109,7 @@ export const usePricing = () => {
     return (planId: string): number => {
       if (!currentSubscription) return 0;
 
-      const actualPlanId = PLAN_ID_MAPPING[planId] || planId;
+      const actualPlanId = PLAN_ID_MAPPING[planId as keyof typeof PLAN_ID_MAPPING] || planId;
 
       if (
         currentSubscription.plan_id === actualPlanId &&
