@@ -1,5 +1,12 @@
 {
-  "buildCommand": "cd ../.. && npx turbo run build --filter=web",
-  "outputDirectory": "apps/web/.next",
-  "installCommand": "pnpm install"
+  "version": 2,
+  "builds": [
+    {
+      "src": "apps/server/dist/main.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/apps/server/dist/main.js" }
+  ]
 }
