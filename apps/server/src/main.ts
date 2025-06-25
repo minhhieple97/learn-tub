@@ -1,43 +1,16 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import { WinstonModule } from 'nest-winston';
-import * as winston from 'winston';
 import helmet from 'helmet';
 
 import { AppModule } from './app.module';
+import {  AppConfigService, LoggerService } from './config';
 
 async function bootstrap() {
-  // Winston logger configuration
-  const logger = WinstonModule.createLogger({
-    transports: [
-      new winston.transports.Console({
-        format: winston.format.combine(
-          winston.format.timestamp(),
-          winston.format.colorize(),
-          winston.format.simple(),
-        ),
-      }),
-      new winston.transports.File({
-        filename: 'logs/error.log',
-        level: 'error',
-        format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
-      }),
-      new winston.transports.File({
-        filename: 'logs/combined.log',
-        format: winston.format.combine(winston.format.timestamp(), winston.format.json()),
-      }),
-    ],
-  });
-
-  const app = await NestFactory.create(AppModule, { logger });
-  const configService = app.get(ConfigService);
-
-  // Security middleware
+  const logger = new LoggerService();
+  const app = await NestFactory.create(AppModule, { logger: logger.createLogger() });
+  const configService = app.get(AppConfigService);
   app.use(helmet());
-
-  // Global validation pipe
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -45,21 +18,15 @@ async function bootstrap() {
       transform: true,
     }),
   );
-
-  // CORS configuration
   app.enableCors({
-    origin: process.env.NODE_ENV === 'production' ? false : true,
+    origin: '*',
     credentials: true,
   });
-
-  // API versioning
   app.setGlobalPrefix('api/v1');
-
-  // Swagger documentation
-  if (process.env.NODE_ENV !== 'production') {
+  if (configService.isDevelopment) {
     const config = new DocumentBuilder()
-      .setTitle('Stripe Webhook Service')
-      .setDescription('API for handling Stripe webhooks with queue processing')
+      .setTitle('LearnTube API')
+      .setDescription('API for LearnTube')
       .setVersion('1.0')
       .addTag('webhooks')
       .addTag('health')
@@ -69,7 +36,7 @@ async function bootstrap() {
     SwaggerModule.setup('api/docs', app, document);
   }
 
-  const port = configService.get<number>('PORT', 3001);
+  const port = configService.port;
   await app.listen(port);
 
   Logger.log(`🚀 Application is running on: http://localhost:${port}`, 'Bootstrap');

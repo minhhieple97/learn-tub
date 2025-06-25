@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { BullModule } from '@nestjs/bull';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ScheduleModule } from '@nestjs/schedule';
@@ -11,20 +11,19 @@ import { PaymentModule } from './modules/payment/payment.module';
 import { CreditModule } from './modules/credit/credit.module';
 import { SubscriptionModule } from './modules/subscription/subscription.module';
 
-import { EnvValidationModule } from './config';
+import { AppConfigModule, AppConfigService } from './config';
 import { PrismaModule } from './modules/prisma/prisma.module';
 
 @Module({
   imports: [
-    EnvValidationModule,
+    AppConfigModule,
     EventEmitterModule.forRoot(),
     ScheduleModule.forRoot(),
     BullModule.forRootAsync({
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => {
-        const redisUrl = configService.get<string>('redis.url');
-        // Convert Upstash REST URL to Redis URL format
-        // Remove https:// and replace with redis://
+      imports: [AppConfigModule],
+      inject: [AppConfigService],
+      useFactory: (appConfigService: AppConfigService) => {
+        const redisUrl = appConfigService.upstashRedisRestUrl;
         const redisConnectionUrl = redisUrl?.replace('https://', 'redis://');
         
         return {

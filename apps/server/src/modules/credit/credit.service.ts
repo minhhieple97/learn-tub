@@ -6,53 +6,33 @@ import {
   transaction_type_enum,
   subscription_plans,
 } from '@prisma/client';
-import { PrismaService } from '../prisma/prisma.service';
-
-export interface CreateCreditBucketDto {
-  userId: string;
-  creditsTotal: number;
-  sourceType: credit_source_type_enum;
-  description: string | null;
-  expiresAt: Date | null;
-  metadata?: Record<string, any> | null;
-  userSubscriptionId?: string | null;
-}
-
-export interface CreateCreditTransactionDto {
-  userId: string;
-  amount: number;
-  type: transaction_type_enum;
-  description: string;
-  relatedActionId?: string;
-  stripePaymentIntentId?: string;
-}
+import { CreditRepository } from './credit.repository';
+import { CreateCreditBucketDto, CreateCreditTransactionDto } from './types';
+import { CREDIT_CONFIG } from '../../config/constants';
 
 @Injectable()
 export class CreditService {
   private readonly logger = new Logger(CreditService.name);
 
   constructor(
-    private readonly configService: ConfigService,
-    private readonly prisma: PrismaService,
+    private readonly creditRepository: CreditRepository,
   ) {}
 
   async createCreditBucket(data: CreateCreditBucketDto) {
     try {
-      const creditBucket = await this.prisma.credit_buckets.create({
-        data: {
-          user_id: data.userId,
-          credits_total: data.creditsTotal,
-          credits_used: 0,
-          credits_remaining: data.creditsTotal,
-          source_type: data.sourceType,
-          status: credit_bucket_status_enum.active,
-          description: data.description,
-          expires_at: data.expiresAt,
-          metadata: data.metadata
-            ? JSON.parse(JSON.stringify(data.metadata))
-            : null,
-          user_subscription_id: data.userSubscriptionId,
-        },
+      const creditBucket = await this.creditRepository.createCreditBucket({
+        user_id: data.userId,
+        credits_total: data.creditsTotal,
+        credits_used: 0,
+        credits_remaining: data.creditsTotal,
+        source_type: data.sourceType,
+        status: credit_bucket_status_enum.active,
+        description: data.description,
+        expires_at: data.expiresAt,
+        metadata: data.metadata
+          ? JSON.parse(JSON.stringify(data.metadata))
+          : null,
+        user_subscription_id: data.userSubscriptionId,
       });
 
       this.logger.log(
@@ -68,15 +48,13 @@ export class CreditService {
 
   async createCreditTransaction(data: CreateCreditTransactionDto) {
     try {
-      const transaction = await this.prisma.credit_transactions.create({
-        data: {
-          user_id: data.userId,
-          amount: data.amount,
-          type: data.type,
-          description: data.description,
-          related_action_id: data.relatedActionId,
-          stripe_payment_intent_id: data.stripePaymentIntentId,
-        },
+      const transaction = await this.creditRepository.createCreditTransaction({
+        user_id: data.userId,
+        amount: data.amount,
+        type: data.type,
+        description: data.description,
+        related_action_id: data.relatedActionId,
+        stripe_payment_intent_id: data.stripePaymentIntentId,
       });
 
       this.logger.log(
@@ -90,18 +68,7 @@ export class CreditService {
   }
 
   async getUserTotalCredits(userId: string): Promise<number> {
-    const now = new Date();
-
-    const buckets = await this.prisma.credit_buckets.findMany({
-      where: {
-        user_id: userId,
-        status: credit_bucket_status_enum.active,
-        OR: [{ expires_at: null }, { expires_at: { gt: now } }],
-      },
-      select: {
-        credits_remaining: true,
-      },
-    });
+    const buckets = await this.creditRepository.findActiveCreditBuckets(userId);
 
     const totalCredits = buckets.reduce(
       (sum, bucket) => sum + (bucket.credits_remaining || 0),
@@ -128,7 +95,7 @@ export class CreditService {
     description?: string,
     relatedActionId?: string,
   ) {
-    return this.prisma.$transaction(async (tx) => {
+    return this.creditRepository.executeTransaction(async (tx) => {
       // Get active credit buckets ordered by expiration (FIFO)
       const buckets = await tx.credit_buckets.findMany({
         where: {
@@ -214,10 +181,7 @@ export class CreditService {
     plan: subscription_plans,
     userSubscriptionId?: string,
   ): Promise<void> {
-    const expirationDays = this.configService.get<number>(
-      'credit.expiration.subscriptionDays',
-      30,
-    );
+    const expirationDays = CREDIT_CONFIG.EXPIRATION.SUBSCRIPTION_DAYS;
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + expirationDays);
 
@@ -262,32 +226,16 @@ export class CreditService {
   }
 
   async expireCreditBucketsByUserSubscriptionId(userSubscriptionId: string) {
-    const buckets = await this.prisma.credit_buckets.findMany({
-      where: {
-        user_subscription_id: userSubscriptionId,
-        status: credit_bucket_status_enum.active,
-      },
-      select: {
-        id: true,
-        user_id: true,
-        credits_remaining: true,
-        description: true,
-      },
-    });
+    const buckets = await this.creditRepository.findCreditBucketsByUserSubscriptionId(userSubscriptionId);
 
     if (buckets.length === 0) {
       return { expiredBuckets: [], error: null };
     }
 
-    await this.prisma.credit_buckets.updateMany({
-      where: {
-        user_subscription_id: userSubscriptionId,
-        status: credit_bucket_status_enum.active,
-      },
-      data: {
-        status: credit_bucket_status_enum.expired,
-      },
-    });
+    await this.creditRepository.updateCreditBucketsByUserSubscriptionId(
+      userSubscriptionId,
+      { status: credit_bucket_status_enum.expired }
+    );
 
     this.logger.log(
       `⏰ Expired ${buckets.length} credit buckets for subscription: ${userSubscriptionId}`,
@@ -297,32 +245,16 @@ export class CreditService {
   }
 
   async markCreditBucketsAsCancelled(userSubscriptionId: string) {
-    const buckets = await this.prisma.credit_buckets.findMany({
-      where: {
-        user_subscription_id: userSubscriptionId,
-        status: credit_bucket_status_enum.active,
-      },
-      select: {
-        id: true,
-        user_id: true,
-        credits_remaining: true,
-        description: true,
-      },
-    });
+    const buckets = await this.creditRepository.findCreditBucketsByUserSubscriptionId(userSubscriptionId);
 
     if (buckets.length === 0) {
       return { cancelledBuckets: [], error: null };
     }
 
-    await this.prisma.credit_buckets.updateMany({
-      where: {
-        user_subscription_id: userSubscriptionId,
-        status: credit_bucket_status_enum.active,
-      },
-      data: {
-        source_type: credit_source_type_enum.cancelled_plan,
-      },
-    });
+    await this.creditRepository.updateCreditBucketsByUserSubscriptionId(
+      userSubscriptionId,
+      { source_type: credit_source_type_enum.cancelled_plan }
+    );
 
     this.logger.log(
       `🚫 Marked ${buckets.length} credit buckets as cancelled for subscription: ${userSubscriptionId}`,
@@ -344,9 +276,7 @@ export class CreditService {
     }
 
     try {
-      const result = await this.prisma.credit_transactions.createMany({
-        data: transactions,
-      });
+      const result = await this.creditRepository.createBulkCreditTransactions(transactions);
 
       this.logger.log(`📊 Created ${result.count} credit transactions in bulk`);
       return { data: result, error: null };
@@ -357,19 +287,12 @@ export class CreditService {
   }
 
   async getExpiredCreditBuckets() {
-    const now = new Date();
-
-    const expiredBuckets = await this.prisma.credit_buckets.findMany({
-      where: {
-        status: credit_bucket_status_enum.active,
-        expires_at: {
-          not: null,
-          lt: now,
-        },
-      },
-    });
-
-    return { data: expiredBuckets, error: null };
+    try {
+      const expiredBuckets = await this.creditRepository.findExpiredCreditBuckets();
+      return { data: expiredBuckets, error: null };
+    } catch (error) {
+      return { data: [], error };
+    }
   }
 
   async expireCreditBuckets(bucketIds: string[]) {
@@ -378,14 +301,10 @@ export class CreditService {
     }
 
     try {
-      const result = await this.prisma.credit_buckets.updateMany({
-        where: {
-          id: { in: bucketIds },
-        },
-        data: {
-          status: credit_bucket_status_enum.expired,
-        },
-      });
+      const result = await this.creditRepository.updateCreditBucketsByIds(
+        bucketIds,
+        { status: credit_bucket_status_enum.expired }
+      );
 
       this.logger.log(`⏰ Expired ${result.count} credit buckets`);
       return { data: result, error: null };

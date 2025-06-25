@@ -9,7 +9,7 @@ import { CreditService } from '../credit/credit.service';
 import { PaymentService } from '../payment/payment.service';
 import { PLAN_ID_MAPPING } from '../webhook/constants';
 import Stripe from 'stripe';
-import { PrismaService } from '../prisma/prisma.service';
+import { SubscriptionRepository } from './subscription.repository';
 
 @Injectable()
 export class SubscriptionService {
@@ -18,48 +18,32 @@ export class SubscriptionService {
   constructor(
     private readonly creditService: CreditService,
     private readonly paymentService: PaymentService,
-    private readonly prisma: PrismaService,
+    private readonly subscriptionRepository: SubscriptionRepository,
   ) {}
 
   async getSubscriptionPlanById(
     id: string,
   ): Promise<subscription_plans | null> {
-    return this.prisma.subscription_plans.findFirst({
-      where: { id, is_active: true },
-    });
+    return this.subscriptionRepository.findSubscriptionPlanById(id);
   }
 
   async getPlanByStripePrice(
     priceId: string,
   ): Promise<subscription_plans | null> {
-    return this.prisma.subscription_plans.findFirst({
-      where: { stripe_price_id: priceId, is_active: true },
-    });
+    return this.subscriptionRepository.findPlanByStripePrice(priceId);
   }
 
   async getUserByStripeCustomerId(
     customerId: string,
   ): Promise<user_subscriptions | null> {
-    return this.prisma.user_subscriptions.findFirst({
-      where: { stripe_customer_id: customerId },
-    });
+    return this.subscriptionRepository.findUserByStripeCustomerId(customerId);
   }
 
   async checkUserHasActivePlan(
     userId: string,
     planId: string,
   ): Promise<{ hasActivePlan: boolean }> {
-    const now = new Date();
-    const existingSubscription = await this.prisma.user_subscriptions.findFirst(
-      {
-        where: {
-          user_id: userId,
-          plan_id: planId,
-          status: 'active',
-          current_period_end: { gte: now },
-        },
-      },
-    );
+    const existingSubscription = await this.subscriptionRepository.findActiveUserSubscription(userId, planId);
     return { hasActivePlan: !!existingSubscription };
   }
 
@@ -68,9 +52,9 @@ export class SubscriptionService {
     planId: string,
     subscriptionData: ISubscriptionData,
   ): Promise<user_subscriptions> {
-    return this.prisma.user_subscriptions.upsert({
-      where: { stripe_subscription_id: subscriptionData.stripeSubscriptionId },
-      create: {
+    return this.subscriptionRepository.upsertUserSubscription(
+      subscriptionData.stripeSubscriptionId,
+      {
         user_id: userId,
         plan_id: planId,
         stripe_subscription_id: subscriptionData.stripeSubscriptionId,
@@ -80,13 +64,13 @@ export class SubscriptionService {
         current_period_end: subscriptionData.currentPeriodEnd,
         cancel_at_period_end: subscriptionData.cancelAtPeriodEnd,
       },
-      update: {
+      {
         status: 'active',
         current_period_start: subscriptionData.currentPeriodStart,
         current_period_end: subscriptionData.currentPeriodEnd,
         cancel_at_period_end: subscriptionData.cancelAtPeriodEnd,
       },
-    });
+    );
   }
 
   async updateSubscriptionStatus(
@@ -97,18 +81,15 @@ export class SubscriptionService {
     cancelAtPeriodEnd?: boolean,
   ): Promise<user_subscriptions | null> {
     try {
-      return await this.prisma.user_subscriptions.update({
-        where: { stripe_subscription_id: subscriptionId },
-        data: {
-          status,
-          current_period_start: periodStart
-            ? new Date(periodStart * 1000)
-            : undefined,
-          current_period_end: periodEnd
-            ? new Date(periodEnd * 1000)
-            : undefined,
-          cancel_at_period_end: cancelAtPeriodEnd,
-        },
+      return await this.subscriptionRepository.updateSubscriptionByStripeId(subscriptionId, {
+        status,
+        current_period_start: periodStart
+          ? new Date(periodStart * 1000)
+          : undefined,
+        current_period_end: periodEnd
+          ? new Date(periodEnd * 1000)
+          : undefined,
+        cancel_at_period_end: cancelAtPeriodEnd,
       });
     } catch (error) {
       this.logger.error(
@@ -123,25 +104,13 @@ export class SubscriptionService {
     customerId: string,
     subscriptionId: string,
   ): Promise<UserSubscriptionWithPlan | null> {
-    return this.prisma.user_subscriptions.findFirst({
-      where: {
-        stripe_customer_id: customerId,
-        stripe_subscription_id: subscriptionId,
-        status: 'active',
-      },
-      include: {
-        subscription_plans: true,
-      },
-    });
+    return this.subscriptionRepository.findActiveSubscriptionByStripeIds(customerId, subscriptionId);
   }
 
   async expireUserSubscription(
     subscriptionId: string,
   ): Promise<user_subscriptions> {
-    return this.prisma.user_subscriptions.update({
-      where: { id: subscriptionId },
-      data: { status: 'expired' },
-    });
+    return this.subscriptionRepository.updateSubscriptionById(subscriptionId, { status: 'expired' });
   }
 
   async createNewUserSubscription(
@@ -152,17 +121,15 @@ export class SubscriptionService {
     periodStart: Date,
     periodEnd: Date,
   ): Promise<user_subscriptions> {
-    return this.prisma.user_subscriptions.create({
-      data: {
-        user_id: userId,
-        plan_id: planId,
-        stripe_customer_id: stripeCustomerId,
-        stripe_subscription_id: stripeSubscriptionId,
-        status: 'active',
-        current_period_start: periodStart,
-        current_period_end: periodEnd,
-        cancel_at_period_end: false,
-      },
+    return this.subscriptionRepository.createUserSubscription({
+      user_id: userId,
+      plan_id: planId,
+      stripe_customer_id: stripeCustomerId,
+      stripe_subscription_id: stripeSubscriptionId,
+      status: 'active',
+      current_period_start: periodStart,
+      current_period_end: periodEnd,
+      cancel_at_period_end: false,
     });
   }
 
@@ -171,12 +138,7 @@ export class SubscriptionService {
     subscriptionId: string,
     cancelAtPeriodEnd: boolean,
   ): Promise<user_subscriptions | null> {
-    const subscription = await this.prisma.user_subscriptions.findFirst({
-      where: {
-        stripe_customer_id: customerId,
-        stripe_subscription_id: subscriptionId,
-      },
-    });
+    const subscription = await this.subscriptionRepository.findSubscriptionByStripeIds(customerId, subscriptionId);
 
     if (!subscription) {
       this.logger.warn(
@@ -185,34 +147,22 @@ export class SubscriptionService {
       return null;
     }
 
-    return this.prisma.user_subscriptions.update({
-      where: { id: subscription.id },
-      data: { cancel_at_period_end: cancelAtPeriodEnd },
-    });
+    return this.subscriptionRepository.updateSubscriptionById(subscription.id, { cancel_at_period_end: cancelAtPeriodEnd });
   }
 
   async cancelActiveFreePlan(userId: string): Promise<void> {
     const freePlanId = PLAN_ID_MAPPING.FREE;
 
-    const freeSubscriptions = await this.prisma.user_subscriptions.findMany({
-      where: {
-        user_id: userId,
-        plan_id: freePlanId,
-        status: 'active',
-      },
-    });
+    const freeSubscriptions = await this.subscriptionRepository.findActiveFreeSubscriptions(userId, freePlanId);
 
     if (freeSubscriptions.length === 0) {
       return;
     }
 
     for (const sub of freeSubscriptions) {
-      await this.prisma.user_subscriptions.update({
-        where: { id: sub.id },
-        data: {
-          status: 'cancelled',
-          cancel_at_period_end: true,
-        },
+      await this.subscriptionRepository.updateSubscriptionById(sub.id, {
+        status: 'cancelled',
+        cancel_at_period_end: true,
       });
 
       await this.creditService.markCreditBucketsAsCancelled(sub.id);

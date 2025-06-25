@@ -7,37 +7,32 @@ import { CreditService } from '../../credit/credit.service';
 
 import { STRIPE_BILLING_REASON, PLAN_ID_MAPPING } from '../constants';
 import { SubscriptionService } from 'src/modules/subscription/subscription.service';
+import { WEBHOOK_CONFIG, PAYMENT_CONFIG, CREDIT_CONFIG } from '../../../config/constants';
+import { AppConfigService } from '@/src/config';
 
 @Injectable()
 export class StripeWebhookService {
   private readonly logger = new Logger(StripeWebhookService.name);
   private readonly stripe: Stripe;
-  private readonly webhookEvents: any;
-  private readonly paymentConfig: any;
-  private readonly creditConfig: any;
 
   constructor(
     private readonly configService: ConfigService,
     private readonly paymentService: PaymentService,
     private readonly creditService: CreditService,
     private readonly subscriptionService: SubscriptionService,
+    private readonly appConfigService: AppConfigService,
   ) {
     this.stripe = new Stripe(
-      this.configService.get<string>('stripe.secretKey'),
+      this.appConfigService.stripeSecretKey,
       {
         apiVersion: '2023-10-16',
       },
     );
-    this.webhookEvents = this.configService.get('webhook.events');
-    this.paymentConfig = this.configService.get('payment');
-    this.creditConfig = this.configService.get('credit');
   }
 
   constructEvent(body: Buffer | string, signature: string): Stripe.Event {
     try {
-      const webhookSecret = this.configService.get<string>(
-        'stripe.webhookSecret',
-      );
+      const webhookSecret = this.appConfigService.stripeWebhookSecret;
       return this.stripe.webhooks.constructEvent(
         body,
         signature,
@@ -57,43 +52,43 @@ export class StripeWebhookService {
     this.logger.log(`🎣 Processing webhook event: ${event.type}`);
 
     switch (event.type) {
-      case this.webhookEvents.checkoutSessionCompleted:
+      case WEBHOOK_CONFIG.EVENTS.CHECKOUT_SESSION_COMPLETED:
         await this.handleCheckoutSessionCompleted(
           event.data.object as Stripe.Checkout.Session,
         );
         break;
 
-      case this.webhookEvents.customerSubscriptionCreated:
+      case WEBHOOK_CONFIG.EVENTS.CUSTOMER_SUBSCRIPTION_CREATED:
         await this.handleSubscriptionCreated(
           event.data.object as Stripe.Subscription,
         );
         break;
 
-      case this.webhookEvents.customerSubscriptionUpdated:
+      case WEBHOOK_CONFIG.EVENTS.CUSTOMER_SUBSCRIPTION_UPDATED:
         await this.handleSubscriptionUpdated(
           event.data.object as Stripe.Subscription,
         );
         break;
 
-      case this.webhookEvents.customerSubscriptionDeleted:
+      case WEBHOOK_CONFIG.EVENTS.CUSTOMER_SUBSCRIPTION_DELETED:
         await this.handleSubscriptionDeleted(
           event.data.object as Stripe.Subscription,
         );
         break;
 
-      case this.webhookEvents.invoicePaymentSucceeded:
+      case WEBHOOK_CONFIG.EVENTS.INVOICE_PAYMENT_SUCCEEDED:
         await this.handleInvoicePaymentSucceeded(
           event.data.object as Stripe.Invoice,
         );
         break;
 
-      case this.webhookEvents.invoicePaymentFailed:
+      case WEBHOOK_CONFIG.EVENTS.INVOICE_PAYMENT_FAILED:
         await this.handleInvoicePaymentFailed(
           event.data.object as Stripe.Invoice,
         );
         break;
 
-      case this.webhookEvents.invoicePaid:
+      case WEBHOOK_CONFIG.EVENTS.INVOICE_PAID:
         await this.handleInvoicePaid(event.data.object as Stripe.Invoice);
         break;
 
@@ -138,9 +133,9 @@ export class StripeWebhookService {
       `✅ Checkout completed for user: ${userId}, mode: ${session.mode}`,
     );
 
-    if (session.mode === this.paymentConfig.modes.subscription) {
+    if (session.mode === PAYMENT_CONFIG.MODES.SUBSCRIPTION) {
       await this.handleSubscriptionCheckout(session);
-    } else if (session.mode === this.paymentConfig.modes.payment) {
+    } else if (session.mode === PAYMENT_CONFIG.MODES.PAYMENT) {
       await this.handleCreditsPurchase(session);
     }
 
@@ -149,12 +144,12 @@ export class StripeWebhookService {
       amountCents: session.amount_total,
       currency: session.currency,
       paymentType:
-        session.mode === this.paymentConfig.modes.subscription
-          ? this.paymentConfig.types.subscription
-          : this.paymentConfig.types.credits,
+        session.mode === PAYMENT_CONFIG.MODES.SUBSCRIPTION
+          ? PAYMENT_CONFIG.TYPES.SUBSCRIPTION
+          : PAYMENT_CONFIG.TYPES.CREDITS,
       status: 'completed',
       description:
-        session.mode === this.paymentConfig.modes.subscription
+        session.mode === PAYMENT_CONFIG.MODES.SUBSCRIPTION
           ? 'Subscription purchase'
           : `Purchase of ${session.metadata?.credits_amount || 0} AI credits`,
       stripePaymentIntentId:
@@ -222,7 +217,7 @@ export class StripeWebhookService {
     }
 
     const expiresAt = this.calculateExpirationDate(
-      this.creditConfig.expiration.purchaseDays,
+      CREDIT_CONFIG.EXPIRATION.PURCHASE_DAYS,
     );
     const paymentIntentId =
       typeof session.payment_intent === 'string'
