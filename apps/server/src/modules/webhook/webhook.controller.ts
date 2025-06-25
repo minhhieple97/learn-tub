@@ -1,7 +1,6 @@
 import {
   Controller,
   Post,
-  Body,
   Headers,
   HttpStatus,
   HttpCode,
@@ -27,12 +26,18 @@ export class WebhookController {
     required: true,
     description: 'Stripe webhook signature',
   })
-  @ApiResponse({ status: 200, description: 'Webhook processed successfully' })
   @ApiResponse({
-    status: 400,
+    status: HttpStatus.OK,
+    description: 'Webhook processed successfully',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
     description: 'Invalid webhook signature or payload',
   })
-  @ApiResponse({ status: 500, description: 'Internal server error' })
+  @ApiResponse({
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    description: 'Internal server error',
+  })
   async handleStripeWebhook(
     @Req() req: IRequestWithRawBody,
     @Headers('stripe-signature') signature: string,

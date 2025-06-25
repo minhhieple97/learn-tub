@@ -9,6 +9,7 @@ import { IdempotentWebhookService } from './idempotent-webhook.service';
 import { WebhookEventService } from './webhook-event.service';
 import { StripeEventDto } from '../../stripe/dto/stripe-webhook.dto';
 import { QUEUE_CONFIG } from '@/src/config/constants';
+import { webhook_event_status } from '@prisma/client';
 
 @Injectable()
 export class WebhookService {
@@ -81,13 +82,12 @@ export class WebhookService {
           eventData: event,
         },
         {
-          jobId: `${QUEUE_CONFIG.JOB_NAMES.WEBHOOK_STRIPE}-${webhookEvent.id}`,
+          jobId: webhookEvent.id,
         },
       );
 
       await this.webhookEventService.createWebhookJob(
         webhookEvent.id,
-        job.id.toString(),
         QUEUE_CONFIG.NAMES.WEBHOOK_PROCESSING,
       );
 
@@ -127,9 +127,8 @@ export class WebhookService {
 
     for (const event of failedEvents) {
       try {
-        // Re-queue the failed event
         const job = await this.webhookQueue.add(
-          'process-webhook',
+          QUEUE_CONFIG.JOB_NAMES.WEBHOOK_STRIPE,
           {
             eventId: event.id,
             stripeEventId: event.stripe_event_id,
@@ -146,18 +145,15 @@ export class WebhookService {
           },
         );
 
-        // Update status to retrying
         await this.webhookEventService.updateWebhookEventStatus(
           event.id,
-          'retrying',
+          webhook_event_status.retrying,
           null,
           true,
         );
 
-        // Create new job record
         await this.webhookEventService.createWebhookJob(
           event.id,
-          job.id.toString(),
           QUEUE_CONFIG.NAMES.WEBHOOK_PROCESSING,
         );
 
