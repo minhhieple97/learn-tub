@@ -158,9 +158,10 @@ export const usePricing = () => {
         return 'Loading...';
       case 'active':
         return 'Current Plan';
-      case 'active-cancelled':
+      case 'active-cancelled': {
         const daysRemaining = getDaysUntilResubscribe(planId);
         return `You can subscribe to this plan again after ${daysRemaining} days`;
+      }
       case 'has-other-plan':
         return 'Switch Plan';
       case 'expired':
