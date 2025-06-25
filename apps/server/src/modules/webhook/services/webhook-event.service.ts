@@ -8,7 +8,6 @@ export class WebhookEventService {
   private readonly logger = new Logger(WebhookEventService.name);
 
   constructor(
-    private readonly configService: ConfigService,
     private readonly webhookEventRepository: WebhookEventRepository,
   ) {}
 
@@ -32,7 +31,7 @@ export class WebhookEventService {
   async createWebhookEvent(
     stripeEventId: string,
     eventType: string,
-    payload: any,
+    payload: object,
   ) {
     try {
       const dbEventType = this.convertStripeEventType(eventType);
@@ -42,16 +41,14 @@ export class WebhookEventService {
           stripe_event_id: stripeEventId,
           event_type: dbEventType,
           status: webhook_event_status.pending,
-          raw_payload: {},
+          raw_payload: JSON.stringify(payload),
           max_attempts: 3,
           attempts: 0,
         },
       );
-      console.log('webhookEvent', webhookEvent);
       this.logger.log(`📝 Created webhook event record: ${webhookEvent.id}`);
       return webhookEvent;
     } catch (error) {
-      console.log('error', error);
       this.logger.error('❌ Failed to create webhook event', error);
       throw error;
     }

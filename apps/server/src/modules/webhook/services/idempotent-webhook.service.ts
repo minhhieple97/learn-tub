@@ -1,6 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { WebhookEventService } from './webhook-event.service';
-import { ConfigService } from '@nestjs/config';
 import { webhook_event_status } from '@prisma/client';
 
 @Injectable()
@@ -9,22 +8,13 @@ export class IdempotentWebhookService {
   private readonly processingStatuses: webhook_event_status[];
   private readonly completedStatuses: webhook_event_status[];
 
-  constructor(
-    private readonly webhookEventService: WebhookEventService,
-    private readonly configService: ConfigService,
-  ) {
+  constructor(private readonly webhookEventService: WebhookEventService) {
     this.processingStatuses = [
-      this.configService.get(
-        'webhook.status.processing',
-      ) as webhook_event_status,
-      this.configService.get('webhook.status.retrying') as webhook_event_status,
+      webhook_event_status.processing,
+      webhook_event_status.retrying,
     ];
 
-    this.completedStatuses = [
-      this.configService.get(
-        'webhook.status.completed',
-      ) as webhook_event_status,
-    ];
+    this.completedStatuses = [webhook_event_status.completed];
   }
 
   async isEventProcessed(stripeEventId: string): Promise<{
@@ -61,18 +51,14 @@ export class IdempotentWebhookService {
   async markEventAsProcessing(eventId: string): Promise<void> {
     await this.webhookEventService.updateWebhookEventStatus(
       eventId,
-      this.configService.get(
-        'webhook.status.processing',
-      ) as webhook_event_status,
+      webhook_event_status.processing,
     );
   }
 
   async markEventAsCompleted(eventId: string): Promise<void> {
     await this.webhookEventService.updateWebhookEventStatus(
       eventId,
-      this.configService.get(
-        'webhook.status.completed',
-      ) as webhook_event_status,
+      webhook_event_status.completed,
     );
   }
 
@@ -82,9 +68,9 @@ export class IdempotentWebhookService {
   ): Promise<void> {
     await this.webhookEventService.updateWebhookEventStatus(
       eventId,
-      this.configService.get('webhook.status.failed') as webhook_event_status,
+      webhook_event_status.failed,
       errorMessage,
-      true, // Increment attempts
+      true,
     );
   }
 

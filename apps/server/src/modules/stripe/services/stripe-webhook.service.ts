@@ -58,12 +58,6 @@ export class StripeWebhookService {
         );
         break;
 
-      case WEBHOOK_CONFIG.EVENTS.CUSTOMER_SUBSCRIPTION_CREATED:
-        await this.handleSubscriptionCreated(
-          event.data.object as Stripe.Subscription,
-        );
-        break;
-
       case WEBHOOK_CONFIG.EVENTS.CUSTOMER_SUBSCRIPTION_UPDATED:
         await this.handleSubscriptionUpdated(
           event.data.object as Stripe.Subscription,
@@ -97,12 +91,6 @@ export class StripeWebhookService {
     }
   }
 
-  private calculateExpirationDate(days: number | null): Date | null {
-    if (days === null) return null;
-    const expirationDate = new Date();
-    expirationDate.setDate(expirationDate.getDate() + days);
-    return expirationDate;
-  }
 
   private extractSubscriptionData(subscription: Stripe.Subscription) {
     return {
@@ -133,34 +121,52 @@ export class StripeWebhookService {
       `✅ Checkout completed for user: ${userId}, mode: ${session.mode}`,
     );
 
-    if (session.mode === PAYMENT_CONFIG.MODES.SUBSCRIPTION) {
-      await this.handleSubscriptionCheckout(session);
-    } else if (session.mode === PAYMENT_CONFIG.MODES.PAYMENT) {
-      await this.handleCreditsPurchase(session);
-    }
+    try {
+      // Prepare payment history data
+      const paymentHistoryData = {
+        user_id: userId,
+        amount_cents: session.amount_total,
+        currency: session.currency,
+        payment_type:
+          session.mode === PAYMENT_CONFIG.MODES.SUBSCRIPTION
+            ? PAYMENT_CONFIG.TYPES.SUBSCRIPTION
+            : PAYMENT_CONFIG.TYPES.CREDITS,
+        status: 'completed' as const,
+        description:
+          session.mode === PAYMENT_CONFIG.MODES.SUBSCRIPTION
+            ? 'Subscription purchase'
+            : `Purchase of ${session.metadata?.credits_amount || 0} AI credits`,
+        stripe_payment_intent_id:
+          typeof session.payment_intent === 'string'
+            ? session.payment_intent
+            : null,
+        stripe_invoice_id: null,
+      };
 
-    await this.paymentService.createPaymentHistory({
-      userId,
-      amountCents: session.amount_total,
-      currency: session.currency,
-      paymentType:
-        session.mode === PAYMENT_CONFIG.MODES.SUBSCRIPTION
-          ? PAYMENT_CONFIG.TYPES.SUBSCRIPTION
-          : PAYMENT_CONFIG.TYPES.CREDITS,
-      status: 'completed',
-      description:
-        session.mode === PAYMENT_CONFIG.MODES.SUBSCRIPTION
-          ? 'Subscription purchase'
-          : `Purchase of ${session.metadata?.credits_amount || 0} AI credits`,
-      stripePaymentIntentId:
-        typeof session.payment_intent === 'string'
-          ? session.payment_intent
-          : null,
-    });
+      if (session.mode === PAYMENT_CONFIG.MODES.SUBSCRIPTION) {
+        await this.handleSubscriptionCheckoutTransaction(
+          session,
+          paymentHistoryData,
+        );
+        return;
+      }
+      if (session.mode === PAYMENT_CONFIG.MODES.PAYMENT) {
+        await this.handleCreditsPurchaseTransaction(
+          session,
+          paymentHistoryData,
+        );
+      }
+    } catch (error) {
+      this.logger.error(
+        `❌ Failed to handle checkout session completed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+      throw error;
+    }
   }
 
-  private async handleSubscriptionCheckout(
+  private async handleSubscriptionCheckoutTransaction(
     session: Stripe.Checkout.Session,
+    paymentHistoryData: any,
   ): Promise<void> {
     const { user_id: userId, plan_id: planId } = session.metadata;
 
@@ -182,31 +188,27 @@ export class StripeWebhookService {
       session.subscription,
     );
     const subscriptionData = this.extractSubscriptionData(subscription);
-    const userSubscription =
-      await this.subscriptionService.upsertUserSubscription(
-        userId,
-        planId,
-        subscriptionData,
-      );
-
     const plan = await this.subscriptionService.getSubscriptionPlanById(planId);
-    if (plan) {
-      await this.creditService.grantMonthlyCredits(
-        userId,
-        plan,
-        userSubscription.id,
-      );
+
+    if (!plan) {
+      throw new Error(`Plan not found: ${planId}`);
     }
 
-    if (planId !== PLAN_ID_MAPPING.FREE) {
-      await this.subscriptionService.cancelActiveFreePlan(userId);
-    }
+    await this.subscriptionService.handleCheckoutCompletedTransaction(
+      userId,
+      planId,
+      subscriptionData,
+      plan,
+      null,
+      paymentHistoryData,
+    );
 
-    this.logger.log(`🎯 Subscription created/updated for user: ${userId}`);
+    this.logger.log(`🎯 Subscription checkout completed for user: ${userId}`);
   }
 
-  private async handleCreditsPurchase(
+  private async handleCreditsPurchaseTransaction(
     session: Stripe.Checkout.Session,
+    paymentHistoryData: any,
   ): Promise<void> {
     const { user_id: userId, credits_amount: creditsAmountStr } =
       session.metadata;
@@ -216,33 +218,16 @@ export class StripeWebhookService {
       throw new Error('Invalid credits amount');
     }
 
-    const expiresAt = this.calculateExpirationDate(
-      CREDIT_CONFIG.EXPIRATION.PURCHASE_DAYS,
-    );
-    const paymentIntentId =
-      typeof session.payment_intent === 'string'
-        ? session.payment_intent
-        : null;
-
-    await this.creditService.createCreditBucket({
-      userId,
-      creditsTotal: creditsAmount,
-      sourceType: 'purchase',
-      description: `Purchased ${creditsAmount} AI credits`,
-      expiresAt,
-      metadata: {
-        stripe_payment_intent_id: paymentIntentId,
-        stripe_session_id: session.id,
-      },
-    });
-
-    await this.creditService.createCreditTransaction({
-      userId,
-      amount: creditsAmount,
-      type: 'purchase',
-      description: `Purchased ${creditsAmount} AI credits`,
-      stripePaymentIntentId: paymentIntentId,
-    });
+    // Handle everything in a single transaction
+    const result =
+      await this.subscriptionService.handleCheckoutCompletedTransaction(
+        userId,
+        null,
+        null,
+        null,
+        creditsAmount,
+        paymentHistoryData,
+      );
 
     this.logger.log(`💰 ${creditsAmount} credits added to user: ${userId}`);
   }
@@ -273,25 +258,28 @@ export class StripeWebhookService {
       return;
     }
 
-    const subscriptionData = this.extractSubscriptionData(subscription);
-    const userSubscription =
-      await this.subscriptionService.upsertUserSubscription(
-        userId,
-        plan.id,
-        subscriptionData,
-      );
-    await this.creditService.grantMonthlyCredits(
-      userId,
-      plan,
-      userSubscription.id,
-    );
+    try {
+      const subscriptionData = this.extractSubscriptionData(subscription);
 
-    if (plan.id !== PLAN_ID_MAPPING.FREE) {
-      await this.subscriptionService.cancelActiveFreePlan(userId);
+      // Handle everything in a single transaction
+      const result =
+        await this.subscriptionService.handleSubscriptionCreationTransaction(
+          userId,
+          plan.id,
+          subscriptionData,
+          plan,
+        );
+
+      this.logger.log(
+        `🎉 Subscription created for user: ${userId}, sub: ${subscription.id}`,
+        `Credit bucket: ${result.creditBucket.id}, Transaction: ${result.creditTransaction.id}`,
+      );
+    } catch (error) {
+      this.logger.error(
+        `❌ Failed to handle subscription creation: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+      throw error;
     }
-    this.logger.log(
-      `🎉 Sub created for user: ${userId}, sub: ${subscription.id}`,
-    );
   }
 
   private async findUserIdFromSubscription(
@@ -386,15 +374,22 @@ export class StripeWebhookService {
       await this.subscriptionService.getUserByStripeCustomerId(customerId);
     if (!userSub) throw new Error(`User not found for customer: ${customerId}`);
 
-    await this.paymentService.createPaymentHistory({
-      userId: userSub.user_id,
-      amountCents: invoice.amount_paid,
-      currency: invoice.currency,
-      paymentType: 'subscription_renewal',
-      status: 'completed',
-      description: `Subscription payment - ${invoice.billing_reason || 'cycle'}`,
-      stripeInvoiceId: invoice.id,
-    });
+    try {
+      await this.paymentService.createPaymentHistoryTransaction({
+        userId: userSub.user_id,
+        amountCents: invoice.amount_paid,
+        currency: invoice.currency,
+        paymentType: 'subscription_renewal',
+        status: 'completed',
+        description: `Subscription payment - ${invoice.billing_reason || 'cycle'}`,
+        stripeInvoiceId: invoice.id,
+      });
+    } catch (error) {
+      this.logger.error(
+        `❌ Failed to create payment history: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+      throw error;
+    }
   }
 
   private async handleInvoicePaymentFailed(
@@ -415,18 +410,27 @@ export class StripeWebhookService {
       this.logger.error(`User not found for customer: ${customerId}`);
       return;
     }
-    await this.paymentService.createPaymentHistory({
-      userId: userSub.user_id,
-      amountCents: invoice.amount_due,
-      currency: invoice.currency,
-      paymentType: 'subscription_renewal',
-      status: 'failed',
-      description: 'Failed subscription payment',
-      stripeInvoiceId: invoice.id,
-    });
-    this.logger.log(
-      `❌ Subscription payment failed for user: ${userSub.user_id}`,
-    );
+
+    try {
+      await this.paymentService.createPaymentHistoryTransaction({
+        userId: userSub.user_id,
+        amountCents: invoice.amount_due,
+        currency: invoice.currency,
+        paymentType: 'subscription_renewal',
+        status: 'failed',
+        description: 'Failed subscription payment',
+        stripeInvoiceId: invoice.id,
+      });
+
+      this.logger.log(
+        `❌ Subscription payment failed for user: ${userSub.user_id}`,
+      );
+    } catch (error) {
+      this.logger.error(
+        `❌ Failed to create payment history for failed payment: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+      throw error;
+    }
   }
 
   private async handleInvoicePaid(invoice: Stripe.Invoice): Promise<void> {
@@ -448,10 +452,18 @@ export class StripeWebhookService {
       typeof invoice.customer === 'string'
         ? invoice.customer
         : invoice.customer.id;
-    await this.subscriptionService.processSubscriptionRenewal(
-      customerId,
-      subscriptionId,
-      invoice,
-    );
+
+    try {
+      await this.subscriptionService.processSubscriptionRenewalTransaction(
+        customerId,
+        subscriptionId,
+        invoice,
+      );
+    } catch (error) {
+      this.logger.error(
+        `❌ Failed to process subscription renewal: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
+      throw error;
+    }
   }
 }

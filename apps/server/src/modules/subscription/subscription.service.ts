@@ -333,4 +333,130 @@ export class SubscriptionService {
       throw error;
     }
   }
+
+  async handleSubscriptionCreationTransaction(
+    userId: string,
+    planId: string,
+    subscriptionData: ISubscriptionData,
+    plan: any,
+  ): Promise<any> {
+    const freePlanId = PLAN_ID_MAPPING.FREE;
+    const subscriptionUpsertData = {
+      user_id: userId,
+      plan_id: planId,
+      stripe_subscription_id: subscriptionData.stripeSubscriptionId,
+      stripe_customer_id: subscriptionData.stripeCustomerId,
+      status: subscription_status.active,
+      current_period_start: subscriptionData.currentPeriodStart!,
+      current_period_end: subscriptionData.currentPeriodEnd!,
+      cancel_at_period_end: subscriptionData.cancelAtPeriodEnd,
+    };
+
+    return this.subscriptionRepository.handleSubscriptionCreationTransaction(
+      userId,
+      planId,
+      subscriptionUpsertData,
+      plan,
+      freePlanId,
+    );
+  }
+
+  async handleCheckoutCompletedTransaction(
+    userId: string,
+    planId: string | null,
+    subscriptionData: ISubscriptionData | null,
+    plan: any | null,
+    creditsAmount: number | null,
+    paymentHistoryData: any,
+  ): Promise<any> {
+    const freePlanId = PLAN_ID_MAPPING.FREE;
+    const subscriptionUpsertData = subscriptionData
+      ? {
+          user_id: userId,
+          plan_id: planId!,
+          stripe_subscription_id: subscriptionData.stripeSubscriptionId,
+          stripe_customer_id: subscriptionData.stripeCustomerId,
+          status: subscription_status.active,
+          current_period_start: subscriptionData.currentPeriodStart!,
+          current_period_end: subscriptionData.currentPeriodEnd!,
+          cancel_at_period_end: subscriptionData.cancelAtPeriodEnd,
+        }
+      : null;
+
+    return this.subscriptionRepository.handleCheckoutCompletedTransaction(
+      userId,
+      planId,
+      subscriptionUpsertData,
+      plan,
+      creditsAmount,
+      paymentHistoryData,
+      freePlanId,
+    );
+  }
+
+  async handleSubscriptionRenewalTransaction(
+    customerId: string,
+    subscriptionId: string,
+    invoice: Stripe.Invoice,
+    currentSubscription: any,
+    plan: any,
+  ): Promise<any> {
+    return this.subscriptionRepository.handleSubscriptionRenewalTransaction(
+      customerId,
+      subscriptionId,
+      invoice,
+      currentSubscription,
+      plan,
+    );
+  }
+
+  async processSubscriptionRenewalTransaction(
+    customerId: string,
+    subscriptionId: string,
+    invoice: Stripe.Invoice,
+  ): Promise<void> {
+    const startTime = Date.now();
+    this.logger.log(
+      `🔄 Processing subscription renewal for invoice: ${invoice.id}`,
+    );
+
+    try {
+      const currentSubscription = await this.getActiveSubscriptionByStripeIds(
+        customerId,
+        subscriptionId,
+      );
+
+      if (!currentSubscription) {
+        throw new Error(
+          `Active subscription not found for renewal: subId ${subscriptionId}`,
+        );
+      }
+
+      const { subscription_plans: plan } = currentSubscription;
+      this.logger.log(
+        `✅ Found active subscription for user: ${currentSubscription.user_id}`,
+      );
+
+      const result = await this.handleSubscriptionRenewalTransaction(
+        customerId,
+        subscriptionId,
+        invoice,
+        currentSubscription,
+        plan,
+      );
+
+      const processingTime = Date.now() - startTime;
+      this.logger.log(
+        `🎉 Subscription renewal completed for user: ${currentSubscription.user_id} (${processingTime}ms)`,
+        `Expired ${result.expiredBuckets.length} buckets, created new subscription: ${result.newSubscription.id}`,
+      );
+    } catch (error) {
+      const processingTime = Date.now() - startTime;
+      this.logger.error(
+        `❌ Failed to process subscription renewal (${processingTime}ms):`,
+        error,
+      );
+      throw error;
+    }
+  }
 }
