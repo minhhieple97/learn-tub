@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Post } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { StripeService } from './services/stripe.service';
 
@@ -9,14 +9,20 @@ export class StripeController {
 
   @Get('products')
   @ApiOperation({ summary: 'Get all Stripe products' })
-  @ApiResponse({ status: 200, description: 'Products retrieved successfully' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Products retrieved successfully',
+  })
   async getProducts() {
     return this.stripeService.getProducts();
   }
 
   @Get('customers')
   @ApiOperation({ summary: 'Get all Stripe customers' })
-  @ApiResponse({ status: 200, description: 'Customers retrieved successfully' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Customers retrieved successfully',
+  })
   async getCustomers() {
     return this.stripeService.getCustomers();
   }
@@ -24,7 +30,7 @@ export class StripeController {
   @Post('create-payment-intent')
   @ApiOperation({ summary: 'Create a payment intent' })
   @ApiResponse({
-    status: 201,
+    status: HttpStatus.CREATED,
     description: 'Payment intent created successfully',
   })
   async createPaymentIntent(
@@ -37,7 +43,7 @@ export class StripeController {
   @Post('subscriptions')
   @ApiOperation({ summary: 'Create a subscription' })
   @ApiResponse({
-    status: 201,
+    status: HttpStatus.CREATED,
     description: 'Subscription created successfully',
   })
   async createSubscription(
@@ -49,14 +55,20 @@ export class StripeController {
 
   @Post('customers')
   @ApiOperation({ summary: 'Create a customer' })
-  @ApiResponse({ status: 201, description: 'Customer created successfully' })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'Customer created successfully',
+  })
   async createCustomer(@Body() body: { email: string; name: string }) {
     return this.stripeService.createCustomer(body.email, body.name);
   }
 
   @Post('products')
   @ApiOperation({ summary: 'Create a product with price' })
-  @ApiResponse({ status: 201, description: 'Product created successfully' })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'Product created successfully',
+  })
   async createProduct(
     @Body() body: { name: string; description: string; price: number },
   ) {
@@ -69,7 +81,10 @@ export class StripeController {
 
   @Post('refunds')
   @ApiOperation({ summary: 'Process a refund' })
-  @ApiResponse({ status: 201, description: 'Refund processed successfully' })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'Refund processed successfully',
+  })
   async refundPayment(@Body() body: { paymentIntentId: string }) {
     return this.stripeService.refundPayment(body.paymentIntentId);
   }
@@ -77,7 +92,7 @@ export class StripeController {
   @Post('payment-links')
   @ApiOperation({ summary: 'Create a payment link' })
   @ApiResponse({
-    status: 201,
+    status: HttpStatus.CREATED,
     description: 'Payment link created successfully',
   })
   async createPaymentLink(@Body() body: { priceId: string }) {
@@ -87,7 +102,7 @@ export class StripeController {
   @Post('checkout-sessions')
   @ApiOperation({ summary: 'Create a checkout session' })
   @ApiResponse({
-    status: 201,
+    status: HttpStatus.CREATED,
     description: 'Checkout session created successfully',
   })
   async createCheckoutSession(
@@ -117,7 +132,10 @@ export class StripeController {
 
   @Get('balance')
   @ApiOperation({ summary: 'Get Stripe account balance' })
-  @ApiResponse({ status: 200, description: 'Balance retrieved successfully' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Balance retrieved successfully',
+  })
   async getBalance() {
     return this.stripeService.getBalance();
   }

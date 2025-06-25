@@ -1,18 +1,13 @@
-import { Injectable, Logger, Inject, forwardRef } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { Injectable, Logger } from '@nestjs/common';
 import Stripe from 'stripe';
 
 import { PaymentService } from '../../payment/payment.service';
 import { CreditService } from '../../credit/credit.service';
 import { SubscriptionService } from '../../subscription/subscription.service';
 
-import {
-  WEBHOOK_CONFIG,
-  PAYMENT_CONFIG,
-  CREDIT_CONFIG,
-} from '../../../config/constants';
+import { WEBHOOK_CONFIG, PAYMENT_CONFIG } from '../../../config/constants';
 import { AppConfigService } from '@/src/config';
-import { PLAN_ID_MAPPING, STRIPE_BILLING_REASON } from '../constants';
+import { STRIPE_BILLING_REASON } from '../constants';
 
 @Injectable()
 export class StripeWebhookService {
@@ -21,7 +16,6 @@ export class StripeWebhookService {
 
   constructor(
     private readonly paymentService: PaymentService,
-    private readonly creditService: CreditService,
     private readonly subscriptionService: SubscriptionService,
     private readonly appConfigService: AppConfigService,
   ) {
@@ -91,7 +85,6 @@ export class StripeWebhookService {
     }
   }
 
-
   private extractSubscriptionData(subscription: Stripe.Subscription) {
     return {
       stripeSubscriptionId: subscription.id,
@@ -122,7 +115,6 @@ export class StripeWebhookService {
     );
 
     try {
-      // Prepare payment history data
       const paymentHistoryData = {
         user_id: userId,
         amount_cents: session.amount_total,

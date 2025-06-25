@@ -56,14 +56,12 @@ export class WebhookEventService {
 
   async createWebhookJob(
     eventId: string,
-    jobId: string,
     queueName: string,
     priority: number = 0,
   ) {
     try {
       const job = await this.webhookEventRepository.createWebhookJob({
         webhook_event_id: eventId,
-        job_id: jobId,
         queue_name: queueName,
         priority,
         delay_ms: 0,

@@ -11,7 +11,6 @@ export type ICreateWebhookEventData = {
 
 export type ICreateWebhookJobData = {
   webhook_event_id: string;
-  job_id: string;
   queue_name: string;
   priority: number;
   delay_ms: number;
