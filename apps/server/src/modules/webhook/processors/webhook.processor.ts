@@ -4,11 +4,10 @@ import type { Job } from 'bullmq';
 
 import { StripeWebhookService } from '../../stripe/services/stripe-webhook.service';
 import { IdempotentWebhookService } from '../services/idempotent-webhook.service';
-import { WebhookEventService } from '../services/webhook-event.service';
 import { webhook_event_type } from '@prisma/client';
 import { QUEUE_CONFIG } from '@/src/config/constants';
 
-type WebhookJobData = {
+type IWebhookJobData = {
   eventId: string;
   stripeEventId: string;
   eventType: webhook_event_type;
@@ -23,12 +22,11 @@ export class WebhookProcessor extends WorkerHost {
   constructor(
     private readonly stripeWebhookService: StripeWebhookService,
     private readonly idempotentWebhookService: IdempotentWebhookService,
-    private readonly webhookEventService: WebhookEventService,
   ) {
     super();
   }
 
-  async process(job: Job<WebhookJobData>) {
+  async process(job: Job<IWebhookJobData>) {
     switch (job.name) {
       case QUEUE_CONFIG.JOB_NAMES.WEBHOOK_STRIPE:
         return this.processWebhook(job);
@@ -39,7 +37,7 @@ export class WebhookProcessor extends WorkerHost {
     }
   }
 
-  private async processWebhook(job: Job<WebhookJobData>) {
+  private async processWebhook(job: Job<IWebhookJobData>) {
     const { eventId, stripeEventId, eventType, eventData, isRetry } = job.data;
     const startTime = Date.now();
 

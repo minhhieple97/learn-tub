@@ -38,4 +38,35 @@ export class PaymentService {
   async getPaymentHistoryById(id: string) {
     return this.paymentRepository.findPaymentHistoryById(id);
   }
+
+  async createPaymentHistoryTransaction(data: CreatePaymentHistoryDto) {
+    try {
+      const paymentHistoryData = {
+        user_id: data.userId,
+        amount_cents: data.amountCents,
+        currency: data.currency,
+        payment_type: data.paymentType,
+        status: data.status,
+        description: data.description,
+        stripe_payment_intent_id: data.stripePaymentIntentId,
+        stripe_invoice_id: data.stripeInvoiceId,
+      };
+
+      const paymentHistory =
+        await this.paymentRepository.createPaymentHistoryTransaction(
+          paymentHistoryData,
+        );
+
+      this.logger.log(
+        `💳 Payment history created (transaction): ${paymentHistory.id} for user: ${data.userId}`,
+      );
+      return paymentHistory;
+    } catch (error) {
+      this.logger.error(
+        '❌ Failed to create payment history (transaction)',
+        error,
+      );
+      throw error;
+    }
+  }
 }

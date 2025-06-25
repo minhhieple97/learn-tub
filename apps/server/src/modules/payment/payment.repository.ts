@@ -22,4 +22,21 @@ export class PaymentRepository {
       where: { id },
     });
   }
+
+  async executeTransaction<T>(callback: (tx: any) => Promise<T>): Promise<T> {
+    return this.prisma.$transaction(callback);
+  }
+
+  async createPaymentHistoryTransaction(data: CreatePaymentHistoryData) {
+    return this.executeTransaction(async (tx) => {
+      return await tx.payment_history.create({ data });
+    });
+  }
+
+  async createPaymentHistoryInTransaction(
+    tx: any,
+    data: CreatePaymentHistoryData,
+  ) {
+    return await tx.payment_history.create({ data });
+  }
 } 
