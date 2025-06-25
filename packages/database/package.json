@@ -1,22 +1,30 @@
 {
   "name": "@repo/db",
   "version": "0.0.0",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
-    ".": "./src/index.ts"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
   },
+  "files": [
+    "dist/**"
+  ],
   "scripts": {
-    "db:generate": "prisma generate",
-    "db:push": "prisma db push",
-    "db:pull": "prisma db pull",
+    "build": "tsup src/index.ts --format cjs,esm --dts",
+    "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
     "db:migrate:deploy": "prisma migrate deploy",
     "db:migrate:dev": "prisma migrate dev",
+    "db:push": "prisma db push",
     "db:seed": "tsx src/seed.ts",
-    "dev": "tsup src/* --watch",
+    "db:pull": "prisma db pull",
     "format": "prisma format",
-    "generate": "prisma generate",
+    "db:generate": "prisma generate",
     "lint": "eslint . --max-warnings 0",
-    "prebuild": "npm run generate",
-    "predev": "npm run generate",
+    "prebuild": "npm run db:generate",
+    "predev": "npm run db:generate",
     "studio": "prisma studio"
   },
   "dependencies": {
