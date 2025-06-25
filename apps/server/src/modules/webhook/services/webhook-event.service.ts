@@ -12,26 +12,46 @@ export class WebhookEventService {
     private readonly webhookEventRepository: WebhookEventRepository,
   ) {}
 
+  private convertStripeEventType(stripeEventType: string): webhook_event_type {
+    const convertedType = stripeEventType.replace(
+      /\./g,
+      '_',
+    ) as webhook_event_type;
+
+    const validTypes = Object.values(webhook_event_type);
+    if (!validTypes.includes(convertedType)) {
+      this.logger.warn(
+        `⚠️ Unknown event type: ${stripeEventType} (converted: ${convertedType})`,
+      );
+      throw new Error(`Unsupported webhook event type: ${stripeEventType}`);
+    }
+
+    return convertedType;
+  }
+
   async createWebhookEvent(
     stripeEventId: string,
     eventType: string,
     payload: any,
   ) {
     try {
-      const webhookEvent = await this.webhookEventRepository.createWebhookEvent({
-        stripe_event_id: stripeEventId,
-        event_type: eventType as webhook_event_type,
-        status: this.configService.get(
-          'webhook.status.pending',
-        ) as webhook_event_status,
-        raw_payload: payload,
-        max_attempts: 3,
-        attempts: 0,
-      });
+      const dbEventType = this.convertStripeEventType(eventType);
 
+      const webhookEvent = await this.webhookEventRepository.createWebhookEvent(
+        {
+          stripe_event_id: stripeEventId,
+          event_type: dbEventType,
+          status: webhook_event_status.pending,
+          raw_payload: {},
+          max_attempts: 3,
+          attempts: 0,
+        },
+      );
+      console.log('webhookEvent', webhookEvent);
       this.logger.log(`📝 Created webhook event record: ${webhookEvent.id}`);
       return webhookEvent;
     } catch (error) {
+      console.log('error', error);
       this.logger.error('❌ Failed to create webhook event', error);
       throw error;
     }
@@ -77,7 +97,10 @@ export class WebhookEventService {
         updateData.attempts = { increment: 1 };
       }
 
-      const updatedEvent = await this.webhookEventRepository.updateWebhookEvent(eventId, updateData);
+      const updatedEvent = await this.webhookEventRepository.updateWebhookEvent(
+        eventId,
+        updateData,
+      );
 
       this.logger.log(
         `📝 Updated webhook event ${eventId} status to: ${status}`,
@@ -94,14 +117,19 @@ export class WebhookEventService {
   }
 
   async getWebhookEventByStripeId(stripeEventId: string) {
-    return this.webhookEventRepository.findWebhookEventByStripeId(stripeEventId);
+    return this.webhookEventRepository.findWebhookEventByStripeId(
+      stripeEventId,
+    );
   }
 
   async getRetryableWebhookEvents() {
-    const maxRetryAge = 24 * 60 * 60 * 1000; // 24 hours
+    const maxRetryAge = 24 * 60 * 60 * 1000;
 
     try {
-      const failedEvents = await this.webhookEventRepository.findRetryableWebhookEvents(maxRetryAge);
+      const failedEvents =
+        await this.webhookEventRepository.findRetryableWebhookEvents(
+          maxRetryAge,
+        );
       return { data: failedEvents };
     } catch (error) {
       this.logger.error('❌ Failed to get retryable webhook events', error);

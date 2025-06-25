@@ -88,6 +88,10 @@ export const QUEUE_CONFIG = {
     CREDIT_MAINTENANCE: 'credit-maintenance',
     SUBSCRIPTION_MAINTENANCE: 'subscription-maintenance',
   },
+  JOB_NAMES: {
+    WEBHOOK_STRIPE: 'webhook-stripe',
+    WEBHOOK_STRIPE_CLEANUP: 'webhook-stripe-cleanup',
+  },
   OPTIONS: {
     DEFAULT_JOB_OPTIONS: {
       removeOnComplete: 100,

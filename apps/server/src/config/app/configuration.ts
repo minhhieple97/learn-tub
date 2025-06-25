@@ -11,4 +11,8 @@ export default registerAs('app', () => ({
   upstashRedisRestToken: process.env.UPSTASH_REDIS_REST_TOKEN,
   logLevel: process.env.LOG_LEVEL,
   cacheTtl: process.env.CACHE_TTL,
+  redisHost: process.env.REDIS_HOST,
+  redisPort: process.env.REDIS_PORT,
+  redisPassword: process.env.REDIS_PASSWORD,
+  redisUsername: process.env.REDIS_USERNAME,
 }));

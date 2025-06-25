@@ -4,11 +4,10 @@ import {
   transaction_type_enum,
 } from '@prisma/client';
 
-export type CreateCreditBucketData = {
+export type ICreateCreditBucketData = {
   user_id: string;
   credits_total: number;
   credits_used?: number;
-  credits_remaining: number;
   source_type: credit_source_type_enum;
   status: credit_bucket_status_enum;
   description: string | null;
@@ -17,7 +16,7 @@ export type CreateCreditBucketData = {
   user_subscription_id?: string | null;
 };
 
-export type CreateCreditTransactionData = {
+export type ICreateCreditTransactionData = {
   user_id: string;
   amount: number;
   type: transaction_type_enum;

@@ -5,5 +5,5 @@ export const STRIPE_BILLING_REASON = {
 } as const;
 
 export const PLAN_ID_MAPPING = {
-  FREE: 'f3a4b5c6-7890-1234-abcd-efgh12345678',
+  FREE: '207cd634-648a-44a3-982a-5605ef25fb7c',
 };

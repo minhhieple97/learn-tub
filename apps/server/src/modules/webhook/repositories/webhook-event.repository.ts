@@ -2,24 +2,24 @@ import { Injectable } from '@nestjs/common';
 import { webhook_event_status, webhook_event_type } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import {
-  CreateWebhookEventData,
-  CreateWebhookJobData,
-  UpdateWebhookEventData,
+  ICreateWebhookEventData,
+  ICreateWebhookJobData,
+  IUpdateWebhookEventData,
 } from '../types';
 
 @Injectable()
 export class WebhookEventRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async createWebhookEvent(data: CreateWebhookEventData) {
+  async createWebhookEvent(data: ICreateWebhookEventData) {
     return this.prisma.webhook_events.create({ data });
   }
 
-  async createWebhookJob(data: CreateWebhookJobData) {
+  async createWebhookJob(data: ICreateWebhookJobData) {
     return this.prisma.webhook_jobs.create({ data });
   }
 
-  async updateWebhookEvent(eventId: string, data: UpdateWebhookEventData) {
+  async updateWebhookEvent(eventId: string, data: IUpdateWebhookEventData) {
     return this.prisma.webhook_events.update({
       where: { id: eventId },
       data,
