@@ -1,14 +1,18 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Inject, forwardRef } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Stripe from 'stripe';
 
 import { PaymentService } from '../../payment/payment.service';
 import { CreditService } from '../../credit/credit.service';
+import { SubscriptionService } from '../../subscription/subscription.service';
 
-import { STRIPE_BILLING_REASON, PLAN_ID_MAPPING } from '../constants';
-import { SubscriptionService } from 'src/modules/subscription/subscription.service';
-import { WEBHOOK_CONFIG, PAYMENT_CONFIG, CREDIT_CONFIG } from '../../../config/constants';
+import {
+  WEBHOOK_CONFIG,
+  PAYMENT_CONFIG,
+  CREDIT_CONFIG,
+} from '../../../config/constants';
 import { AppConfigService } from '@/src/config';
+import { PLAN_ID_MAPPING, STRIPE_BILLING_REASON } from '../constants';
 
 @Injectable()
 export class StripeWebhookService {
@@ -16,18 +20,14 @@ export class StripeWebhookService {
   private readonly stripe: Stripe;
 
   constructor(
-    private readonly configService: ConfigService,
     private readonly paymentService: PaymentService,
     private readonly creditService: CreditService,
     private readonly subscriptionService: SubscriptionService,
     private readonly appConfigService: AppConfigService,
   ) {
-    this.stripe = new Stripe(
-      this.appConfigService.stripeSecretKey,
-      {
-        apiVersion: '2023-10-16',
-      },
-    );
+    this.stripe = new Stripe(this.appConfigService.stripeSecretKey, {
+      apiVersion: '2023-10-16',
+    });
   }
 
   constructEvent(body: Buffer | string, signature: string): Stripe.Event {

@@ -2,10 +2,13 @@ import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bull';
 import type { Queue } from 'bull';
 import { ConfigService } from '@nestjs/config';
+import { validate } from 'class-validator';
+import { plainToClass } from 'class-transformer';
 
-import { StripeWebhookService } from './stripe-webhook.service';
+import { StripeWebhookService } from '../../stripe/services/stripe-webhook.service';
 import { IdempotentWebhookService } from './idempotent-webhook.service';
 import { WebhookEventService } from './webhook-event.service';
+import { StripeEventDto } from '../../stripe/dto/stripe-webhook.dto';
 
 @Injectable()
 export class WebhookService {
@@ -16,7 +19,6 @@ export class WebhookService {
     private readonly stripeWebhookService: StripeWebhookService,
     private readonly idempotentWebhookService: IdempotentWebhookService,
     private readonly webhookEventService: WebhookEventService,
-    private readonly configService: ConfigService,
   ) {}
 
   async processStripeWebhook(
@@ -24,8 +26,36 @@ export class WebhookService {
     signature: string,
   ): Promise<{ eventId: string; queued: boolean }> {
     try {
+      this.logger.log(
+        `🎣 Processing stripe webhook - body type: ${typeof body}, signature type: ${typeof signature}`,
+      );
+
+      if (!body || typeof body !== 'string') {
+        throw new BadRequestException(
+          'Invalid webhook body - must be a string',
+        );
+      }
+
+      if (!signature || typeof signature !== 'string') {
+        throw new BadRequestException(
+          'Invalid webhook signature - must be a string',
+        );
+      }
+
       // Construct and validate the Stripe event
       const event = this.stripeWebhookService.constructEvent(body, signature);
+
+      // Validate the event structure using class-validator
+      const eventDto = plainToClass(StripeEventDto, event);
+      const validationErrors = await validate(eventDto);
+
+      if (validationErrors.length > 0) {
+        this.logger.error(
+          '❌ Webhook event validation failed',
+          validationErrors,
+        );
+        throw new BadRequestException('Invalid webhook event structure');
+      }
 
       this.logger.log(
         `🎣 Processing webhook event: ${event.type} (${event.id})`,
