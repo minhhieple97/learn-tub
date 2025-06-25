@@ -1,8 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
-
 import { ConfigService } from '@nestjs/config';
 import { webhook_event_status, webhook_event_type } from '@prisma/client';
-import { PrismaService } from 'src/modules/prisma/prisma.service';
+import { WebhookEventRepository } from '../repositories/webhook-event.repository';
 
 @Injectable()
 export class WebhookEventService {
@@ -10,7 +9,7 @@ export class WebhookEventService {
 
   constructor(
     private readonly configService: ConfigService,
-    private readonly prisma: PrismaService,
+    private readonly webhookEventRepository: WebhookEventRepository,
   ) {}
 
   async createWebhookEvent(
@@ -19,17 +18,15 @@ export class WebhookEventService {
     payload: any,
   ) {
     try {
-      const webhookEvent = await this.prisma.webhook_events.create({
-        data: {
-          stripe_event_id: stripeEventId,
-          event_type: eventType as webhook_event_type,
-          status: this.configService.get(
-            'webhook.status.pending',
-          ) as webhook_event_status,
-          raw_payload: payload,
-          max_attempts: 3,
-          attempts: 0,
-        },
+      const webhookEvent = await this.webhookEventRepository.createWebhookEvent({
+        stripe_event_id: stripeEventId,
+        event_type: eventType as webhook_event_type,
+        status: this.configService.get(
+          'webhook.status.pending',
+        ) as webhook_event_status,
+        raw_payload: payload,
+        max_attempts: 3,
+        attempts: 0,
       });
 
       this.logger.log(`📝 Created webhook event record: ${webhookEvent.id}`);
@@ -47,14 +44,12 @@ export class WebhookEventService {
     priority: number = 0,
   ) {
     try {
-      const job = await this.prisma.webhook_jobs.create({
-        data: {
-          webhook_event_id: eventId,
-          job_id: jobId,
-          queue_name: queueName,
-          priority,
-          delay_ms: 0,
-        },
+      const job = await this.webhookEventRepository.createWebhookJob({
+        webhook_event_id: eventId,
+        job_id: jobId,
+        queue_name: queueName,
+        priority,
+        delay_ms: 0,
       });
 
       this.logger.log(`📝 Created webhook job record: ${job.id}`);
@@ -72,20 +67,17 @@ export class WebhookEventService {
     incrementAttempts: boolean = false,
   ) {
     try {
-      const data: any = { status: status as webhook_event_status };
+      const updateData: any = { status: status as webhook_event_status };
 
       if (errorMessage !== undefined) {
-        data.error_message = errorMessage;
+        updateData.error_message = errorMessage;
       }
 
       if (incrementAttempts) {
-        data.attempts = { increment: 1 };
+        updateData.attempts = { increment: 1 };
       }
 
-      const updatedEvent = await this.prisma.webhook_events.update({
-        where: { id: eventId },
-        data,
-      });
+      const updatedEvent = await this.webhookEventRepository.updateWebhookEvent(eventId, updateData);
 
       this.logger.log(
         `📝 Updated webhook event ${eventId} status to: ${status}`,
@@ -98,34 +90,18 @@ export class WebhookEventService {
   }
 
   async getWebhookEvent(eventId: string) {
-    return this.prisma.webhook_events.findUnique({
-      where: { id: eventId },
-    });
+    return this.webhookEventRepository.findWebhookEventById(eventId);
   }
 
   async getWebhookEventByStripeId(stripeEventId: string) {
-    return this.prisma.webhook_events.findFirst({
-      where: { stripe_event_id: stripeEventId },
-    });
+    return this.webhookEventRepository.findWebhookEventByStripeId(stripeEventId);
   }
 
   async getRetryableWebhookEvents() {
     const maxRetryAge = 24 * 60 * 60 * 1000; // 24 hours
-    const cutoffDate = new Date(Date.now() - maxRetryAge);
 
     try {
-      const failedEvents = await this.prisma.webhook_events.findMany({
-        where: {
-          status: this.configService.get(
-            'webhook.status.failed',
-          ) as webhook_event_status,
-          attempts: { lt: 3 },
-          created_at: { gte: cutoffDate },
-        },
-        orderBy: { created_at: 'desc' },
-        take: 50,
-      });
-
+      const failedEvents = await this.webhookEventRepository.findRetryableWebhookEvents(maxRetryAge);
       return { data: failedEvents };
     } catch (error) {
       this.logger.error('❌ Failed to get retryable webhook events', error);
@@ -135,60 +111,7 @@ export class WebhookEventService {
 
   async getWebhookEventStats() {
     try {
-      const [
-        totalCount,
-        pendingCount,
-        processingCount,
-        completedCount,
-        failedCount,
-        retryingCount,
-      ] = await Promise.all([
-        this.prisma.webhook_events.count(),
-        this.prisma.webhook_events.count({
-          where: {
-            status: this.configService.get(
-              'webhook.status.pending',
-            ) as webhook_event_status,
-          },
-        }),
-        this.prisma.webhook_events.count({
-          where: {
-            status: this.configService.get(
-              'webhook.status.processing',
-            ) as webhook_event_status,
-          },
-        }),
-        this.prisma.webhook_events.count({
-          where: {
-            status: this.configService.get(
-              'webhook.status.completed',
-            ) as webhook_event_status,
-          },
-        }),
-        this.prisma.webhook_events.count({
-          where: {
-            status: this.configService.get(
-              'webhook.status.failed',
-            ) as webhook_event_status,
-          },
-        }),
-        this.prisma.webhook_events.count({
-          where: {
-            status: this.configService.get(
-              'webhook.status.retrying',
-            ) as webhook_event_status,
-          },
-        }),
-      ]);
-
-      return {
-        total: totalCount,
-        pending: pendingCount,
-        processing: processingCount,
-        completed: completedCount,
-        failed: failedCount,
-        retrying: retryingCount,
-      };
+      return await this.webhookEventRepository.getWebhookEventStats();
     } catch (error) {
       this.logger.error('❌ Failed to get webhook event stats', error);
       throw error;
