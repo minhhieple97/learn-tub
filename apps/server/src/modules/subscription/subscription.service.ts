@@ -4,12 +4,14 @@ import {
   user_subscriptions,
   subscription_status,
 } from '@prisma/client';
-import { ISubscriptionData, UserSubscriptionWithPlan } from '../webhook/types';
+
 import { CreditService } from '../credit/credit.service';
 import { PaymentService } from '../payment/payment.service';
-import { PLAN_ID_MAPPING } from '../webhook/constants';
 import Stripe from 'stripe';
 import { SubscriptionRepository } from './subscription.repository';
+
+import { PLAN_ID_MAPPING } from '../stripe/constants';
+import { ISubscriptionData, IUserSubscriptionWithPlan } from './types';
 
 @Injectable()
 export class SubscriptionService {
@@ -43,7 +45,11 @@ export class SubscriptionService {
     userId: string,
     planId: string,
   ): Promise<{ hasActivePlan: boolean }> {
-    const existingSubscription = await this.subscriptionRepository.findActiveUserSubscription(userId, planId);
+    const existingSubscription =
+      await this.subscriptionRepository.findActiveUserSubscription(
+        userId,
+        planId,
+      );
     return { hasActivePlan: !!existingSubscription };
   }
 
@@ -81,16 +87,19 @@ export class SubscriptionService {
     cancelAtPeriodEnd?: boolean,
   ): Promise<user_subscriptions | null> {
     try {
-      return await this.subscriptionRepository.updateSubscriptionByStripeId(subscriptionId, {
-        status,
-        current_period_start: periodStart
-          ? new Date(periodStart * 1000)
-          : undefined,
-        current_period_end: periodEnd
-          ? new Date(periodEnd * 1000)
-          : undefined,
-        cancel_at_period_end: cancelAtPeriodEnd,
-      });
+      return await this.subscriptionRepository.updateSubscriptionByStripeId(
+        subscriptionId,
+        {
+          status,
+          current_period_start: periodStart
+            ? new Date(periodStart * 1000)
+            : undefined,
+          current_period_end: periodEnd
+            ? new Date(periodEnd * 1000)
+            : undefined,
+          cancel_at_period_end: cancelAtPeriodEnd,
+        },
+      );
     } catch (error) {
       this.logger.error(
         `Failed to update subscription status for ${subscriptionId}`,
@@ -103,14 +112,19 @@ export class SubscriptionService {
   async getActiveSubscriptionByStripeIds(
     customerId: string,
     subscriptionId: string,
-  ): Promise<UserSubscriptionWithPlan | null> {
-    return this.subscriptionRepository.findActiveSubscriptionByStripeIds(customerId, subscriptionId);
+  ): Promise<IUserSubscriptionWithPlan | null> {
+    return this.subscriptionRepository.findActiveSubscriptionByStripeIds(
+      customerId,
+      subscriptionId,
+    );
   }
 
   async expireUserSubscription(
     subscriptionId: string,
   ): Promise<user_subscriptions> {
-    return this.subscriptionRepository.updateSubscriptionById(subscriptionId, { status: 'expired' });
+    return this.subscriptionRepository.updateSubscriptionById(subscriptionId, {
+      status: 'expired',
+    });
   }
 
   async createNewUserSubscription(
@@ -138,7 +152,11 @@ export class SubscriptionService {
     subscriptionId: string,
     cancelAtPeriodEnd: boolean,
   ): Promise<user_subscriptions | null> {
-    const subscription = await this.subscriptionRepository.findSubscriptionByStripeIds(customerId, subscriptionId);
+    const subscription =
+      await this.subscriptionRepository.findSubscriptionByStripeIds(
+        customerId,
+        subscriptionId,
+      );
 
     if (!subscription) {
       this.logger.warn(
@@ -147,13 +165,19 @@ export class SubscriptionService {
       return null;
     }
 
-    return this.subscriptionRepository.updateSubscriptionById(subscription.id, { cancel_at_period_end: cancelAtPeriodEnd });
+    return this.subscriptionRepository.updateSubscriptionById(subscription.id, {
+      cancel_at_period_end: cancelAtPeriodEnd,
+    });
   }
 
   async cancelActiveFreePlan(userId: string): Promise<void> {
     const freePlanId = PLAN_ID_MAPPING.FREE;
 
-    const freeSubscriptions = await this.subscriptionRepository.findActiveFreeSubscriptions(userId, freePlanId);
+    const freeSubscriptions =
+      await this.subscriptionRepository.findActiveFreeSubscriptions(
+        userId,
+        freePlanId,
+      );
 
     if (freeSubscriptions.length === 0) {
       return;

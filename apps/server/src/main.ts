@@ -4,11 +4,16 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import helmet from 'helmet';
 
 import { AppModule } from './app.module';
-import {  AppConfigService, LoggerService } from './config';
+import { AppConfigService, LoggerService } from './config';
 
 async function bootstrap() {
-  const logger = new LoggerService();
-  const app = await NestFactory.create(AppModule, { logger: logger.createLogger() });
+  const loggerService = new LoggerService();
+  const logger = loggerService.createLogger();
+  const app = await NestFactory.create(AppModule, {
+    logger,
+    rawBody: true,
+    bodyParser: true,
+  });
   const configService = app.get(AppConfigService);
   app.use(helmet());
   app.useGlobalPipes(
@@ -39,8 +44,14 @@ async function bootstrap() {
   const port = configService.port;
   await app.listen(port);
 
-  Logger.log(`🚀 Application is running on: http://localhost:${port}`, 'Bootstrap');
-  Logger.log(`📚 API Documentation: http://localhost:${port}/api/docs`, 'Bootstrap');
+  Logger.log(
+    `🚀 Application is running on: http://localhost:${port}`,
+    'Bootstrap',
+  );
+  Logger.log(
+    `📚 API Documentation: http://localhost:${port}/api/docs`,
+    'Bootstrap',
+  );
 }
 
 bootstrap().catch((error) => {

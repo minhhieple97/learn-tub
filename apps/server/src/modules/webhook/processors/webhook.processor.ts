@@ -2,7 +2,7 @@ import { Processor, Process } from '@nestjs/bull';
 import { Logger } from '@nestjs/common';
 import type { Job } from 'bull';
 
-import { StripeWebhookService } from '../services/stripe-webhook.service';
+import { StripeWebhookService } from '../../stripe/services/stripe-webhook.service';
 import { IdempotentWebhookService } from '../services/idempotent-webhook.service';
 import { WebhookEventService } from '../services/webhook-event.service';
 import { webhook_event_type } from '@prisma/client';
