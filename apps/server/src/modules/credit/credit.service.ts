@@ -24,7 +24,6 @@ export class CreditService {
         user_id: data.userId,
         credits_total: data.creditsTotal,
         credits_used: 0,
-        credits_remaining: data.creditsTotal,
         source_type: data.sourceType,
         status: credit_bucket_status_enum.active,
         description: data.description,
@@ -152,7 +151,6 @@ export class CreditService {
           where: { id: bucket.id },
           data: {
             credits_used: newUsed,
-            credits_remaining: newRemaining,
             status:
               newRemaining <= 0
                 ? credit_bucket_status_enum.exhausted

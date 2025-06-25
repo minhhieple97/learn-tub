@@ -3,17 +3,17 @@ import {
   credit_bucket_status_enum,
 } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateCreditBucketData, CreateCreditTransactionData } from './types';
+import { ICreateCreditBucketData, ICreateCreditTransactionData } from './types';
 
 @Injectable()
 export class CreditRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async createCreditBucket(data: CreateCreditBucketData) {
+  async createCreditBucket(data: ICreateCreditBucketData) {
     return this.prisma.credit_buckets.create({ data });
   }
 
-  async createCreditTransaction(data: CreateCreditTransactionData) {
+  async createCreditTransaction(data: ICreateCreditTransactionData) {
     return this.prisma.credit_transactions.create({ data });
   }
 
@@ -45,7 +45,7 @@ export class CreditRepository {
     });
   }
 
-  async updateCreditBucket(id: string, data: Partial<CreateCreditBucketData>) {
+  async updateCreditBucket(id: string, data: Partial<ICreateCreditBucketData>) {
     return this.prisma.credit_buckets.update({
       where: { id },
       data,
@@ -69,7 +69,7 @@ export class CreditRepository {
 
   async updateCreditBucketsByUserSubscriptionId(
     userSubscriptionId: string,
-    data: Partial<CreateCreditBucketData>,
+    data: Partial<ICreateCreditBucketData>,
   ) {
     return this.prisma.credit_buckets.updateMany({
       where: {
@@ -80,7 +80,9 @@ export class CreditRepository {
     });
   }
 
-  async createBulkCreditTransactions(transactions: CreateCreditTransactionData[]) {
+  async createBulkCreditTransactions(
+    transactions: ICreateCreditTransactionData[],
+  ) {
     return this.prisma.credit_transactions.createMany({
       data: transactions,
     });
@@ -99,7 +101,10 @@ export class CreditRepository {
     });
   }
 
-  async updateCreditBucketsByIds(bucketIds: string[], data: Partial<CreateCreditBucketData>) {
+  async updateCreditBucketsByIds(
+    bucketIds: string[],
+    data: Partial<ICreateCreditBucketData>,
+  ) {
     return this.prisma.credit_buckets.updateMany({
       where: {
         id: { in: bucketIds },

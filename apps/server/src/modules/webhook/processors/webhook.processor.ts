@@ -1,32 +1,45 @@
-import { Processor, Process } from '@nestjs/bull';
+import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Logger } from '@nestjs/common';
-import type { Job } from 'bull';
+import type { Job } from 'bullmq';
 
 import { StripeWebhookService } from '../../stripe/services/stripe-webhook.service';
 import { IdempotentWebhookService } from '../services/idempotent-webhook.service';
 import { WebhookEventService } from '../services/webhook-event.service';
 import { webhook_event_type } from '@prisma/client';
+import { QUEUE_CONFIG } from '@/src/config/constants';
 
-interface WebhookJobData {
+type WebhookJobData = {
   eventId: string;
   stripeEventId: string;
   eventType: webhook_event_type;
   eventData: any;
   isRetry?: boolean;
-}
+};
 
-@Processor('webhook-processing')
-export class WebhookProcessor {
+@Processor(QUEUE_CONFIG.NAMES.WEBHOOK_PROCESSING)
+export class WebhookProcessor extends WorkerHost {
   private readonly logger = new Logger(WebhookProcessor.name);
 
   constructor(
     private readonly stripeWebhookService: StripeWebhookService,
     private readonly idempotentWebhookService: IdempotentWebhookService,
     private readonly webhookEventService: WebhookEventService,
-  ) {}
+  ) {
+    super();
+  }
 
-  @Process('process-webhook')
-  async processWebhook(job: Job<WebhookJobData>) {
+  async process(job: Job<WebhookJobData>) {
+    switch (job.name) {
+      case QUEUE_CONFIG.JOB_NAMES.WEBHOOK_STRIPE:
+        return this.processWebhook(job);
+      case QUEUE_CONFIG.JOB_NAMES.WEBHOOK_STRIPE_CLEANUP:
+        return this.cleanupOldEvents();
+      default:
+        throw new Error(`Unknown job type: ${job.name}`);
+    }
+  }
+
+  private async processWebhook(job: Job<WebhookJobData>) {
     const { eventId, stripeEventId, eventType, eventData, isRetry } = job.data;
     const startTime = Date.now();
 
@@ -35,13 +48,10 @@ export class WebhookProcessor {
         `🔄 Processing ${isRetry ? 'retry of ' : ''}webhook event: ${eventType} (${stripeEventId})`,
       );
 
-      // Mark the event as processing
       await this.idempotentWebhookService.markEventAsProcessing(eventId);
 
-      // Process the webhook event
       await this.stripeWebhookService.processWebhookEvent(eventData);
 
-      // Mark the event as completed
       await this.idempotentWebhookService.markEventAsCompleted(eventId);
 
       const processingTime = Date.now() - startTime;
@@ -60,25 +70,20 @@ export class WebhookProcessor {
         error,
       );
 
-      // Mark the event as failed
       await this.idempotentWebhookService.markEventAsFailed(
         eventId,
         errorMessage,
       );
 
-      // Rethrow the error to trigger Bull's retry mechanism if attempts remain
       throw error;
     }
   }
 
-  @Process({ name: 'cleanup-old-events', concurrency: 1 })
-  async cleanupOldEvents() {
+  private async cleanupOldEvents() {
     try {
       this.logger.log('🧹 Starting webhook event cleanup');
 
-      // Here we would implement logic to clean up old webhook events
-      // For example, archiving or deleting events older than X days
-
+      // TODO: Implement logic to clean up old webhook events
       this.logger.log('✅ Webhook event cleanup completed');
       return { success: true };
     } catch (error) {

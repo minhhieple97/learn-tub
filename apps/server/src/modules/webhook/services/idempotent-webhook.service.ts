@@ -39,8 +39,6 @@ export class IdempotentWebhookService {
       if (!event) {
         return { processed: false };
       }
-
-      // Check if the event is already completed or currently processing
       const isProcessing = this.processingStatuses.includes(event.status);
       const isCompleted = this.completedStatuses.includes(event.status);
 

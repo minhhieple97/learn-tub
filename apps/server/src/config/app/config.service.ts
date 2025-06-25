@@ -56,4 +56,20 @@ export class AppConfigService {
   get cacheTtl(): number {
     return Number(this.configService.get<number>('app.cacheTtl'));
   }
+
+  get redisHost(): string {
+    return this.configService.get<string>('app.redisHost');
+  }
+
+  get redisPort(): number {
+    return Number(this.configService.get<number>('app.redisPort'));
+  }
+
+  get redisPassword(): string {
+    return this.configService.get<string>('app.redisPassword');
+  }
+
+  get redisUsername(): string {
+    return this.configService.get<string>('app.redisUsername');
+  }
 }

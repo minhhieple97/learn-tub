@@ -1,7 +1,6 @@
 import { Injectable, Logger, BadRequestException } from '@nestjs/common';
-import { InjectQueue } from '@nestjs/bull';
-import type { Queue } from 'bull';
-import { ConfigService } from '@nestjs/config';
+import { InjectQueue } from '@nestjs/bullmq';
+import type { Queue } from 'bullmq';
 import { validate } from 'class-validator';
 import { plainToClass } from 'class-transformer';
 
@@ -9,20 +8,22 @@ import { StripeWebhookService } from '../../stripe/services/stripe-webhook.servi
 import { IdempotentWebhookService } from './idempotent-webhook.service';
 import { WebhookEventService } from './webhook-event.service';
 import { StripeEventDto } from '../../stripe/dto/stripe-webhook.dto';
+import { QUEUE_CONFIG } from '@/src/config/constants';
 
 @Injectable()
 export class WebhookService {
   private readonly logger = new Logger(WebhookService.name);
 
   constructor(
-    @InjectQueue('webhook-processing') private readonly webhookQueue: Queue,
+    @InjectQueue(QUEUE_CONFIG.NAMES.WEBHOOK_PROCESSING)
+    private readonly webhookQueue: Queue,
     private readonly stripeWebhookService: StripeWebhookService,
     private readonly idempotentWebhookService: IdempotentWebhookService,
     private readonly webhookEventService: WebhookEventService,
   ) {}
 
   async processStripeWebhook(
-    body: string,
+    body: Buffer,
     signature: string,
   ): Promise<{ eventId: string; queued: boolean }> {
     try {
@@ -30,22 +31,14 @@ export class WebhookService {
         `🎣 Processing stripe webhook - body type: ${typeof body}, signature type: ${typeof signature}`,
       );
 
-      if (!body || typeof body !== 'string') {
-        throw new BadRequestException(
-          'Invalid webhook body - must be a string',
-        );
-      }
-
       if (!signature || typeof signature !== 'string') {
         throw new BadRequestException(
           'Invalid webhook signature - must be a string',
         );
       }
 
-      // Construct and validate the Stripe event
       const event = this.stripeWebhookService.constructEvent(body, signature);
 
-      // Validate the event structure using class-validator
       const eventDto = plainToClass(StripeEventDto, event);
       const validationErrors = await validate(eventDto);
 
@@ -61,7 +54,6 @@ export class WebhookService {
         `🎣 Processing webhook event: ${event.type} (${event.id})`,
       );
 
-      // Check if we've already processed this event (idempotency)
       const { processed } =
         await this.idempotentWebhookService.isEventProcessed(event.id);
 
@@ -70,10 +62,9 @@ export class WebhookService {
         return { eventId: event.id, queued: false };
       }
 
-      // Store the webhook event in database
       const webhookEvent = await this.webhookEventService.createWebhookEvent(
         event.id,
-        event.type as any,
+        event.type,
         event,
       );
 
@@ -81,9 +72,8 @@ export class WebhookService {
         throw new Error('Failed to create webhook event record');
       }
 
-      // Add to processing queue for async handling
       const job = await this.webhookQueue.add(
-        'process-webhook',
+        QUEUE_CONFIG.JOB_NAMES.WEBHOOK_STRIPE,
         {
           eventId: webhookEvent.id,
           stripeEventId: event.id,
@@ -91,22 +81,14 @@ export class WebhookService {
           eventData: event,
         },
         {
-          // Job options
-          attempts: 3,
-          backoff: {
-            type: 'exponential',
-            delay: 2000,
-          },
-          removeOnComplete: 100,
-          removeOnFail: 50,
+          jobId: `${QUEUE_CONFIG.JOB_NAMES.WEBHOOK_STRIPE}-${webhookEvent.id}`,
         },
       );
 
-      // Create webhook job record
       await this.webhookEventService.createWebhookJob(
         webhookEvent.id,
         job.id.toString(),
-        'webhook-processing',
+        QUEUE_CONFIG.NAMES.WEBHOOK_PROCESSING,
       );
 
       this.logger.log(
@@ -176,7 +158,7 @@ export class WebhookService {
         await this.webhookEventService.createWebhookJob(
           event.id,
           job.id.toString(),
-          'webhook-processing',
+          QUEUE_CONFIG.NAMES.WEBHOOK_PROCESSING,
         );
 
         retriedCount++;
