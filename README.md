@@ -36,6 +36,8 @@ LearnTub is a modern learning platform that transforms passive YouTube video wat
 - **Styling:** [Tailwind CSS](https://tailwindcss.com/) with custom design system
 - **UI Components:** [Radix UI](https://www.radix-ui.com/) primitives
 - **Icons:** [Lucide React](https://lucide.dev/)
+- **State Management:** [Zustand](https://zustand-demo.pmnd.rs/) for client-side state management
+- **Data Fetching:** [React Query (TanStack Query)](https://tanstack.com/query) for server state management
 - **Forms:** React Hook Form with Zod validation
 - **Animations:** Framer Motion
 
@@ -47,8 +49,9 @@ LearnTub is a modern learning platform that transforms passive YouTube video wat
 
 ### Shared Infrastructure
 
-- **Database:** [PostgreSQL](https://www.postgresql.org/) (Vercel/Neon) + [Supabase](https://supabase.com/)
+- **Database:** [PostgreSQL](https://www.postgresql.org/) ([Supabase](https://supabase.com/))
 - **Authentication:** Supabase Auth
+- **Payments:** [Stripe](https://stripe.com/) for payment processing and subscription management
 - **AI Integration:** [OpenAI](https://openai.com/) & [Google Gemini](https://ai.google.dev/) for intelligent note evaluation
 - **AI Analytics:** Comprehensive usage tracking with cost calculation and performance metrics
 - **External APIs:** YouTube Data API v3 for video integration
