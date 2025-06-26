@@ -1,10 +1,10 @@
 # LearnTub 🎓
 
+[![Turborepo](https://img.shields.io/badge/Built%20with-Turborepo-EF4444?style=for-the-badge&logo=turborepo&logoColor=white)](https://turbo.build/)
 [![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/minh-hiep-les-projects/v0-learn-tub)
-[![Built with Next.js](https://img.shields.io/badge/Built%20with-Next.js-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com/)
-[![Turborepo](https://img.shields.io/badge/Built%20with-Turborepo-EF4444?style=for-the-badge&logo=turborepo&logoColor=white)](https://turbo.build/)
+
 
 > Transform YouTube into your personalized learning platform with AI-powered insights and smart note-taking.
 
@@ -94,9 +94,39 @@ LearnTub is a modern learning platform that transforms passive YouTube video wat
    pnpm install
    ```
 
-3. **Environment Setup**
+3. **Server Setup**
 
-   Create a `.env` file in the root directory:
+   Navigate to the server application and install dependencies:
+
+   ```bash
+   cd apps/server
+   pnpm install
+   ```
+
+   Create a `.env` file in the `apps/server` directory with the server-specific environment variables (see `apps/server/README.md` for details).
+
+4. **Database Setup**
+
+   Navigate to the database package and set it up:
+
+   ```bash
+   cd ../../packages/database
+   pnpm install
+   npm run db
+   ```
+
+   Navigate back to the root directory:
+
+   ```bash
+   cd ../../
+   ```
+
+
+
+
+4. **Web Application Environment Setup**
+
+   Create a `.env` file in the `apps/web` directory with the following environment variables:
 
    ```env
    # Supabase Configuration
@@ -120,19 +150,15 @@ LearnTub is a modern learning platform that transforms passive YouTube video wat
    UPSTASH_REDIS_REST_URL=your_upstash_redis_rest_url
    UPSTASH_REDIS_REST_TOKEN=your_upstash_redis_rest_token
 
+   # Stripe Configuration
+   NEXT_PUBLIC_STRIPE_PUBLIC_KEY=your_stripe_public_key
+   STRIPE_SECRET_KEY=your_stripe_secret_key
+   STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
+
    # App Configuration
    NEXT_PUBLIC_APP_URL=http://localhost:3000
    NODE_ENV=development
-   ```
-
-4. **Database Setup**
-
-   ```bash
-   # Pull latest schema from Supabase
-   npm run db:pull
-
-   # Reset database (if needed)
-   npm run db:reset
+   CRON_SECRET=your_cron_secret
    ```
 
 5. **Run the development server**
@@ -141,7 +167,9 @@ LearnTub is a modern learning platform that transforms passive YouTube video wat
    npm run dev
    ```
 
-   Open [http://localhost:3000](http://localhost:3000) to view the application.
+   The applications will run on different ports:
+   - **Web App:** [http://localhost:3000](http://localhost:3000) 
+   - **Server API:** [http://localhost:3001](http://localhost:3001)
 
 ## 🏗️ Project Structure
 
@@ -271,12 +299,12 @@ npm run db           # Pull and reset database
 
 ### Upcoming Features & Improvements
 
-- **🔄 Idempotent Stripe Event Processing**
+- **🔄 Idempotent Stripe Event Processing** ✅ **(done)**
   - Implement idempotent handling for Stripe webhook events to prevent duplicate processing
   - Add event deduplication mechanism and processing state tracking
   - Ensure reliable payment and subscription event handling
 
-- **💳 Transaction-Safe Credit Processing**
+- **💳 Transaction-Safe Credit Processing** 🚧 **(in progress)**
   - Set up database transactions for credit processing operations
   - Implement Prisma wrapper for atomic credit deduction and allocation
   - Ensure data consistency across credit buckets and user balances
