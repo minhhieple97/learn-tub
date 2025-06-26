@@ -10,9 +10,11 @@ import { StripeModule } from './modules/stripe/stripe.module';
 import { AppConfigModule } from './config';
 import { PrismaModule } from './modules/prisma/prisma.module';
 import { QueueModule } from './modules/queues/queue.module';
+import { CacheModule } from './config/cache';
 
 @Module({
   imports: [
+    CacheModule,
     AppConfigModule,
     QueueModule,
     PrismaModule,

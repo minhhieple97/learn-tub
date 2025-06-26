@@ -8,6 +8,7 @@ import { CreditModule } from '../credit/credit.module';
 import { SubscriptionModule } from '../subscription/subscription.module';
 import { PrismaModule } from '../prisma/prisma.module';
 import { AppConfigModule } from '@/src/config';
+import { CacheModule } from '@/src/config/cache';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { AppConfigModule } from '@/src/config';
     CreditModule,
     SubscriptionModule,
     PrismaModule,
+    CacheModule,
   ],
   controllers: [],
   providers: [StripeService, StripeWebhookService],

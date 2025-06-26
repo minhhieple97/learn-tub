@@ -2,12 +2,42 @@ import { Injectable, Logger } from '@nestjs/common';
 import Stripe from 'stripe';
 
 import { PaymentService } from '../../payment/payment.service';
-import { CreditService } from '../../credit/credit.service';
 import { SubscriptionService } from '../../subscription/subscription.service';
+import { CacheService, CacheUtils } from '../../../config/cache';
 
 import { WEBHOOK_CONFIG, PAYMENT_CONFIG } from '../../../config/constants';
 import { AppConfigService } from '@/src/config';
 import { STRIPE_BILLING_REASON } from '../constants';
+
+export type IUpdateSubscriptionStatusParams = {
+  subscriptionId: string;
+  status: any;
+  currentPeriodStart?: number;
+  currentPeriodEnd?: number;
+  cancelAtPeriodEnd?: boolean;
+};
+
+export type IHandleCheckoutCompletedParams = {
+  userId: string;
+  planId?: string | null;
+  subscriptionData?: any | null;
+  plan?: any | null;
+  creditsAmount?: number | null;
+  paymentHistoryData: any;
+};
+
+export type IHandleSubscriptionCreationParams = {
+  userId: string;
+  planId: string;
+  subscriptionData: any;
+  plan: any;
+};
+
+export type IProcessSubscriptionRenewalParams = {
+  customerId: string;
+  subscriptionId: string;
+  invoice: Stripe.Invoice;
+};
 
 @Injectable()
 export class StripeWebhookService {
@@ -18,6 +48,7 @@ export class StripeWebhookService {
     private readonly paymentService: PaymentService,
     private readonly subscriptionService: SubscriptionService,
     private readonly appConfigService: AppConfigService,
+    private readonly cacheService: CacheService,
   ) {
     this.stripe = new Stripe(this.appConfigService.stripeSecretKey, {
       apiVersion: '2023-10-16',
@@ -83,6 +114,80 @@ export class StripeWebhookService {
       default:
         this.logger.log(`🤷 Unhandled event type: ${event.type}`);
     }
+  }
+
+  // Cache invalidation helper methods
+  private async invalidateCacheOnCreditChange(
+    userId: string,
+    context: string,
+  ): Promise<void> {
+    await CacheUtils.safeInvalidate(
+      () => this.cacheService.invalidateUserCacheOnCreditChange(userId),
+      `${context} - user: ${userId}`,
+      this.logger,
+    );
+  }
+
+  private async invalidateCacheOnSubscriptionChange(
+    userId: string,
+    context: string,
+  ): Promise<void> {
+    await CacheUtils.safeInvalidate(
+      () => this.cacheService.invalidateUserCacheOnSubscriptionChange(userId),
+      `${context} - user: ${userId}`,
+      this.logger,
+    );
+  }
+
+  private async invalidateFullUserCache(
+    userId: string,
+    context: string,
+  ): Promise<void> {
+    await CacheUtils.safeInvalidate(
+      () => this.cacheService.invalidateUserCache(userId),
+      `${context} - user: ${userId}`,
+      this.logger,
+    );
+  }
+
+  private async invalidateCacheByCustomerId(
+    customerId: string,
+    context: string,
+  ): Promise<void> {
+    try {
+      const userSub =
+        await this.subscriptionService.getUserByStripeCustomerId(customerId);
+      if (userSub) {
+        await this.invalidateCacheOnSubscriptionChange(
+          userSub.user_id,
+          context,
+        );
+      } else {
+        this.logger.warn(
+          `User not found for customer ${customerId} during cache invalidation`,
+        );
+      }
+    } catch (error) {
+      this.logger.error(
+        `Failed to invalidate cache for customer ${customerId}:`,
+        error,
+      );
+    }
+  }
+
+  // Helper method to extract customer ID from subscription
+  private getCustomerIdFromSubscription(
+    subscription: Stripe.Subscription,
+  ): string {
+    return typeof subscription.customer === 'string'
+      ? subscription.customer
+      : subscription.customer.id;
+  }
+
+  private getCustomerIdFromInvoice(invoice: Stripe.Invoice): string {
+    return typeof invoice.customer === 'string'
+      ? invoice.customer
+      : invoice.customer?.id || '';
   }
 
   private extractSubscriptionData(subscription: Stripe.Subscription) {
@@ -186,15 +291,19 @@ export class StripeWebhookService {
       throw new Error(`Plan not found: ${planId}`);
     }
 
-    await this.subscriptionService.handleCheckoutCompletedTransaction(
+    await this.handleCheckoutCompletedTransactionTyped({
       userId,
       planId,
       subscriptionData,
       plan,
-      null,
+      creditsAmount: null,
       paymentHistoryData,
-    );
+    });
 
+    await this.invalidateCacheOnSubscriptionChange(
+      userId,
+      'Subscription checkout',
+    );
     this.logger.log(`🎯 Subscription checkout completed for user: ${userId}`);
   }
 
@@ -210,122 +319,72 @@ export class StripeWebhookService {
       throw new Error('Invalid credits amount');
     }
 
-    // Handle everything in a single transaction
-    const result =
-      await this.subscriptionService.handleCheckoutCompletedTransaction(
-        userId,
-        null,
-        null,
-        null,
-        creditsAmount,
-        paymentHistoryData,
-      );
+    await this.handleCheckoutCompletedTransactionTyped({
+      userId,
+      planId: null,
+      subscriptionData: null,
+      plan: null,
+      creditsAmount,
+      paymentHistoryData,
+    });
 
+    await this.invalidateCacheOnCreditChange(userId, 'Credit purchase');
     this.logger.log(`💰 ${creditsAmount} credits added to user: ${userId}`);
   }
 
-  private async handleSubscriptionCreated(
-    subscription: Stripe.Subscription,
-  ): Promise<void> {
-    const priceId = subscription.items?.data?.[0]?.price?.id;
-    if (!priceId) throw new Error('Price ID not found in subscription');
-
-    const plan = await this.subscriptionService.getPlanByStripePrice(priceId);
-    if (!plan) throw new Error(`Plan not found for price ID: ${priceId}`);
-
-    const userId = await this.findUserIdFromSubscription(subscription);
-    const customerId =
-      typeof subscription.customer === 'string'
-        ? subscription.customer
-        : subscription.customer.id;
-    if (!userId)
-      throw new Error(`User ID not found for customer: ${customerId}`);
-
-    const { hasActivePlan } =
-      await this.subscriptionService.checkUserHasActivePlan(userId, plan.id);
-    if (hasActivePlan) {
-      this.logger.log(
-        `⚠️ User ${userId} already has active plan ${plan.id}. Skipping.`,
-      );
-      return;
-    }
-
-    try {
-      const subscriptionData = this.extractSubscriptionData(subscription);
-
-      // Handle everything in a single transaction
-      const result =
-        await this.subscriptionService.handleSubscriptionCreationTransaction(
-          userId,
-          plan.id,
-          subscriptionData,
-          plan,
-        );
-
-      this.logger.log(
-        `🎉 Subscription created for user: ${userId}, sub: ${subscription.id}`,
-        `Credit bucket: ${result.creditBucket.id}, Transaction: ${result.creditTransaction.id}`,
-      );
-    } catch (error) {
-      this.logger.error(
-        `❌ Failed to handle subscription creation: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      );
-      throw error;
-    }
+  private async updateSubscriptionStatusTyped(
+    params: IUpdateSubscriptionStatusParams,
+  ): Promise<any> {
+    return this.subscriptionService.updateSubscriptionStatus(
+      params.subscriptionId,
+      params.status,
+      params.currentPeriodStart,
+      params.currentPeriodEnd,
+      params.cancelAtPeriodEnd,
+    );
   }
 
-  private async findUserIdFromSubscription(
-    subscription: Stripe.Subscription,
-  ): Promise<string | null> {
-    if (subscription.metadata?.user_id) {
-      this.logger.log('🔍 Found user ID from subscription metadata');
-      return subscription.metadata.user_id;
-    }
+  private async handleCheckoutCompletedTransactionTyped(
+    params: IHandleCheckoutCompletedParams,
+  ): Promise<any> {
+    return this.subscriptionService.handleCheckoutCompletedTransaction(
+      params.userId,
+      params.planId,
+      params.subscriptionData,
+      params.plan,
+      params.creditsAmount,
+      params.paymentHistoryData,
+    );
+  }
 
-    const customerId =
-      typeof subscription.customer === 'string'
-        ? subscription.customer
-        : subscription.customer.id;
 
-    const customer = await this.stripe.customers.retrieve(customerId);
-    if (customer.deleted) {
-      this.logger.warn(`Stripe customer ${customerId} is deleted.`);
-      return null;
-    }
 
-    if ((customer as Stripe.Customer).metadata?.user_id) {
-      this.logger.log('🔍 Found user ID from customer metadata');
-      return (customer as Stripe.Customer).metadata.user_id;
-    }
-
-    const existingUserSub =
-      await this.subscriptionService.getUserByStripeCustomerId(customerId);
-    if (existingUserSub) {
-      this.logger.log('🔍 Found user ID from existing subscription');
-      return existingUserSub.user_id;
-    }
-
-    return null;
+  private async processSubscriptionRenewalTransactionTyped(
+    params: IProcessSubscriptionRenewalParams,
+  ): Promise<void> {
+    return this.subscriptionService.processSubscriptionRenewalTransaction(
+      params.customerId,
+      params.subscriptionId,
+      params.invoice,
+    );
   }
 
   private async handleSubscriptionUpdated(
     subscription: Stripe.Subscription,
   ): Promise<void> {
-    const customerId =
-      typeof subscription.customer === 'string'
-        ? subscription.customer
-        : subscription.customer.id;
-
+    const customerId = this.getCustomerIdFromSubscription(subscription);
     const status =
       subscription.status === 'canceled' ? 'cancelled' : subscription.status;
 
-    await this.subscriptionService.updateSubscriptionStatus(
-      subscription.id,
-      status as any,
-      subscription.current_period_start,
-      subscription.current_period_end,
-      subscription.cancel_at_period_end,
-    );
+    await this.updateSubscriptionStatusTyped({
+      subscriptionId: subscription.id,
+      status: status as any,
+      currentPeriodStart: subscription.current_period_start,
+      currentPeriodEnd: subscription.current_period_end,
+      cancelAtPeriodEnd: subscription.cancel_at_period_end,
+    });
+
+    await this.invalidateCacheByCustomerId(customerId, 'Subscription update');
 
     if (subscription.cancel_at_period_end) {
       this.logger.log(
@@ -342,10 +401,14 @@ export class StripeWebhookService {
   private async handleSubscriptionDeleted(
     subscription: Stripe.Subscription,
   ): Promise<void> {
-    await this.subscriptionService.updateSubscriptionStatus(
-      subscription.id,
-      'cancelled',
-    );
+    const customerId = this.getCustomerIdFromSubscription(subscription);
+
+    await this.updateSubscriptionStatusTyped({
+      subscriptionId: subscription.id,
+      status: 'cancelled',
+    });
+
+    await this.invalidateCacheByCustomerId(customerId, 'Subscription deletion');
     this.logger.log(`❌ Subscription deleted: ${subscription.id}`);
   }
 
@@ -358,10 +421,7 @@ export class StripeWebhookService {
       );
       return;
     }
-    const customerId =
-      typeof invoice.customer === 'string'
-        ? invoice.customer
-        : invoice.customer.id;
+    const customerId = this.getCustomerIdFromInvoice(invoice);
     const userSub =
       await this.subscriptionService.getUserByStripeCustomerId(customerId);
     if (!userSub) throw new Error(`User not found for customer: ${customerId}`);
@@ -376,6 +436,11 @@ export class StripeWebhookService {
         description: `Subscription payment - ${invoice.billing_reason || 'cycle'}`,
         stripeInvoiceId: invoice.id,
       });
+
+      await this.invalidateCacheOnSubscriptionChange(
+        userSub.user_id,
+        'Payment success',
+      );
     } catch (error) {
       this.logger.error(
         `❌ Failed to create payment history: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -391,11 +456,7 @@ export class StripeWebhookService {
       this.logger.log('ℹ️ Non-subscription invoice payment failed, skipping.');
       return;
     }
-    const customerId =
-      typeof invoice.customer === 'string'
-        ? invoice.customer
-        : invoice.customer.id;
-
+    const customerId = this.getCustomerIdFromInvoice(invoice);
     const userSub =
       await this.subscriptionService.getUserByStripeCustomerId(customerId);
     if (!userSub) {
@@ -414,6 +475,10 @@ export class StripeWebhookService {
         stripeInvoiceId: invoice.id,
       });
 
+      await this.invalidateCacheOnSubscriptionChange(
+        userSub.user_id,
+        'Payment failure',
+      );
       this.logger.log(
         `❌ Subscription payment failed for user: ${userSub.user_id}`,
       );
@@ -440,17 +505,24 @@ export class StripeWebhookService {
       this.logger.log('ℹ️ Non-subscription invoice paid, skipping renewal.');
       return;
     }
-    const customerId =
-      typeof invoice.customer === 'string'
-        ? invoice.customer
-        : invoice.customer.id;
+    const customerId = this.getCustomerIdFromInvoice(invoice);
 
     try {
-      await this.subscriptionService.processSubscriptionRenewalTransaction(
+      await this.processSubscriptionRenewalTransactionTyped({
         customerId,
         subscriptionId,
         invoice,
-      );
+      });
+
+     
+      const userSub =
+        await this.subscriptionService.getUserByStripeCustomerId(customerId);
+      if (userSub) {
+        await this.invalidateFullUserCache(
+          userSub.user_id,
+          'Subscription renewal',
+        );
+      }
     } catch (error) {
       this.logger.error(
         `❌ Failed to process subscription renewal: ${error instanceof Error ? error.message : 'Unknown error'}`,
