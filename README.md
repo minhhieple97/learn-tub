@@ -5,7 +5,6 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com/)
 
-
 > Transform YouTube into your personalized learning platform with AI-powered insights and smart note-taking.
 
 ## 🚀 Overview
@@ -121,10 +120,7 @@ LearnTub is a modern learning platform that transforms passive YouTube video wat
    cd ../../
    ```
 
-
-
-
-4. **Web Application Environment Setup**
+5. **Web Application Environment Setup**
 
    Create a `.env` file in the `apps/web` directory with the following environment variables:
 
@@ -161,14 +157,14 @@ LearnTub is a modern learning platform that transforms passive YouTube video wat
    CRON_SECRET=your_cron_secret
    ```
 
-5. **Run the development server**
+6. **Run the development server**
 
    ```bash
    npm run dev
    ```
 
    The applications will run on different ports:
-   - **Web App:** [http://localhost:3000](http://localhost:3000) 
+   - **Web App:** [http://localhost:3000](http://localhost:3000)
    - **Server API:** [http://localhost:3001](http://localhost:3001)
 
 ## 🏗️ Project Structure

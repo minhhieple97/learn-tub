@@ -15,8 +15,8 @@ export const ResizerTooltip = ({
       duration-200 ease-out will-change-[transform,opacity] group-hover:opacity-100 group-focus:opacity-100
       ${
         isDragging || isKeyboardActive
-          ? '-translate-y-2 scale-105 opacity-100'
-          : 'translate-y-1 scale-95'
+          ? "-translate-y-2 scale-105 opacity-100"
+          : "translate-y-1 scale-95"
       }
     `}
     >

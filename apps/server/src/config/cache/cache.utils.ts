@@ -17,7 +17,6 @@ export const createCacheInvalidationFunctions = (
   invalidateAllUserCache: (userId: string) =>
     cacheService.invalidateUserCache(userId),
 
-  // Multiple users cache invalidation
   invalidateMultipleUsersCacheOnCreditChange: (userIds: string[]) =>
     cacheService.invalidateMultipleUsersCacheOnCreditChange(userIds),
 
@@ -25,7 +24,6 @@ export const createCacheInvalidationFunctions = (
     cacheService.invalidateMultipleUsersCacheOnSubscriptionChange(userIds),
 });
 
-// Static utility functions for one-off usage
 export class CacheUtils {
   static async safeInvalidate(
     invalidateFunction: () => Promise<any>,

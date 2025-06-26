@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
-import { DifficultyBadge } from '@/components/ui/difficulty-badge';
-import { IQuestion, IUserAnswer, IQuizAnswerOption } from '../types';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+import { DifficultyBadge } from "@/components/ui/difficulty-badge";
+import { IQuestion, IUserAnswer, IQuizAnswerOption } from "../types";
 
 type IQuestionCardProps = {
   question: IQuestion;
@@ -40,13 +40,13 @@ export const QuestionCard = ({
             <Button
               key={key}
               variant={
-                currentAnswer?.selectedAnswer === key ? 'default' : 'outline'
+                currentAnswer?.selectedAnswer === key ? "default" : "outline"
               }
               className={cn(
-                'justify-start p-4 h-auto text-left whitespace-normal transition-all duration-200',
+                "justify-start p-4 h-auto text-left whitespace-normal transition-all duration-200",
                 currentAnswer?.selectedAnswer === key
-                  ? 'bg-blue-600 hover:bg-blue-700 text-white ring-2 ring-blue-300 dark:ring-blue-500 shadow-md'
-                  : 'border-slate-300 hover:border-blue-400 hover:bg-blue-50 dark:border-slate-600 dark:hover:border-blue-500 dark:hover:bg-blue-950/30',
+                  ? "bg-blue-600 hover:bg-blue-700 text-white ring-2 ring-blue-300 dark:ring-blue-500 shadow-md"
+                  : "border-slate-300 hover:border-blue-400 hover:bg-blue-50 dark:border-slate-600 dark:hover:border-blue-500 dark:hover:bg-blue-950/30",
               )}
               onClick={() => onAnswerSelect(key as IQuizAnswerOption)}
             >

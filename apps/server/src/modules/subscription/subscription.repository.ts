@@ -526,4 +526,4 @@ export class SubscriptionRepository {
       };
     });
   }
-} 
+}

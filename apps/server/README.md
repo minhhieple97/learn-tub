@@ -11,7 +11,7 @@ This application uses Joi for environment variable validation. Create a `.env.lo
 PORT=3001
 NODE_ENV=development
 
-# Database Configuration  
+# Database Configuration
 DATABASE_URL="postgresql://username:password@localhost:5432/learnTub"
 
 # Stripe Configuration

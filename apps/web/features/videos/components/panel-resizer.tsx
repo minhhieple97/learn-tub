@@ -1,6 +1,6 @@
-import React from 'react';
-import { ResizerHandle } from './resizer-handle';
-import { ResizerTooltip } from './resizer-tooltip';
+import React from "react";
+import { ResizerHandle } from "./resizer-handle";
+import { ResizerTooltip } from "./resizer-tooltip";
 
 type PanelResizerProps = {
   onMouseDown: (e: React.MouseEvent) => void;
@@ -23,9 +23,9 @@ export const PanelResizer = ({
       className={`
         group relative shrink-0 transform-gpu cursor-col-resize transition-all duration-200
         ease-out will-change-[width]
-        ${isDragging || isKeyboardActive ? 'w-8' : 'w-5 hover:w-6'}
+        ${isDragging || isKeyboardActive ? "w-8" : "w-5 hover:w-6"}
       `}
-      style={{ userSelect: 'none' }}
+      style={{ userSelect: "none" }}
       role="separator"
       tabIndex={0}
       onKeyDown={onKeyDown}
@@ -39,7 +39,7 @@ export const PanelResizer = ({
         pointer-events-none absolute inset-0 rounded-lg bg-gradient-to-b from-primary/20 via-primary/40
         to-primary/20 opacity-0 blur-sm transition-all duration-200 ease-out
         group-hover:opacity-60 ${
-          isDragging || isKeyboardActive ? 'scale-110 opacity-100' : ''
+          isDragging || isKeyboardActive ? "scale-110 opacity-100" : ""
         }
       `}
       />
@@ -50,7 +50,7 @@ export const PanelResizer = ({
         pointer-events-none absolute inset-0 rounded-lg bg-gradient-to-r from-transparent via-primary/15
         to-transparent opacity-0 transition-all duration-200 ease-out
         group-hover:opacity-100 ${
-          isDragging || isKeyboardActive ? 'opacity-100' : ''
+          isDragging || isKeyboardActive ? "opacity-100" : ""
         }
       `}
       />

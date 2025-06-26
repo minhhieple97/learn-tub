@@ -1,5 +1,5 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import type { IStatCardProps } from '../types';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import type { IStatCardProps } from "../types";
 
 export const StatCard = ({
   title,

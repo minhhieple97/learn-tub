@@ -17,7 +17,7 @@ import { PaymentRepository } from '../payment/payment.repository';
     CreditService,
     PaymentService,
     PrismaService,
-    PaymentRepository
+    PaymentRepository,
   ],
   exports: [SubscriptionService, SubscriptionRepository],
 })

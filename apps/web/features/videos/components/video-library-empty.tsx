@@ -1,4 +1,4 @@
-import { Video, Sparkles } from 'lucide-react';
+import { Video, Sparkles } from "lucide-react";
 
 export const VideoLibraryEmpty = () => {
   return (
@@ -8,7 +8,9 @@ export const VideoLibraryEmpty = () => {
       </div>
       <div className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
         <Sparkles className="h-5 w-5" />
-        <span className="font-semibold text-lg">Switch to "Add Video" tab to get started</span>
+        <span className="font-semibold text-lg">
+          Switch to "Add Video" tab to get started
+        </span>
       </div>
     </div>
   );

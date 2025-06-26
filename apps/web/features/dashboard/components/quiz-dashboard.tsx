@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
-import { Brain } from 'lucide-react';
-import { Suspense } from 'react';
-import { useAction } from 'next-safe-action/hooks';
-import { retakeQuizAction } from '../actions/quiz-actions';
-import { QuizDashboardStats } from './quiz-dashboard-stats';
-import { QuizDashboardFilters } from './quiz-dashboard-filters';
-import { QuizSessionsList } from './quiz-sessions-list';
-import { QuizSessionsSkeleton } from './quiz-sessions-skeleton';
-import { QuizPagination } from './quiz-pagination';
-import type { IQuizSessionWithAttempts } from '@/features/quizzes/types';
+import { Brain } from "lucide-react";
+import { Suspense } from "react";
+import { useAction } from "next-safe-action/hooks";
+import { retakeQuizAction } from "../actions/quiz-actions";
+import { QuizDashboardStats } from "./quiz-dashboard-stats";
+import { QuizDashboardFilters } from "./quiz-dashboard-filters";
+import { QuizSessionsList } from "./quiz-sessions-list";
+import { QuizSessionsSkeleton } from "./quiz-sessions-skeleton";
+import { QuizPagination } from "./quiz-pagination";
+import type { IQuizSessionWithAttempts } from "@/features/quizzes/types";
 
 type Video = {
   id: string;
@@ -30,7 +30,8 @@ type QuizDashboardProps = {
 };
 
 export const QuizDashboard = ({ data, videos }: QuizDashboardProps) => {
-  const { execute: executeRetake, isExecuting: isRetaking } = useAction(retakeQuizAction);
+  const { execute: executeRetake, isExecuting: isRetaking } =
+    useAction(retakeQuizAction);
 
   const handleRetakeQuiz = async (sessionId: string) => {
     executeRetake({ sessionId });

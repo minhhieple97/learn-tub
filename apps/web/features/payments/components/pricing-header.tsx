@@ -1,4 +1,4 @@
-import { Zap } from 'lucide-react';
+import { Zap } from "lucide-react";
 
 type PricingHeaderProps = {
   compact?: boolean;
@@ -14,13 +14,14 @@ export const PricingHeader = ({ compact = false }: PricingHeaderProps) => {
         Simple, transparent pricing
       </div>
       <h2 className="mb-6 text-4xl font-bold text-foreground lg:text-5xl">
-        Choose Your{' '}
+        Choose Your{" "}
         <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent dark:from-blue-400 dark:to-indigo-400">
           Learning Plan
         </span>
       </h2>
       <p className="mx-auto max-w-3xl text-xl text-muted-foreground">
-        Start free and upgrade as you grow. All plans include unlimited note-taking.
+        Start free and upgrade as you grow. All plans include unlimited
+        note-taking.
       </p>
     </div>
   );

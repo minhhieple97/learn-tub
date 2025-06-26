@@ -1,11 +1,11 @@
-import 'server-only';
-import { createClient } from '@/lib/supabase/server';
-import { IQuizFilters, IQuizDashboardData } from '../types';
+import "server-only";
+import { createClient } from "@/lib/supabase/server";
+import { IQuizFilters, IQuizDashboardData } from "../types";
 import {
   IQuizQuestion,
   IQuizDifficulty,
   IQuizSessionWithAttempts,
-} from '@/features/quizzes/types';
+} from "@/features/quizzes/types";
 
 export const getQuizDashboardData = async (
   userId: string,
@@ -17,7 +17,7 @@ export const getQuizDashboardData = async (
   const offset = (page - 1) * limit;
 
   let query = supabase
-    .from('quiz_sessions')
+    .from("quiz_sessions")
     .select(
       `
       *,
@@ -44,40 +44,40 @@ export const getQuizDashboardData = async (
       )
     `,
     )
-    .eq('user_id', userId);
+    .eq("user_id", userId);
 
-  if (filters?.difficulty && filters.difficulty !== 'all') {
-    query = query.eq('difficulty', filters.difficulty);
+  if (filters?.difficulty && filters.difficulty !== "all") {
+    query = query.eq("difficulty", filters.difficulty);
   }
 
   if (filters?.search) {
-    query = query.ilike('title', `%${filters.search}%`);
+    query = query.ilike("title", `%${filters.search}%`);
   }
 
   if (filters?.videoId) {
-    query = query.eq('video_id', filters.videoId);
+    query = query.eq("video_id", filters.videoId);
   }
 
-  const sortBy = filters?.sortBy || 'created_at';
-  const sortOrder = filters?.sortOrder || 'desc';
+  const sortBy = filters?.sortBy || "created_at";
+  const sortOrder = filters?.sortOrder || "desc";
 
-  if (sortBy === 'created_at') {
-    query = query.order('created_at', { ascending: sortOrder === 'asc' });
+  if (sortBy === "created_at") {
+    query = query.order("created_at", { ascending: sortOrder === "asc" });
   }
 
   let countQuery = supabase
-    .from('quiz_sessions')
-    .select('*', { count: 'exact', head: true })
-    .eq('user_id', userId);
+    .from("quiz_sessions")
+    .select("*", { count: "exact", head: true })
+    .eq("user_id", userId);
 
-  if (filters?.difficulty && filters.difficulty !== 'all') {
-    countQuery = countQuery.eq('difficulty', filters.difficulty);
+  if (filters?.difficulty && filters.difficulty !== "all") {
+    countQuery = countQuery.eq("difficulty", filters.difficulty);
   }
   if (filters?.search) {
-    countQuery = countQuery.ilike('title', `%${filters.search}%`);
+    countQuery = countQuery.ilike("title", `%${filters.search}%`);
   }
   if (filters?.videoId) {
-    countQuery = countQuery.eq('video_id', filters.videoId);
+    countQuery = countQuery.eq("video_id", filters.videoId);
   }
 
   // Optimize performance by combining all database queries
@@ -91,14 +91,14 @@ export const getQuizDashboardData = async (
     query.range(offset, offset + limit - 1),
     countQuery,
     supabase
-      .from('quiz_sessions')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', userId),
+      .from("quiz_sessions")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", userId),
     supabase
-      .from('quiz_attempts')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', userId),
-    supabase.from('quiz_attempts').select('score').eq('user_id', userId),
+      .from("quiz_attempts")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", userId),
+    supabase.from("quiz_attempts").select("score").eq("user_id", userId),
   ]);
 
   if (error) {
@@ -135,7 +135,7 @@ export const getQuizDashboardData = async (
         videos: session.videos
           ? {
               ...session.videos,
-              description: session.videos.description || '',
+              description: session.videos.description || "",
             }
           : undefined,
       };
@@ -162,10 +162,10 @@ export const getQuizSessionForRetake = async (
   const supabase = await createClient();
 
   const { data: session, error } = await supabase
-    .from('quiz_sessions')
-    .select('*')
-    .eq('id', sessionId)
-    .eq('user_id', userId)
+    .from("quiz_sessions")
+    .select("*")
+    .eq("id", sessionId)
+    .eq("user_id", userId)
     .single();
 
   if (error) {
@@ -182,7 +182,7 @@ export const getQuizSessionDetail = async (
   const supabase = await createClient();
 
   const { data: session, error } = await supabase
-    .from('quiz_sessions')
+    .from("quiz_sessions")
     .select(
       `
       *,
@@ -209,8 +209,8 @@ export const getQuizSessionDetail = async (
       )
     `,
     )
-    .eq('id', sessionId)
-    .eq('user_id', userId)
+    .eq("id", sessionId)
+    .eq("user_id", userId)
     .single();
 
   if (error || !session) {
@@ -237,7 +237,7 @@ export const getQuizSessionDetail = async (
     videos: session.videos
       ? {
           ...session.videos,
-          description: session.videos.description || '',
+          description: session.videos.description || "",
         }
       : undefined,
   };
@@ -247,10 +247,10 @@ export const getUserVideos = async (userId: string) => {
   const supabase = await createClient();
 
   const { data: videos, error } = await supabase
-    .from('videos')
-    .select('id, title, youtube_id')
-    .eq('user_id', userId)
-    .order('created_at', { ascending: false });
+    .from("videos")
+    .select("id, title, youtube_id")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
 
   if (error) {
     throw new Error(`Failed to fetch videos: ${error.message}`);

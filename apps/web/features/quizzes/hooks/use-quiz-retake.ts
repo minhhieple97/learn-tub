@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { useState, useCallback, useRef } from 'react';
-import { useAction } from 'next-safe-action/hooks';
-import { evaluateQuizAction } from '../actions';
+import { useState, useCallback, useRef } from "react";
+import { useAction } from "next-safe-action/hooks";
+import { evaluateQuizAction } from "../actions";
 
-import { AI_QUIZZ_CONFIG } from '@/config/constants';
-import { IQuizSession, IQuizState } from '../types';
+import { AI_QUIZZ_CONFIG } from "@/config/constants";
+import { IQuizSession, IQuizState } from "../types";
 
 type ExtendedQuizState = IQuizState & {
   startTime: number | null;
@@ -15,7 +15,10 @@ type ExtendedQuizState = IQuizState & {
   isRetakeMode: boolean;
 };
 
-export const useQuizRetake = (videoId: string, existingSession?: IQuizSession) => {
+export const useQuizRetake = (
+  videoId: string,
+  existingSession?: IQuizSession,
+) => {
   const [state, setState] = useState<ExtendedQuizState>(() => {
     if (existingSession) {
       return {
@@ -35,7 +38,7 @@ export const useQuizRetake = (videoId: string, existingSession?: IQuizSession) =
           questionCount: existingSession.question_count,
           difficulty: existingSession.difficulty,
           provider: existingSession.provider_name || null,
-          aiModelId: existingSession.ai_model_id || '',
+          aiModelId: existingSession.ai_model_id || "",
         },
       };
     }
@@ -56,7 +59,7 @@ export const useQuizRetake = (videoId: string, existingSession?: IQuizSession) =
         questionCount: AI_QUIZZ_CONFIG.DEFAULT_QUESTION_COUNT,
         difficulty: AI_QUIZZ_CONFIG.DEFAULT_DIFFICULTY,
         provider: null,
-        aiModelId: '',
+        aiModelId: "",
       },
     };
   });
@@ -82,7 +85,9 @@ export const useQuizRetake = (videoId: string, existingSession?: IQuizSession) =
     }
     setState((prev) => {
       if (prev.startTime) {
-        const timeTakenSeconds = Math.floor((Date.now() - prev.startTime) / 1000);
+        const timeTakenSeconds = Math.floor(
+          (Date.now() - prev.startTime) / 1000,
+        );
         return { ...prev, timeTakenSeconds };
       }
       return prev;
@@ -102,34 +107,42 @@ export const useQuizRetake = (videoId: string, existingSession?: IQuizSession) =
         }));
       },
       onError: (error) => {
-        console.error('Failed to evaluate quiz:', error);
+        console.error("Failed to evaluate quiz:", error);
         setState((prev) => ({ ...prev, isEvaluating: false }));
       },
     },
   );
 
-  const answerQuestion = useCallback((questionId: string, answer: 'A' | 'B' | 'C' | 'D') => {
-    setState((prev) => {
-      const existingAnswerIndex = prev.answers.findIndex((a) => a.questionId === questionId);
+  const answerQuestion = useCallback(
+    (questionId: string, answer: "A" | "B" | "C" | "D") => {
+      setState((prev) => {
+        const existingAnswerIndex = prev.answers.findIndex(
+          (a) => a.questionId === questionId,
+        );
 
-      const newAnswers = [...prev.answers];
-      if (existingAnswerIndex >= 0) {
-        newAnswers[existingAnswerIndex] = {
-          questionId,
-          selectedAnswer: answer,
-        };
-      } else {
-        newAnswers.push({ questionId, selectedAnswer: answer });
-      }
+        const newAnswers = [...prev.answers];
+        if (existingAnswerIndex >= 0) {
+          newAnswers[existingAnswerIndex] = {
+            questionId,
+            selectedAnswer: answer,
+          };
+        } else {
+          newAnswers.push({ questionId, selectedAnswer: answer });
+        }
 
-      return { ...prev, answers: newAnswers };
-    });
-  }, []);
+        return { ...prev, answers: newAnswers };
+      });
+    },
+    [],
+  );
 
   const nextQuestion = useCallback(() => {
     setState((prev) => ({
       ...prev,
-      currentQuestionIndex: Math.min(prev.currentQuestionIndex + 1, prev.questions.length - 1),
+      currentQuestionIndex: Math.min(
+        prev.currentQuestionIndex + 1,
+        prev.questions.length - 1,
+      ),
     }));
   }, []);
 
@@ -143,7 +156,10 @@ export const useQuizRetake = (videoId: string, existingSession?: IQuizSession) =
   const goToQuestion = useCallback((index: number) => {
     setState((prev) => ({
       ...prev,
-      currentQuestionIndex: Math.max(0, Math.min(index, prev.questions.length - 1)),
+      currentQuestionIndex: Math.max(
+        0,
+        Math.min(index, prev.questions.length - 1),
+      ),
     }));
   }, []);
 
@@ -168,7 +184,7 @@ export const useQuizRetake = (videoId: string, existingSession?: IQuizSession) =
           description: videoDescription,
         },
         aiModelId: state.settings.aiModelId,
-        quizSessionId: state.sessionId || '',
+        quizSessionId: state.sessionId || "",
         timeTakenSeconds: finalTimeTaken,
       });
     },
@@ -199,7 +215,9 @@ export const useQuizRetake = (videoId: string, existingSession?: IQuizSession) =
   }, [stopTimer]);
 
   const currentQuestion = state.questions[state.currentQuestionIndex];
-  const currentAnswer = state.answers.find((a) => a.questionId === currentQuestion?.id);
+  const currentAnswer = state.answers.find(
+    (a) => a.questionId === currentQuestion?.id,
+  );
   const hasAnsweredAll = state.answers.length === state.questions.length;
   const canGoNext = state.currentQuestionIndex < state.questions.length - 1;
   const canGoPrevious = state.currentQuestionIndex > 0;
@@ -212,7 +230,7 @@ export const useQuizRetake = (videoId: string, existingSession?: IQuizSession) =
   const formatTime = useCallback((seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   }, []);
 
   return {

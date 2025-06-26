@@ -1,17 +1,20 @@
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useAction } from 'next-safe-action/hooks';
-import { useRouter } from 'next/navigation';
-import { toast } from '@/hooks/use-toast';
-import { addVideoAction } from '../actions/add-video';
-import { routes } from '@/routes';
-import { isValidYouTubeUrl } from '@/lib/utils';
-import { TOAST_MESSAGES } from '@/config/constants';
-import { IUseAddVideoFormReturn } from '../types';
-import { z } from 'zod';
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useAction } from "next-safe-action/hooks";
+import { useRouter } from "next/navigation";
+import { toast } from "@/hooks/use-toast";
+import { addVideoAction } from "../actions/add-video";
+import { routes } from "@/routes";
+import { isValidYouTubeUrl } from "@/lib/utils";
+import { TOAST_MESSAGES } from "@/config/constants";
+import { IUseAddVideoFormReturn } from "../types";
+import { z } from "zod";
 
 const addVideoSchema = z.object({
-  videoUrl: z.string().url('Please enter a valid URL').min(1, 'Video URL is required'),
+  videoUrl: z
+    .string()
+    .url("Please enter a valid URL")
+    .min(1, "Video URL is required"),
   tutorial: z.string().optional(),
 });
 
@@ -24,25 +27,28 @@ export const useAddVideoForm = (): IUseAddVideoFormReturn => {
   const form = useForm<AddVideoFormData>({
     resolver: zodResolver(addVideoSchema),
     defaultValues: {
-      videoUrl: '',
-      tutorial: '',
+      videoUrl: "",
+      tutorial: "",
     },
   });
 
-  const watchedUrl = form.watch('videoUrl');
+  const watchedUrl = form.watch("videoUrl");
 
-  const handleValidationError = (fieldErrors: Record<string, string[] | undefined>) => {
+  const handleValidationError = (
+    fieldErrors: Record<string, string[] | undefined>,
+  ) => {
     if (fieldErrors.videoUrl?.length) {
       toast.error({
-        title: 'Invalid URL',
-        description: fieldErrors.videoUrl[0] || TOAST_MESSAGES.INVALID_URL_ERROR,
+        title: "Invalid URL",
+        description:
+          fieldErrors.videoUrl[0] || TOAST_MESSAGES.INVALID_URL_ERROR,
       });
       return;
     }
 
     if (fieldErrors.tutorial?.length) {
       toast.error({
-        title: 'Invalid Tutorial Text',
+        title: "Invalid Tutorial Text",
         description: fieldErrors.tutorial[0],
       });
       return;
@@ -64,7 +70,7 @@ export const useAddVideoForm = (): IUseAddVideoFormReturn => {
         handleValidationError(error.validationErrors.fieldErrors);
       } else {
         toast.error({
-          title: 'Failed to add video',
+          title: "Failed to add video",
           description: error.serverError || TOAST_MESSAGES.UNEXPECTED_ERROR,
         });
       }
@@ -86,9 +92,9 @@ export const useAddVideoForm = (): IUseAddVideoFormReturn => {
     form,
     onSubmit,
     url: watchedUrl,
-    setUrl: (value: string) => form.setValue('videoUrl', value),
-    tutorial: form.watch('tutorial') || '',
-    setTutorial: (value: string) => form.setValue('tutorial', value),
+    setUrl: (value: string) => form.setValue("videoUrl", value),
+    tutorial: form.watch("tutorial") || "",
+    setTutorial: (value: string) => form.setValue("tutorial", value),
     isValidUrl,
     isPending,
     execute: (input: { videoUrl: string; tutorial?: string }) => execute(input),

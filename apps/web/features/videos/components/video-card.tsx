@@ -1,10 +1,10 @@
-import Link from 'next/link';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Clock, BookOpen, Play, Eye, Calendar } from 'lucide-react';
-import { IVideo } from '../types';
-import { formatDistanceToNow, formatDuration } from '@/lib/utils';
-import { routes } from '@/routes';
+import Link from "next/link";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Clock, BookOpen, Play, Eye, Calendar } from "lucide-react";
+import { IVideo } from "../types";
+import { formatDistanceToNow, formatDuration } from "@/lib/utils";
+import { routes } from "@/routes";
 
 type VideoCardProps = {
   video: IVideo;
@@ -17,7 +17,8 @@ export const VideoCard = ({ video }: VideoCardProps) => {
         <div className="aspect-video relative overflow-hidden rounded-t-2xl flex-shrink-0">
           <img
             src={
-              video.thumbnail_url || `https://img.youtube.com/vi/${video.youtube_id}/hqdefault.jpg`
+              video.thumbnail_url ||
+              `https://img.youtube.com/vi/${video.youtube_id}/hqdefault.jpg`
             }
             alt={video.title}
             className="object-cover w-full h-full group-hover:scale-125 transition-transform duration-700 ease-out"

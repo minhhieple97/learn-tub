@@ -1,15 +1,15 @@
-import { useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Brain, Sparkles, History } from 'lucide-react';
-import { STATUS_STREAMING } from '@/config/constants';
-import { EvaluationDialogHeader } from './evaluation-dialog-header';
-import { EvaluationContent } from './evaluation-content';
-import { AIFeedbackHistory } from './note-feedback-history';
-import { useNotesStore } from '../store';
-import { useAIModelData } from '@/features/ai/hooks/use-ai-models';
-import type { IAIModelOption } from '@/features/ai/types';
+import { useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Brain, Sparkles, History } from "lucide-react";
+import { STATUS_STREAMING } from "@/config/constants";
+import { EvaluationDialogHeader } from "./evaluation-dialog-header";
+import { EvaluationContent } from "./evaluation-content";
+import { AIFeedbackHistory } from "./note-feedback-history";
+import { useNotesStore } from "../store";
+import { useAIModelData } from "@/features/ai/hooks/use-ai-models";
+import type { IAIModelOption } from "@/features/ai/types";
 
 type INoteEvaluationProps = {
   noteId: string;
@@ -33,8 +33,11 @@ export const NoteEvaluation = ({ noteId, disabled }: INoteEvaluationProps) => {
   } = useNotesStore();
 
   useEffect(() => {
-    if (providers.length > 0 && !providers.some((p) => p.name === evaluation.provider)) {
-      setProvider(providers[0]?.name || '');
+    if (
+      providers.length > 0 &&
+      !providers.some((p) => p.name === evaluation.provider)
+    ) {
+      setProvider(providers[0]?.name || "");
     }
   }, [providers, evaluation.provider, setProvider]);
 
@@ -99,7 +102,7 @@ export const NoteEvaluation = ({ noteId, disabled }: INoteEvaluationProps) => {
         <DialogContent
           className="max-w-3xl overflow-hidden"
           style={{
-            maxHeight: '90vh',
+            maxHeight: "90vh",
           }}
         >
           <EvaluationDialogHeader
@@ -108,13 +111,23 @@ export const NoteEvaluation = ({ noteId, disabled }: INoteEvaluationProps) => {
           />
 
           <div className="overflow-y-auto flex-1 py-4 pb-6">
-            <Tabs value={evaluation.activeTab} onValueChange={handleTabChange} className="w-full">
+            <Tabs
+              value={evaluation.activeTab}
+              onValueChange={handleTabChange}
+              className="w-full"
+            >
               <TabsList className="grid w-full grid-cols-2 mb-6">
-                <TabsTrigger value="evaluate" className="flex items-center gap-2">
+                <TabsTrigger
+                  value="evaluate"
+                  className="flex items-center gap-2"
+                >
                   <Sparkles className="h-4 w-4" />
                   New Analysis
                 </TabsTrigger>
-                <TabsTrigger value="history" className="flex items-center gap-2">
+                <TabsTrigger
+                  value="history"
+                  className="flex items-center gap-2"
+                >
                   <History className="h-4 w-4" />
                   History
                 </TabsTrigger>

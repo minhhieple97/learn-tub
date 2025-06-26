@@ -1,18 +1,18 @@
-import { z } from 'zod';
-import type { USER_SUBSCRIPTION_STATUS } from '@/config/constants';
+import { z } from "zod";
+import type { USER_SUBSCRIPTION_STATUS } from "@/config/constants";
 import type {
   STRIPE_SUBSCRIPTION_STATUS,
   STRIPE_BILLING_REASON,
   STRIPE_INVOICE_STATUS,
-} from './constants';
+} from "./constants";
 import {
   CancelSubscriptionSchema,
   CreateCheckoutSessionSchema,
   PurchaseCreditsSchema,
   PurchaseCreditPackageSchema,
   UpdateSubscriptionSchema,
-} from './schemas';
-import { Database, Json } from '@/database.types';
+} from "./schemas";
+import { Database, Json } from "@/database.types";
 
 export type ISubscriptionPlan = {
   id: string;
@@ -35,7 +35,7 @@ export type IUserSubscription = {
   plan_id: string;
   stripe_subscription_id: string | null;
   stripe_customer_id: string | null;
-  status: 'active' | 'canceled' | 'past_due' | 'incomplete';
+  status: "active" | "canceled" | "past_due" | "incomplete";
   current_period_start: string | null;
   current_period_end: string | null;
   cancel_at_period_end: boolean;
@@ -62,7 +62,7 @@ export type ICreditBucket = {
 export type ICreditTransaction = {
   id: string;
   user_id: string;
-  type: 'purchase' | 'monthly_reset' | 'usage' | 'refund';
+  type: "purchase" | "monthly_reset" | "usage" | "refund";
   amount: number;
   description: string | null;
   stripe_payment_intent_id: string | null;
@@ -77,22 +77,26 @@ export type IPaymentHistory = {
   stripe_invoice_id: string | null;
   amount_cents: number;
   currency: string;
-  status: 'succeeded' | 'failed' | 'pending' | 'canceled';
-  payment_type: 'subscription' | 'credits' | 'one_time';
+  status: "succeeded" | "failed" | "pending" | "canceled";
+  payment_type: "subscription" | "credits" | "one_time";
   description: string | null;
   created_at: string;
 };
 
-export type ICreateCheckoutSessionInput = z.infer<typeof CreateCheckoutSessionSchema>;
+export type ICreateCheckoutSessionInput = z.infer<
+  typeof CreateCheckoutSessionSchema
+>;
 export type IPurchaseCreditsInput = z.infer<typeof PurchaseCreditsSchema>;
-export type IPurchaseCreditPackageInput = z.infer<typeof PurchaseCreditPackageSchema>;
+export type IPurchaseCreditPackageInput = z.infer<
+  typeof PurchaseCreditPackageSchema
+>;
 export type ICancelSubscriptionInput = z.infer<typeof CancelSubscriptionSchema>;
 export type IUpdateSubscriptionInput = z.infer<typeof UpdateSubscriptionSchema>;
 
 export type IPaymentDetails = {
   amount: number;
   currency: string;
-  paymentType: 'subscription' | 'credits';
+  paymentType: "subscription" | "credits";
   planName?: string;
   creditsAmount?: number;
 };
@@ -146,9 +150,11 @@ export type IPricingData = {
   features: IPricingFeature[];
 };
 
-export type ICreditSourceType = NonNullable<Database['public']['Enums']['credit_source_type_enum']>;
+export type ICreditSourceType = NonNullable<
+  Database["public"]["Enums"]["credit_source_type_enum"]
+>;
 export type ICreditBucketStatus = NonNullable<
-  Database['public']['Enums']['credit_bucket_status_enum']
+  Database["public"]["Enums"]["credit_bucket_status_enum"]
 >;
 export type IUserSubscriptionStatus =
   (typeof USER_SUBSCRIPTION_STATUS)[keyof typeof USER_SUBSCRIPTION_STATUS];
@@ -313,10 +319,10 @@ export type IStripeInvoiceSettings = {
 };
 
 export type IStripeRecurring = {
-  interval: 'day' | 'week' | 'month' | 'year';
+  interval: "day" | "week" | "month" | "year";
   interval_count: number;
   trial_period_days: number | null;
-  usage_type: 'licensed' | 'metered';
+  usage_type: "licensed" | "metered";
 };
 
 export type IStripePlan = {
@@ -325,11 +331,11 @@ export type IStripePlan = {
   active: boolean;
   amount: number;
   amount_decimal: string;
-  billing_scheme: 'per_unit' | 'tiered';
+  billing_scheme: "per_unit" | "tiered";
   created: number;
   currency: string;
   discounts: any[] | null;
-  interval: 'day' | 'week' | 'month' | 'year';
+  interval: "day" | "week" | "month" | "year";
   interval_count: number;
   livemode: boolean;
   metadata: Record<string, any>;
@@ -338,14 +344,14 @@ export type IStripePlan = {
   tiers_mode: string | null;
   transform_usage: any | null;
   trial_period_days: number | null;
-  usage_type: 'licensed' | 'metered';
+  usage_type: "licensed" | "metered";
 };
 
 export type IStripePrice = {
   id: string;
   object: string;
   active: boolean;
-  billing_scheme: 'per_unit' | 'tiered';
+  billing_scheme: "per_unit" | "tiered";
   created: number;
   currency: string;
   custom_unit_amount: any | null;
@@ -355,10 +361,10 @@ export type IStripePrice = {
   nickname: string | null;
   product: string;
   recurring: IStripeRecurring | null;
-  tax_behavior: 'unspecified' | 'inclusive' | 'exclusive';
+  tax_behavior: "unspecified" | "inclusive" | "exclusive";
   tiers_mode: string | null;
   transform_quantity: any | null;
-  type: 'one_time' | 'recurring';
+  type: "one_time" | "recurring";
   unit_amount: number | null;
   unit_amount_decimal: string | null;
 };
@@ -388,12 +394,12 @@ export type IStripeSubscriptionItems = {
 export type IStripeSubscriptionPaymentSettings = {
   payment_method_options: any | null;
   payment_method_types: string[] | null;
-  save_default_payment_method: 'off' | 'on_subscription';
+  save_default_payment_method: "off" | "on_subscription";
 };
 
 export type IStripeTrialSettings = {
   end_behavior: {
-    missing_payment_method: 'create_invoice' | 'pause';
+    missing_payment_method: "create_invoice" | "pause";
   };
 };
 
@@ -411,7 +417,7 @@ export type IStripeSubscription = {
   cancel_at_period_end: boolean;
   canceled_at: number | null;
   cancellation_details: IStripeCancellationDetails;
-  collection_method: 'charge_automatically' | 'send_invoice';
+  collection_method: "charge_automatically" | "send_invoice";
   created: number;
   currency: string;
   customer: string;
@@ -485,8 +491,10 @@ export type IWebhookJob = {
   updated_at: string | null;
 };
 
-export type IWebhookEventType = Database['public']['Enums']['webhook_event_type'];
-export type IWebhookEventStatus = Database['public']['Enums']['webhook_event_status'];
+export type IWebhookEventType =
+  Database["public"]["Enums"]["webhook_event_type"];
+export type IWebhookEventStatus =
+  Database["public"]["Enums"]["webhook_event_status"];
 
 export type IWebhookProcessingResult = {
   success: boolean;
@@ -508,8 +516,7 @@ export type IWebhookJobOptions = {
   removeOnFail?: number;
   attempts?: number;
   backoff?: {
-    type: 'exponential' | 'fixed';
+    type: "exponential" | "fixed";
     delay: number;
   };
 };
-

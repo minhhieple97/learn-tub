@@ -1,17 +1,17 @@
-'use client';
+"use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Settings } from 'lucide-react';
-import { IQuizDifficulty } from '../types';
-import { AIModelSelector } from '@/features/ai/components/ai-model-selector';
-import { useQuizStore } from '../store';
+} from "@/components/ui/select";
+import { Settings } from "lucide-react";
+import { IQuizDifficulty } from "../types";
+import { AIModelSelector } from "@/features/ai/components/ai-model-selector";
+import { useQuizStore } from "../store";
 
 type IQuizzSettingsProps = {
   isGenerating?: boolean;
@@ -24,7 +24,7 @@ export const QuizzSettings = ({
   return (
     <Card
       className={`mb-6 w-full max-w-md border-blue-200 dark:border-blue-800 shadow-md ${
-        isGenerating ? 'opacity-60' : ''
+        isGenerating ? "opacity-60" : ""
       }`}
     >
       <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/50 dark:to-indigo-950/50">

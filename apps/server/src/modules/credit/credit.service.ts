@@ -1,5 +1,4 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import {
   credit_bucket_status_enum,
   credit_source_type_enum,
@@ -14,9 +13,7 @@ import { CREDIT_CONFIG } from '../../config/constants';
 export class CreditService {
   private readonly logger = new Logger(CreditService.name);
 
-  constructor(
-    private readonly creditRepository: CreditRepository,
-  ) {}
+  constructor(private readonly creditRepository: CreditRepository) {}
 
   async createCreditBucket(data: CreateCreditBucketDto) {
     try {
@@ -224,7 +221,10 @@ export class CreditService {
   }
 
   async expireCreditBucketsByUserSubscriptionId(userSubscriptionId: string) {
-    const buckets = await this.creditRepository.findCreditBucketsByUserSubscriptionId(userSubscriptionId);
+    const buckets =
+      await this.creditRepository.findCreditBucketsByUserSubscriptionId(
+        userSubscriptionId,
+      );
 
     if (buckets.length === 0) {
       return { expiredBuckets: [], error: null };
@@ -232,7 +232,7 @@ export class CreditService {
 
     await this.creditRepository.updateCreditBucketsByUserSubscriptionId(
       userSubscriptionId,
-      { status: credit_bucket_status_enum.expired }
+      { status: credit_bucket_status_enum.expired },
     );
 
     this.logger.log(
@@ -243,7 +243,10 @@ export class CreditService {
   }
 
   async markCreditBucketsAsCancelled(userSubscriptionId: string) {
-    const buckets = await this.creditRepository.findCreditBucketsByUserSubscriptionId(userSubscriptionId);
+    const buckets =
+      await this.creditRepository.findCreditBucketsByUserSubscriptionId(
+        userSubscriptionId,
+      );
 
     if (buckets.length === 0) {
       return { cancelledBuckets: [], error: null };
@@ -251,7 +254,7 @@ export class CreditService {
 
     await this.creditRepository.updateCreditBucketsByUserSubscriptionId(
       userSubscriptionId,
-      { source_type: credit_source_type_enum.cancelled_plan }
+      { source_type: credit_source_type_enum.cancelled_plan },
     );
 
     this.logger.log(
@@ -274,7 +277,8 @@ export class CreditService {
     }
 
     try {
-      const result = await this.creditRepository.createBulkCreditTransactions(transactions);
+      const result =
+        await this.creditRepository.createBulkCreditTransactions(transactions);
 
       this.logger.log(`📊 Created ${result.count} credit transactions in bulk`);
       return { data: result, error: null };
@@ -286,7 +290,8 @@ export class CreditService {
 
   async getExpiredCreditBuckets() {
     try {
-      const expiredBuckets = await this.creditRepository.findExpiredCreditBuckets();
+      const expiredBuckets =
+        await this.creditRepository.findExpiredCreditBuckets();
       return { data: expiredBuckets, error: null };
     } catch (error) {
       return { data: [], error };
@@ -301,7 +306,7 @@ export class CreditService {
     try {
       const result = await this.creditRepository.updateCreditBucketsByIds(
         bucketIds,
-        { status: credit_bucket_status_enum.expired }
+        { status: credit_bucket_status_enum.expired },
       );
 
       this.logger.log(`⏰ Expired ${result.count} credit buckets`);

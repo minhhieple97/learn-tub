@@ -12,17 +12,9 @@ export class CacheClientService {
   private readonly redis: Redis;
 
   constructor(private readonly appConfigService: AppConfigService) {
-    this.redis = new Redis({
-      host: this.appConfigService.redisHost,
-      port: this.appConfigService.redisPort,
-      password: this.appConfigService.redisPassword,
-      username: this.appConfigService.redisUsername,
-      connectTimeout: 60000,
+    this.redis = new Redis(this.appConfigService.redisUrl, {
+      connectTimeout: 5000,
       lazyConnect: true,
-      enableReadyCheck: false,
-      tls: {
-        rejectUnauthorized: false,
-      },
     });
 
     this.redis.on('connect', () => {
@@ -115,7 +107,7 @@ export class CacheClientService {
 
   async disconnect(): Promise<void> {
     try {
-      await this.redis.disconnect();
+      this.redis.disconnect();
       this.logger.log('Disconnected from Redis cache');
     } catch (error) {
       this.logger.error('Error disconnecting from Redis cache:', error);

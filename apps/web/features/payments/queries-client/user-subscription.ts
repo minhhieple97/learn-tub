@@ -1,6 +1,9 @@
-import { queryOptions } from '@tanstack/react-query';
-import { USER_SUBSCRIPTION_QUERY_KEY, USER_SUBSCRIPTION_QUERY_URL } from '../constants';
-import type { IUserSubscriptionResponse } from '../types';
+import { queryOptions } from "@tanstack/react-query";
+import {
+  USER_SUBSCRIPTION_QUERY_KEY,
+  USER_SUBSCRIPTION_QUERY_URL,
+} from "../constants";
+import type { IUserSubscriptionResponse } from "../types";
 
 const CACHE_TIME = 5 * 60 * 1000; // 5 minutes
 const DEFAULT_RETRY_COUNT = 2;
@@ -14,16 +17,16 @@ class SubscriptionFetchError extends Error {
     public readonly statusText?: string,
   ) {
     super(message);
-    this.name = 'SubscriptionFetchError';
+    this.name = "SubscriptionFetchError";
   }
 }
 
 async function fetchUserSubscription(): Promise<IUserSubscriptionResponse> {
   try {
     const response = await fetch(USER_SUBSCRIPTION_QUERY_URL, {
-      method: 'GET',
+      method: "GET",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
     });
 
@@ -42,7 +45,9 @@ async function fetchUserSubscription(): Promise<IUserSubscriptionResponse> {
       throw error;
     }
 
-    throw new SubscriptionFetchError('Network error while fetching subscription data');
+    throw new SubscriptionFetchError(
+      "Network error while fetching subscription data",
+    );
   }
 }
 

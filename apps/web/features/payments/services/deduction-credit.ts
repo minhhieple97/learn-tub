@@ -1,9 +1,9 @@
-import { CREDIT_ACTION_COUNTS } from '@/config/constants';
+import { CREDIT_ACTION_COUNTS } from "@/config/constants";
 import {
   checkAvailableCreditsForDeduction,
   executeCreditDeduction,
-} from '@/features/payments/queries';
-import { ITransactionType } from '@/types';
+} from "@/features/payments/queries";
+import { ITransactionType } from "@/types";
 
 export type ICreditDeductionRequest = {
   userId: string;
@@ -27,7 +27,9 @@ export class CreditDeductionService {
     return checkAvailableCreditsForDeduction(userId, requiredCredits);
   }
 
-  static async deductCredits(request: ICreditDeductionRequest): Promise<ICreditDeductionResult> {
+  static async deductCredits(
+    request: ICreditDeductionRequest,
+  ): Promise<ICreditDeductionResult> {
     const { userId, command, description, relatedActionId } = request;
     const requiredCredits = CREDIT_ACTION_COUNTS[command];
 
@@ -39,10 +41,11 @@ export class CreditDeductionService {
     }
 
     try {
-      const { hasCredits, availableCredits } = await CreditDeductionService.checkAvailableCredits(
-        userId,
-        requiredCredits,
-      );
+      const { hasCredits, availableCredits } =
+        await CreditDeductionService.checkAvailableCredits(
+          userId,
+          requiredCredits,
+        );
 
       if (!hasCredits) {
         return {
@@ -61,10 +64,11 @@ export class CreditDeductionService {
 
       return result;
     } catch (error) {
-      console.error('Credit deduction failed:', error);
+      console.error("Credit deduction failed:", error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred',
+        error:
+          error instanceof Error ? error.message : "Unknown error occurred",
       };
     }
   }
@@ -72,7 +76,11 @@ export class CreditDeductionService {
   static async validateUserAction(
     userId: string,
     command: ITransactionType,
-  ): Promise<{ canProceed: boolean; error?: string; availableCredits?: number }> {
+  ): Promise<{
+    canProceed: boolean;
+    error?: string;
+    availableCredits?: number;
+  }> {
     const requiredCredits = CREDIT_ACTION_COUNTS[command];
 
     if (!requiredCredits) {
@@ -82,10 +90,11 @@ export class CreditDeductionService {
       };
     }
 
-    const { hasCredits, availableCredits } = await CreditDeductionService.checkAvailableCredits(
-      userId,
-      requiredCredits,
-    );
+    const { hasCredits, availableCredits } =
+      await CreditDeductionService.checkAvailableCredits(
+        userId,
+        requiredCredits,
+      );
 
     return {
       canProceed: hasCredits,
@@ -98,7 +107,8 @@ export class CreditDeductionService {
 }
 
 export const deductCredits = CreditDeductionService.deductCredits;
-export const checkAvailableCredits = CreditDeductionService.checkAvailableCredits;
+export const checkAvailableCredits =
+  CreditDeductionService.checkAvailableCredits;
 export const validateUserAction = CreditDeductionService.validateUserAction;
 
 export const validateAndDeductCredits = async (
@@ -112,7 +122,7 @@ export const validateAndDeductCredits = async (
   if (!validation.canProceed) {
     return {
       success: false,
-      error: validation.error || 'Credit validation failed',
+      error: validation.error || "Credit validation failed",
     };
   }
 

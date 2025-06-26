@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from "react";
 
 type IUsePlayerControlsProps = {
   player: any;
@@ -33,14 +33,14 @@ export const usePlayerControls = ({
   const timeUpdateIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    if (player && typeof player.getVolume === 'function') {
+    if (player && typeof player.getVolume === "function") {
       setVolume(player.getVolume());
       setIsMuted(player.isMuted());
     }
   }, [player]);
 
   useEffect(() => {
-    if (player && typeof player.getCurrentTime === 'function') {
+    if (player && typeof player.getCurrentTime === "function") {
       if (timeUpdateIntervalRef.current) {
         clearInterval(timeUpdateIntervalRef.current);
       }
@@ -66,9 +66,9 @@ export const usePlayerControls = ({
   useEffect(() => {
     if (
       player &&
-      typeof targetSeekTime === 'number' &&
+      typeof targetSeekTime === "number" &&
       targetSeekTime >= 0 &&
-      typeof player.seekTo === 'function'
+      typeof player.seekTo === "function"
     ) {
       const currentVideoTime = Math.floor(player.getCurrentTime() || 0);
       if (targetSeekTime !== currentVideoTime) {
@@ -81,8 +81,8 @@ export const usePlayerControls = ({
   const handlePlayPause = () => {
     if (
       !player ||
-      typeof player.playVideo !== 'function' ||
-      typeof player.pauseVideo !== 'function'
+      typeof player.playVideo !== "function" ||
+      typeof player.pauseVideo !== "function"
     )
       return;
 
@@ -94,7 +94,7 @@ export const usePlayerControls = ({
   };
 
   const handleSeek = (value: number[]) => {
-    if (!player || typeof player.seekTo !== 'function') return;
+    if (!player || typeof player.seekTo !== "function") return;
     const newTime = value[0];
     if (newTime === undefined) return;
     player.seekTo(newTime, true);
@@ -105,7 +105,7 @@ export const usePlayerControls = ({
   };
 
   const handleVolumeChange = (value: number[]) => {
-    if (!player || typeof player.setVolume !== 'function') return;
+    if (!player || typeof player.setVolume !== "function") return;
     const newVolume = value[0];
     if (newVolume === undefined) return;
     player.setVolume(newVolume);
@@ -120,7 +120,12 @@ export const usePlayerControls = ({
   };
 
   const toggleMute = () => {
-    if (!player || typeof player.mute !== 'function' || typeof player.unMute !== 'function') return;
+    if (
+      !player ||
+      typeof player.mute !== "function" ||
+      typeof player.unMute !== "function"
+    )
+      return;
     if (isMuted) {
       player.unMute();
       setIsMuted(false);
@@ -131,9 +136,15 @@ export const usePlayerControls = ({
   };
 
   const skipForward = () => {
-    if (!player || typeof player.seekTo !== 'function' || typeof player.getDuration !== 'function')
+    if (
+      !player ||
+      typeof player.seekTo !== "function" ||
+      typeof player.getDuration !== "function"
+    )
       return;
-    const currentVideoTime = player.getCurrentTime ? player.getCurrentTime() : currentTime;
+    const currentVideoTime = player.getCurrentTime
+      ? player.getCurrentTime()
+      : currentTime;
     const videoDuration = player.getDuration ? player.getDuration() : 0;
     const newTime = Math.min(currentVideoTime + 10, videoDuration);
     player.seekTo(newTime, true);
@@ -144,8 +155,10 @@ export const usePlayerControls = ({
   };
 
   const skipBackward = () => {
-    if (!player || typeof player.seekTo !== 'function') return;
-    const currentVideoTime = player.getCurrentTime ? player.getCurrentTime() : currentTime;
+    if (!player || typeof player.seekTo !== "function") return;
+    const currentVideoTime = player.getCurrentTime
+      ? player.getCurrentTime()
+      : currentTime;
     const newTime = Math.max(currentVideoTime - 10, 0);
     player.seekTo(newTime, true);
     setCurrentTime(Math.floor(newTime));
@@ -173,4 +186,4 @@ export const usePlayerControls = ({
     skipForward,
     skipBackward,
   };
-}; 
+};

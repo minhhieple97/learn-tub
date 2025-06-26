@@ -357,8 +357,6 @@ export class StripeWebhookService {
     );
   }
 
-
-
   private async processSubscriptionRenewalTransactionTyped(
     params: IProcessSubscriptionRenewalParams,
   ): Promise<void> {
@@ -514,7 +512,6 @@ export class StripeWebhookService {
         invoice,
       });
 
-     
       const userSub =
         await this.subscriptionService.getUserByStripeCustomerId(customerId);
       if (userSub) {

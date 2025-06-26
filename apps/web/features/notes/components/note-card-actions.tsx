@@ -1,6 +1,6 @@
-import { Button } from '@/components/ui/button';
-import { Pencil, Trash2 } from 'lucide-react';
-import { useNotesStore } from '../store';
+import { Button } from "@/components/ui/button";
+import { Pencil, Trash2 } from "lucide-react";
+import { useNotesStore } from "../store";
 
 type INoteCardActionsProps = {
   noteId: string;
@@ -23,7 +23,12 @@ export const NoteCardActions = ({ noteId }: INoteCardActionsProps) => {
 
   return (
     <div className="flex space-x-2">
-      <Button variant="ghost" size="sm" onClick={handleEdit} disabled={editingNote?.id === noteId}>
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={handleEdit}
+        disabled={editingNote?.id === noteId}
+      >
         <Pencil className="h-4 w-4" />
       </Button>
       <Button

@@ -1,6 +1,8 @@
-import { USER_SUBSCRIPTION_STATUS } from '@/config/constants';
+import { USER_SUBSCRIPTION_STATUS } from "@/config/constants";
 
-export const calculateDaysRemaining = (periodEndDate: string | null): number => {
+export const calculateDaysRemaining = (
+  periodEndDate: string | null,
+): number => {
   if (!periodEndDate) return 0;
 
   const now = new Date();
@@ -28,27 +30,31 @@ export const isSubscriptionPeriodValid = (subscription: any): boolean => {
 };
 
 export const getSubscriptionStatusText = (subscription: any): string => {
-  if (!subscription) return 'No subscription';
+  if (!subscription) return "No subscription";
 
   if (isSubscriptionCancelled(subscription)) {
-    const daysRemaining = calculateDaysRemaining(subscription.current_period_end);
+    const daysRemaining = calculateDaysRemaining(
+      subscription.current_period_end,
+    );
     return `Cancelled (expires in ${daysRemaining} days)`;
   }
 
   if (subscription.status === USER_SUBSCRIPTION_STATUS.ACTIVE) {
-    return 'Active';
+    return "Active";
   }
 
   return subscription.status;
 };
 
-export const formatSubscriptionEndDate = (periodEndDate: string | null): string => {
-  if (!periodEndDate) return 'Unknown';
+export const formatSubscriptionEndDate = (
+  periodEndDate: string | null,
+): string => {
+  if (!periodEndDate) return "Unknown";
 
   const endDate = new Date(periodEndDate);
-  return endDate.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
+  return endDate.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
   });
 };

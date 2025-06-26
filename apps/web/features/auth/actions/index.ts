@@ -1,21 +1,30 @@
-'use server';
+"use server";
 
-import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
-import { action, ActionError, authAction } from '@/lib/safe-action';
-import { createClient } from '@/lib/supabase/server';
-import { loginSchema, registerSchema, updateProfileSchema, uploadAvatarSchema } from '../schemas';
-import { AVATAR_UPLOAD_CONFIG, AUTH_ERROR_MESSAGES, AUTH_SUCCESS_MESSAGES } from '../constants';
-import { routes } from '@/routes';
-import { z } from 'zod';
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { action, ActionError, authAction } from "@/lib/safe-action";
+import { createClient } from "@/lib/supabase/server";
+import {
+  loginSchema,
+  registerSchema,
+  updateProfileSchema,
+  uploadAvatarSchema,
+} from "../schemas";
+import {
+  AVATAR_UPLOAD_CONFIG,
+  AUTH_ERROR_MESSAGES,
+  AUTH_SUCCESS_MESSAGES,
+} from "../constants";
+import { routes } from "@/routes";
+import { z } from "zod";
 import {
   getUserInSession,
   updateProfile,
   uploadAvatarFile,
   updateProfileAvatar,
-} from '@/features/profile/queries';
-import { checkProfileByUserId } from '@/lib/require-auth';
-import { CacheClient } from '@/lib/cache';
+} from "@/features/profile/queries";
+import { checkProfileByUserId } from "@/lib/require-auth";
+import { CacheClient } from "@/lib/cache";
 
 export const loginAction = action
   .inputSchema(loginSchema)
@@ -30,7 +39,7 @@ export const loginAction = action
     if (error) {
       throw new ActionError(error.message);
     }
-    revalidatePath(routes.learn, 'layout');
+    revalidatePath(routes.learn, "layout");
     redirect(routes.learn);
   });
 
@@ -57,18 +66,20 @@ export const registerAction = action
     }
   });
 
-export const signOutAction = action.inputSchema(z.object({})).action(async () => {
-  const supabase = await createClient();
+export const signOutAction = action
+  .inputSchema(z.object({}))
+  .action(async () => {
+    const supabase = await createClient();
 
-  const { error } = await supabase.auth.signOut();
+    const { error } = await supabase.auth.signOut();
 
-  if (error) {
-    throw new ActionError(error.message);
-  }
+    if (error) {
+      throw new ActionError(error.message);
+    }
 
-  revalidatePath(routes.home, 'layout');
-  redirect(routes.home);
-});
+    revalidatePath(routes.home, "layout");
+    redirect(routes.home);
+  });
 
 export const updateProfileAction = authAction
   .inputSchema(updateProfileSchema)
@@ -82,8 +93,11 @@ export const updateProfileAction = authAction
     }
 
     await CacheClient.invalidateUserProfile(user.id);
-    revalidatePath(routes.settings.root, 'page');
-    return { profile: result.data, message: AUTH_SUCCESS_MESSAGES.PROFILE_UPDATED };
+    revalidatePath(routes.settings.root, "page");
+    return {
+      profile: result.data,
+      message: AUTH_SUCCESS_MESSAGES.PROFILE_UPDATED,
+    };
   });
 
 export const uploadAvatarAction = authAction
@@ -105,16 +119,26 @@ export const uploadAvatarAction = authAction
     });
 
     if (uploadResult.error) {
-      throw new ActionError(uploadResult.error || AUTH_ERROR_MESSAGES.UPLOAD_FAILED);
+      throw new ActionError(
+        uploadResult.error || AUTH_ERROR_MESSAGES.UPLOAD_FAILED,
+      );
     }
 
-    const updateResult = await updateProfileAvatar(profile.id, uploadResult.url!);
+    const updateResult = await updateProfileAvatar(
+      profile.id,
+      uploadResult.url!,
+    );
 
     if (!updateResult.success) {
-      throw new ActionError(updateResult.error || AUTH_ERROR_MESSAGES.UPDATE_AVATAR_FAILED);
+      throw new ActionError(
+        updateResult.error || AUTH_ERROR_MESSAGES.UPDATE_AVATAR_FAILED,
+      );
     }
 
-    revalidatePath(routes.settings.root, 'page');
+    revalidatePath(routes.settings.root, "page");
     await CacheClient.invalidateUserProfile(user.id);
-    return { url: uploadResult.url, message: AUTH_SUCCESS_MESSAGES.AVATAR_UPLOADED };
+    return {
+      url: uploadResult.url,
+      message: AUTH_SUCCESS_MESSAGES.AVATAR_UPLOADED,
+    };
   });

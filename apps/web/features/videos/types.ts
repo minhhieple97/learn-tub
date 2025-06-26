@@ -1,5 +1,5 @@
-import { IYouTubeVideo, IAsyncOperationHook } from '@/types';
-import { UseFormReturn } from 'react-hook-form';
+import { IYouTubeVideo, IAsyncOperationHook } from "@/types";
+import { UseFormReturn } from "react-hook-form";
 
 export type ICourse = {
   title: string;
@@ -41,7 +41,7 @@ export type IVideo = {
   notes?: Array<{ count: number }>;
 };
 
-export type { IYouTubeVideo as IYouTubeVideoData } from '@/types';
+export type { IYouTubeVideo as IYouTubeVideoData } from "@/types";
 
 export type IUseAddVideoFormReturn = {
   form: UseFormReturn<{

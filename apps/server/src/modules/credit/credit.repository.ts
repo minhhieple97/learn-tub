@@ -1,7 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import {
-  credit_bucket_status_enum,
-} from '@prisma/client';
+import { credit_bucket_status_enum } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { ICreateCreditBucketData, ICreateCreditTransactionData } from './types';
 
@@ -116,4 +114,4 @@ export class CreditRepository {
   async executeTransaction<T>(callback: (tx: any) => Promise<T>): Promise<T> {
     return this.prisma.$transaction(callback);
   }
-} 
+}

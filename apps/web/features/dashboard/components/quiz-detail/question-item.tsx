@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { ChevronDown, ChevronUp, CheckCircle, Eye, EyeOff } from 'lucide-react';
-import { DifficultyBadge } from '@/components/ui/difficulty-badge';
-import { IQuizQuestion } from '@/features/quizzes/types';
+import { useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { ChevronDown, ChevronUp, CheckCircle, Eye, EyeOff } from "lucide-react";
+import { DifficultyBadge } from "@/components/ui/difficulty-badge";
+import { IQuizQuestion } from "@/features/quizzes/types";
 
 type QuestionItemProps = {
   question: IQuizQuestion;
@@ -66,8 +66,8 @@ export const QuestionItem = ({
                         key={key}
                         className={`p-4 rounded-lg border transition-colors ${
                           isCorrect
-                            ? 'bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800'
-                            : 'bg-muted/50 dark:bg-muted/20 border-border/50 hover:bg-accent/5'
+                            ? "bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800"
+                            : "bg-muted/50 dark:bg-muted/20 border-border/50 hover:bg-accent/5"
                         }`}
                       >
                         <div className="flex items-center justify-between">

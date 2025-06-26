@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 import {
   Trophy,
   Target,
@@ -12,10 +12,10 @@ import {
   RotateCcw,
   CheckCircle,
   XCircle,
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { IQuizFeedback } from '../types';
-import { useQuizStore } from '../store';
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { IQuizFeedback } from "../types";
+import { useQuizStore } from "../store";
 
 type IQuizzResultsProps = {
   feedback: IQuizFeedback;
@@ -110,10 +110,10 @@ export const QuizzResults = ({ feedback }: IQuizzResultsProps) => {
                   <div className="flex items-start gap-3">
                     <div
                       className={cn(
-                        'rounded-full p-1 mt-1 shadow-sm',
+                        "rounded-full p-1 mt-1 shadow-sm",
                         result.isCorrect
-                          ? 'bg-emerald-200 text-emerald-700 dark:bg-emerald-800/50 dark:text-emerald-300'
-                          : 'bg-red-200 text-red-700 dark:bg-red-800/50 dark:text-red-300',
+                          ? "bg-emerald-200 text-emerald-700 dark:bg-emerald-800/50 dark:text-emerald-300"
+                          : "bg-red-200 text-red-700 dark:bg-red-800/50 dark:text-red-300",
                       )}
                     >
                       {result.isCorrect ? (
@@ -128,13 +128,13 @@ export const QuizzResults = ({ feedback }: IQuizzResultsProps) => {
                       </p>
                       <div className="mt-2 text-sm text-slate-700 dark:text-slate-400">
                         <p>
-                          Your answer:{' '}
+                          Your answer:{" "}
                           <span className="font-medium text-slate-900 dark:text-slate-200">
                             {result.selectedAnswer}
                           </span>
                         </p>
                         <p>
-                          Correct answer:{' '}
+                          Correct answer:{" "}
                           <span className="font-medium text-emerald-700 dark:text-emerald-300">
                             {result.correctAnswer}
                           </span>

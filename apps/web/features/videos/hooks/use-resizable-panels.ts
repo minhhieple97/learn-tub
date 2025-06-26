@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from "react";
 
 type IUseResizablePanelsProps = {
   initialLeftWidth?: number;
@@ -51,7 +51,10 @@ export const useResizablePanels = ({
 
         const percentage = (mouseX / containerWidth) * 100;
 
-        const clampedPercentage = Math.max(minLeftWidth, Math.min(maxLeftWidth, percentage));
+        const clampedPercentage = Math.max(
+          minLeftWidth,
+          Math.min(maxLeftWidth, percentage),
+        );
 
         setLeftWidth(clampedPercentage);
         lastUpdateTimeRef.current = now;
@@ -86,29 +89,29 @@ export const useResizablePanels = ({
       const largeStep = 10; // 10% for larger jumps
       const step = e.shiftKey ? largeStep : smallStep;
 
-      if (e.key === 'ArrowLeft') {
+      if (e.key === "ArrowLeft") {
         e.preventDefault();
         setIsKeyboardActive(true);
         const newWidth = Math.max(minLeftWidth, leftWidth - step);
         setLeftWidth(newWidth);
         setTimeout(() => setIsKeyboardActive(false), 150);
-      } else if (e.key === 'ArrowRight') {
+      } else if (e.key === "ArrowRight") {
         e.preventDefault();
         setIsKeyboardActive(true);
         const newWidth = Math.min(maxLeftWidth, leftWidth + step);
         setLeftWidth(newWidth);
         setTimeout(() => setIsKeyboardActive(false), 150);
-      } else if (e.key === 'Home') {
+      } else if (e.key === "Home") {
         e.preventDefault();
         setIsKeyboardActive(true);
         setLeftWidth(minLeftWidth);
         setTimeout(() => setIsKeyboardActive(false), 300);
-      } else if (e.key === 'End') {
+      } else if (e.key === "End") {
         e.preventDefault();
         setIsKeyboardActive(true);
         setLeftWidth(maxLeftWidth);
         setTimeout(() => setIsKeyboardActive(false), 300);
-      } else if (e.key === 'Space' || e.key === 'Enter') {
+      } else if (e.key === "Space" || e.key === "Enter") {
         e.preventDefault();
         setIsKeyboardActive(true);
         setLeftWidth(66.666667);
@@ -120,21 +123,21 @@ export const useResizablePanels = ({
 
   useEffect(() => {
     if (isDragging) {
-      document.addEventListener('mousemove', handleMouseMove, {
+      document.addEventListener("mousemove", handleMouseMove, {
         passive: true,
       });
-      document.addEventListener('mouseup', handleMouseUp);
-      document.body.style.cursor = 'col-resize';
-      document.body.style.userSelect = 'none';
-      document.body.style.pointerEvents = 'none';
-      document.body.style.overflow = 'hidden';
+      document.addEventListener("mouseup", handleMouseUp);
+      document.body.style.cursor = "col-resize";
+      document.body.style.userSelect = "none";
+      document.body.style.pointerEvents = "none";
+      document.body.style.overflow = "hidden";
     } else {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-      document.body.style.cursor = '';
-      document.body.style.userSelect = '';
-      document.body.style.pointerEvents = '';
-      document.body.style.overflow = '';
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+      document.body.style.pointerEvents = "";
+      document.body.style.overflow = "";
 
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
@@ -143,12 +146,12 @@ export const useResizablePanels = ({
     }
 
     return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-      document.body.style.cursor = '';
-      document.body.style.userSelect = '';
-      document.body.style.pointerEvents = '';
-      document.body.style.overflow = '';
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+      document.body.style.pointerEvents = "";
+      document.body.style.overflow = "";
 
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);

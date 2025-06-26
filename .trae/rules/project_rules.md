@@ -67,12 +67,12 @@ export const UserProfile = ({ userId }: { userId: string }) => {
 - Implement proper fallback values and validation.
 
 ```typescript
-'use client';
-import { useQueryState, parseAsString, parseAsInteger } from 'nuqs';
+"use client";
+import { useQueryState, parseAsString, parseAsInteger } from "nuqs";
 
 // ✅ Good - Single parameter in a Client Component
 export const useSearchQuery = () => {
-  return useQueryState('q', parseAsString.withDefault(''));
+  return useQueryState("q", parseAsString.withDefault(""));
 };
 ```
 
@@ -85,15 +85,15 @@ export const useSearchQuery = () => {
 - Server actions are ideal for mutating data on the server from client interactions.
 
 ```typescript
-import { z } from 'zod';
-import { createSafeAction } from 'next-safe-action';
-import { userService } from '../services'; // Call services from actions
+import { z } from "zod";
+import { createSafeAction } from "next-safe-action";
+import { userService } from "../services"; // Call services from actions
 
 // ✅ Good - Schema definition
 export const CreateUserSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
-  email: z.string().email('Invalid email format'),
-  age: z.number().min(18, 'Must be at least 18 years old'),
+  name: z.string().min(1, "Name is required"),
+  email: z.string().email("Invalid email format"),
+  age: z.number().min(18, "Must be at least 18 years old"),
 });
 
 // ✅ Good - Safe action
@@ -183,7 +183,7 @@ export type NotificationChannel = {
 };
 
 // features/notifications/services/email-channel.ts
-import type { NotificationChannel } from '../types';
+import type { NotificationChannel } from "../types";
 export const emailChannel: NotificationChannel = {
   send: async (to, message) => {
     console.log(`Sending email to ${to}: ${message}`);
@@ -192,7 +192,7 @@ export const emailChannel: NotificationChannel = {
 };
 
 // features/notifications/services/sms-channel.ts
-import type { NotificationChannel } from '../types';
+import type { NotificationChannel } from "../types";
 export const smsChannel: NotificationChannel = {
   send: async (to, message) => {
     console.log(`Sending SMS to ${to}: ${message}`);
@@ -201,7 +201,7 @@ export const smsChannel: NotificationChannel = {
 };
 
 // features/notifications/services/notification-service.ts
-import type { NotificationChannel } from '../types';
+import type { NotificationChannel } from "../types";
 
 export const notificationService = {
   async notify(channel: NotificationChannel, to: string, message: string) {
@@ -214,14 +214,14 @@ import {
   notificationService,
   emailChannel,
   smsChannel,
-} from '@/features/notifications';
+} from "@/features/notifications";
 
 await notificationService.notify(
   emailChannel,
-  'test@example.com',
-  'Hello via Email',
+  "test@example.com",
+  "Hello via Email",
 );
-await notificationService.notify(smsChannel, '+1234567890', 'Hello via SMS');
+await notificationService.notify(smsChannel, "+1234567890", "Hello via SMS");
 ```
 
 ### 3. Liskov Substitution Principle (LSP)
@@ -253,14 +253,14 @@ export type UserAuditInfo = {
 };
 
 export type UserRole = {
-  role: 'admin' | 'user';
+  role: "admin" | "user";
 };
 
 // Composed type for full user data
 export type User = UserBasicInfo & UserAuditInfo & UserRole;
 
 // Type for creating a new user (omits generated fields)
-export type CreateUserInput = Omit<User, 'id' | 'createdAt' | 'updatedAt'>;
+export type CreateUserInput = Omit<User, "id" | "createdAt" | "updatedAt">;
 
 // A component/function only needing basic info can import just that type:
 // import type { UserBasicInfo } from '@/features/user/types';
@@ -277,8 +277,8 @@ _High-level modules should not depend on low-level modules. Both should depend o
 
 ```typescript
 // features/user/services/user-service.ts
-import { getUserById } from '../queries'; // Depending on the query function signature/contract
-import type { CreateUserInput, User } from '../types'; // Depending on types (abstractions)
+import { getUserById } from "../queries"; // Depending on the query function signature/contract
+import type { CreateUserInput, User } from "../types"; // Depending on types (abstractions)
 
 export const userService = {
   async createUserWithProfile(data: CreateUserInput): Promise<User> {
@@ -351,9 +351,9 @@ Contains server actions for the feature. These are typically called from Client 
 
 ```typescript
 // features/user/actions/create-user.ts
-import { createSafeAction } from 'next-safe-action';
-import { CreateUserSchema } from '../schemas'; // Depends on Schema (DIP)
-import { userService } from '../services'; // Depends on Service (DIP)
+import { createSafeAction } from "next-safe-action";
+import { CreateUserSchema } from "../schemas"; // Depends on Schema (DIP)
+import { userService } from "../services"; // Depends on Service (DIP)
 
 export const createUserAction = createSafeAction(
   CreateUserSchema,
@@ -371,8 +371,8 @@ Contains ORM queries and data access logic. These are primarily used by Server C
 
 ```typescript
 // features/user/queries/get-user.ts
-import { db } from '@/lib/db'; // Server-side database client (low-level detail)
-import type { User } from '../types'; // Depends on Type (Abstraction - DIP)
+import { db } from "@/lib/db"; // Server-side database client (low-level detail)
+import type { User } from "../types"; // Depends on Type (Abstraction - DIP)
 
 export const getUserById = async (id: string): Promise<User | null> => {
   // Direct database access - use only in Server Components or Services
@@ -389,8 +389,8 @@ Contains business logic and operations. This layer orchestrates queries, actions
 
 ```typescript
 // features/user/services/user-service.ts
-import { getUserById, createUser } from '../queries'; // Depends on Queries (via contracts - DIP)
-import type { CreateUserInput, User } from '../types'; // Depends on Types (Abstractions - DIP, LSP)
+import { getUserById, createUser } from "../queries"; // Depends on Queries (via contracts - DIP)
+import type { CreateUserInput, User } from "../types"; // Depends on Types (Abstractions - DIP, LSP)
 
 export const userService = {
   async createUserWithProfile(data: CreateUserInput): Promise<User> {
@@ -406,7 +406,7 @@ export const userService = {
   ): Promise<boolean> {
     const user = await getUserById(userId); // Using the query function via its contract
     // Access validation logic (SRP)
-    return user?.role === 'admin' || user?.id === resourceId;
+    return user?.role === "admin" || user?.id === resourceId;
   },
   // Methods here should be open for extension, closed for modification (OCP)
 };
@@ -418,7 +418,7 @@ Contains all Zod validation schemas for the feature.
 
 ```typescript
 // features/user/schemas.ts
-import { z } from 'zod';
+import { z } from "zod";
 // This file's single responsibility is schema definition.
 ```
 
@@ -445,11 +445,11 @@ Main export file for the entire feature.
 ```typescript
 // features/user/index.ts
 // This file's responsibility is to provide a clean export surface for the feature (SRP)
-export * from './actions';
-export * from './queries';
-export * from './services';
-export * from './schemas';
-export * from './types';
+export * from "./actions";
+export * from "./queries";
+export * from "./services";
+export * from "./schemas";
+export * from "./types";
 ```
 
 ### Import Patterns
@@ -464,12 +464,12 @@ import {
   userService, // Service (used in Server Components/Actions)
   CreateUserSchema, // Schema (used in Actions/Client Forms)
   type User, // Type (used everywhere) - Depending on Abstraction (DIP)
-} from '@/features/user';
+} from "@/features/user";
 
 // ✅ Specific imports when needed (e.g., for clarity or avoiding circular deps)
-import { createUserAction } from '@/features/user/actions';
-import { getUserById } from '@/features/user/queries';
-import type { User } from '@/features/user/types'; // Explicitly depending on Type (Abstraction - DIP)
+import { createUserAction } from "@/features/user/actions";
+import { getUserById } from "@/features/user/queries";
+import type { User } from "@/features/user/types"; // Explicitly depending on Type (Abstraction - DIP)
 ```
 
 ## Type vs Interface Rules
@@ -484,7 +484,7 @@ import type { User } from '@/features/user/types'; // Explicitly depending on Ty
 export type User = {
   /* ... */
 };
-export type CreateUserInput = Omit<User, 'id'>;
+export type CreateUserInput = Omit<User, "id">;
 export type UserWithProfile = User & { profile: Profile };
 
 // ❌ Avoid - Don't use interface
@@ -519,11 +519,11 @@ Client-side hooks should have a single responsibility related to UI logic and cl
 
 ```typescript
 // features/user/hooks/use-user-management-client.ts (Client Component Hook)
-'use client';
+"use client";
 import {
   useUserProfileClient,
   useUserPermissionsClient,
-} from '@/features/user/hooks'; // Assuming client hooks are in a 'hooks' subfolder
+} from "@/features/user/hooks"; // Assuming client hooks are in a 'hooks' subfolder
 
 export const useUserManagementClient = (userId: string) => {
   // Composing other client hooks (SRP)
@@ -537,8 +537,8 @@ export const useUserManagementClient = (userId: string) => {
     user,
     permissions,
     loading,
-    canEdit: permissions.includes('user:edit'),
-    canDelete: permissions.includes('user:delete'),
+    canEdit: permissions.includes("user:edit"),
+    canDelete: permissions.includes("user:delete"),
   };
 };
 ```
@@ -549,8 +549,8 @@ Services and Server Components can depend on queries and services from other fea
 
 ```typescript
 // features/order/services/order-service.ts
-import { getUserById } from '@/features/user/queries'; // Depending on user queries via contract
-import { getProductById } from '@/features/product/queries'; // Depending on product queries via contract
+import { getUserById } from "@/features/user/queries"; // Depending on user queries via contract
+import { getProductById } from "@/features/product/queries"; // Depending on product queries via contract
 
 export const orderService = {
   async createOrder(userId: string, productId: string) {
@@ -559,7 +559,7 @@ export const orderService = {
     const product = await getProductById(productId);
 
     if (!user || !product) {
-      throw new Error('Invalid user or product');
+      throw new Error("Invalid user or product");
     }
 
     // Create order logic using fetched data
@@ -573,13 +573,13 @@ export const orderService = {
 
 ```typescript
 // Lazy load client feature components
-import { lazy } from 'react';
+import { lazy } from "react";
 
 export const UserManagementClient = lazy(
-  () => import('@/features/user/components/UserManagementClient'),
+  () => import("@/features/user/components/UserManagementClient"),
 );
 export const ProductCatalogClient = lazy(
-  () => import('@/features/product/components/ProductCatalogClient'),
+  () => import("@/features/product/components/ProductCatalogClient"),
 );
 ```
 
@@ -587,11 +587,11 @@ export const ProductCatalogClient = lazy(
 
 ```typescript
 // ✅ Import only what you need - Supports ISP and reduces bundle size
-import { createUserAction } from '@/features/user/actions';
-import type { User } from '@/features/user/types'; // Import type specifically from types.ts
+import { createUserAction } from "@/features/user/actions";
+import type { User } from "@/features/user/types"; // Import type specifically from types.ts
 
 // ❌ Avoid importing everything - Violates ISP and can increase bundle size
-import * as UserFeature from '@/features/user';
+import * as UserFeature from "@/features/user";
 ```
 
 ## Testing Considerations
@@ -611,9 +611,9 @@ import * as UserFeature from '@/features/user';
 Server actions have the single responsibility of handling mutations securely on the server.
 
 ```typescript
-import { auth } from '@/lib/auth'; // Authentication utility
-import { createSafeAction } from 'next-safe-action';
-import { z } from 'zod';
+import { auth } from "@/lib/auth"; // Authentication utility
+import { createSafeAction } from "next-safe-action";
+import { z } from "zod";
 
 const SomeSchema = z.object({
   /* ... */
@@ -624,7 +624,7 @@ export const protectedAction = createSafeAction(
   async (data) => {
     const session = await auth(); // Authentication check (SRP)
     if (!session?.user) {
-      throw new Error('Unauthorized'); // Throw error if not authenticated
+      throw new Error("Unauthorized"); // Throw error if not authenticated
     }
 
     // Protected logic here (SRP)

@@ -1,5 +1,5 @@
-import type { z } from 'zod';
-import type { ProfileSchema } from './schemas';
+import type { z } from "zod";
+import type { ProfileSchema } from "./schemas";
 
 export type ProfileFormData = z.infer<typeof ProfileSchema>;
 
@@ -16,7 +16,7 @@ export type AvatarUploadResult = {
 // Component types
 export type ICurrentUserAvatarProps = {
   className?: string;
-  size?: 'sm' | 'md' | 'lg' | 'xl';
+  size?: "sm" | "md" | "lg" | "xl";
 };
 
 export type IManageBillingButtonProps = {

@@ -1,6 +1,6 @@
-import { BookOpen, Clock, TrendingUp, Video } from 'lucide-react';
-import { StatCard } from './stat-card';
-import type { IDashboardStats } from '../types';
+import { BookOpen, Clock, TrendingUp, Video } from "lucide-react";
+import { StatCard } from "./stat-card";
+import type { IDashboardStats } from "../types";
 
 type StatsGridProps = {
   stats: IDashboardStats;
@@ -9,27 +9,27 @@ type StatsGridProps = {
 export const StatsGrid = ({ stats }: StatsGridProps) => {
   const statCards = [
     {
-      title: 'Total Videos',
+      title: "Total Videos",
       value: stats.totalVideos,
-      change: '+2 from last week',
+      change: "+2 from last week",
       icon: Video,
     },
     {
-      title: 'Learning Time',
+      title: "Learning Time",
       value: stats.learningTime,
-      change: '+4h from last week',
+      change: "+4h from last week",
       icon: Clock,
     },
     {
-      title: 'Notes Created',
+      title: "Notes Created",
       value: stats.notesCreated,
-      change: '+12 from last week',
+      change: "+12 from last week",
       icon: BookOpen,
     },
     {
-      title: 'Streak',
+      title: "Streak",
       value: `${stats.streak} days`,
-      change: 'Keep it up!',
+      change: "Keep it up!",
       icon: TrendingUp,
     },
   ];

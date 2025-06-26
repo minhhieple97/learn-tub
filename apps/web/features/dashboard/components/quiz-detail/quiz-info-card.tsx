@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Clock, Target, Trophy } from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
-import { QuizRetakeButton } from './quiz-retake-button';
-import { DifficultyBadge } from '@/components/ui/difficulty-badge';
-import { IQuizSessionWithAttempts } from '@/features/quizzes/types';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Clock, Target, Trophy } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
+import { QuizRetakeButton } from "./quiz-retake-button";
+import { DifficultyBadge } from "@/components/ui/difficulty-badge";
+import { IQuizSessionWithAttempts } from "@/features/quizzes/types";
 
 type IQuizInfoCardProps = {
   quizSession: IQuizSessionWithAttempts;
@@ -24,12 +24,12 @@ export const QuizInfoCard = ({ quizSession }: IQuizInfoCardProps) => {
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Clock className="h-3.5 w-3.5" />
               <span>
-                Created{' '}
+                Created{" "}
                 {quizSession.created_at
                   ? formatDistanceToNow(new Date(quizSession.created_at), {
                       addSuffix: true,
                     })
-                  : 'N/A'}
+                  : "N/A"}
               </span>
             </div>
           </div>
@@ -67,7 +67,9 @@ export const QuizInfoCard = ({ quizSession }: IQuizInfoCardProps) => {
             <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30 border border-border/30">
               <div className="text-sm">
                 <span className="text-muted-foreground">AI Model:</span>
-                <span className="ml-1 font-medium text-foreground">{quizSession.model_name}</span>
+                <span className="ml-1 font-medium text-foreground">
+                  {quizSession.model_name}
+                </span>
               </div>
             </div>
           </div>

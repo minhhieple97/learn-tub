@@ -1,18 +1,28 @@
-'use client';
+"use client";
 
-import { useSearchParams } from 'next/navigation';
-import { CheckCircle, CreditCard, Zap } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import Link from 'next/link';
-import { routes } from '@/routes';
-import { usePaymentDetails } from '../hooks/use-payment-detail';
-import { IPaymentDetails } from '../types';
+import { useSearchParams } from "next/navigation";
+import { CheckCircle, CreditCard, Zap } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import Link from "next/link";
+import { routes } from "@/routes";
+import { usePaymentDetails } from "../hooks/use-payment-detail";
+import { IPaymentDetails } from "../types";
 
 export function PaymentSuccessContent() {
   const searchParams = useSearchParams();
-  const sessionId = searchParams.get('session_id');
-  const { data: paymentDetails, isLoading, error } = usePaymentDetails(sessionId);
+  const sessionId = searchParams.get("session_id");
+  const {
+    data: paymentDetails,
+    isLoading,
+    error,
+  } = usePaymentDetails(sessionId);
 
   if (isLoading) {
     return <PaymentSuccessLoading />;
@@ -52,7 +62,9 @@ function PaymentError({ error }: { error: string }) {
   return (
     <Card>
       <CardHeader className="text-center">
-        <CardTitle className="text-2xl font-bold text-red-600 dark:text-red-400">Error</CardTitle>
+        <CardTitle className="text-2xl font-bold text-red-600 dark:text-red-400">
+          Error
+        </CardTitle>
         <CardDescription>{error}</CardDescription>
       </CardHeader>
       <CardContent>
@@ -64,7 +76,11 @@ function PaymentError({ error }: { error: string }) {
   );
 }
 
-function PaymentSuccessDetails({ paymentDetails }: { paymentDetails?: IPaymentDetails }) {
+function PaymentSuccessDetails({
+  paymentDetails,
+}: {
+  paymentDetails?: IPaymentDetails;
+}) {
   if (!paymentDetails) return null;
 
   return (
@@ -76,53 +92,57 @@ function PaymentSuccessDetails({ paymentDetails }: { paymentDetails?: IPaymentDe
         <CardTitle className="text-2xl font-bold text-green-600 dark:text-green-400">
           Payment Successful!
         </CardTitle>
-        <CardDescription>Your payment has been processed successfully.</CardDescription>
+        <CardDescription>
+          Your payment has been processed successfully.
+        </CardDescription>
       </CardHeader>
 
       <CardContent className="space-y-6">
         <div className="space-y-4">
           <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
             <div className="flex items-center gap-3">
-              {paymentDetails.paymentType === 'subscription' ? (
+              {paymentDetails.paymentType === "subscription" ? (
                 <CreditCard className="w-5 h-5 text-blue-600 dark:text-blue-400" />
               ) : (
                 <Zap className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
               )}
               <div>
                 <p className="font-medium">
-                  {paymentDetails.paymentType === 'subscription'
-                    ? paymentDetails.planName || 'Subscription Plan'
+                  {paymentDetails.paymentType === "subscription"
+                    ? paymentDetails.planName || "Subscription Plan"
                     : `${paymentDetails.creditsAmount} AI Credits`}
                 </p>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  {paymentDetails.paymentType === 'subscription'
-                    ? 'Monthly subscription'
-                    : 'One-time purchase'}
+                  {paymentDetails.paymentType === "subscription"
+                    ? "Monthly subscription"
+                    : "One-time purchase"}
                 </p>
               </div>
             </div>
             <div className="text-right">
-              <p className="font-bold">${(paymentDetails.amount / 100).toFixed(2)}</p>
+              <p className="font-bold">
+                ${(paymentDetails.amount / 100).toFixed(2)}
+              </p>
               <p className="text-sm text-gray-600 dark:text-gray-400 uppercase">
                 {paymentDetails.currency}
               </p>
             </div>
           </div>
 
-          {paymentDetails.paymentType === 'subscription' && (
+          {paymentDetails.paymentType === "subscription" && (
             <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
               <p className="text-sm text-blue-800 dark:text-blue-300">
-                Your subscription is now active! You can manage your subscription in your account
-                settings.
+                Your subscription is now active! You can manage your
+                subscription in your account settings.
               </p>
             </div>
           )}
 
-          {paymentDetails.paymentType === 'credits' && (
+          {paymentDetails.paymentType === "credits" && (
             <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
               <p className="text-sm text-yellow-800 dark:text-yellow-300">
-                {paymentDetails.creditsAmount} AI credits have been added to your account and are
-                ready to use!
+                {paymentDetails.creditsAmount} AI credits have been added to
+                your account and are ready to use!
               </p>
             </div>
           )}

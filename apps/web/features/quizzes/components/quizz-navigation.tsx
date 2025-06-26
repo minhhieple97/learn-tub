@@ -1,21 +1,21 @@
-'use client';
+"use client";
 
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from "@/components/ui/select";
 import {
   ChevronLeft,
   ChevronRight,
   CheckCircle,
   Loader2,
   Clock,
-} from 'lucide-react';
-import { IUserAnswer, IQuestion } from '../types';
+} from "lucide-react";
+import { IUserAnswer, IQuestion } from "../types";
 
 type IQuizzNavigationProps = {
   currentQuestionIndex: number;

@@ -15,4 +15,5 @@ export default registerAs('app', () => ({
   redisPort: process.env.REDIS_PORT,
   redisPassword: process.env.REDIS_PASSWORD,
   redisUsername: process.env.REDIS_USERNAME,
+  redisUrl: process.env.REDIS_URL,
 }));

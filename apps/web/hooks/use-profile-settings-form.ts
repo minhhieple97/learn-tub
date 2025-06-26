@@ -1,16 +1,21 @@
-import { useState, useRef, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useProfileSettings, useAvatarUpload } from '@/hooks/use-profile-settings';
-import { ProfileSchema } from '@/features/settings/schemas';
-import type { ProfileFormData } from '@/features/settings/types';
-import type { IUserProfile } from '@/types';
+import { useState, useRef, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  useProfileSettings,
+  useAvatarUpload,
+} from "@/hooks/use-profile-settings";
+import { ProfileSchema } from "@/features/settings/schemas";
+import type { ProfileFormData } from "@/features/settings/types";
+import type { IUserProfile } from "@/types";
 
 type UseProfileSettingsFormProps = {
   userProfile: IUserProfile;
 };
 
-export const useProfileSettingsForm = ({ userProfile }: UseProfileSettingsFormProps) => {
+export const useProfileSettingsForm = ({
+  userProfile,
+}: UseProfileSettingsFormProps) => {
   const { updateProfile, isUpdating } = useProfileSettings();
   const { uploadAvatar, isUploading } = useAvatarUpload();
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
@@ -19,7 +24,7 @@ export const useProfileSettingsForm = ({ userProfile }: UseProfileSettingsFormPr
   const form = useForm<ProfileFormData>({
     resolver: zodResolver(ProfileSchema),
     defaultValues: {
-      full_name: '',
+      full_name: "",
     },
   });
 
@@ -33,7 +38,7 @@ export const useProfileSettingsForm = ({ userProfile }: UseProfileSettingsFormPr
   useEffect(() => {
     if (userProfile) {
       reset({
-        full_name: userProfile.full_name || '',
+        full_name: userProfile.full_name || "",
       });
       setAvatarUrl(userProfile.avatar_url || null);
     }
@@ -43,7 +48,9 @@ export const useProfileSettingsForm = ({ userProfile }: UseProfileSettingsFormPr
     fileInputRef.current?.click();
   };
 
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -64,9 +71,9 @@ export const useProfileSettingsForm = ({ userProfile }: UseProfileSettingsFormPr
   const getUserInitials = (name: string | null, email: string) => {
     if (name) {
       return name
-        .split(' ')
+        .split(" ")
         .map((word) => word[0])
-        .join('')
+        .join("")
         .toUpperCase()
         .slice(0, 2);
     }

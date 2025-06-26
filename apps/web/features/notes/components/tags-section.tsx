@@ -1,15 +1,20 @@
-'use client';
+"use client";
 
-import type React from 'react';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Plus, X } from 'lucide-react';
-import type { ITagsSectionProps } from '../types';
-import { VALIDATION_LIMITS } from '@/config/constants';
-import { useNotesStore } from '../store';
+import type React from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Plus, X } from "lucide-react";
+import type { ITagsSectionProps } from "../types";
+import { VALIDATION_LIMITS } from "@/config/constants";
+import { useNotesStore } from "../store";
 
-export const TagsSection = ({ onAddTag, onRemoveTag, onKeyDown, onTagInputChange }: ITagsSectionProps) => {
+export const TagsSection = ({
+  onAddTag,
+  onRemoveTag,
+  onKeyDown,
+  onTagInputChange,
+}: ITagsSectionProps) => {
   const { formTags, tagInput } = useNotesStore();
   return (
     <div className="space-y-4">

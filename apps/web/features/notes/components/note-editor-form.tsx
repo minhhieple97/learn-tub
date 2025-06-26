@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import type React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Textarea } from '@/components/ui/textarea';
-import { TimestampDisplay } from './timestamp-display';
-import { TagsSection } from './tags-section';
-import { NoteFormActions } from './note-form-actions';
-import { useNoteEditorForm } from '../hooks';
-import { VALIDATION_LIMITS } from '@/config/constants';
+import type React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
+import { TimestampDisplay } from "./timestamp-display";
+import { TagsSection } from "./tags-section";
+import { NoteFormActions } from "./note-form-actions";
+import { useNoteEditorForm } from "../hooks";
+import { VALIDATION_LIMITS } from "@/config/constants";
 
 export const NoteEditorForm = () => {
   const {

@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { Progress } from '@/components/ui/progress';
-import { cn } from '@/lib/utils';
-import { IUserAnswer, IQuestion } from '../types';
+import { Progress } from "@/components/ui/progress";
+import { cn } from "@/lib/utils";
+import { IUserAnswer, IQuestion } from "../types";
 
 type IQuizzProgressProps = {
   currentQuestionIndex: number;
@@ -52,12 +52,12 @@ export const QuizzProgress = ({
               <div
                 key={index}
                 className={cn(
-                  'w-2 h-2 rounded-full transition-colors',
+                  "w-2 h-2 rounded-full transition-colors",
                   isAnswered
-                    ? 'bg-emerald-500'
+                    ? "bg-emerald-500"
                     : isCurrent
-                    ? 'bg-blue-500'
-                    : 'bg-slate-300 dark:bg-slate-600',
+                      ? "bg-blue-500"
+                      : "bg-slate-300 dark:bg-slate-600",
                 )}
               />
             );

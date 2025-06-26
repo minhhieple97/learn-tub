@@ -24,6 +24,7 @@ import { AppConfigService } from './config.service';
         REDIS_PORT: Joi.number().required(),
         REDIS_PASSWORD: Joi.string().required(),
         REDIS_USERNAME: Joi.string().required(),
+        REDIS_URL: Joi.string().required(),
       }),
     }),
   ],

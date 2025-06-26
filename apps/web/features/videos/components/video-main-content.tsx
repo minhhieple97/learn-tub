@@ -1,6 +1,6 @@
-import { IVideoPageData } from '../types';
-import { VideoInfoCard } from './video-info-card';
-import { YouTubePlayer } from './youtube-player';
+import { IVideoPageData } from "../types";
+import { VideoInfoCard } from "./video-info-card";
+import { YouTubePlayer } from "./youtube-player";
 
 type VideoMainContentProps = {
   video: IVideoPageData;

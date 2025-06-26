@@ -1,6 +1,6 @@
-import { useEffect } from 'react';
-import { useQuizStore } from '../store';
-import { IQuizAnswerOption } from '../types';
+import { useEffect } from "react";
+import { useQuizStore } from "../store";
+import { IQuizAnswerOption } from "../types";
 
 type UseQuizTabProps = {
   videoId: string;

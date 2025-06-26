@@ -20,16 +20,16 @@ export class LoggerService {
           filename: 'logs/error.log',
           level: 'error',
           format: winston.format.combine(
-            winston.format.timestamp(), 
-            winston.format.json()
+            winston.format.timestamp(),
+            winston.format.json(),
           ),
         }),
         new winston.transports.File({
           filename: 'logs/combined.log',
           level: logLevel,
           format: winston.format.combine(
-            winston.format.timestamp(), 
-            winston.format.json()
+            winston.format.timestamp(),
+            winston.format.json(),
           ),
         }),
       ],
@@ -39,4 +39,4 @@ export class LoggerService {
   createLogger() {
     return WinstonModule.createLogger(this.createLoggerOptions());
   }
-} 
+}

@@ -1,4 +1,4 @@
-import { useRouter, useSearchParams, usePathname } from 'next/navigation';
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import {
   useTransition,
   useMemo,
@@ -6,14 +6,14 @@ import {
   useRef,
   useEffect,
   useState,
-} from 'react';
-import { debounce } from 'lodash';
+} from "react";
+import { debounce } from "lodash";
 import {
   QUIZZ_DASHBOARD_CONFIG,
   QUIZZ_FILTER_DEFAULTS,
   QUIZZ_FILTER_VALUES,
-} from '@/config/constants';
-import type { IQuizFilters } from '../types';
+} from "@/config/constants";
+import type { IQuizFilters } from "../types";
 
 export const useQuizDashboardFilters = () => {
   const router = useRouter();
@@ -21,15 +21,15 @@ export const useQuizDashboardFilters = () => {
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
 
-  const urlSearch = searchParams.get('search') || QUIZZ_FILTER_DEFAULTS.SEARCH;
+  const urlSearch = searchParams.get("search") || QUIZZ_FILTER_DEFAULTS.SEARCH;
   const difficulty =
-    searchParams.get('difficulty') || QUIZZ_FILTER_DEFAULTS.DIFFICULTY;
-  const videoId = searchParams.get('videoId') || QUIZZ_FILTER_DEFAULTS.VIDEO_ID;
-  const sortBy = searchParams.get('sortBy') || QUIZZ_FILTER_DEFAULTS.SORT_BY;
+    searchParams.get("difficulty") || QUIZZ_FILTER_DEFAULTS.DIFFICULTY;
+  const videoId = searchParams.get("videoId") || QUIZZ_FILTER_DEFAULTS.VIDEO_ID;
+  const sortBy = searchParams.get("sortBy") || QUIZZ_FILTER_DEFAULTS.SORT_BY;
   const sortOrder =
-    searchParams.get('sortOrder') || QUIZZ_FILTER_DEFAULTS.SORT_ORDER;
+    searchParams.get("sortOrder") || QUIZZ_FILTER_DEFAULTS.SORT_ORDER;
   const page = parseInt(
-    searchParams.get('page') || QUIZZ_DASHBOARD_CONFIG.DEFAULT_PAGE.toString(),
+    searchParams.get("page") || QUIZZ_DASHBOARD_CONFIG.DEFAULT_PAGE.toString(),
     10,
   );
 
@@ -42,10 +42,10 @@ export const useQuizDashboardFilters = () => {
   const filters = useMemo(
     (): Partial<IQuizFilters> => ({
       search: urlSearch,
-      difficulty: difficulty as IQuizFilters['difficulty'],
+      difficulty: difficulty as IQuizFilters["difficulty"],
       videoId: videoId || undefined,
-      sortBy: sortBy as IQuizFilters['sortBy'],
-      sortOrder: sortOrder as IQuizFilters['sortOrder'],
+      sortBy: sortBy as IQuizFilters["sortBy"],
+      sortOrder: sortOrder as IQuizFilters["sortOrder"],
       page,
       limit: QUIZZ_DASHBOARD_CONFIG.PAGINATION_LIMIT,
     }),
@@ -70,13 +70,13 @@ export const useQuizDashboardFilters = () => {
       const urlParams = new URLSearchParams();
 
       Object.entries(params).forEach(([key, value]) => {
-        if (value && value !== QUIZZ_FILTER_VALUES.ALL && value !== '') {
+        if (value && value !== QUIZZ_FILTER_VALUES.ALL && value !== "") {
           urlParams.set(key, value.toString());
         }
       });
 
       const queryString = urlParams.toString();
-      return pathname + (queryString ? `?${queryString}` : '');
+      return pathname + (queryString ? `?${queryString}` : "");
     },
     [pathname],
   );
@@ -107,7 +107,7 @@ export const useQuizDashboardFilters = () => {
 
   const handleFilterChange = useCallback(
     (key: string, value: string) => {
-      if (key === 'search') {
+      if (key === "search") {
         setLocalSearch(value);
         debouncedSearch(value);
       } else {

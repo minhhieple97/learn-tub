@@ -6,9 +6,9 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from '@/components/ui/pagination';
-import { useQuizDashboardFilters } from '../hooks/use-quiz-dashboard-filters';
-import { cn } from '@/lib/utils';
+} from "@/components/ui/pagination";
+import { useQuizDashboardFilters } from "../hooks/use-quiz-dashboard-filters";
+import { cn } from "@/lib/utils";
 
 type IQuizPaginationProps = {
   currentPage: number;
@@ -43,21 +43,21 @@ export const QuizPagination = ({
         for (let i = 1; i <= 4; i++) {
           pages.push(i);
         }
-        pages.push('...');
+        pages.push("...");
         pages.push(totalPages);
       } else if (currentPage >= totalPages - 2) {
         pages.push(1);
-        pages.push('...');
+        pages.push("...");
         for (let i = totalPages - 3; i <= totalPages; i++) {
           pages.push(i);
         }
       } else {
         pages.push(1);
-        pages.push('...');
+        pages.push("...");
         for (let i = currentPage - 1; i <= currentPage + 1; i++) {
           pages.push(i);
         }
-        pages.push('...');
+        pages.push("...");
         pages.push(totalPages);
       }
     }
@@ -82,25 +82,29 @@ export const QuizPagination = ({
                   handlePageChange(currentPage - 1);
                 }
               }}
-              className={cn(currentPage === 1 || isPending ? 'pointer-events-none opacity-50' : '')}
+              className={cn(
+                currentPage === 1 || isPending
+                  ? "pointer-events-none opacity-50"
+                  : "",
+              )}
             />
           </PaginationItem>
 
           {getPageNumbers().map((pageNum, index) => (
             <PaginationItem key={index}>
-              {pageNum === '...' ? (
+              {pageNum === "..." ? (
                 <PaginationEllipsis />
               ) : (
                 <PaginationLink
                   href="#"
                   onClick={(e) => {
                     e.preventDefault();
-                    if (typeof pageNum === 'number' && !isPending) {
+                    if (typeof pageNum === "number" && !isPending) {
                       handlePageChange(pageNum);
                     }
                   }}
                   isActive={pageNum === currentPage}
-                  className={cn(isPending && 'pointer-events-none opacity-50')}
+                  className={cn(isPending && "pointer-events-none opacity-50")}
                 >
                   {pageNum}
                 </PaginationLink>
@@ -118,7 +122,9 @@ export const QuizPagination = ({
                 }
               }}
               className={cn(
-                currentPage === totalPages || isPending ? 'pointer-events-none opacity-50' : '',
+                currentPage === totalPages || isPending
+                  ? "pointer-events-none opacity-50"
+                  : "",
               )}
             />
           </PaginationItem>

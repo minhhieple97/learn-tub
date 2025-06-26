@@ -1,10 +1,13 @@
-import { useCallback } from 'react';
-import { useAction } from 'next-safe-action/hooks';
-import { useQueryClient } from '@tanstack/react-query';
-import { toast } from '@/hooks/use-toast';
-import { updateProfileAction, uploadAvatarAction } from '@/features/auth/actions';
-import { USER_PROFILE_QUERY_KEY } from '@/features/auth/constants';
-import type { IProfileUpdate, IFileUploadResult } from '@/types';
+import { useCallback } from "react";
+import { useAction } from "next-safe-action/hooks";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "@/hooks/use-toast";
+import {
+  updateProfileAction,
+  uploadAvatarAction,
+} from "@/features/auth/actions";
+import { USER_PROFILE_QUERY_KEY } from "@/features/auth/constants";
+import type { IProfileUpdate, IFileUploadResult } from "@/types";
 
 export const useProfileSettings = () => {
   const queryClient = useQueryClient();
@@ -13,15 +16,15 @@ export const useProfileSettings = () => {
     onSuccess: ({ data }) => {
       queryClient.invalidateQueries({ queryKey: USER_PROFILE_QUERY_KEY });
       toast({
-        title: 'Success',
-        description: data?.message || 'Profile updated successfully',
+        title: "Success",
+        description: data?.message || "Profile updated successfully",
       });
     },
     onError: ({ error }) => {
       toast({
-        title: 'Error',
-        description: error.serverError || 'Failed to update profile',
-        variant: 'destructive',
+        title: "Error",
+        description: error.serverError || "Failed to update profile",
+        variant: "destructive",
       });
     },
   });
@@ -48,15 +51,15 @@ export const useAvatarUpload = () => {
     onSuccess: ({ data }) => {
       queryClient.invalidateQueries({ queryKey: USER_PROFILE_QUERY_KEY });
       toast({
-        title: 'Success',
-        description: data?.message || 'Avatar uploaded successfully',
+        title: "Success",
+        description: data?.message || "Avatar uploaded successfully",
       });
     },
     onError: ({ error }) => {
       toast({
-        title: 'Error',
-        description: error.serverError || 'Failed to upload avatar',
-        variant: 'destructive',
+        title: "Error",
+        description: error.serverError || "Failed to upload avatar",
+        variant: "destructive",
       });
     },
   });
@@ -71,13 +74,13 @@ export const useAvatarUpload = () => {
         }
 
         return {
-          url: '',
-          error: 'Failed to upload avatar',
+          url: "",
+          error: "Failed to upload avatar",
         };
       } catch (error) {
         return {
-          url: '',
-          error: 'Failed to upload avatar',
+          url: "",
+          error: "Failed to upload avatar",
         };
       }
     },

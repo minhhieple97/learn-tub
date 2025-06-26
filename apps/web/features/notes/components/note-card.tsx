@@ -1,9 +1,9 @@
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { TimestampDisplay } from './timestamp-display';
-import { NoteCardActions } from './note-card-actions';
-import type { INote } from '../types';
-import { NoteEvaluation } from '@/features/notes/components/note-evaluation';
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { TimestampDisplay } from "./timestamp-display";
+import { NoteCardActions } from "./note-card-actions";
+import type { INote } from "../types";
+import { NoteEvaluation } from "@/features/notes/components/note-evaluation";
 
 type NoteCardProps = {
   note: INote;
@@ -11,7 +11,8 @@ type NoteCardProps = {
 };
 
 export const NoteCard = ({ note, onTimestampClick }: NoteCardProps) => {
-  const handleTimestampClick = (timestamp: number) => onTimestampClick?.(timestamp);
+  const handleTimestampClick = (timestamp: number) =>
+    onTimestampClick?.(timestamp);
 
   return (
     <Card className="overflow-hidden">

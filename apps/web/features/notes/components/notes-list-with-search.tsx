@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { NotesList } from './notes-list';
-import { NotesSearch } from './notes-search';
+import React from "react";
+import { NotesList } from "./notes-list";
+import { NotesSearch } from "./notes-search";
 
 type NotesListWithSearchProps = {
   onTimestampClick?: (timestamp: number) => void;
@@ -13,7 +13,7 @@ type NotesListWithSearchProps = {
 export const NotesListWithSearch = ({
   onTimestampClick,
   showSearch = true,
-  searchPlaceholder = 'Search notes content...',
+  searchPlaceholder = "Search notes content...",
 }: NotesListWithSearchProps) => {
   return (
     <div className="space-y-4">

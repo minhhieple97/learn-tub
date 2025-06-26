@@ -1,8 +1,8 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
-import { useAction } from 'next-safe-action/hooks';
-import { generateQuizQuestionsAction, evaluateQuizAction } from '../actions';
-import { AI_QUIZZ_CONFIG } from '@/config/constants';
-import { IQuizAnswerOption, IQuizSettings, IQuizState } from '../types';
+import { useState, useCallback, useRef, useEffect } from "react";
+import { useAction } from "next-safe-action/hooks";
+import { generateQuizQuestionsAction, evaluateQuizAction } from "../actions";
+import { AI_QUIZZ_CONFIG } from "@/config/constants";
+import { IQuizAnswerOption, IQuizSettings, IQuizState } from "../types";
 
 type IExtendedQuizState = IQuizState & {
   startTime: number | null;
@@ -28,7 +28,7 @@ export const useQuiz = (videoId: string) => {
       questionCount: AI_QUIZZ_CONFIG.DEFAULT_QUESTION_COUNT,
       difficulty: AI_QUIZZ_CONFIG.DEFAULT_DIFFICULTY,
       provider: null,
-      aiModelId: '',
+      aiModelId: "",
     },
   });
 
@@ -94,7 +94,7 @@ export const useQuiz = (videoId: string) => {
         }
       },
       onError: (error) => {
-        console.error('Failed to generate questions:', error);
+        console.error("Failed to generate questions:", error);
         setState((prev) => ({ ...prev, isGenerating: false }));
       },
     });
@@ -112,7 +112,7 @@ export const useQuiz = (videoId: string) => {
         }));
       },
       onError: (error) => {
-        console.error('Failed to evaluate quiz:', error);
+        console.error("Failed to evaluate quiz:", error);
         setState((prev) => ({ ...prev, isEvaluating: false }));
       },
     },
@@ -217,7 +217,7 @@ export const useQuiz = (videoId: string) => {
           tutorial: videoTutorial,
         },
         aiModelId: state.settings.aiModelId,
-        quizSessionId: state.sessionId || '',
+        quizSessionId: state.sessionId || "",
         timeTakenSeconds: finalTimeTaken,
       });
     },
@@ -259,7 +259,7 @@ export const useQuiz = (videoId: string) => {
   const formatTime = useCallback((seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   }, []);
 
   const currentQuestion = state.questions[state.currentQuestionIndex];

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState } from "react";
 
 type UseVideoPlayerReturn = {
   currentTimestamp: number;
@@ -9,7 +9,9 @@ type UseVideoPlayerReturn = {
 
 export const useVideoPlayer = (): UseVideoPlayerReturn => {
   const [currentTimestamp, setCurrentTimestamp] = useState(0);
-  const [targetSeekTime, setTargetSeekTime] = useState<number | undefined>(undefined);
+  const [targetSeekTime, setTargetSeekTime] = useState<number | undefined>(
+    undefined,
+  );
 
   const handleTimeUpdate = (time: number) => {
     setCurrentTimestamp(Math.floor(time));

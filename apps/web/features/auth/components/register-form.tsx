@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Form,
   FormControl,
@@ -9,10 +9,10 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
-import { GoogleAuthButton } from './google-auth-button';
-import { useRegister } from '@/features/auth/hooks/use-register';
-import { Loader2 } from 'lucide-react';
+} from "@/components/ui/form";
+import { GoogleAuthButton } from "./google-auth-button";
+import { useRegister } from "@/features/auth/hooks/use-register";
+import { Loader2 } from "lucide-react";
 
 export const RegisterForm = () => {
   const { form, onSubmit, isSubmitting, isLoading } = useRegister();
@@ -140,7 +140,7 @@ export const RegisterForm = () => {
                 Creating account...
               </div>
             ) : (
-              'Create Account'
+              "Create Account"
             )}
           </Button>
         </form>

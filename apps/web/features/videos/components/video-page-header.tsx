@@ -1,9 +1,9 @@
-import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
-import Link from 'next/link';
-import { routes } from '@/routes';
-import { tabValues } from '../search-params';
-import { IVideoPageData } from '../types';
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
+import { routes } from "@/routes";
+import { tabValues } from "../search-params";
+import { IVideoPageData } from "../types";
 
 type IVideoPageHeaderProps = {
   video: IVideoPageData;
@@ -20,7 +20,9 @@ export const VideoPageHeader = ({ video }: IVideoPageHeaderProps) => {
           </Link>
         </Button>
         <h1 className="text-2xl font-bold">{video.title}</h1>
-        {video.courses && <p className="text-muted-foreground">Course: {video.courses.title}</p>}
+        {video.courses && (
+          <p className="text-muted-foreground">Course: {video.courses.title}</p>
+        )}
       </div>
     </div>
   );

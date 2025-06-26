@@ -1,16 +1,15 @@
-import { createClient } from '@/lib/supabase/server';
+import { createClient } from "@/lib/supabase/server";
 
-
-import { IVideo, IVideoData } from '../types';
-import { checkProfile } from '@/lib/require-auth';
+import { IVideo, IVideoData } from "../types";
+import { checkProfile } from "@/lib/require-auth";
 
 export const getUserVideos = async (userId: string): Promise<IVideo[]> => {
   const supabase = await createClient();
   const { data: videos, error } = await supabase
-    .from('videos')
-    .select('*, notes(count)')
-    .eq('user_id', userId)
-    .order('created_at', { ascending: false });
+    .from("videos")
+    .select("*, notes(count)")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
 
   if (error) {
     throw new Error(`Failed to get user videos: ${error.message}`);
@@ -28,10 +27,10 @@ export const getLearnPageData = async () => {
 export const checkExistingVideo = async (userId: string, youtubeId: string) => {
   const supabase = await createClient();
   const { data: existingVideos, error } = await supabase
-    .from('videos')
-    .select('id')
-    .eq('youtube_id', youtubeId)
-    .eq('user_id', userId)
+    .from("videos")
+    .select("id")
+    .eq("youtube_id", youtubeId)
+    .eq("user_id", userId)
     .maybeSingle();
   if (error) {
     throw new Error(`Failed to check existing video: ${error.message}`);
@@ -42,7 +41,7 @@ export const checkExistingVideo = async (userId: string, youtubeId: string) => {
 
 export const insertVideo = async (videoData: IVideoData) => {
   const supabase = await createClient();
-  const { error } = await supabase.from('videos').insert({
+  const { error } = await supabase.from("videos").insert({
     user_id: videoData.userId,
     youtube_id: videoData.youtubeId,
     title: videoData.title,
@@ -61,13 +60,16 @@ export const insertVideo = async (videoData: IVideoData) => {
   return { success: true, videoId: videoData.youtubeId };
 };
 
-export const getVideoByYoutubeId = async (youtubeId: string, userId: string) => {
+export const getVideoByYoutubeId = async (
+  youtubeId: string,
+  userId: string,
+) => {
   const supabase = await createClient();
   const { data: video, error } = await supabase
-    .from('videos')
-    .select('*, courses(title)')
-    .eq('youtube_id', youtubeId)
-    .eq('user_id', userId)
+    .from("videos")
+    .select("*, courses(title)")
+    .eq("youtube_id", youtubeId)
+    .eq("user_id", userId)
     .maybeSingle();
 
   if (error) {
@@ -88,10 +90,10 @@ export const getVideoPageData = async (videoId: string) => {
 export const getVideoById = async (videoId: string, userId: string) => {
   const supabase = await createClient();
   const { data: video, error } = await supabase
-    .from('videos')
-    .select('id, title, youtube_id, description, tutorial')
-    .eq('id', videoId)
-    .eq('user_id', userId)
+    .from("videos")
+    .select("id, title, youtube_id, description, tutorial")
+    .eq("id", videoId)
+    .eq("user_id", userId)
     .single();
 
   if (error) {

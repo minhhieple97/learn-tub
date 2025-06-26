@@ -1,41 +1,50 @@
-'use server';
+"use server";
 
-import { revalidatePath } from 'next/cache';
-import { ActionError, authAction } from '@/lib/safe-action';
-import { createClient } from '@/lib/supabase/server';
-import { saveNoteInputSchema, updateNoteInputSchema, deleteNoteInputSchema } from '../schemas';
-import { routes } from '@/routes';
-import { checkProfileByUserId } from '@/lib/require-auth';
+import { revalidatePath } from "next/cache";
+import { ActionError, authAction } from "@/lib/safe-action";
+import { createClient } from "@/lib/supabase/server";
+import {
+  saveNoteInputSchema,
+  updateNoteInputSchema,
+  deleteNoteInputSchema,
+} from "../schemas";
+import { routes } from "@/routes";
+import { checkProfileByUserId } from "@/lib/require-auth";
 
 export const saveNoteAction = authAction
   .inputSchema(saveNoteInputSchema)
-  .action(async ({ parsedInput: { videoId, content, timestamp, tags }, ctx: { user } }) => {
-    const supabase = await createClient();
-    const profile = await checkProfileByUserId(user.id);
-    const { data, error } = await supabase
-      .from('notes')
-      .insert({
-        video_id: videoId,
-        user_id: profile.id,
-        content,
-        timestamp_seconds: timestamp,
-        tags,
-      })
-      .select('id')
-      .single();
+  .action(
+    async ({
+      parsedInput: { videoId, content, timestamp, tags },
+      ctx: { user },
+    }) => {
+      const supabase = await createClient();
+      const profile = await checkProfileByUserId(user.id);
+      const { data, error } = await supabase
+        .from("notes")
+        .insert({
+          video_id: videoId,
+          user_id: profile.id,
+          content,
+          timestamp_seconds: timestamp,
+          tags,
+        })
+        .select("id")
+        .single();
 
-    if (error) {
-      throw new ActionError(`Failed to save note: ${error.message}`);
-    }
+      if (error) {
+        throw new ActionError(`Failed to save note: ${error.message}`);
+      }
 
-    revalidatePath(`/learn/${videoId}`);
+      revalidatePath(`/learn/${videoId}`);
 
-    return {
-      success: true,
-      noteId: data.id,
-      message: 'Note saved successfully',
-    };
-  });
+      return {
+        success: true,
+        noteId: data.id,
+        message: "Note saved successfully",
+      };
+    },
+  );
 
 export const updateNoteAction = authAction
   .inputSchema(updateNoteInputSchema)
@@ -43,14 +52,14 @@ export const updateNoteAction = authAction
     const supabase = await createClient();
     const profile = await checkProfileByUserId(user.id);
     const { error } = await supabase
-      .from('notes')
+      .from("notes")
       .update({
         content,
         tags,
         updated_at: new Date().toISOString(),
       })
-      .eq('id', noteId)
-      .eq('user_id', profile.id);
+      .eq("id", noteId)
+      .eq("user_id", profile.id);
 
     if (error) {
       throw new ActionError(`Failed to update note: ${error.message}`);
@@ -61,7 +70,7 @@ export const updateNoteAction = authAction
     return {
       success: true,
       noteId,
-      message: 'Note updated successfully',
+      message: "Note updated successfully",
     };
   });
 
@@ -71,10 +80,10 @@ export const deleteNoteAction = authAction
     const supabase = await createClient();
     const profile = await checkProfileByUserId(user.id);
     const { error } = await supabase
-      .from('notes')
+      .from("notes")
       .delete()
-      .eq('id', noteId)
-      .eq('user_id', profile.id);
+      .eq("id", noteId)
+      .eq("user_id", profile.id);
 
     if (error) {
       throw new ActionError(`Failed to delete note: ${error.message}`);
@@ -85,6 +94,6 @@ export const deleteNoteAction = authAction
     return {
       success: true,
       noteId,
-      message: 'Note deleted successfully',
+      message: "Note deleted successfully",
     };
   });

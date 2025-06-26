@@ -2,8 +2,8 @@ import {
   IQuizAttempt,
   IQuizDifficultyFilter,
   IQuizSessionWithAttempts,
-} from '../quizzes/types';
-import { Tables } from '@/database.types';
+} from "../quizzes/types";
+import { Tables } from "@/database.types";
 
 export type IDashboardStats = {
   totalVideos: number;
@@ -51,7 +51,7 @@ export type IInsightsData = {
     totalSessions: number;
     totalAttempts: number;
     averageScore: number;
-    recentAttempts: (Tables<'quiz_attempts'> & {
+    recentAttempts: (Tables<"quiz_attempts"> & {
       quiz_sessions: {
         title: string;
         videos: {
@@ -68,10 +68,10 @@ export type IQuizFilters = {
   search: string;
   difficulty: IQuizDifficultyFilter;
   videoId?: string;
-  sortBy: 'created_at' | 'score' | 'attempts';
-  sortOrder: 'asc' | 'desc';
+  sortBy: "created_at" | "score" | "attempts";
+  sortOrder: "asc" | "desc";
   page: number;
   limit: number;
 };
 
-export type IQuizFilterParams = Omit<IQuizFilters, 'limit'>;
+export type IQuizFilterParams = Omit<IQuizFilters, "limit">;

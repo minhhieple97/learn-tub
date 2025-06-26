@@ -1,14 +1,14 @@
-import { createClient } from '@/lib/supabase/server';
+import { createClient } from "@/lib/supabase/server";
 import {
   IDatabaseQuizSession,
   IQuizAttempt,
   IQuizDifficulty,
   IQuizFeedback,
   IUserAnswer,
-} from '../types';
-import { IQuizQuestion } from '../types';
-import { IQuizSession, IQuizSessionWithAttempts } from '../types';
-import type { Database } from '@/database.types';
+} from "../types";
+import { IQuizQuestion } from "../types";
+import { IQuizSession, IQuizSessionWithAttempts } from "../types";
+import type { Database } from "@/database.types";
 
 export const createQuizSession = async (data: {
   userId: string;
@@ -19,11 +19,11 @@ export const createQuizSession = async (data: {
   topics?: string[];
   aiModelId: string;
   questions: IQuizQuestion[];
-}): Promise<Database['public']['Tables']['quiz_sessions']['Row']> => {
+}): Promise<Database["public"]["Tables"]["quiz_sessions"]["Row"]> => {
   const supabase = await createClient();
 
   const { data: session, error } = await supabase
-    .from('quiz_sessions')
+    .from("quiz_sessions")
     .insert({
       user_id: data.userId,
       video_id: data.videoId,
@@ -57,7 +57,7 @@ export const saveQuizAttempt = async (data: {
   const supabase = await createClient();
 
   const { data: attempt, error } = await supabase
-    .from('quiz_attempts')
+    .from("quiz_attempts")
     .insert({
       quiz_session_id: data.quizSessionId,
       user_id: data.userId,
@@ -86,7 +86,7 @@ export const getUserQuizSessions = async (
   const supabase = await createClient();
 
   const { data: sessions, error } = await supabase
-    .from('quiz_sessions')
+    .from("quiz_sessions")
     .select(
       `
       *,
@@ -113,8 +113,8 @@ export const getUserQuizSessions = async (
       )
     `,
     )
-    .eq('user_id', userId)
-    .order('created_at', { ascending: false })
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false })
     .range(offset, offset + limit - 1);
 
   if (error) {
@@ -124,7 +124,10 @@ export const getUserQuizSessions = async (
   return sessions.map((session) => {
     const attempts = session.quiz_attempts || [];
     const latestAttempt = attempts.length > 0 ? attempts[0] : undefined;
-    const bestScore = attempts.length > 0 ? Math.max(...attempts.map((a) => a.score)) : undefined;
+    const bestScore =
+      attempts.length > 0
+        ? Math.max(...attempts.map((a) => a.score))
+        : undefined;
 
     return {
       ...session,
@@ -136,7 +139,7 @@ export const getUserQuizSessions = async (
       videos: session.videos
         ? {
             ...session.videos,
-            description: session.videos.description || '',
+            description: session.videos.description || "",
           }
         : undefined,
       model_name: session.ai_model_pricing?.model_name,
@@ -153,7 +156,7 @@ export const getVideoQuizSessions = async (
   const supabase = await createClient();
 
   const { data: sessions, error } = await supabase
-    .from('quiz_sessions')
+    .from("quiz_sessions")
     .select(
       `
       *,
@@ -179,9 +182,9 @@ export const getVideoQuizSessions = async (
       )
     `,
     )
-    .eq('video_id', videoId)
-    .eq('user_id', userId)
-    .order('created_at', { ascending: false });
+    .eq("video_id", videoId)
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
 
   if (error) {
     throw new Error(`Failed to fetch video quiz sessions: ${error.message}`);
@@ -190,7 +193,10 @@ export const getVideoQuizSessions = async (
   return sessions.map((session) => {
     const attempts = session.quiz_attempts || [];
     const latestAttempt = attempts.length > 0 ? attempts[0] : undefined;
-    const bestScore = attempts.length > 0 ? Math.max(...attempts.map((a) => a.score)) : undefined;
+    const bestScore =
+      attempts.length > 0
+        ? Math.max(...attempts.map((a) => a.score))
+        : undefined;
 
     return {
       ...session,
@@ -213,7 +219,7 @@ export const getQuizSessionById = async (
   const supabase = await createClient();
 
   const { data: session, error } = await supabase
-    .from('quiz_sessions')
+    .from("quiz_sessions")
     .select(
       `
       *,
@@ -226,12 +232,12 @@ export const getQuizSessionById = async (
       )
     `,
     )
-    .eq('id', sessionId)
-    .eq('user_id', userId)
+    .eq("id", sessionId)
+    .eq("user_id", userId)
     .single();
 
   if (error) {
-    if (error.code === 'PGRST116') {
+    if (error.code === "PGRST116") {
       return null;
     }
     throw new Error(`Failed to fetch quiz session: ${error.message}`);
@@ -253,14 +259,14 @@ export const getQuizAttemptById = async (
   const supabase = await createClient();
 
   const { data: attempt, error } = await supabase
-    .from('quiz_attempts')
-    .select('*')
-    .eq('id', attemptId)
-    .eq('user_id', userId)
+    .from("quiz_attempts")
+    .select("*")
+    .eq("id", attemptId)
+    .eq("user_id", userId)
     .single();
 
   if (error) {
-    if (error.code === 'PGRST116') {
+    if (error.code === "PGRST116") {
       return null;
     }
     throw new Error(`Failed to fetch quiz attempt: ${error.message}`);
@@ -273,27 +279,31 @@ export const getQuizStatistics = async (userId: string) => {
   const supabase = await createClient();
 
   const { count: totalSessions, error: sessionsError } = await supabase
-    .from('quiz_sessions')
-    .select('*', { count: 'exact', head: true })
-    .eq('user_id', userId);
+    .from("quiz_sessions")
+    .select("*", { count: "exact", head: true })
+    .eq("user_id", userId);
 
   if (sessionsError) {
-    throw new Error(`Failed to fetch quiz sessions count: ${sessionsError.message}`);
+    throw new Error(
+      `Failed to fetch quiz sessions count: ${sessionsError.message}`,
+    );
   }
 
   const { count: totalAttempts, error: attemptsError } = await supabase
-    .from('quiz_attempts')
-    .select('*', { count: 'exact', head: true })
-    .eq('user_id', userId);
+    .from("quiz_attempts")
+    .select("*", { count: "exact", head: true })
+    .eq("user_id", userId);
 
   if (attemptsError) {
-    throw new Error(`Failed to fetch quiz attempts count: ${attemptsError.message}`);
+    throw new Error(
+      `Failed to fetch quiz attempts count: ${attemptsError.message}`,
+    );
   }
 
   const { data: avgData, error: avgError } = await supabase
-    .from('quiz_attempts')
-    .select('score')
-    .eq('user_id', userId);
+    .from("quiz_attempts")
+    .select("score")
+    .eq("user_id", userId);
 
   if (avgError) {
     throw new Error(`Failed to fetch average score: ${avgError.message}`);
@@ -301,11 +311,14 @@ export const getQuizStatistics = async (userId: string) => {
 
   const averageScore =
     avgData.length > 0
-      ? Math.round(avgData.reduce((sum, attempt) => sum + attempt.score, 0) / avgData.length)
+      ? Math.round(
+          avgData.reduce((sum, attempt) => sum + attempt.score, 0) /
+            avgData.length,
+        )
       : 0;
 
   const { data: recentAttempts, error: recentError } = await supabase
-    .from('quiz_attempts')
+    .from("quiz_attempts")
     .select(
       `
       *,
@@ -315,8 +328,8 @@ export const getQuizStatistics = async (userId: string) => {
       )
     `,
     )
-    .eq('user_id', userId)
-    .order('completed_at', { ascending: false })
+    .eq("user_id", userId)
+    .order("completed_at", { ascending: false })
     .limit(5);
 
   if (recentError) {
@@ -331,14 +344,17 @@ export const getQuizStatistics = async (userId: string) => {
   };
 };
 
-export const deleteQuizSession = async (sessionId: string, userId: string): Promise<void> => {
+export const deleteQuizSession = async (
+  sessionId: string,
+  userId: string,
+): Promise<void> => {
   const supabase = await createClient();
 
   const { error } = await supabase
-    .from('quiz_sessions')
+    .from("quiz_sessions")
     .delete()
-    .eq('id', sessionId)
-    .eq('user_id', userId);
+    .eq("id", sessionId)
+    .eq("user_id", userId);
 
   if (error) {
     throw new Error(`Failed to delete quiz session: ${error.message}`);

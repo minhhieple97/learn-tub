@@ -1,6 +1,6 @@
-import { Button } from '@/components/ui/button';
-import { Clock } from 'lucide-react';
-import { IPricingPlan } from '../types';
+import { Button } from "@/components/ui/button";
+import { Clock } from "lucide-react";
+import { IPricingPlan } from "../types";
 
 type PricingPlanButtonProps = {
   plan: IPricingPlan;
@@ -28,7 +28,7 @@ export const PricingPlanButton = ({
   // Free plan doesn't have a button
   if (index === 0) return null;
 
-  const defaultButtonText = index === 1 ? 'Go Pro' : 'Go Premium';
+  const defaultButtonText = index === 1 ? "Go Pro" : "Go Premium";
   const buttonText = getButtonText(plan.id, defaultButtonText);
   const disabled = isButtonDisabled(plan.id);
   const isProcessing = processingPlan === plan.id;
@@ -37,22 +37,22 @@ export const PricingPlanButton = ({
 
   const getButtonVariant = () => {
     switch (status) {
-      case 'active':
-        return 'secondary';
-      case 'active-cancelled':
-        return 'outline';
+      case "active":
+        return "secondary";
+      case "active-cancelled":
+        return "outline";
       default:
-        return 'default';
+        return "default";
     }
   };
 
   const getButtonClassName = () => {
-    const baseClass = `w-full ${compact ? 'text-xs' : 'text-sm'} transition-all`;
+    const baseClass = `w-full ${compact ? "text-xs" : "text-sm"} transition-all`;
 
     switch (status) {
-      case 'active':
+      case "active":
         return `${baseClass} bg-green-600 hover:bg-green-700 text-white shadow-md hover:shadow-lg`;
-      case 'active-cancelled':
+      case "active-cancelled":
         return `${baseClass} border-orange-300 text-orange-600 hover:bg-orange-50 hover:text-orange-700 dark:border-orange-600 dark:text-orange-400 dark:hover:bg-orange-900/20`;
       default:
         return `${baseClass} bg-gradient-to-r ${plan.gradient} text-white shadow-md hover:shadow-lg`;
@@ -75,11 +75,13 @@ export const PricingPlanButton = ({
       );
     }
 
-    if (status === 'active-cancelled' && daysRemaining > 0) {
+    if (status === "active-cancelled" && daysRemaining > 0) {
       return (
         <div className="flex items-center justify-center">
           <Clock className="mr-2 size-4" />
-          <span className="text-center leading-tight">Available after {daysRemaining} days</span>
+          <span className="text-center leading-tight">
+            Available after {daysRemaining} days
+          </span>
         </div>
       );
     }
@@ -91,7 +93,7 @@ export const PricingPlanButton = ({
     <Button
       className={getButtonClassName()}
       variant={getButtonVariant()}
-      size={compact ? 'sm' : 'default'}
+      size={compact ? "sm" : "default"}
       onClick={handleClick}
       disabled={disabled}
     >

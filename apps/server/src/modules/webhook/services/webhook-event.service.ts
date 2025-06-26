@@ -1,5 +1,4 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { webhook_event_status, webhook_event_type } from '@prisma/client';
 import { WebhookEventRepository } from '../repositories/webhook-event.repository';
 

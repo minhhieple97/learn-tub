@@ -4,7 +4,7 @@ import {
   AI_QUIZZ_ERRORS,
   AI_QUIZZ_PROMPTS,
   AI_COMMANDS,
-} from '@/config/constants';
+} from "@/config/constants";
 import type {
   IEvaluateQuizRequest,
   IGenerateQuestionsRequest,
@@ -13,15 +13,17 @@ import type {
   IQuizGenerationResponse,
   IQuizQuestion,
   IQuizStreamChunk,
-} from '../types';
-import { aiUsageTracker } from '@/features/ai';
-import { AIClientFactory } from '@/features/ai/services/ai-client';
-import { createClient } from '@/lib/supabase/server';
+} from "../types";
+import { aiUsageTracker } from "@/features/ai";
+import { AIClientFactory } from "@/features/ai/services/ai-client";
+import { createClient } from "@/lib/supabase/server";
 
 type IStreamController = ReadableStreamDefaultController<IQuizStreamChunk>;
 
 class QuizzService {
-  async generateQuestions(request: IGenerateQuestionsRequest): Promise<IQuizGenerationResponse> {
+  async generateQuestions(
+    request: IGenerateQuestionsRequest,
+  ): Promise<IQuizGenerationResponse> {
     try {
       const {
         aiModelId,
@@ -44,13 +46,15 @@ class QuizzService {
 
       const supabase = await createClient();
       const { data: modelData, error } = (await supabase
-        .from('ai_model_pricing_view')
-        .select('model_name')
-        .eq('id', aiModelId)
+        .from("ai_model_pricing_view")
+        .select("model_name")
+        .eq("id", aiModelId)
         .single()) as { data: { model_name: string } | null; error: any };
 
       if (error || !modelData?.model_name) {
-        throw new Error(`${AI_QUIZZ_ERRORS.UNSUPPORTED_PROVIDER}: ${aiModelId}`);
+        throw new Error(
+          `${AI_QUIZZ_ERRORS.UNSUPPORTED_PROVIDER}: ${aiModelId}`,
+        );
       }
 
       const modelName = modelData.model_name;
@@ -58,7 +62,7 @@ class QuizzService {
       const response = await aiUsageTracker.wrapAIOperationWithTokens(
         {
           user_id: userId,
-          command: 'generate_quizz_questions',
+          command: "generate_quizz_questions",
           ai_model_id: aiModelId,
           request_payload: { prompt_length: prompt.length },
         },
@@ -70,10 +74,12 @@ class QuizzService {
             prompt,
           );
 
-          const { result, tokenUsage } = await aiClient.chatCompletionWithUsage({
-            model: modelName,
-            messages,
-          });
+          const { result, tokenUsage } = await aiClient.chatCompletionWithUsage(
+            {
+              model: modelName,
+              messages,
+            },
+          );
 
           return {
             result,
@@ -92,7 +98,10 @@ class QuizzService {
       console.error(error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : AI_QUIZZ_ERRORS.FAILED_TO_GENERATE,
+        error:
+          error instanceof Error
+            ? error.message
+            : AI_QUIZZ_ERRORS.FAILED_TO_GENERATE,
       };
     }
   }
@@ -123,13 +132,27 @@ class QuizzService {
     return this.callAIProviderStreamForAPI(aiModelId, prompt, userId);
   }
 
-  async evaluateQuiz(request: IEvaluateQuizRequest): Promise<IQuizEvaluationResponse> {
+  async evaluateQuiz(
+    request: IEvaluateQuizRequest,
+  ): Promise<IQuizEvaluationResponse> {
     try {
       const { aiModelId, questions, answers, videoContext, userId } = request;
-      const prompt = this.createEvaluationPrompt(questions, answers, videoContext);
+      const prompt = this.createEvaluationPrompt(
+        questions,
+        answers,
+        videoContext,
+      );
 
-      const response = await this.callAIProviderForEvaluation(aiModelId, prompt, userId);
-      const feedback = this.parseFeedbackFromResponse(response, questions, answers);
+      const response = await this.callAIProviderForEvaluation(
+        aiModelId,
+        prompt,
+        userId,
+      );
+      const feedback = this.parseFeedbackFromResponse(
+        response,
+        questions,
+        answers,
+      );
 
       return {
         success: true,
@@ -138,7 +161,10 @@ class QuizzService {
     } catch (error) {
       return {
         success: false,
-        error: error instanceof Error ? error.message : AI_QUIZZ_ERRORS.FAILED_TO_EVALUATE,
+        error:
+          error instanceof Error
+            ? error.message
+            : AI_QUIZZ_ERRORS.FAILED_TO_EVALUATE,
       };
     }
   }
@@ -151,25 +177,35 @@ class QuizzService {
     difficulty: string;
     topics?: string[];
   }): string {
-    const { videoTitle, videoDescription, videoTutorial, questionCount, difficulty, topics } =
-      params;
+    const {
+      videoTitle,
+      videoDescription,
+      videoTutorial,
+      questionCount,
+      difficulty,
+      topics,
+    } = params;
 
-    const contextInfo = this.buildVideoContext({ videoTitle, videoDescription, videoTutorial });
+    const contextInfo = this.buildVideoContext({
+      videoTitle,
+      videoDescription,
+      videoTutorial,
+    });
     const topicsInfo = topics?.length
-      ? `${AI_QUIZZ_PROMPTS.TOPICS_PREFIX}${topics.join(', ')}`
-      : '';
+      ? `${AI_QUIZZ_PROMPTS.TOPICS_PREFIX}${topics.join(", ")}`
+      : "";
     const difficultyInfo =
       difficulty === AI_QUIZZ_CONFIG.DEFAULT_DIFFICULTY
         ? AI_QUIZZ_PROMPTS.DIFFICULTY_MIXED
         : `${difficulty}${AI_QUIZZ_PROMPTS.DIFFICULTY_SUFFIX}`;
 
     return `
-${AI_QUIZZ_PROMPTS.GENERATION_INTRO.replace('{count}', questionCount.toString())}
+${AI_QUIZZ_PROMPTS.GENERATION_INTRO.replace("{count}", questionCount.toString())}
 
 ${contextInfo}
 ${topicsInfo}
 
-${AI_QUIZZ_PROMPTS.GENERATION_REQUIREMENTS.replace('{difficulty}', difficultyInfo)}
+${AI_QUIZZ_PROMPTS.GENERATION_REQUIREMENTS.replace("{difficulty}", difficultyInfo)}
 
 ${AI_QUIZZ_PROMPTS.GENERATION_FORMAT}
 
@@ -178,7 +214,10 @@ ${AI_QUIZZ_PROMPTS.GENERATION_FOOTER}`;
 
   private createEvaluationPrompt(
     questions: IQuizQuestion[],
-    answers: Array<{ questionId: string; selectedAnswer: 'A' | 'B' | 'C' | 'D' }>,
+    answers: Array<{
+      questionId: string;
+      selectedAnswer: "A" | "B" | "C" | "D";
+    }>,
     videoContext?: { title?: string; description?: string; tutorial?: string },
   ): string {
     const contextInfo = this.buildVideoContext({
@@ -192,7 +231,7 @@ ${AI_QUIZZ_PROMPTS.GENERATION_FOOTER}`;
       return {
         question: q.question,
         correctAnswer: q.correctAnswer,
-        userAnswer: userAnswer?.selectedAnswer || 'No answer',
+        userAnswer: userAnswer?.selectedAnswer || "No answer",
         topic: q.topic,
         difficulty: q.difficulty,
       };
@@ -206,7 +245,7 @@ ${contextInfo}
 ${AI_QUIZZ_PROMPTS.QUIZZ_RESULTS_PREFIX}
 ${JSON.stringify(questionsWithAnswers, null, 2)}
 
-${AI_QUIZZ_PROMPTS.EVALUATION_FORMAT.replace('{total}', questions.length.toString())}
+${AI_QUIZZ_PROMPTS.EVALUATION_FORMAT.replace("{total}", questions.length.toString())}
 
 ${AI_QUIZZ_PROMPTS.EVALUATION_FOCUS}`;
   }
@@ -216,28 +255,38 @@ ${AI_QUIZZ_PROMPTS.EVALUATION_FOCUS}`;
     videoDescription?: string;
     videoTutorial?: string;
   }): string {
-    if (!context) return '';
+    if (!context) return "";
 
     const parts: string[] = [];
     if (context.videoTitle) {
-      parts.push(`${AI_QUIZZ_PROMPTS.VIDEO_TITLE_PREFIX}${context.videoTitle}"`);
+      parts.push(
+        `${AI_QUIZZ_PROMPTS.VIDEO_TITLE_PREFIX}${context.videoTitle}"`,
+      );
     }
     if (context.videoDescription) {
-      parts.push(`${AI_QUIZZ_PROMPTS.VIDEO_DESCRIPTION_PREFIX}${context.videoDescription}"`);
+      parts.push(
+        `${AI_QUIZZ_PROMPTS.VIDEO_DESCRIPTION_PREFIX}${context.videoDescription}"`,
+      );
     }
     if (context.videoTutorial) {
-      parts.push(`${AI_QUIZZ_PROMPTS.VIDEO_TUTORIAL_PREFIX}${context.videoTutorial}"`);
+      parts.push(
+        `${AI_QUIZZ_PROMPTS.VIDEO_TUTORIAL_PREFIX}${context.videoTutorial}"`,
+      );
     }
 
-    return parts.join('\n');
+    return parts.join("\n");
   }
 
-  private async callAIProvider(aiModelId: string, prompt: string, userId: string): Promise<string> {
+  private async callAIProvider(
+    aiModelId: string,
+    prompt: string,
+    userId: string,
+  ): Promise<string> {
     const supabase = await createClient();
     const { data: modelData, error } = (await supabase
-      .from('ai_model_pricing_view')
-      .select('model_name')
-      .eq('id', aiModelId)
+      .from("ai_model_pricing_view")
+      .select("model_name")
+      .eq("id", aiModelId)
       .single()) as { data: { model_name: string } | null; error: any };
 
     if (error || !modelData?.model_name) {
@@ -249,7 +298,7 @@ ${AI_QUIZZ_PROMPTS.EVALUATION_FOCUS}`;
     return aiUsageTracker.wrapAIOperationWithTokens(
       {
         user_id: userId,
-        command: 'generate_quizz_questions',
+        command: "generate_quizz_questions",
         ai_model_id: aiModelId,
         request_payload: { prompt_length: prompt.length },
       },
@@ -281,9 +330,9 @@ ${AI_QUIZZ_PROMPTS.EVALUATION_FOCUS}`;
   ): Promise<string> {
     const supabase = await createClient();
     const { data: modelData, error } = (await supabase
-      .from('ai_model_pricing_view')
-      .select('model_name')
-      .eq('id', aiModelId)
+      .from("ai_model_pricing_view")
+      .select("model_name")
+      .eq("id", aiModelId)
       .single()) as { data: { model_name: string } | null; error: any };
 
     if (error || !modelData?.model_name) {
@@ -295,7 +344,7 @@ ${AI_QUIZZ_PROMPTS.EVALUATION_FOCUS}`;
     return aiUsageTracker.wrapAIOperationWithTokens(
       {
         user_id: userId,
-        command: 'evaluate_note',
+        command: "evaluate_note",
         ai_model_id: aiModelId,
         request_payload: { prompt_length: prompt.length },
       },
@@ -327,9 +376,9 @@ ${AI_QUIZZ_PROMPTS.EVALUATION_FOCUS}`;
   ): Promise<ReadableStream<IQuizStreamChunk>> {
     const supabase = await createClient();
     const { data: modelData, error } = (await supabase
-      .from('ai_model_pricing_view')
-      .select('model_name')
-      .eq('id', aiModelId)
+      .from("ai_model_pricing_view")
+      .select("model_name")
+      .eq("id", aiModelId)
       .single()) as { data: { model_name: string } | null; error: any };
 
     if (error || !modelData?.model_name) {
@@ -341,7 +390,7 @@ ${AI_QUIZZ_PROMPTS.EVALUATION_FOCUS}`;
     return aiUsageTracker.wrapStreamingOperation(
       {
         user_id: userId,
-        command: 'generate_quizz_questions',
+        command: "generate_quizz_questions",
         ai_model_id: aiModelId,
         request_payload: { prompt_length: prompt.length },
       },
@@ -353,13 +402,14 @@ ${AI_QUIZZ_PROMPTS.EVALUATION_FOCUS}`;
           prompt,
         );
 
-        const { stream, getUsage } = await aiClient.streamChatCompletionWithUsage({
-          model: modelName,
-          messages,
-          stream_options: {
-            include_usage: true,
-          },
-        });
+        const { stream, getUsage } =
+          await aiClient.streamChatCompletionWithUsage({
+            model: modelName,
+            messages,
+            stream_options: {
+              include_usage: true,
+            },
+          });
 
         const transformedStream = this.createStreamFromAIClient(stream);
 
@@ -378,9 +428,9 @@ ${AI_QUIZZ_PROMPTS.EVALUATION_FOCUS}`;
   ): Promise<ReadableStream<Uint8Array>> {
     const supabase = await createClient();
     const { data: modelData, error } = (await supabase
-      .from('ai_model_pricing_view')
-      .select('model_name')
-      .eq('id', aiModelId)
+      .from("ai_model_pricing_view")
+      .select("model_name")
+      .eq("id", aiModelId)
       .single()) as { data: { model_name: string } | null; error: any };
 
     if (error || !modelData?.model_name) {
@@ -392,7 +442,7 @@ ${AI_QUIZZ_PROMPTS.EVALUATION_FOCUS}`;
     return aiUsageTracker.wrapStreamingOperation(
       {
         user_id: userId,
-        command: 'generate_quizz_questions',
+        command: "generate_quizz_questions",
         ai_model_id: aiModelId,
         request_payload: { prompt_length: prompt.length },
       },
@@ -404,13 +454,14 @@ ${AI_QUIZZ_PROMPTS.EVALUATION_FOCUS}`;
           prompt,
         );
 
-        const { stream, getUsage } = await aiClient.streamChatCompletionWithUsage({
-          model: modelName,
-          messages,
-          stream_options: {
-            include_usage: true,
-          },
-        });
+        const { stream, getUsage } =
+          await aiClient.streamChatCompletionWithUsage({
+            model: modelName,
+            messages,
+            stream_options: {
+              include_usage: true,
+            },
+          });
 
         const transformedStream = this.createAPIStreamFromAIClient(stream);
 
@@ -431,18 +482,18 @@ ${AI_QUIZZ_PROMPTS.EVALUATION_FOCUS}`;
     return new ReadableStream<IQuizStreamChunk>({
       async start(controller) {
         try {
-          let fullContent = '';
+          let fullContent = "";
           const reader = aiStream.getReader();
 
           while (true) {
             const { done, value } = await reader.read();
             if (done) break;
 
-            const content = value.choices[0]?.delta?.content || '';
+            const content = value.choices[0]?.delta?.content || "";
             fullContent += content;
 
             controller.enqueue({
-              type: 'question',
+              type: "question",
               content,
               finished: false,
             });
@@ -466,55 +517,58 @@ ${AI_QUIZZ_PROMPTS.EVALUATION_FOCUS}`;
     return new ReadableStream<Uint8Array>({
       async start(controller) {
         try {
-          let fullContent = '';
+          let fullContent = "";
           const reader = aiStream.getReader();
 
           while (true) {
             const { done, value } = await reader.read();
             if (done) break;
 
-            const content = value.choices[0]?.delta?.content || '';
+            const content = value.choices[0]?.delta?.content || "";
             fullContent += content;
 
             const chunkData =
               JSON.stringify({
-                type: 'question',
+                type: "question",
                 content,
                 finished: false,
-              }) + '\n';
+              }) + "\n";
 
             controller.enqueue(encoder.encode(chunkData));
           }
 
           try {
-            const questions = quizService.parseQuestionsFromResponse(fullContent);
+            const questions =
+              quizService.parseQuestionsFromResponse(fullContent);
             const completeData =
               JSON.stringify({
-                type: 'complete',
+                type: "complete",
                 content: JSON.stringify(questions),
                 finished: true,
-              }) + '\n';
+              }) + "\n";
 
             controller.enqueue(encoder.encode(completeData));
           } catch {
             const errorData =
               JSON.stringify({
-                type: 'error',
+                type: "error",
                 content: AI_QUIZZ_ERRORS.FAILED_TO_PARSE_QUESTIONS,
                 finished: true,
-              }) + '\n';
+              }) + "\n";
 
             controller.enqueue(encoder.encode(errorData));
           }
         } catch (error) {
           const errorMessage =
-            error instanceof Error ? error.message : AI_QUIZZ_ERRORS.FAILED_TO_GENERATE;
+            error instanceof Error
+              ? error.message
+              : AI_QUIZZ_ERRORS.FAILED_TO_GENERATE;
           const errorData =
             JSON.stringify({
-              type: 'error',
+              type: "error",
               content: `${AI_QUIZZ_ERRORS.FAILED_TO_GENERATE}: ${errorMessage}`,
               finished: true,
-            }) + '\n';
+            }) + "\n";
 
           controller.enqueue(encoder.encode(errorData));
         } finally {
@@ -530,22 +584,24 @@ ${AI_QUIZZ_PROMPTS.EVALUATION_FOCUS}`;
       if (cleanedText.startsWith(AI_QUIZZ_CONFIG.MARKDOWN_JSON_START)) {
         cleanedText = cleanedText.replace(
           new RegExp(`^${AI_QUIZZ_CONFIG.MARKDOWN_JSON_START}\\s*`),
-          '',
+          "",
         );
       }
       if (cleanedText.startsWith(AI_QUIZZ_CONFIG.MARKDOWN_CODE_START)) {
         cleanedText = cleanedText.replace(
           new RegExp(`^${AI_QUIZZ_CONFIG.MARKDOWN_CODE_START}\\s*`),
-          '',
+          "",
         );
       }
       if (cleanedText.endsWith(AI_QUIZZ_CONFIG.MARKDOWN_CODE_END)) {
         cleanedText = cleanedText.replace(
           new RegExp(`\\s*${AI_QUIZZ_CONFIG.MARKDOWN_CODE_END}$`),
-          '',
+          "",
         );
       }
-      const jsonMatch = cleanedText.match(new RegExp(AI_QUIZZ_CONFIG.JSON_REGEX_PATTERN));
+      const jsonMatch = cleanedText.match(
+        new RegExp(AI_QUIZZ_CONFIG.JSON_REGEX_PATTERN),
+      );
       if (jsonMatch) {
         cleanedText = jsonMatch[0];
       }
@@ -554,29 +610,34 @@ ${AI_QUIZZ_PROMPTS.EVALUATION_FOCUS}`;
         throw new Error(AI_QUIZZ_ERRORS.INVALID_RESPONSE_FORMAT);
       }
 
-      return parsed.questions.map((q: Record<string, unknown>, index: number) => {
-        const options = q.options as Record<string, string> | undefined;
-        return {
-          id: (q.id as string) || `${AI_QUIZZ_CONFIG.DEFAULT_QUESTION_ID_PREFIX}${index + 1}`,
-          question: (q.question as string) || '',
-          options: {
-            A: options?.A || '',
-            B: options?.B || '',
-            C: options?.C || '',
-            D: options?.D || '',
-          },
-          correctAnswer:
-            (q.correctAnswer as 'A' | 'B' | 'C' | 'D') || AI_QUIZZ_CONFIG.DEFAULT_ANSWER,
-          explanation: (q.explanation as string) || '',
-          topic: (q.topic as string) || AI_QUIZZ_CONFIG.DEFAULT_TOPIC,
-          difficulty:
-            (q.difficulty as 'easy' | 'medium' | 'hard') ||
-            AI_QUIZZ_CONFIG.DEFAULT_QUIZZ_DIFFICULTY,
-        };
-      });
+      return parsed.questions.map(
+        (q: Record<string, unknown>, index: number) => {
+          const options = q.options as Record<string, string> | undefined;
+          return {
+            id:
+              (q.id as string) ||
+              `${AI_QUIZZ_CONFIG.DEFAULT_QUESTION_ID_PREFIX}${index + 1}`,
+            question: (q.question as string) || "",
+            options: {
+              A: options?.A || "",
+              B: options?.B || "",
+              C: options?.C || "",
+              D: options?.D || "",
+            },
+            correctAnswer:
+              (q.correctAnswer as "A" | "B" | "C" | "D") ||
+              AI_QUIZZ_CONFIG.DEFAULT_ANSWER,
+            explanation: (q.explanation as string) || "",
+            topic: (q.topic as string) || AI_QUIZZ_CONFIG.DEFAULT_TOPIC,
+            difficulty:
+              (q.difficulty as "easy" | "medium" | "hard") ||
+              AI_QUIZZ_CONFIG.DEFAULT_QUIZZ_DIFFICULTY,
+          };
+        },
+      );
     } catch (_error) {
-      console.error('Failed to parse AI response:', _error);
-      console.error('Original response text:', responseText);
+      console.error("Failed to parse AI response:", _error);
+      console.error("Original response text:", responseText);
       throw new Error(AI_QUIZZ_ERRORS.FAILED_TO_PARSE_QUESTIONS);
     }
   }
@@ -584,7 +645,10 @@ ${AI_QUIZZ_PROMPTS.EVALUATION_FOCUS}`;
   private parseFeedbackFromResponse(
     responseText: string,
     questions: IQuizQuestion[],
-    answers: Array<{ questionId: string; selectedAnswer: 'A' | 'B' | 'C' | 'D' }>,
+    answers: Array<{
+      questionId: string;
+      selectedAnswer: "A" | "B" | "C" | "D";
+    }>,
   ): IQuizFeedback {
     try {
       let cleanedText = responseText.trim();
@@ -592,23 +656,25 @@ ${AI_QUIZZ_PROMPTS.EVALUATION_FOCUS}`;
       if (cleanedText.startsWith(AI_QUIZZ_CONFIG.MARKDOWN_JSON_START)) {
         cleanedText = cleanedText.replace(
           new RegExp(`^${AI_QUIZZ_CONFIG.MARKDOWN_JSON_START}\\s*`),
-          '',
+          "",
         );
       }
       if (cleanedText.startsWith(AI_QUIZZ_CONFIG.MARKDOWN_CODE_START)) {
         cleanedText = cleanedText.replace(
           new RegExp(`^${AI_QUIZZ_CONFIG.MARKDOWN_CODE_START}\\s*`),
-          '',
+          "",
         );
       }
       if (cleanedText.endsWith(AI_QUIZZ_CONFIG.MARKDOWN_CODE_END)) {
         cleanedText = cleanedText.replace(
           new RegExp(`\\s*${AI_QUIZZ_CONFIG.MARKDOWN_CODE_END}$`),
-          '',
+          "",
         );
       }
 
-      const jsonMatch = cleanedText.match(new RegExp(AI_QUIZZ_CONFIG.JSON_REGEX_PATTERN));
+      const jsonMatch = cleanedText.match(
+        new RegExp(AI_QUIZZ_CONFIG.JSON_REGEX_PATTERN),
+      );
       if (jsonMatch) {
         cleanedText = jsonMatch[0];
       }
@@ -618,7 +684,8 @@ ${AI_QUIZZ_PROMPTS.EVALUATION_FOCUS}`;
       // Calculate results for each question
       const results = questions.map((question) => {
         const userAnswer = answers.find((a) => a.questionId === question.id);
-        const selectedAnswer = userAnswer?.selectedAnswer || AI_QUIZZ_CONFIG.DEFAULT_ANSWER;
+        const selectedAnswer =
+          userAnswer?.selectedAnswer || AI_QUIZZ_CONFIG.DEFAULT_ANSWER;
         const isCorrect = selectedAnswer === question.correctAnswer;
 
         return {
@@ -635,12 +702,17 @@ ${AI_QUIZZ_PROMPTS.EVALUATION_FOCUS}`;
 
       return {
         totalQuestions: parsed.totalQuestions || questions.length,
-        correctAnswers: parsed.correctAnswers || results.filter((r) => r.isCorrect).length,
+        correctAnswers:
+          parsed.correctAnswers || results.filter((r) => r.isCorrect).length,
         score:
           parsed.score ||
-          Math.round((results.filter((r) => r.isCorrect).length / questions.length) * 100),
+          Math.round(
+            (results.filter((r) => r.isCorrect).length / questions.length) *
+              100,
+          ),
         results,
-        overallFeedback: parsed.overallFeedback || AI_QUIZZ_ERRORS.QUIZZ_COMPLETED_SUCCESS,
+        overallFeedback:
+          parsed.overallFeedback || AI_QUIZZ_ERRORS.QUIZZ_COMPLETED_SUCCESS,
         areasForImprovement: parsed.areasForImprovement || [],
         strengths: parsed.strengths || [],
         performanceByTopic: parsed.performanceByTopic || {},
@@ -648,7 +720,8 @@ ${AI_QUIZZ_PROMPTS.EVALUATION_FOCUS}`;
     } catch (_error) {
       const results = questions.map((question) => {
         const userAnswer = answers.find((a) => a.questionId === question.id);
-        const selectedAnswer = userAnswer?.selectedAnswer || AI_QUIZZ_CONFIG.DEFAULT_ANSWER;
+        const selectedAnswer =
+          userAnswer?.selectedAnswer || AI_QUIZZ_CONFIG.DEFAULT_ANSWER;
         const isCorrect = selectedAnswer === question.correctAnswer;
 
         return {
@@ -678,17 +751,20 @@ ${AI_QUIZZ_PROMPTS.EVALUATION_FOCUS}`;
     }
   }
 
-  private handleStreamCompletion(controller: IStreamController, fullContent: string): void {
+  private handleStreamCompletion(
+    controller: IStreamController,
+    fullContent: string,
+  ): void {
     try {
       const questions = this.parseQuestionsFromResponse(fullContent);
       controller.enqueue({
-        type: 'complete',
+        type: "complete",
         content: JSON.stringify(questions),
         finished: true,
       });
     } catch {
       controller.enqueue({
-        type: 'error',
+        type: "error",
         content: AI_QUIZZ_ERRORS.FAILED_TO_PARSE_QUESTIONS,
         finished: true,
       });
@@ -697,12 +773,17 @@ ${AI_QUIZZ_PROMPTS.EVALUATION_FOCUS}`;
     }
   }
 
-  private handleStreamError(controller: IStreamController, error: unknown): void {
+  private handleStreamError(
+    controller: IStreamController,
+    error: unknown,
+  ): void {
     const errorMessage =
-      error instanceof Error ? error.message : AI_QUIZZ_ERRORS.FAILED_TO_GENERATE;
+      error instanceof Error
+        ? error.message
+        : AI_QUIZZ_ERRORS.FAILED_TO_GENERATE;
 
     controller.enqueue({
-      type: 'error',
+      type: "error",
       content: `${AI_QUIZZ_ERRORS.FAILED_TO_GENERATE}: ${errorMessage}`,
       finished: true,
     });

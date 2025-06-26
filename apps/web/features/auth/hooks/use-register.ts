@@ -1,21 +1,21 @@
-'use client';
+"use client";
 
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useAction } from 'next-safe-action/hooks';
-import { toast } from '@/hooks/use-toast';
-import { registerSchema } from '../schemas';
-import { registerAction } from '../actions';
-import type { IRegisterFormData } from '../types';
-import { useRouter } from 'next/navigation';
-import { routes } from '@/routes';
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useAction } from "next-safe-action/hooks";
+import { toast } from "@/hooks/use-toast";
+import { registerSchema } from "../schemas";
+import { registerAction } from "../actions";
+import type { IRegisterFormData } from "../types";
+import { useRouter } from "next/navigation";
+import { routes } from "@/routes";
 
 type UseRegisterReturn = {
   form: ReturnType<typeof useForm<IRegisterFormData>>;
   onSubmit: (data: IRegisterFormData) => void;
-  register: ReturnType<typeof useForm<IRegisterFormData>>['register'];
-  handleSubmit: ReturnType<typeof useForm<IRegisterFormData>>['handleSubmit'];
-  errors: ReturnType<typeof useForm<IRegisterFormData>>['formState']['errors'];
+  register: ReturnType<typeof useForm<IRegisterFormData>>["register"];
+  handleSubmit: ReturnType<typeof useForm<IRegisterFormData>>["handleSubmit"];
+  errors: ReturnType<typeof useForm<IRegisterFormData>>["formState"]["errors"];
   isSubmitting: boolean;
   isLoading: boolean;
   password: string;
@@ -31,13 +31,16 @@ export const useRegister = (): UseRegisterReturn => {
   const { execute, isPending } = useAction(registerAction, {
     onError: ({ error }) => {
       toast.error({
-        description: error.serverError || 'An unexpected error occurred during registration',
+        description:
+          error.serverError ||
+          "An unexpected error occurred during registration",
       });
     },
     onSuccess: () => {
       toast.success({
-        title: 'Account created successfully!',
-        description: 'Sign up successful. Please check your email for verification.',
+        title: "Account created successfully!",
+        description:
+          "Sign up successful. Please check your email for verification.",
       });
       router.push(routes.auth.login);
     },
@@ -46,10 +49,10 @@ export const useRegister = (): UseRegisterReturn => {
   const form = useForm<IRegisterFormData>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
-      fullName: '',
-      email: '',
-      password: '',
-      confirmPassword: '',
+      fullName: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
     },
   });
 
@@ -60,8 +63,8 @@ export const useRegister = (): UseRegisterReturn => {
     watch,
   } = form;
 
-  const password = watch('password') || '';
-  const confirmPassword = watch('confirmPassword') || '';
+  const password = watch("password") || "";
+  const confirmPassword = watch("confirmPassword") || "";
 
   const passwordRequirements = {
     hasMinLength: password.length >= 8,

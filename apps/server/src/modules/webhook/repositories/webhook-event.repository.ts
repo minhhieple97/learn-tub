@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { webhook_event_status, webhook_event_type } from '@prisma/client';
+import { webhook_event_status } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import {
   ICreateWebhookEventData,
@@ -87,4 +87,4 @@ export class WebhookEventRepository {
       retrying: retryingCount,
     };
   }
-} 
+}

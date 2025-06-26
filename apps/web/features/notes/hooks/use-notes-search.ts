@@ -1,14 +1,23 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useDebounce } from '@/hooks/use-debounce';
-import { useNotesStore } from '../store';
-import { SEARCH_CONFIG } from '@/config/constants';
+import { useState, useEffect } from "react";
+import { useDebounce } from "@/hooks/use-debounce";
+import { useNotesStore } from "../store";
+import { SEARCH_CONFIG } from "@/config/constants";
 
 export const useNotesSearch = () => {
-  const { isSearching, isSearchActive, resultCount, performSearch, clearSearch } = useNotesStore();
-  const [inputValue, setInputValue] = useState('');
-  const debouncedSearchQuery = useDebounce(inputValue, SEARCH_CONFIG.DEBOUNCE_DELAY);
+  const {
+    isSearching,
+    isSearchActive,
+    resultCount,
+    performSearch,
+    clearSearch,
+  } = useNotesStore();
+  const [inputValue, setInputValue] = useState("");
+  const debouncedSearchQuery = useDebounce(
+    inputValue,
+    SEARCH_CONFIG.DEBOUNCE_DELAY,
+  );
 
   useEffect(() => {
     if (debouncedSearchQuery.trim()) {
@@ -24,7 +33,7 @@ export const useNotesSearch = () => {
   };
 
   const handleClearSearch = () => {
-    setInputValue('');
+    setInputValue("");
     clearSearch();
   };
 
@@ -36,4 +45,4 @@ export const useNotesSearch = () => {
     handleInputChange,
     handleClearSearch,
   };
-}; 
+};
