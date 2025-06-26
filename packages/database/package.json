@@ -25,7 +25,8 @@
     "lint": "eslint . --max-warnings 0",
     "prebuild": "npm run db:generate",
     "predev": "npm run db:generate",
-    "studio": "prisma studio"
+    "studio": "prisma studio",
+    "db": "npm run db:pull && npm run db:generate"
   },
   "dependencies": {
     "@prisma/client": "^6.10.1"
