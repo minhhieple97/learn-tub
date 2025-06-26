@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import { Card, CardContent } from '@/components/ui/card';
-import { QuizzWelcomeScreen } from './quizz-welcome-screen';
-import { QuizzProgress } from './quizz-progress';
-import { QuestionCard } from './question-card';
-import { QuizzNavigation } from './quizz-navigation';
-import { QuizzResults } from './quizz-results';
-import { useQuizTab } from '../hooks/use-quiz-tab';
+import { Card, CardContent } from "@/components/ui/card";
+import { QuizzWelcomeScreen } from "./quizz-welcome-screen";
+import { QuizzProgress } from "./quizz-progress";
+import { QuestionCard } from "./question-card";
+import { QuizzNavigation } from "./quizz-navigation";
+import { QuizzResults } from "./quizz-results";
+import { useQuizTab } from "../hooks/use-quiz-tab";
 
 type IQuizzTabProps = {
   videoId: string;

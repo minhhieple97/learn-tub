@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import { RotateCcw } from 'lucide-react';
-import { routes } from '@/routes';
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { RotateCcw } from "lucide-react";
+import { routes } from "@/routes";
 
 type QuizRetakeButtonProps = {
   quizSessionId: string;

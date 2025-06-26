@@ -1,24 +1,24 @@
-'use server';
-import { ActionError, authAction } from '@/lib/safe-action';
-import { z } from 'zod';
-import { quizService } from '../services/quizz-service';
-import { createQuizSession } from '../queries';
-import { getVideoById } from '@/features/videos/queries';
-import { RateLimiter } from '@/lib/rate-limiter';
-import { checkProfileByUserId } from '@/lib/require-auth';
-import { deductCredits } from '@/features/payments/services/deduction-credit';
-import { validateUserCreditsForOperation } from '@/features/payments/queries';
-import { CREDIT_ACTION_COUNTS } from '@/config/constants';
+"use server";
+import { ActionError, authAction } from "@/lib/safe-action";
+import { z } from "zod";
+import { quizService } from "../services/quizz-service";
+import { createQuizSession } from "../queries";
+import { getVideoById } from "@/features/videos/queries";
+import { RateLimiter } from "@/lib/rate-limiter";
+import { checkProfileByUserId } from "@/lib/require-auth";
+import { deductCredits } from "@/features/payments/services/deduction-credit";
+import { validateUserCreditsForOperation } from "@/features/payments/queries";
+import { CREDIT_ACTION_COUNTS } from "@/config/constants";
 
 const GenerateQuizQuestionsSchema = z.object({
-  videoId: z.string().min(1, 'Video ID is required'),
+  videoId: z.string().min(1, "Video ID is required"),
   videoTitle: z.string().optional(),
   videoDescription: z.string().optional(),
   videoTutorial: z.string().optional(),
   questionCount: z.number().min(1).max(50).default(10),
-  difficulty: z.enum(['easy', 'medium', 'hard', 'mixed']).default('mixed'),
+  difficulty: z.enum(["easy", "medium", "hard", "mixed"]).default("mixed"),
   topics: z.array(z.string()).optional(),
-  aiModelId: z.string().uuid('AI model ID is required'),
+  aiModelId: z.string().uuid("AI model ID is required"),
 });
 
 export const generateQuizQuestionsAction = authAction
@@ -36,11 +36,12 @@ export const generateQuizQuestionsAction = authAction
 
     const creditValidation = await validateUserCreditsForOperation(
       profile.id,
-      CREDIT_ACTION_COUNTS['generate_quizz_questions'],
+      CREDIT_ACTION_COUNTS["generate_quizz_questions"],
     );
     if (!creditValidation.success) {
       throw new ActionError(
-        creditValidation.message || 'Insufficient credits to generate quiz questions',
+        creditValidation.message ||
+          "Insufficient credits to generate quiz questions",
       );
     }
 
@@ -57,7 +58,7 @@ export const generateQuizQuestionsAction = authAction
           videoTutorial = video.tutorial || undefined;
         }
       } catch (error) {
-        console.warn('Could not fetch video data:', error);
+        console.warn("Could not fetch video data:", error);
       }
     }
 
@@ -70,7 +71,7 @@ export const generateQuizQuestionsAction = authAction
     });
 
     if (!response.success) {
-      throw new Error(response.error || 'Failed to generate quiz questions');
+      throw new Error(response.error || "Failed to generate quiz questions");
     }
 
     const quizSession = await createQuizSession({
@@ -86,13 +87,16 @@ export const generateQuizQuestionsAction = authAction
 
     const creditResult = await deductCredits({
       userId: profile.id,
-      command: 'generate_quizz_questions',
+      command: "generate_quizz_questions",
       description: `Quiz generation for video: ${data.videoId}`,
       relatedActionId: quizSession.id,
     });
 
     if (!creditResult.success) {
-      console.error('Failed to deduct credits after quiz generation:', creditResult.error);
+      console.error(
+        "Failed to deduct credits after quiz generation:",
+        creditResult.error,
+      );
     }
 
     return {

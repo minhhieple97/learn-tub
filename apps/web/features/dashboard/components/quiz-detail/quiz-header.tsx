@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
-import Link from 'next/link';
-import { routes } from '@/routes';
-import { IQuizSessionWithAttempts } from '@/features/quizzes/types';
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
+import { routes } from "@/routes";
+import { IQuizSessionWithAttempts } from "@/features/quizzes/types";
 
 type IQuizHeaderProps = {
   quizSession: IQuizSessionWithAttempts;
@@ -20,9 +20,11 @@ export const QuizHeader = ({ quizSession }: IQuizHeaderProps) => {
         </Button>
       </Link>
       <div className="space-y-1">
-        <h1 className="text-2xl font-bold text-foreground">{quizSession.title}</h1>
+        <h1 className="text-2xl font-bold text-foreground">
+          {quizSession.title}
+        </h1>
         <p className="text-sm text-muted-foreground">
-          {quizSession.videos?.title || 'Video not found'}
+          {quizSession.videos?.title || "Video not found"}
         </p>
       </div>
     </div>

@@ -1,13 +1,13 @@
-'use server';
-import { authAction, ActionError } from '@/lib/safe-action';
-import { quizService } from '../services/quizz-service';
-import { saveQuizAttempt } from '../queries';
-import { EvaluateQuizSchema } from '../schema';
-import { RateLimiter } from '@/lib/rate-limiter';
-import { checkProfileByUserId } from '@/lib/require-auth';
-import { deductCredits } from '@/features/payments/services';
-import { validateUserCreditsForOperation } from '@/features/payments/queries';
-import { AI_COMMANDS, CREDIT_ACTION_COUNTS } from '@/config/constants';
+"use server";
+import { authAction, ActionError } from "@/lib/safe-action";
+import { quizService } from "../services/quizz-service";
+import { saveQuizAttempt } from "../queries";
+import { EvaluateQuizSchema } from "../schema";
+import { RateLimiter } from "@/lib/rate-limiter";
+import { checkProfileByUserId } from "@/lib/require-auth";
+import { deductCredits } from "@/features/payments/services";
+import { validateUserCreditsForOperation } from "@/features/payments/queries";
+import { AI_COMMANDS, CREDIT_ACTION_COUNTS } from "@/config/constants";
 
 export const evaluateQuizAction = authAction
   .inputSchema(EvaluateQuizSchema)
@@ -24,10 +24,12 @@ export const evaluateQuizAction = authAction
 
     const creditValidation = await validateUserCreditsForOperation(
       profile.id,
-      CREDIT_ACTION_COUNTS['evaluate_quizz_answers'],
+      CREDIT_ACTION_COUNTS["evaluate_quizz_answers"],
     );
     if (!creditValidation.success) {
-      throw new ActionError(creditValidation.message || 'Insufficient credits to evaluate quiz');
+      throw new ActionError(
+        creditValidation.message || "Insufficient credits to evaluate quiz",
+      );
     }
 
     const response = await quizService.evaluateQuiz({
@@ -39,7 +41,7 @@ export const evaluateQuizAction = authAction
     });
 
     if (!response.success || !response.data) {
-      throw new Error(response.error || 'Failed to evaluate quiz');
+      throw new Error(response.error || "Failed to evaluate quiz");
     }
 
     const attempt = await saveQuizAttempt({
@@ -55,13 +57,16 @@ export const evaluateQuizAction = authAction
 
     const creditResult = await deductCredits({
       userId: profile.id,
-      command: 'evaluate_quizz_answers',
+      command: "evaluate_quizz_answers",
       description: `Quiz evaluation for session: ${data.quizSessionId}`,
       relatedActionId: attempt.id,
     });
 
     if (!creditResult.success) {
-      console.error('Failed to deduct credits after quiz evaluation:', creditResult.error);
+      console.error(
+        "Failed to deduct credits after quiz evaluation:",
+        creditResult.error,
+      );
     }
 
     return {

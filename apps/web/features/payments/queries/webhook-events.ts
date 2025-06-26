@@ -1,14 +1,14 @@
-import { createClient } from '@/lib/supabase/server';
-import { WEBHOOK_EVENT_STATUS } from '../constants';
-import type { IWebhookEventType, IWebhookEventStatus } from '../types';
-import { Tables, TablesInsert, TablesUpdate } from '@/database.types';
+import { createClient } from "@/lib/supabase/server";
+import { WEBHOOK_EVENT_STATUS } from "../constants";
+import type { IWebhookEventType, IWebhookEventStatus } from "../types";
+import { Tables, TablesInsert, TablesUpdate } from "@/database.types";
 
-type WebhookEventRow = Tables<'webhook_events'>;
-type WebhookEventInsert = TablesInsert<'webhook_events'>;
-type WebhookEventUpdate = TablesUpdate<'webhook_events'>;
+type WebhookEventRow = Tables<"webhook_events">;
+type WebhookEventInsert = TablesInsert<"webhook_events">;
+type WebhookEventUpdate = TablesUpdate<"webhook_events">;
 
-type WebhookJobRow = Tables<'webhook_jobs'>;
-type WebhookJobInsert = TablesInsert<'webhook_jobs'>;
+type WebhookJobRow = Tables<"webhook_jobs">;
+type WebhookJobInsert = TablesInsert<"webhook_jobs">;
 
 export async function createWebhookEvent(
   stripeEventId: string,
@@ -26,10 +26,14 @@ export async function createWebhookEvent(
     max_attempts: 3,
   };
 
-  const { data, error } = await supabase.from('webhook_events').insert(eventData).select().single();
+  const { data, error } = await supabase
+    .from("webhook_events")
+    .insert(eventData)
+    .select()
+    .single();
 
   if (error) {
-    console.error('Failed to create webhook event:', error);
+    console.error("Failed to create webhook event:", error);
   }
 
   return { data, error };
@@ -41,9 +45,9 @@ export async function getWebhookEventByStripeId(
   const supabase = await createClient();
 
   const { data, error } = await supabase
-    .from('webhook_events')
-    .select('*')
-    .eq('stripe_event_id', stripeEventId)
+    .from("webhook_events")
+    .select("*")
+    .eq("stripe_event_id", stripeEventId)
     .single();
 
   return { data, error };
@@ -60,14 +64,17 @@ export async function updateWebhookEventStatus(
   const updateData: WebhookEventUpdate = {
     status,
     error_message: errorMessage || null,
-    processed_at: status === WEBHOOK_EVENT_STATUS.COMPLETED ? new Date().toISOString() : null,
+    processed_at:
+      status === WEBHOOK_EVENT_STATUS.COMPLETED
+        ? new Date().toISOString()
+        : null,
   };
 
   if (incrementAttempts) {
     const { data: currentEvent } = await supabase
-      .from('webhook_events')
-      .select('attempts')
-      .eq('id', eventId)
+      .from("webhook_events")
+      .select("attempts")
+      .eq("id", eventId)
       .single();
 
     if (currentEvent) {
@@ -76,14 +83,14 @@ export async function updateWebhookEventStatus(
   }
 
   const { data, error } = await supabase
-    .from('webhook_events')
+    .from("webhook_events")
     .update(updateData)
-    .eq('id', eventId)
+    .eq("id", eventId)
     .select()
     .single();
 
   if (error) {
-    console.error('Failed to update webhook event status:', error);
+    console.error("Failed to update webhook event status:", error);
   }
 
   return { data, error };
@@ -106,10 +113,14 @@ export async function createWebhookJob(
     delay_ms: delayMs,
   };
 
-  const { data, error } = await supabase.from('webhook_jobs').insert(jobData).select().single();
+  const { data, error } = await supabase
+    .from("webhook_jobs")
+    .insert(jobData)
+    .select()
+    .single();
 
   if (error) {
-    console.error('Failed to create webhook job:', error);
+    console.error("Failed to create webhook job:", error);
   }
 
   return { data, error };
@@ -122,10 +133,10 @@ export async function getWebhookEventsByStatus(
   const supabase = await createClient();
 
   const { data, error } = await supabase
-    .from('webhook_events')
-    .select('*')
-    .eq('status', status)
-    .order('created_at', { ascending: true })
+    .from("webhook_events")
+    .select("*")
+    .eq("status", status)
+    .order("created_at", { ascending: true })
     .limit(limit);
 
   return { data, error };
@@ -137,11 +148,11 @@ export async function getRetryableWebhookEvents(
   const supabase = await createClient();
 
   const { data, error } = await supabase
-    .from('webhook_events')
-    .select('*')
-    .eq('status', WEBHOOK_EVENT_STATUS.FAILED)
-    .lt('attempts', 3) // Only events that haven't exceeded max attempts
-    .order('created_at', { ascending: true })
+    .from("webhook_events")
+    .select("*")
+    .eq("status", WEBHOOK_EVENT_STATUS.FAILED)
+    .lt("attempts", 3) // Only events that haven't exceeded max attempts
+    .order("created_at", { ascending: true })
     .limit(limit);
 
   return { data, error };
@@ -160,8 +171,8 @@ export async function getWebhookEventStats(): Promise<{
   const supabase = await createClient();
 
   const { data, error } = await supabase
-    .from('webhook_events')
-    .select('status')
+    .from("webhook_events")
+    .select("status")
     .then(async (result) => {
       if (result.error) return result;
 
@@ -205,13 +216,13 @@ export async function cleanupOldWebhookEvents(
   cutoffDate.setDate(cutoffDate.getDate() - olderThanDays);
 
   const { error, count } = await supabase
-    .from('webhook_events')
-    .delete({ count: 'exact' })
-    .lt('created_at', cutoffDate.toISOString())
-    .eq('status', WEBHOOK_EVENT_STATUS.COMPLETED);
+    .from("webhook_events")
+    .delete({ count: "exact" })
+    .lt("created_at", cutoffDate.toISOString())
+    .eq("status", WEBHOOK_EVENT_STATUS.COMPLETED);
 
   if (error) {
-    console.error('Failed to cleanup old webhook events:', error);
+    console.error("Failed to cleanup old webhook events:", error);
     return { deletedCount: 0, error };
   }
 
@@ -224,7 +235,7 @@ export async function isWebhookEventProcessed(
   const { data: event, error } = await getWebhookEventByStripeId(stripeEventId);
 
   if (error) {
-    if (error.code === 'PGRST116') {
+    if (error.code === "PGRST116") {
       return { processed: false, event: null, error: null };
     }
     return { processed: false, event: null, error };

@@ -1,13 +1,19 @@
-'use client';
+"use client";
 
-import { useEffect } from 'react';
-import { NoteEditorForm } from './note-editor-form';
-import { NotesListWithSearch } from './notes-list-with-search';
-import { useNotesStore } from '../store';
-import type { INoteEditorProps } from '../types';
+import { useEffect } from "react";
+import { NoteEditorForm } from "./note-editor-form";
+import { NotesListWithSearch } from "./notes-list-with-search";
+import { useNotesStore } from "../store";
+import type { INoteEditorProps } from "../types";
 
-export const NoteEditor = ({ video, currentTimestamp, onTimestampClick }: INoteEditorProps) => {
-  const { setCurrentVideo, setCurrentTimestamp } = useNotesStore((state) => state);
+export const NoteEditor = ({
+  video,
+  currentTimestamp,
+  onTimestampClick,
+}: INoteEditorProps) => {
+  const { setCurrentVideo, setCurrentTimestamp } = useNotesStore(
+    (state) => state,
+  );
 
   useEffect(() => {
     setCurrentVideo(video.id);

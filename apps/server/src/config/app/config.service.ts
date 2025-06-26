@@ -72,4 +72,8 @@ export class AppConfigService {
   get redisUsername(): string {
     return this.configService.get<string>('app.redisUsername');
   }
+
+  get redisUrl(): string {
+    return this.configService.get<string>('app.redisUrl');
+  }
 }

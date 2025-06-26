@@ -1,5 +1,5 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Target, RotateCcw, Trophy, Clock } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Target, RotateCcw, Trophy, Clock } from "lucide-react";
 
 type QuizDashboardStatsProps = {
   totalSessions: number;

@@ -4,8 +4,8 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import type { IRecentVideo } from '../types';
+} from "@/components/ui/card";
+import type { IRecentVideo } from "../types";
 
 type RecentVideosCardProps = {
   videos: IRecentVideo[];

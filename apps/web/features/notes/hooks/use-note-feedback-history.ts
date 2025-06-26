@@ -1,10 +1,10 @@
-import { useState, useCallback } from 'react';
-import { toast } from 'sonner';
+import { useState, useCallback } from "react";
+import { toast } from "sonner";
 import {
   getAIFeedbackHistoryAction,
   deleteAIFeedbackAction,
-} from '../../quizzes/actions/get-ai-feedback-history';
-import { INoteEvaluationResult } from '@/features/quizzes/types';
+} from "../../quizzes/actions/get-ai-feedback-history";
+import { INoteEvaluationResult } from "@/features/quizzes/types";
 
 export const useNoteFeedbackHistory = () => {
   const [history, setHistory] = useState<INoteEvaluationResult[]>([]);
@@ -21,14 +21,16 @@ export const useNoteFeedbackHistory = () => {
       if (result.data?.success && result.data.data) {
         setHistory(result.data.data);
       } else {
-        const errorMessage = result.data?.error || 'Failed to fetch feedback history';
+        const errorMessage =
+          result.data?.error || "Failed to fetch feedback history";
         setError(errorMessage);
-        toast.error('Failed to load feedback history');
+        toast.error("Failed to load feedback history");
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+      const errorMessage =
+        err instanceof Error ? err.message : "Unknown error occurred";
       setError(errorMessage);
-      toast.error('Failed to load feedback history');
+      toast.error("Failed to load feedback history");
     } finally {
       setIsLoading(false);
     }
@@ -40,12 +42,12 @@ export const useNoteFeedbackHistory = () => {
 
       if (result.data?.success) {
         setHistory((prev) => prev.filter((item) => item.id !== feedbackId));
-        toast.success('Feedback deleted successfully');
+        toast.success("Feedback deleted successfully");
       } else {
-        toast.error(result.serverError || 'Failed to delete feedback');
+        toast.error(result.serverError || "Failed to delete feedback");
       }
     } catch (_err) {
-      toast.error('Failed to delete feedback');
+      toast.error("Failed to delete feedback");
     }
   }, []);
 

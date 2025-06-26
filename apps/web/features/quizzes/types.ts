@@ -1,10 +1,10 @@
-import { AI_FORMAT } from '@/config/constants';
-import { Json } from '@/database.types';
-import { IFeedback, IApiResponse } from '@/types';
+import { AI_FORMAT } from "@/config/constants";
+import { Json } from "@/database.types";
+import { IFeedback, IApiResponse } from "@/types";
 
-export type IQuizDifficulty = 'easy' | 'medium' | 'hard' | 'mixed';
-export type IQuizAnswerOption = 'A' | 'B' | 'C' | 'D';
-export type IQuizDifficultyFilter = 'all' | IQuizDifficulty;
+export type IQuizDifficulty = "easy" | "medium" | "hard" | "mixed";
+export type IQuizAnswerOption = "A" | "B" | "C" | "D";
+export type IQuizDifficultyFilter = "all" | IQuizDifficulty;
 
 export type IQuizSettingsType = {
   questionCount: number;
@@ -96,7 +96,7 @@ export type IGenerateQuestionsRequest = {
 export type IEvaluateQuizRequest = {
   aiModelId: string;
   questions: IQuizQuestion[];
-  answers: Array<{ questionId: string; selectedAnswer: 'A' | 'B' | 'C' | 'D' }>;
+  answers: Array<{ questionId: string; selectedAnswer: "A" | "B" | "C" | "D" }>;
   videoContext?: {
     title?: string;
     description?: string;
@@ -109,7 +109,7 @@ export type IQuizGenerationResponse = IApiResponse<IQuizQuestion[]>;
 export type IQuizEvaluationResponse = IApiResponse<IQuizFeedback>;
 
 export type IQuizStreamChunk = {
-  type: 'question' | 'complete' | 'error';
+  type: "question" | "complete" | "error";
   content: string;
   finished: boolean;
 };
@@ -150,7 +150,9 @@ export type ICreateAIEvaluationInput = {
 
 export type ICopyFeedbackInput = {
   feedback: IFeedback;
-  format: typeof AI_FORMAT.COPY_FORMATS.PLAIN | typeof AI_FORMAT.COPY_FORMATS.MARKDOWN;
+  format:
+    | typeof AI_FORMAT.COPY_FORMATS.PLAIN
+    | typeof AI_FORMAT.COPY_FORMATS.MARKDOWN;
 };
 
 export type IVideoWithNotes = {

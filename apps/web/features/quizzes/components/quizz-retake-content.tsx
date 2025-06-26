@@ -1,18 +1,18 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { ArrowLeft, RotateCcw } from 'lucide-react';
-import { QuizzProgress } from './quizz-progress';
-import { QuestionCard } from './question-card';
-import { QuizzNavigation } from './quizz-navigation';
-import { QuizzResults } from './quizz-results';
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft, RotateCcw } from "lucide-react";
+import { QuizzProgress } from "./quizz-progress";
+import { QuestionCard } from "./question-card";
+import { QuizzNavigation } from "./quizz-navigation";
+import { QuizzResults } from "./quizz-results";
 
-import { routes } from '@/routes';
-import { useQuizStore } from '../store';
-import { IQuizSessionWithAttempts } from '../types';
+import { routes } from "@/routes";
+import { useQuizStore } from "../store";
+import { IQuizSessionWithAttempts } from "../types";
 
 type IQuizzRetakeContentProps = {
   quizSession: IQuizSessionWithAttempts;

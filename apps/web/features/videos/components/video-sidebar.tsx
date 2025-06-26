@@ -1,7 +1,7 @@
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { NoteEditor } from '@/features/notes/components/note-editor';
-import { QuizzTab } from '@/features/quizzes/components/quizz-tab';
-import { IVideoPageData } from '../types';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { NoteEditor } from "@/features/notes/components/note-editor";
+import { QuizzTab } from "@/features/quizzes/components/quizz-tab";
+import { IVideoPageData } from "../types";
 
 type IVideoSidebarProps = {
   currentTimestamp: number;
@@ -9,7 +9,11 @@ type IVideoSidebarProps = {
   video: IVideoPageData;
 };
 
-export const VideoSidebar = ({ currentTimestamp, onTimestampClick, video }: IVideoSidebarProps) => {
+export const VideoSidebar = ({
+  currentTimestamp,
+  onTimestampClick,
+  video,
+}: IVideoSidebarProps) => {
   return (
     <Tabs defaultValue="notes">
       <TabsList className="w-full">

@@ -18,4 +18,4 @@ export type CreatePaymentHistoryDto = {
   description: string;
   stripePaymentIntentId?: string;
   stripeInvoiceId?: string;
-}; 
+};

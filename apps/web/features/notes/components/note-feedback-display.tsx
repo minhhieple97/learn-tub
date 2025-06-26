@@ -1,11 +1,11 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { CheckCircle, XCircle, Lightbulb, Copy, RotateCcw } from 'lucide-react';
-import { TOAST_MESSAGES } from '@/config/constants';
-import { toast } from '@/hooks/use-toast';
-import { formatFeedbackForCopy, getScoreColor } from '@/lib/utils';
-import { IFeedback } from '@/types';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { CheckCircle, XCircle, Lightbulb, Copy, RotateCcw } from "lucide-react";
+import { TOAST_MESSAGES } from "@/config/constants";
+import { toast } from "@/hooks/use-toast";
+import { formatFeedbackForCopy, getScoreColor } from "@/lib/utils";
+import { IFeedback } from "@/types";
 
 type NoteFeedbackDisplayProps = {
   feedback: IFeedback;
@@ -34,7 +34,7 @@ export const NoteFeedbackDisplay = ({
     <Card
       className="mt-4 flex flex-col overflow-hidden"
       style={{
-        maxHeight: '60vh',
+        maxHeight: "60vh",
       }}
     >
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 flex-shrink-0 border-b">

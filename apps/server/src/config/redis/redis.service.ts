@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { ConnectionOptions } from 'bullmq';
 import { AppConfigService } from '../app/config.service';
 

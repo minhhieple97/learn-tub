@@ -1,5 +1,5 @@
-import { Calendar } from 'lucide-react';
-import type { ISubscriptionDatesProps } from '../types';
+import { Calendar } from "lucide-react";
+import type { ISubscriptionDatesProps } from "../types";
 
 export const SubscriptionDates = ({
   currentPeriodStart,
@@ -13,7 +13,9 @@ export const SubscriptionDates = ({
           <Calendar className="w-4 h-4 text-muted-foreground" />
           <div>
             <p className="text-sm text-muted-foreground">Subscribe Date</p>
-            <p className="font-medium">{new Date(currentPeriodStart).toLocaleDateString()}</p>
+            <p className="font-medium">
+              {new Date(currentPeriodStart).toLocaleDateString()}
+            </p>
           </div>
         </div>
       )}
@@ -23,9 +25,11 @@ export const SubscriptionDates = ({
           <Calendar className="w-4 h-4 text-muted-foreground" />
           <div>
             <p className="text-sm text-muted-foreground">
-              {cancelAtPeriodEnd ? 'Expires' : 'Renews'}
+              {cancelAtPeriodEnd ? "Expires" : "Renews"}
             </p>
-            <p className="font-medium">{new Date(currentPeriodEnd).toLocaleDateString()}</p>
+            <p className="font-medium">
+              {new Date(currentPeriodEnd).toLocaleDateString()}
+            </p>
           </div>
         </div>
       )}

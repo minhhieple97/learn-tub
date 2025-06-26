@@ -1,6 +1,6 @@
-import { createClient } from '@/lib/supabase/server';
-import { cache } from 'react';
-import type { IProfileSettings, IProfileUpdate } from '@/types';
+import { createClient } from "@/lib/supabase/server";
+import { cache } from "react";
+import type { IProfileSettings, IProfileUpdate } from "@/types";
 
 export const getUserInSession = cache(async () => {
   const supabase = await createClient();
@@ -21,20 +21,22 @@ export const getProfileInSession = cache(async () => {
 export const getProfileByUserId = cache(async (userId: string) => {
   const supabase = await createClient();
   const { data: profile, error } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', userId)
+    .from("profiles")
+    .select("*")
+    .eq("id", userId)
     .maybeSingle();
 
   if (error) {
-    console.error('Error fetching profile:', error);
+    console.error("Error fetching profile:", error);
     return null;
   }
 
   return profile;
 });
 
-export const getProfileSettings = async (userId: string): Promise<IProfileSettings | null> => {
+export const getProfileSettings = async (
+  userId: string,
+): Promise<IProfileSettings | null> => {
   return await getProfileByUserId(userId);
 };
 
@@ -45,17 +47,17 @@ export const updateProfile = async (
   const supabase = await createClient();
 
   const { data, error } = await supabase
-    .from('profiles')
+    .from("profiles")
     .update({
       ...updates,
       updated_at: new Date().toISOString(),
     })
-    .eq('id', userId)
+    .eq("id", userId)
     .select()
     .single();
 
   if (error) {
-    console.error('Error updating profile:', error);
+    console.error("Error updating profile:", error);
     return { success: false, error: error.message };
   }
 
@@ -73,19 +75,21 @@ export const uploadAvatarFile = async (
 ): Promise<{ url?: string; filePath?: string; error?: string }> => {
   const supabase = await createClient();
 
-  const { bucket = 'avatars', cacheControl = '3600', upsert = false } = options;
+  const { bucket = "avatars", cacheControl = "3600", upsert = false } = options;
 
-  const fileExt = file.name.split('.').pop();
+  const fileExt = file.name.split(".").pop();
   const fileName = `${userId}-${Date.now()}.${fileExt}`;
   const filePath = `${fileName}`;
 
-  const { error: uploadError } = await supabase.storage.from(bucket).upload(filePath, file, {
-    cacheControl,
-    upsert,
-  });
+  const { error: uploadError } = await supabase.storage
+    .from(bucket)
+    .upload(filePath, file, {
+      cacheControl,
+      upsert,
+    });
 
   if (uploadError) {
-    console.error('Error uploading avatar:', uploadError);
+    console.error("Error uploading avatar:", uploadError);
     return { error: uploadError.message };
   }
 
@@ -103,15 +107,15 @@ export const updateProfileAvatar = async (
   const supabase = await createClient();
 
   const { error } = await supabase
-    .from('profiles')
+    .from("profiles")
     .update({
       avatar_url: avatarUrl,
       updated_at: new Date().toISOString(),
     })
-    .eq('id', userId);
+    .eq("id", userId);
 
   if (error) {
-    console.error('Error updating profile avatar:', error);
+    console.error("Error updating profile avatar:", error);
     return { success: false, error: error.message };
   }
 

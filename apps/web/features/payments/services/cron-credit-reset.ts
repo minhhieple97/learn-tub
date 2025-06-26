@@ -1,7 +1,7 @@
-import { CREDIT_RESET_MESSAGES } from '@/config/constants';
-import { CreditResetService } from '@/features/payments/services';
-import type { ICreditResetSummary } from '@/features/payments/types';
-import { StatusCodes } from 'http-status-codes';
+import { CREDIT_RESET_MESSAGES } from "@/config/constants";
+import { CreditResetService } from "@/features/payments/services";
+import type { ICreditResetSummary } from "@/features/payments/types";
+import { StatusCodes } from "http-status-codes";
 
 export type ICronCreditResetResponse = {
   message: string;
@@ -16,9 +16,11 @@ export type ICronCreditResetError = {
 };
 
 export class CronCreditResetService {
-  static async executeCreditReset(): Promise<ICronCreditResetResponse | ICronCreditResetError> {
+  static async executeCreditReset(): Promise<
+    ICronCreditResetResponse | ICronCreditResetError
+  > {
     try {
-      console.log('Starting monthly credit reset process...');
+      console.log("Starting monthly credit reset process...");
       const startTime = Date.now();
 
       const summary = await CreditResetService.resetCreditsForAllUsers();
@@ -26,7 +28,7 @@ export class CronCreditResetService {
       const endTime = Date.now();
       const duration = `${endTime - startTime}ms`;
 
-      console.log('Credit reset completed:', {
+      console.log("Credit reset completed:", {
         duration,
         ...summary,
       });
@@ -57,17 +59,20 @@ export class CronCreditResetService {
         status,
       };
     } catch (error) {
-      console.error('Credit reset failed:', error);
+      console.error("Credit reset failed:", error);
 
       return {
         error: CREDIT_RESET_MESSAGES.ERROR,
-        details: error instanceof Error ? error.message : 'Unknown error',
+        details: error instanceof Error ? error.message : "Unknown error",
         status: StatusCodes.INTERNAL_SERVER_ERROR,
       };
     }
   }
 
-  static validateCronSecret(authHeader: string | null, cronSecret: string): boolean {
+  static validateCronSecret(
+    authHeader: string | null,
+    cronSecret: string,
+  ): boolean {
     return Boolean(authHeader && authHeader === `Bearer ${cronSecret}`);
   }
 
@@ -80,7 +85,7 @@ export class CronCreditResetService {
 
   static createHealthCheckResponse() {
     return {
-      message: 'Credit reset cron endpoint is running',
+      message: "Credit reset cron endpoint is running",
       timestamp: new Date().toISOString(),
     };
   }

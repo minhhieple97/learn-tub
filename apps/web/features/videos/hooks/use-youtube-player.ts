@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from "react";
 
 type IUseYouTubePlayerProps = {
   youtubeId: string;
@@ -29,7 +29,7 @@ export const useYouTubePlayer = ({
     if (!isApiLoaded || !playerRef.current) return;
 
     if (playerInstanceRef.current) {
-      if (typeof playerInstanceRef.current.destroy === 'function') {
+      if (typeof playerInstanceRef.current.destroy === "function") {
         playerInstanceRef.current.destroy();
       }
       playerInstanceRef.current = null;
@@ -39,7 +39,10 @@ export const useYouTubePlayer = ({
     const onPlayerReady = (event: any) => {
       setPlayer(event.target);
       setDuration(event.target.getDuration());
-      if (initialTimestamp > 0 && initialTimestamp < event.target.getDuration()) {
+      if (
+        initialTimestamp > 0 &&
+        initialTimestamp < event.target.getDuration()
+      ) {
         event.target.seekTo(initialTimestamp, true);
       }
     };
@@ -68,7 +71,10 @@ export const useYouTubePlayer = ({
     playerInstanceRef.current = newPlayer;
 
     return () => {
-      if (playerInstanceRef.current && typeof playerInstanceRef.current.destroy === 'function') {
+      if (
+        playerInstanceRef.current &&
+        typeof playerInstanceRef.current.destroy === "function"
+      ) {
         playerInstanceRef.current.destroy();
       }
       playerInstanceRef.current = null;

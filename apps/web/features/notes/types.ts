@@ -5,9 +5,9 @@ import {
   IAsyncHookReturn,
   IAsyncOperationHook,
   ISearchHookReturn,
-} from '@/types';
-import { STATUS_STREAMING } from '@/config/constants';
-import { IVideoPageData } from '../videos/types';
+} from "@/types";
+import { STATUS_STREAMING } from "@/config/constants";
+import { IVideoPageData } from "../videos/types";
 
 export type INote = {
   id: string;
@@ -96,8 +96,6 @@ export type ITimestampDisplayProps = {
   onClick?: (timestamp: number) => void;
   clickable?: boolean;
 };
-
-
 
 export type INoteFormActionsProps = {
   isLoading: boolean;

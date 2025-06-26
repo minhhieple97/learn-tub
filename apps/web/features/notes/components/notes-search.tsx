@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { Search, X } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { useNotesSearch } from '../hooks';
-import { SEARCH_CONFIG } from '@/config/constants';
+import React from "react";
+import { Search, X } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { useNotesSearch } from "../hooks";
+import { SEARCH_CONFIG } from "@/config/constants";
 
 type NotesSearchProps = {
   placeholder?: string;
@@ -14,8 +14,8 @@ type NotesSearchProps = {
 };
 
 export const NotesSearch = ({
-  placeholder = 'Search notes content...',
-  className = '',
+  placeholder = "Search notes content...",
+  className = "",
 }: NotesSearchProps) => {
   const {
     inputValue,
@@ -54,10 +54,10 @@ export const NotesSearch = ({
         <div className="flex items-center justify-between text-sm text-gray-500">
           <span>
             {isSearching
-              ? 'Searching...'
+              ? "Searching..."
               : isSearchActive && resultCount > 0
-              ? `Found ${resultCount} note${resultCount !== 1 ? 's' : ''}`
-              : 'No notes found'}
+                ? `Found ${resultCount} note${resultCount !== 1 ? "s" : ""}`
+                : "No notes found"}
           </span>
           {inputValue && (
             <Badge variant="secondary" className="text-xs">

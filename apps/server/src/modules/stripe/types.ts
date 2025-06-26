@@ -44,6 +44,3 @@ export type IStripeInvoice = {
     };
   };
 };
-
-
-

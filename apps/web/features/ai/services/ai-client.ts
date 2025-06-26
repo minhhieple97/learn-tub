@@ -1,4 +1,4 @@
-import { env } from '@/env.mjs';
+import { env } from "@/env.mjs";
 import {
   AI_CONFIG,
   AI_DEFAULTS,
@@ -6,14 +6,14 @@ import {
   AI_API,
   HTTP_CONFIG,
   API_ERROR_MESSAGES,
-} from '@/config/constants';
+} from "@/config/constants";
 import {
   IAICompletionRequest,
   IAICompletionResponse,
   IAIStreamChunk,
   IAIMessage,
   ITokenUsage,
-} from '@/features/ai/types';
+} from "@/features/ai/types";
 
 class AIClient {
   private readonly baseUrl: string;
@@ -26,7 +26,7 @@ class AIClient {
 
   private createHeaders(): Record<string, string> {
     return {
-      'Content-Type': HTTP_CONFIG.HEADERS.CONTENT_TYPE,
+      "Content-Type": HTTP_CONFIG.HEADERS.CONTENT_TYPE,
       Authorization: `${HTTP_CONFIG.HEADERS.AUTHORIZATION_PREFIX}${this.apiKey}`,
     };
   }
@@ -43,14 +43,19 @@ class AIClient {
   }
 
   async makeRequest(request: IAICompletionRequest): Promise<Response> {
-    const response = await fetch(`${this.baseUrl}${AI_API.CHAT_COMPLETIONS_PATH}`, {
-      method: HTTP_CONFIG.METHODS.POST,
-      headers: this.createHeaders(),
-      body: this.createRequestBody(request),
-    });
+    const response = await fetch(
+      `${this.baseUrl}${AI_API.CHAT_COMPLETIONS_PATH}`,
+      {
+        method: HTTP_CONFIG.METHODS.POST,
+        headers: this.createHeaders(),
+        body: this.createRequestBody(request),
+      },
+    );
 
     if (!response.ok) {
-      throw new Error(`${API_ERROR_MESSAGES.OPENAI_REQUEST_FAILED}: ${response.statusText}`);
+      throw new Error(
+        `${API_ERROR_MESSAGES.OPENAI_REQUEST_FAILED}: ${response.statusText}`,
+      );
     }
 
     return response;
@@ -60,11 +65,11 @@ class AIClient {
     const response = await this.makeRequest(request);
 
     if (!response.body) {
-      throw new Error('No response body received');
+      throw new Error("No response body received");
     }
 
     const data: IAICompletionResponse = await response.json();
-    return data.choices[0]?.message?.content || '';
+    return data.choices[0]?.message?.content || "";
   }
 
   async chatCompletionWithUsage(request: IAICompletionRequest): Promise<{
@@ -74,11 +79,11 @@ class AIClient {
     const response = await this.makeRequest(request);
 
     if (!response.body) {
-      throw new Error('No response body received');
+      throw new Error("No response body received");
     }
 
     const data: IAICompletionResponse = await response.json();
-    const result = data.choices[0]?.message?.content || '';
+    const result = data.choices[0]?.message?.content || "";
 
     let tokenUsage: ITokenUsage | undefined;
     if (data.usage) {
@@ -95,12 +100,14 @@ class AIClient {
     };
   }
 
-  async streamChatCompletion(request: IAICompletionRequest): Promise<ReadableStream<Uint8Array>> {
+  async streamChatCompletion(
+    request: IAICompletionRequest,
+  ): Promise<ReadableStream<Uint8Array>> {
     const streamRequest = { ...request, stream: true };
     const response = await this.makeRequest(streamRequest);
 
     if (!response.body) {
-      throw new Error('No response body received for streaming');
+      throw new Error("No response body received for streaming");
     }
 
     return response.body;
@@ -110,11 +117,15 @@ class AIClient {
     stream: ReadableStream<Uint8Array>;
     getUsage: () => Promise<ITokenUsage | undefined>;
   }> {
-    const streamRequest = { ...request, stream: true, stream_options: { include_usage: true } };
+    const streamRequest = {
+      ...request,
+      stream: true,
+      stream_options: { include_usage: true },
+    };
     const response = await this.makeRequest(streamRequest);
 
     if (!response.body) {
-      throw new Error('No response body received for streaming');
+      throw new Error("No response body received for streaming");
     }
 
     let capturedUsage: ITokenUsage | undefined;
@@ -128,7 +139,7 @@ class AIClient {
         try {
           const reader = response.body!.getReader();
           const decoder = new TextDecoder();
-          let buffer = '';
+          let buffer = "";
 
           while (true) {
             const { done, value } = await reader.read();
@@ -137,8 +148,8 @@ class AIClient {
             controller.enqueue(value);
 
             buffer += decoder.decode(value, { stream: true });
-            const lines = buffer.split('\n');
-            buffer = lines.pop() || '';
+            const lines = buffer.split("\n");
+            buffer = lines.pop() || "";
 
             for (const line of lines) {
               if (line.startsWith(AI_API.SSE_DATA_PREFIX)) {
@@ -153,18 +164,23 @@ class AIClient {
                       output_tokens: parsed.usage.completion_tokens,
                       total_tokens: parsed.usage.total_tokens,
                     };
-                    usagePromiseResolvers.forEach(({ resolve }) => resolve(capturedUsage));
+                    usagePromiseResolvers.forEach(({ resolve }) =>
+                      resolve(capturedUsage),
+                    );
                     usagePromiseResolvers.length = 0;
                   }
                 } catch (error) {
-                  console.error('Failed to parse streaming chunk for usage:', error);
+                  console.error(
+                    "Failed to parse streaming chunk for usage:",
+                    error,
+                  );
                 }
               }
             }
           }
 
           if (buffer.trim()) {
-            const remainingLines = buffer.split('\n');
+            const remainingLines = buffer.split("\n");
             for (const line of remainingLines) {
               if (line.startsWith(AI_API.SSE_DATA_PREFIX)) {
                 const data = line.slice(AI_API.SSE_DATA_PREFIX_LENGTH).trim();
@@ -178,11 +194,16 @@ class AIClient {
                       output_tokens: parsed.usage.completion_tokens,
                       total_tokens: parsed.usage.total_tokens,
                     };
-                    usagePromiseResolvers.forEach(({ resolve }) => resolve(capturedUsage));
+                    usagePromiseResolvers.forEach(({ resolve }) =>
+                      resolve(capturedUsage),
+                    );
                     usagePromiseResolvers.length = 0;
                   }
                 } catch (error) {
-                  console.error('Failed to parse final streaming chunk for usage:', error);
+                  console.error(
+                    "Failed to parse final streaming chunk for usage:",
+                    error,
+                  );
                 }
               }
             }
@@ -190,7 +211,7 @@ class AIClient {
 
           usagePromiseResolvers.forEach(({ resolve }) => resolve(undefined));
         } catch (error) {
-          console.error('Stream processing error:', error);
+          console.error("Stream processing error:", error);
           usagePromiseResolvers.forEach(({ reject }) => reject(error));
           controller.error(error);
         } finally {
@@ -223,7 +244,7 @@ class AIClient {
         try {
           const reader = responseBody.getReader();
           const decoder = new TextDecoder();
-          let buffer = '';
+          let buffer = "";
 
           while (true) {
             const { done, value } = await reader.read();
@@ -231,8 +252,8 @@ class AIClient {
 
             buffer += decoder.decode(value, { stream: true });
 
-            const lines = buffer.split('\n');
-            buffer = lines.pop() || '';
+            const lines = buffer.split("\n");
+            buffer = lines.pop() || "";
 
             for (const line of lines) {
               if (line.startsWith(AI_API.SSE_DATA_PREFIX)) {
@@ -243,15 +264,15 @@ class AIClient {
                   const parsed: IAIStreamChunk = JSON.parse(data);
                   controller.enqueue(parsed);
                 } catch (error) {
-                  console.error('Failed to parse streaming chunk:', error);
-                  console.error('Problematic data:', data);
+                  console.error("Failed to parse streaming chunk:", error);
+                  console.error("Problematic data:", data);
                 }
               }
             }
           }
 
           if (buffer.trim()) {
-            const remainingLines = buffer.split('\n');
+            const remainingLines = buffer.split("\n");
             for (const line of remainingLines) {
               if (line.startsWith(AI_API.SSE_DATA_PREFIX)) {
                 const data = line.slice(AI_API.SSE_DATA_PREFIX_LENGTH).trim();
@@ -261,14 +282,17 @@ class AIClient {
                   const parsed: IAIStreamChunk = JSON.parse(data);
                   controller.enqueue(parsed);
                 } catch (error) {
-                  console.error('Failed to parse final streaming chunk:', error);
-                  console.error('Problematic data:', data);
+                  console.error(
+                    "Failed to parse final streaming chunk:",
+                    error,
+                  );
+                  console.error("Problematic data:", data);
                 }
               }
             }
           }
         } catch (error) {
-          console.error('Stream processing error:', error);
+          console.error("Stream processing error:", error);
           controller.error(error);
         } finally {
           controller.close();
@@ -277,7 +301,10 @@ class AIClient {
     });
   }
 
-  createSystemUserMessages(systemMessage: string, userMessage: string): IAIMessage[] {
+  createSystemUserMessages(
+    systemMessage: string,
+    userMessage: string,
+  ): IAIMessage[] {
     return [
       {
         role: AI_CHAT_ROLES.SYSTEM,

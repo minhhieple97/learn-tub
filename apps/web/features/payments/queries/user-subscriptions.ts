@@ -1,16 +1,19 @@
-import { createClient } from '@/lib/supabase/server';
-import { IUserSubscriptionStatus, ISubscriptionData } from '../types';
-import { CREDIT_BUCKET_STATUS, USER_SUBSCRIPTION_STATUS } from '@/config/constants';
-import { CacheClient } from '@/lib/cache-client';
+import { createClient } from "@/lib/supabase/server";
+import { IUserSubscriptionStatus, ISubscriptionData } from "../types";
+import {
+  CREDIT_BUCKET_STATUS,
+  USER_SUBSCRIPTION_STATUS,
+} from "@/config/constants";
+import { CacheClient } from "@/lib/cache-client";
 
 export const getUserSubscription = async (userId: string) => {
   const supabase = await createClient();
 
   const { data, error } = await supabase
-    .from('user_subscriptions')
-    .select('*')
-    .eq('user_id', userId)
-    .eq('status', 'active')
+    .from("user_subscriptions")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("status", "active")
     .single();
 
   return { data, error };
@@ -20,9 +23,9 @@ export const getUserStripeCustomerId = async (userId: string) => {
   const supabase = await createClient();
 
   const { data, error } = await supabase
-    .from('user_subscriptions')
-    .select('stripe_customer_id')
-    .eq('user_id', userId)
+    .from("user_subscriptions")
+    .select("stripe_customer_id")
+    .eq("user_id", userId)
     .single();
 
   return { data, error };
@@ -32,9 +35,9 @@ export const getUserByStripeCustomerId = async (customerId: string) => {
   const supabase = await createClient();
 
   const { data, error } = await supabase
-    .from('user_subscriptions')
-    .select('id, user_id, plan_id')
-    .eq('stripe_customer_id', customerId)
+    .from("user_subscriptions")
+    .select("id, user_id, plan_id")
+    .eq("stripe_customer_id", customerId)
     .single();
 
   return { data, error };
@@ -48,15 +51,17 @@ export const upsertUserSubscription = async (
   const supabase = await createClient();
 
   const { data, error } = await supabase
-    .from('user_subscriptions')
+    .from("user_subscriptions")
     .upsert({
       user_id: userId,
       plan_id: planId,
       stripe_subscription_id: subscriptionData.stripeSubscriptionId,
       stripe_customer_id: subscriptionData.stripeCustomerId,
-      status: subscriptionData.status || 'active',
-      current_period_start: subscriptionData.currentPeriodStart?.toISOString() || null,
-      current_period_end: subscriptionData.currentPeriodEnd?.toISOString() || null,
+      status: subscriptionData.status || "active",
+      current_period_start:
+        subscriptionData.currentPeriodStart?.toISOString() || null,
+      current_period_end:
+        subscriptionData.currentPeriodEnd?.toISOString() || null,
       cancel_at_period_end: subscriptionData.cancelAtPeriodEnd || false,
     })
     .select();
@@ -81,14 +86,18 @@ export const updateSubscriptionStatus = async (
   const supabase = await createClient();
 
   const { data, error } = await supabase
-    .from('user_subscriptions')
+    .from("user_subscriptions")
     .update({
-      status: status as 'active' | 'exhausted' | 'expired' | 'cancelled',
-      current_period_start: periodStart ? new Date(periodStart * 1000).toISOString() : undefined,
-      current_period_end: periodEnd ? new Date(periodEnd * 1000).toISOString() : undefined,
+      status: status as "active" | "exhausted" | "expired" | "cancelled",
+      current_period_start: periodStart
+        ? new Date(periodStart * 1000).toISOString()
+        : undefined,
+      current_period_end: periodEnd
+        ? new Date(periodEnd * 1000).toISOString()
+        : undefined,
       cancel_at_period_end: cancelAtPeriodEnd,
     })
-    .eq('stripe_subscription_id', subscriptionId)
+    .eq("stripe_subscription_id", subscriptionId)
     .select();
 
   if (!error && data) {
@@ -109,9 +118,10 @@ export const updateSubscriptionStatus = async (
 export const getUserActiveSubscription = async (
   userId: string,
 ): Promise<{ data: any; error: any }> => {
-  const cachedSubscription = await CacheClient.getUserSubscription<{ data: any; error: any }>(
-    userId,
-  );
+  const cachedSubscription = await CacheClient.getUserSubscription<{
+    data: any;
+    error: any;
+  }>(userId);
   if (cachedSubscription) {
     return cachedSubscription;
   }
@@ -121,7 +131,7 @@ export const getUserActiveSubscription = async (
   const now = new Date().toISOString();
 
   const { data, error } = await supabase
-    .from('user_subscriptions')
+    .from("user_subscriptions")
     .select(
       `
       *,
@@ -135,9 +145,9 @@ export const getUserActiveSubscription = async (
       )
     `,
     )
-    .eq('user_id', userId)
-    .eq('status', 'active')
-    .gte('current_period_end', now)
+    .eq("user_id", userId)
+    .eq("status", "active")
+    .gte("current_period_end", now)
     .maybeSingle();
 
   const result = { data, error };
@@ -155,7 +165,7 @@ export const getUserSubscriptionWithStatus = async (userId: string) => {
   const now = new Date().toISOString();
 
   const { data, error } = await supabase
-    .from('user_subscriptions')
+    .from("user_subscriptions")
     .select(
       `
       *,
@@ -169,9 +179,9 @@ export const getUserSubscriptionWithStatus = async (userId: string) => {
       )
     `,
     )
-    .eq('user_id', userId)
-    .eq('status', 'active')
-    .gte('current_period_end', now)
+    .eq("user_id", userId)
+    .eq("status", "active")
+    .gte("current_period_end", now)
     .maybeSingle();
 
   if (error) {
@@ -201,23 +211,26 @@ export const getUserSubscriptionWithStatus = async (userId: string) => {
   };
 };
 
-export const checkUserHasActivePlan = async (userId: string, planId: string) => {
+export const checkUserHasActivePlan = async (
+  userId: string,
+  planId: string,
+) => {
   const supabase = await createClient();
   const now = new Date().toISOString();
 
   const { data, error } = await supabase
-    .from('user_subscriptions')
-    .select('id')
-    .eq('user_id', userId)
-    .eq('plan_id', planId)
-    .eq('status', 'active')
-    .lte('current_period_start', now)
-    .gte('current_period_end', now)
+    .from("user_subscriptions")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("plan_id", planId)
+    .eq("status", "active")
+    .lte("current_period_start", now)
+    .gte("current_period_end", now)
     .single();
 
   return {
     hasActivePlan: !!data && !error,
-    error: error?.code === 'PGRST116' ? null : error,
+    error: error?.code === "PGRST116" ? null : error,
   };
 };
 
@@ -226,18 +239,18 @@ export const checkUserHasAnyActiveSubscription = async (userId: string) => {
   const now = new Date().toISOString();
 
   const { data, error } = await supabase
-    .from('user_subscriptions')
-    .select('id, plan_id, current_period_start, current_period_end')
-    .eq('user_id', userId)
-    .eq('status', 'active')
-    .lte('current_period_start', now)
-    .gte('current_period_end', now)
+    .from("user_subscriptions")
+    .select("id, plan_id, current_period_start, current_period_end")
+    .eq("user_id", userId)
+    .eq("status", "active")
+    .lte("current_period_start", now)
+    .gte("current_period_end", now)
     .single();
 
   return {
     hasActiveSubscription: !!data && !error,
     subscription: data,
-    error: error?.code === 'PGRST116' ? null : error,
+    error: error?.code === "PGRST116" ? null : error,
   };
 };
 
@@ -248,7 +261,7 @@ export const getActiveSubscriptionByStripeIds = async (
   const supabase = await createClient();
 
   const { data, error } = await supabase
-    .from('user_subscriptions')
+    .from("user_subscriptions")
     .select(
       `
       *,
@@ -259,10 +272,10 @@ export const getActiveSubscriptionByStripeIds = async (
       )
     `,
     )
-    .eq('stripe_customer_id', stripeCustomerId)
-    .eq('stripe_subscription_id', stripeSubscriptionId)
-    .eq('status', 'active')
-    .eq('cancel_at_period_end', false)
+    .eq("stripe_customer_id", stripeCustomerId)
+    .eq("stripe_subscription_id", stripeSubscriptionId)
+    .eq("status", "active")
+    .eq("cancel_at_period_end", false)
     .single();
 
   return { data, error };
@@ -272,12 +285,12 @@ export const expireUserSubscription = async (subscriptionId: string) => {
   const supabase = await createClient();
 
   const { data, error } = await supabase
-    .from('user_subscriptions')
+    .from("user_subscriptions")
     .update({
-      status: 'expired' as const,
+      status: "expired" as const,
       updated_at: new Date().toISOString(),
     })
-    .eq('id', subscriptionId)
+    .eq("id", subscriptionId)
     .select()
     .single();
 
@@ -295,13 +308,13 @@ export const createNewUserSubscription = async (
   const supabase = await createClient();
 
   const { data, error } = await supabase
-    .from('user_subscriptions')
+    .from("user_subscriptions")
     .insert({
       user_id: userId,
       plan_id: planId,
       stripe_customer_id: stripeCustomerId,
       stripe_subscription_id: stripeSubscriptionId,
-      status: 'active' as const,
+      status: "active" as const,
       current_period_start: periodStart.toISOString(),
       current_period_end: periodEnd.toISOString(),
       cancel_at_period_end: false,
@@ -320,14 +333,14 @@ export const updateSubscriptionCancellation = async (
   const supabase = await createClient();
 
   const { data, error } = await supabase
-    .from('user_subscriptions')
+    .from("user_subscriptions")
     .update({
       cancel_at_period_end: cancelAtPeriodEnd,
       updated_at: new Date().toISOString(),
     })
-    .eq('stripe_customer_id', stripeCustomerId)
-    .eq('stripe_subscription_id', stripeSubscriptionId)
-    .eq('status', 'active')
+    .eq("stripe_customer_id", stripeCustomerId)
+    .eq("stripe_subscription_id", stripeSubscriptionId)
+    .eq("status", "active")
     .select()
     .single();
 
@@ -345,7 +358,7 @@ export const getUsersWithActiveSubscriptions = async () => {
   const supabase = await createClient();
 
   const { data, error } = await supabase
-    .from('user_subscriptions')
+    .from("user_subscriptions")
     .select(
       `
       user_id,
@@ -360,35 +373,38 @@ export const getUsersWithActiveSubscriptions = async () => {
       )
     `,
     )
-    .eq('status', 'active')
-    .eq('cancel_at_period_end', false);
+    .eq("status", "active")
+    .eq("cancel_at_period_end", false);
 
   return { data, error };
 };
 
-export const cancelActiveFreePlan = async (userId: string, freePlanId: string) => {
+export const cancelActiveFreePlan = async (
+  userId: string,
+  freePlanId: string,
+) => {
   const supabase = await createClient();
 
   const { data, error } = await supabase
-    .from('user_subscriptions')
+    .from("user_subscriptions")
     .update({
-      status: 'cancelled' as const,
+      status: "cancelled" as const,
       cancel_at_period_end: true,
       updated_at: new Date().toISOString(),
     })
-    .eq('user_id', userId)
-    .eq('plan_id', freePlanId)
-    .eq('status', 'active')
+    .eq("user_id", userId)
+    .eq("plan_id", freePlanId)
+    .eq("status", "active")
     .select();
 
   const creditBucketsUpdateStatusPromises = data
     ? data.map((subscription) => {
         supabase
-          .from('credit_buckets')
+          .from("credit_buckets")
           .update({
-            status: 'cancelled' as const,
+            status: "cancelled" as const,
           })
-          .eq('user_subscription_id', subscription.id);
+          .eq("user_subscription_id", subscription.id);
       })
     : [];
 

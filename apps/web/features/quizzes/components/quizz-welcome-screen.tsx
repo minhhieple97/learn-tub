@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { Button } from '@/components/ui/button';
-import { Brain, Play, Settings, Loader2 } from 'lucide-react';
-import { QuizzSettings } from './quizz-settings';
-import { useQuizWelcome } from '../hooks/use-quiz-welcome';
+import { Button } from "@/components/ui/button";
+import { Brain, Play, Settings, Loader2 } from "lucide-react";
+import { QuizzSettings } from "./quizz-settings";
+import { useQuizWelcome } from "../hooks/use-quiz-welcome";
 
 type IQuizzWelcomeScreenProps = {
   isGenerating: boolean;

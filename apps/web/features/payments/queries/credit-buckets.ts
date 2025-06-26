@@ -1,20 +1,20 @@
-import { createClient } from '@/lib/supabase/server';
-import { Tables, TablesInsert, TablesUpdate } from '@/database.types';
+import { createClient } from "@/lib/supabase/server";
+import { Tables, TablesInsert, TablesUpdate } from "@/database.types";
 import {
   CREDIT_BUCKET_STATUS,
   CREDIT_SOURCE_TYPES,
   USER_SUBSCRIPTION_STATUS,
-} from '@/config/constants';
-import { ICreditSourceType } from '../types';
-import { CacheClient } from '@/lib/cache-client';
+} from "@/config/constants";
+import { ICreditSourceType } from "../types";
+import { CacheClient } from "@/lib/cache-client";
 import {
   invalidateUserCacheOnCreditChange,
   invalidateMultipleUsersCacheOnCreditChange,
-} from './cache-utils';
-import { ITransactionType } from '@/types';
+} from "./cache-utils";
+import { ITransactionType } from "@/types";
 
-type CreditBucket = Tables<'credit_buckets'>;
-type CreditTransaction = TablesInsert<'credit_transactions'>;
+type CreditBucket = Tables<"credit_buckets">;
+type CreditTransaction = TablesInsert<"credit_transactions">;
 
 export type ICreateCreditBucketInput = {
   userId: string;
@@ -30,25 +30,28 @@ export async function getUserCreditBuckets(userId: string) {
   const supabase = await createClient();
 
   const { data, error } = await supabase
-    .from('credit_buckets')
-    .select('*')
-    .eq('user_id', userId)
-    .eq('status', 'active')
-    .order('created_at', { ascending: true });
+    .from("credit_buckets")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("status", "active")
+    .order("created_at", { ascending: true });
 
   return { data, error };
 }
 
-export async function getUserCreditBucketsByType(userId: string, sourceType: ICreditSourceType) {
+export async function getUserCreditBucketsByType(
+  userId: string,
+  sourceType: ICreditSourceType,
+) {
   const supabase = await createClient();
 
   const { data, error } = await supabase
-    .from('credit_buckets')
-    .select('*')
-    .eq('user_id', userId)
-    .eq('source_type', sourceType)
-    .eq('status', 'active')
-    .order('created_at', { ascending: true });
+    .from("credit_buckets")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("source_type", sourceType)
+    .eq("status", "active")
+    .order("created_at", { ascending: true });
 
   return { data, error };
 }
@@ -65,7 +68,7 @@ export async function createCreditBucket(input: ICreateCreditBucketInput) {
     user_subscription_id,
   } = input;
   const { data, error } = await supabase
-    .from('credit_buckets')
+    .from("credit_buckets")
     .insert({
       user_id: userId,
       credits_total: creditsTotal,
@@ -90,18 +93,21 @@ export async function createCreditBucket(input: ICreateCreditBucketInput) {
 export async function updateCreditBucket(
   bucketId: string,
   updates: Partial<
-    Pick<Tables<'credit_buckets'>, 'credits_used' | 'credits_remaining' | 'status' | 'updated_at'>
+    Pick<
+      Tables<"credit_buckets">,
+      "credits_used" | "credits_remaining" | "status" | "updated_at"
+    >
   >,
 ) {
   const supabase = await createClient();
 
   const { data, error } = await supabase
-    .from('credit_buckets')
+    .from("credit_buckets")
     .update({
       ...updates,
       updated_at: new Date().toISOString(),
     })
-    .eq('id', bucketId)
+    .eq("id", bucketId)
     .select()
     .single();
 
@@ -115,7 +121,7 @@ export async function updateCreditBucket(
 export async function addCreditsToUser(
   userId: string,
   creditsAmount: number,
-  sourceType: ICreditSourceType = 'purchase',
+  sourceType: ICreditSourceType = "purchase",
   description: string | null,
   expiresAt: string | null,
 ) {
@@ -132,7 +138,7 @@ export async function getAllUsersForCreditReset() {
   const supabase = await createClient();
 
   const { data, error } = await supabase
-    .from('credit_buckets')
+    .from("credit_buckets")
     .select(
       `
       *,
@@ -149,24 +155,27 @@ export async function getAllUsersForCreditReset() {
       )
     `,
     )
-    .eq('status', 'active')
-    .in('source_type', ['subscription', 'purchase', 'cancelled_plan']);
+    .eq("status", "active")
+    .in("source_type", ["subscription", "purchase", "cancelled_plan"]);
 
   return { data, error };
 }
 
-export async function resetCreditBuckets(userId: string, sourceType: ICreditSourceType) {
+export async function resetCreditBuckets(
+  userId: string,
+  sourceType: ICreditSourceType,
+) {
   const supabase = await createClient();
 
   const { error } = await supabase
-    .from('credit_buckets')
+    .from("credit_buckets")
     .update({
       status: CREDIT_BUCKET_STATUS.EXPIRED,
       updated_at: new Date().toISOString(),
     })
-    .eq('user_id', userId)
-    .eq('source_type', sourceType)
-    .eq('status', 'active');
+    .eq("user_id", userId)
+    .eq("source_type", sourceType)
+    .eq("status", "active");
 
   if (!error) {
     await invalidateUserCacheOnCreditChange(userId);
@@ -185,15 +194,17 @@ export async function getUserTotalCredits(userId: string) {
   const now = new Date().toISOString();
 
   const { data, error } = await supabase
-    .from('credit_buckets')
-    .select('credits_remaining, expires_at')
-    .eq('user_id', userId)
-    .eq('status', 'active')
+    .from("credit_buckets")
+    .select("credits_remaining, expires_at")
+    .eq("user_id", userId)
+    .eq("status", "active")
     .or(`expires_at.is.null,expires_at.gt.${now}`);
 
   if (error) return { totalCredits: 0, error };
 
-  const totalCredits = data?.reduce((sum, bucket) => sum + (bucket.credits_remaining || 0), 0) || 0;
+  const totalCredits =
+    data?.reduce((sum, bucket) => sum + (bucket.credits_remaining || 0), 0) ||
+    0;
 
   await CacheClient.setUserCredits(userId, totalCredits);
 
@@ -205,11 +216,11 @@ export async function getExpiredCreditBuckets() {
   const now = new Date().toISOString();
 
   const { data, error } = await supabase
-    .from('credit_buckets')
-    .select('*')
-    .eq('status', 'active')
-    .not('expires_at', 'is', null)
-    .lt('expires_at', now);
+    .from("credit_buckets")
+    .select("*")
+    .eq("status", "active")
+    .not("expires_at", "is", null)
+    .lt("expires_at", now);
 
   return { data, error };
 }
@@ -222,12 +233,12 @@ export async function expireCreditBuckets(bucketIds: string[]) {
   }
 
   const { data, error } = await supabase
-    .from('credit_buckets')
+    .from("credit_buckets")
     .update({
       status: CREDIT_BUCKET_STATUS.EXPIRED,
       updated_at: new Date().toISOString(),
     })
-    .in('id', bucketIds)
+    .in("id", bucketIds)
     .select();
 
   if (!error && data) {
@@ -243,12 +254,12 @@ export async function getUserValidCredits(userId: string) {
   const now = new Date().toISOString();
 
   const { data, error } = await supabase
-    .from('credit_buckets')
-    .select('*')
-    .eq('user_id', userId)
-    .eq('status', 'active')
+    .from("credit_buckets")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("status", "active")
     .or(`expires_at.is.null,expires_at.gt.${now}`)
-    .order('created_at', { ascending: true });
+    .order("created_at", { ascending: true });
 
   return { data, error };
 }
@@ -286,15 +297,13 @@ export async function validateUserCreditsForOperation(
   message?: string;
   availableCredits: number;
 }> {
-  const { hasSufficientCredits, availableCredits, error } = await checkSufficientCredits(
-    userId,
-    requiredCredits,
-  );
+  const { hasSufficientCredits, availableCredits, error } =
+    await checkSufficientCredits(userId, requiredCredits);
 
   if (error) {
     return {
       success: false,
-      message: 'Failed to check credit balance',
+      message: "Failed to check credit balance",
       availableCredits: 0,
     };
   }
@@ -313,27 +322,31 @@ export async function validateUserCreditsForOperation(
   };
 }
 
-export async function getCreditBucketsByUserSubscriptionId(userSubscriptionId: string) {
+export async function getCreditBucketsByUserSubscriptionId(
+  userSubscriptionId: string,
+) {
   const supabase = await createClient();
 
   const { data, error } = await supabase
-    .from('credit_buckets')
-    .select('*')
-    .eq('user_subscription_id', userSubscriptionId)
-    .eq('status', 'active');
+    .from("credit_buckets")
+    .select("*")
+    .eq("user_subscription_id", userSubscriptionId)
+    .eq("status", "active");
 
   return { data, error };
 }
 
-export async function expireCreditBucketsByUserSubscriptionId(userSubscriptionId: string) {
+export async function expireCreditBucketsByUserSubscriptionId(
+  userSubscriptionId: string,
+) {
   const supabase = await createClient();
 
   // First get the buckets to know how many credits to deduct
   const { data: buckets, error: fetchError } = await supabase
-    .from('credit_buckets')
-    .select('id, user_id, credits_remaining, description')
-    .eq('user_subscription_id', userSubscriptionId)
-    .eq('status', 'active');
+    .from("credit_buckets")
+    .select("id, user_id, credits_remaining, description")
+    .eq("user_subscription_id", userSubscriptionId)
+    .eq("status", "active");
 
   if (fetchError) {
     return { expiredBuckets: [], error: fetchError };
@@ -345,13 +358,13 @@ export async function expireCreditBucketsByUserSubscriptionId(userSubscriptionId
 
   // Update all buckets to expired
   const { error: updateError } = await supabase
-    .from('credit_buckets')
+    .from("credit_buckets")
     .update({
       status: CREDIT_BUCKET_STATUS.EXPIRED,
       updated_at: new Date().toISOString(),
     })
-    .eq('user_subscription_id', userSubscriptionId)
-    .eq('status', 'active');
+    .eq("user_subscription_id", userSubscriptionId)
+    .eq("status", "active");
 
   if (updateError) {
     return { expiredBuckets: [], error: updateError };
@@ -365,10 +378,10 @@ export async function markCreditBucketsAsCancelled(userSubscriptionId: string) {
 
   // Get all active credit buckets for this subscription
   const { data: buckets, error: fetchError } = await supabase
-    .from('credit_buckets')
-    .select('id, user_id, credits_remaining, description')
-    .eq('user_subscription_id', userSubscriptionId)
-    .eq('status', 'active');
+    .from("credit_buckets")
+    .select("id, user_id, credits_remaining, description")
+    .eq("user_subscription_id", userSubscriptionId)
+    .eq("status", "active");
 
   if (fetchError) {
     return { cancelledBuckets: [], error: fetchError };
@@ -380,13 +393,13 @@ export async function markCreditBucketsAsCancelled(userSubscriptionId: string) {
 
   // Update source_type to cancelled_plan for all buckets
   const { error: updateError } = await supabase
-    .from('credit_buckets')
+    .from("credit_buckets")
     .update({
       source_type: CREDIT_SOURCE_TYPES.CANCELLED_PLAN,
       updated_at: new Date().toISOString(),
     })
-    .eq('user_subscription_id', userSubscriptionId)
-    .eq('status', 'active');
+    .eq("user_subscription_id", userSubscriptionId)
+    .eq("status", "active");
 
   if (updateError) {
     return { cancelledBuckets: [], error: updateError };
@@ -402,15 +415,15 @@ export async function checkAvailableCreditsForDeduction(
 ): Promise<{ hasCredits: boolean; availableCredits: number }> {
   const supabase = await createClient();
   const { data: buckets, error } = await supabase
-    .from('credit_buckets')
-    .select('credits_remaining')
-    .eq('user_id', userId)
-    .eq('status', 'active')
-    .gt('credits_remaining', 0)
-    .order('expires_at', { ascending: true, nullsFirst: false });
+    .from("credit_buckets")
+    .select("credits_remaining")
+    .eq("user_id", userId)
+    .eq("status", "active")
+    .gt("credits_remaining", 0)
+    .order("expires_at", { ascending: true, nullsFirst: false });
 
   if (error) {
-    console.error('Error checking available credits:', error);
+    console.error("Error checking available credits:", error);
     return { hasCredits: false, availableCredits: 0 };
   }
 
@@ -426,15 +439,17 @@ export async function checkAvailableCreditsForDeduction(
   };
 }
 
-export async function getActiveCreditBucketsForDeduction(userId: string): Promise<CreditBucket[]> {
+export async function getActiveCreditBucketsForDeduction(
+  userId: string,
+): Promise<CreditBucket[]> {
   const supabase = await createClient();
   const { data: buckets, error } = await supabase
-    .from('credit_buckets')
-    .select('*')
-    .eq('user_id', userId)
-    .eq('status', 'active')
-    .gt('credits_remaining', 0)
-    .order('expires_at', { ascending: true, nullsFirst: false });
+    .from("credit_buckets")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("status", "active")
+    .gt("credits_remaining", 0)
+    .order("expires_at", { ascending: true, nullsFirst: false });
 
   if (error) {
     throw new Error(`Failed to fetch credit buckets: ${error.message}`);
@@ -462,7 +477,7 @@ export async function executeCreditDeduction(
   if (activeBuckets.length === 0) {
     return {
       success: false,
-      error: 'No active credit buckets found',
+      error: "No active credit buckets found",
     };
   }
 
@@ -475,17 +490,22 @@ export async function executeCreditDeduction(
   };
 
   const { data: transaction, error: transactionError } = await supabase
-    .from('credit_transactions')
+    .from("credit_transactions")
     .insert(transactionData)
-    .select('id')
+    .select("id")
     .single();
 
   if (transactionError) {
-    throw new Error(`Failed to create transaction: ${transactionError.message}`);
+    throw new Error(
+      `Failed to create transaction: ${transactionError.message}`,
+    );
   }
 
   let remainingToDeduct = creditsToDeduct;
-  const bucketUpdates: Array<{ id: string; update: TablesUpdate<'credit_buckets'> }> = [];
+  const bucketUpdates: Array<{
+    id: string;
+    update: TablesUpdate<"credit_buckets">;
+  }> = [];
 
   for (const bucket of activeBuckets) {
     if (remainingToDeduct <= 0) break;
@@ -500,7 +520,9 @@ export async function executeCreditDeduction(
       update: {
         credits_used: newUsed,
         status:
-          newRemaining <= 0 ? USER_SUBSCRIPTION_STATUS.EXHAUSTED : USER_SUBSCRIPTION_STATUS.ACTIVE,
+          newRemaining <= 0
+            ? USER_SUBSCRIPTION_STATUS.EXHAUSTED
+            : USER_SUBSCRIPTION_STATUS.ACTIVE,
         updated_at: new Date().toISOString(),
       },
     });
@@ -510,19 +532,24 @@ export async function executeCreditDeduction(
 
   for (const { id, update } of bucketUpdates) {
     const { error: updateError } = await supabase
-      .from('credit_buckets')
+      .from("credit_buckets")
       .update(update)
-      .eq('id', id);
+      .eq("id", id);
 
     if (updateError) {
-      throw new Error(`Failed to update credit bucket ${id}: ${updateError.message}`);
+      throw new Error(
+        `Failed to update credit bucket ${id}: ${updateError.message}`,
+      );
     }
   }
 
   // Invalidate cache after successful deduction
   await invalidateUserCacheOnCreditChange(userId);
 
-  const { availableCredits } = await checkAvailableCreditsForDeduction(userId, 0);
+  const { availableCredits } = await checkAvailableCreditsForDeduction(
+    userId,
+    0,
+  );
 
   return {
     success: true,
@@ -541,7 +568,7 @@ export const createUserCredits = (
   createCreditBucket({
     userId,
     creditsTotal: initialCredits,
-    sourceType: 'bonus',
+    sourceType: "bonus",
     description,
     expiresAt: null,
   });

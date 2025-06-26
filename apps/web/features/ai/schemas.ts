@@ -1,14 +1,14 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 const commandValues = [
-  'evaluate_note',
-  'generate_quizz_questions',
-  'evaluate_quizz_answers',
+  "evaluate_note",
+  "generate_quizz_questions",
+  "evaluate_quizz_answers",
 ] as const;
 
 export const IAICommandSchema = z.enum(commandValues);
 
-export const IAIUsageStatusSchema = z.enum(['success', 'error']);
+export const IAIUsageStatusSchema = z.enum(["success", "error"]);
 
 export const ITokenUsageSchema = z.object({
   input_tokens: z.number().min(0),
@@ -37,7 +37,7 @@ export const ITrackAIUsageRequestSchema = z.object({
   response_payload: z.record(z.unknown()).optional(),
 });
 
-export const IAIUsageTimeRangeSchema = z.enum(['day', 'week', 'month', 'year']);
+export const IAIUsageTimeRangeSchema = z.enum(["day", "week", "month", "year"]);
 
 export const IAIUsageFiltersSchema = z.object({
   user_id: z.string().uuid().optional(),
@@ -65,9 +65,11 @@ export const ICreateAIUsageLogSchema = z.object({
   response_payload: z.record(z.unknown()).optional(),
 });
 
-export const IUpdateAIUsageLogSchema = ICreateAIUsageLogSchema.partial().extend({
-  id: z.string().uuid(),
-});
+export const IUpdateAIUsageLogSchema = ICreateAIUsageLogSchema.partial().extend(
+  {
+    id: z.string().uuid(),
+  },
+);
 
 export const IAnalyticsQuerySchema = z.object({
   user_id: z.string().uuid().optional(),

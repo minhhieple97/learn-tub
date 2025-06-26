@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { create } from 'zustand';
-import { devtools } from 'zustand/middleware';
+import { create } from "zustand";
+import { devtools } from "zustand/middleware";
 import {
   IQuizQuestion,
   IUserAnswer,
@@ -10,10 +10,10 @@ import {
   IQuizAnswerOption,
   IQuizSessionWithAttempts,
   IQuizSession,
-} from '../types';
-import { generateQuizQuestionsAction, evaluateQuizAction } from '../actions';
-import { AI_QUIZZ_CONFIG } from '@/config/constants';
-import { toast } from '@/hooks/use-toast';
+} from "../types";
+import { generateQuizQuestionsAction, evaluateQuizAction } from "../actions";
+import { AI_QUIZZ_CONFIG } from "@/config/constants";
+import { toast } from "@/hooks/use-toast";
 
 type QuizState = {
   questions: IQuizQuestion[];
@@ -79,8 +79,8 @@ type QuizState = {
 export const useQuizStore = create<QuizState>()(
   devtools(
     (set, get) => {
-      if (typeof window !== 'undefined') {
-        window.addEventListener('beforeunload', () => {
+      if (typeof window !== "undefined") {
+        window.addEventListener("beforeunload", () => {
           const { timerInterval } = get();
           if (timerInterval) {
             clearInterval(timerInterval);
@@ -101,7 +101,7 @@ export const useQuizStore = create<QuizState>()(
           questionCount: AI_QUIZZ_CONFIG.DEFAULT_QUESTION_COUNT,
           difficulty: AI_QUIZZ_CONFIG.DEFAULT_DIFFICULTY,
           provider: null,
-          aiModelId: '',
+          aiModelId: "",
         },
         startTime: null,
         currentTime: 0,
@@ -144,13 +144,13 @@ export const useQuizStore = create<QuizState>()(
           } = get();
 
           if (!videoId) {
-            toast.error({ description: 'Video ID is required' });
+            toast.error({ description: "Video ID is required" });
             return;
           }
 
           if (!settings.aiModelId) {
             toast.error({
-              description: 'Please select an AI model to generate questions',
+              description: "Please select an AI model to generate questions",
             });
             return;
           }
@@ -167,7 +167,7 @@ export const useQuizStore = create<QuizState>()(
               difficulty: settings.difficulty,
               aiModelId: settings.aiModelId,
             });
-            console.log('result', result);
+            console.log("result", result);
             if (result?.data?.success) {
               set({
                 questions: result.data.questions || [],
@@ -185,20 +185,20 @@ export const useQuizStore = create<QuizState>()(
               get().startTimer();
 
               toast.success({
-                description: 'Quiz questions generated successfully!',
+                description: "Quiz questions generated successfully!",
               });
             } else {
               throw new Error(
-                result?.serverError || 'Failed to generate questions',
+                result?.serverError || "Failed to generate questions",
               );
             }
           } catch (error) {
-            console.error('Failed to generate questions:', error);
+            console.error("Failed to generate questions:", error);
             toast.error({
               description:
                 error instanceof Error
                   ? error.message
-                  : 'Failed to generate questions',
+                  : "Failed to generate questions",
             });
             set({ isGenerating: false });
           }
@@ -263,14 +263,14 @@ export const useQuizStore = create<QuizState>()(
           } = get();
           if (questions.length === 0 || answers.length === 0) {
             toast.error({
-              description: 'Please answer all questions before submitting',
+              description: "Please answer all questions before submitting",
             });
             return;
           }
 
           if (!videoId || !sessionId) {
             toast.error({
-              description: 'Missing required data for submission',
+              description: "Missing required data for submission",
             });
             return;
           }
@@ -305,17 +305,17 @@ export const useQuizStore = create<QuizState>()(
                 timeTakenSeconds: finalTimeTaken,
               });
 
-              toast.success({ description: 'Quiz submitted successfully!' });
+              toast.success({ description: "Quiz submitted successfully!" });
             } else {
-              throw new Error(result?.serverError || 'Failed to evaluate quiz');
+              throw new Error(result?.serverError || "Failed to evaluate quiz");
             }
           } catch (error) {
-            console.error('Failed to evaluate quiz:', error);
+            console.error("Failed to evaluate quiz:", error);
             toast.error({
               description:
                 error instanceof Error
                   ? error.message
-                  : 'Failed to evaluate quiz',
+                  : "Failed to evaluate quiz",
             });
             set({ isEvaluating: false });
           }
@@ -405,7 +405,7 @@ export const useQuizStore = create<QuizState>()(
               questionCount: session.question_count,
               difficulty: session.difficulty,
               provider: session.provider_name || null,
-              aiModelId: session.ai_model_id || '',
+              aiModelId: session.ai_model_id || "",
             },
             videoId: session.video_id,
             videoTitle: session.videos?.title,
@@ -478,19 +478,19 @@ export const useQuizStore = create<QuizState>()(
           const { currentTime } = get();
           const mins = Math.floor(currentTime / 60);
           const secs = currentTime % 60;
-          return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+          return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
         },
 
         getFormattedTimeTaken: () => {
           const { timeTakenSeconds } = get();
           const mins = Math.floor(timeTakenSeconds / 60);
           const secs = timeTakenSeconds % 60;
-          return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+          return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
         },
       };
     },
     {
-      name: 'quiz-store',
+      name: "quiz-store",
     },
   ),
 );

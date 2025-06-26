@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
 declare global {
   interface Window {
@@ -16,12 +16,12 @@ export const useYouTubeAPI = (): UseYouTubeAPIReturn => {
   const [isApiLoaded, setIsApiLoaded] = useState(false);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    
+    if (typeof window === "undefined") return;
+
     if (!window.YT) {
-      const tag = document.createElement('script');
-      tag.src = 'https://www.youtube.com/iframe_api';
-      const firstScriptTag = document.getElementsByTagName('script')[0];
+      const tag = document.createElement("script");
+      tag.src = "https://www.youtube.com/iframe_api";
+      const firstScriptTag = document.getElementsByTagName("script")[0];
       if (firstScriptTag) {
         firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
       } else {
@@ -38,6 +38,6 @@ export const useYouTubeAPI = (): UseYouTubeAPIReturn => {
 
   return {
     isApiLoaded,
-    YT: typeof window !== 'undefined' ? window.YT : null,
+    YT: typeof window !== "undefined" ? window.YT : null,
   };
-}; 
+};

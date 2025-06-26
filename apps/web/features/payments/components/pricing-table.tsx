@@ -1,4 +1,4 @@
-import { Card } from '@/components/ui/card';
+import { Card } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -6,12 +6,12 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import { PricingPlanHeader } from './pricing-plan-header';
-import { PricingFeatureValue } from './pricing-feature-value';
-import { PricingPlanButton } from './pricing-plan-button';
-import { PRICING_DATA } from '../constants';
-import { IPricingPlan } from '../types';
+} from "@/components/ui/table";
+import { PricingPlanHeader } from "./pricing-plan-header";
+import { PricingFeatureValue } from "./pricing-feature-value";
+import { PricingPlanButton } from "./pricing-plan-button";
+import { PRICING_DATA } from "../constants";
+import { IPricingPlan } from "../types";
 
 type PricingTableProps = {
   compact?: boolean;
@@ -38,13 +38,15 @@ export const PricingTable = ({
     <Table>
       <TableHeader>
         <TableRow className="border-border hover:bg-transparent">
-          <TableHead className={`${compact ? 'w-[140px] py-4' : 'w-[200px] py-6'} font-semibold`}>
+          <TableHead
+            className={`${compact ? "w-[140px] py-4" : "w-[200px] py-6"} font-semibold`}
+          >
             Features
           </TableHead>
           {plans.map((plan) => (
             <TableHead
               key={plan.id}
-              className={`text-center relative ${compact ? 'py-4' : 'py-6'}`}
+              className={`text-center relative ${compact ? "py-4" : "py-6"}`}
             >
               <PricingPlanHeader plan={plan} compact={compact} />
             </TableHead>
@@ -54,14 +56,16 @@ export const PricingTable = ({
       <TableBody>
         {PRICING_DATA.features.map((feature) => (
           <TableRow key={feature.name} className="border-border">
-            <TableCell className={`font-medium ${compact ? 'py-3 text-sm' : 'py-4'}`}>
+            <TableCell
+              className={`font-medium ${compact ? "py-3 text-sm" : "py-4"}`}
+            >
               {feature.name}
             </TableCell>
             {feature.values.map((value, planIndex) => (
               <TableCell
                 key={planIndex}
-                className={`text-center ${compact ? 'py-3 text-sm' : 'py-4'} ${
-                  planIndex === 1 ? 'bg-accent/30' : ''
+                className={`text-center ${compact ? "py-3 text-sm" : "py-4"} ${
+                  planIndex === 1 ? "bg-accent/30" : ""
                 }`}
               >
                 <PricingFeatureValue value={value} compact={compact} />
@@ -70,12 +74,12 @@ export const PricingTable = ({
           </TableRow>
         ))}
         <TableRow className="border-border">
-          <TableCell className={compact ? 'py-4' : 'py-6'} />
+          <TableCell className={compact ? "py-4" : "py-6"} />
           {plans.map((plan, index) => (
             <TableCell
               key={plan.id}
-              className={`text-center ${compact ? 'py-4 px-2' : 'py-6 px-4'} ${
-                index === 1 ? 'bg-accent/30' : ''
+              className={`text-center ${compact ? "py-4 px-2" : "py-6 px-4"} ${
+                index === 1 ? "bg-accent/30" : ""
               }`}
             >
               <PricingPlanButton

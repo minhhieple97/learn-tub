@@ -1,5 +1,5 @@
-export * from './schemas';
+export * from "./schemas";
 
-export * from './queries';
+export * from "./queries";
 
-export * from './services';
+export * from "./services";

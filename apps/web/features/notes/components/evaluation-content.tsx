@@ -1,10 +1,10 @@
-import { EvaluationSettings } from './evaluation-settings';
-import { EvaluationError } from './evaluation-error';
-import { EvaluationWelcome } from './evaluation-welcome';
-import { NoteEvaluationStreaming } from './note-evaluation-streaming';
-import { NoteFeedbackDisplay } from './note-feedback-display';
-import { STATUS_STREAMING } from '@/config/constants';
-import { useNotesStore } from '../store';
+import { EvaluationSettings } from "./evaluation-settings";
+import { EvaluationError } from "./evaluation-error";
+import { EvaluationWelcome } from "./evaluation-welcome";
+import { NoteEvaluationStreaming } from "./note-evaluation-streaming";
+import { NoteFeedbackDisplay } from "./note-feedback-display";
+import { STATUS_STREAMING } from "@/config/constants";
+import { useNotesStore } from "../store";
 
 type IEvaluationContentProps = {
   provider: string | null;
@@ -21,8 +21,12 @@ export const EvaluationContent = ({
   onModelChange,
   onEvaluate,
 }: IEvaluationContentProps) => {
-  const { evaluation, resetEvaluation, showEvaluationSettings, adjustEvaluationSettings } =
-    useNotesStore();
+  const {
+    evaluation,
+    resetEvaluation,
+    showEvaluationSettings,
+    adjustEvaluationSettings,
+  } = useNotesStore();
 
   return (
     <div className="space-y-6">
@@ -41,7 +45,7 @@ export const EvaluationContent = ({
 
       {evaluation.hasError && (
         <EvaluationError
-          error={evaluation.error || ''}
+          error={evaluation.error || ""}
           onAdjustSettings={adjustEvaluationSettings}
         />
       )}
@@ -54,12 +58,16 @@ export const EvaluationContent = ({
       )}
 
       {evaluation.feedback && evaluation.isCompleted && (
-        <NoteFeedbackDisplay feedback={evaluation.feedback} onReset={resetEvaluation} />
+        <NoteFeedbackDisplay
+          feedback={evaluation.feedback}
+          onReset={resetEvaluation}
+        />
       )}
 
-      {evaluation.status === STATUS_STREAMING.IDLE && !evaluation.showSettings && (
-        <EvaluationWelcome onStartAnalysis={showEvaluationSettings} />
-      )}
+      {evaluation.status === STATUS_STREAMING.IDLE &&
+        !evaluation.showSettings && (
+          <EvaluationWelcome onStartAnalysis={showEvaluationSettings} />
+        )}
     </div>
   );
 };

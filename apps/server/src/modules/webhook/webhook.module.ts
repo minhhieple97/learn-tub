@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
 
-
 import { WebhookController } from './webhook.controller';
 import { WebhookService } from './services/webhook.service';
 import { WebhookEventService } from './services/webhook-event.service';

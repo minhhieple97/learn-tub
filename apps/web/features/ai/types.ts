@@ -1,12 +1,17 @@
-import { type Tables, type TablesInsert, type TablesUpdate, type Json } from '@/database.types';
-import { z } from 'zod';
-import { IAICommandSchema } from './schemas';
+import {
+  type Tables,
+  type TablesInsert,
+  type TablesUpdate,
+  type Json,
+} from "@/database.types";
+import { z } from "zod";
+import { IAICommandSchema } from "./schemas";
 
-export type IAIUsageLog = Tables<'ai_usage_logs'>;
-export type IAIUsageLogInsert = TablesInsert<'ai_usage_logs'>;
-export type IAIUsageLogUpdate = TablesUpdate<'ai_usage_logs'>;
+export type IAIUsageLog = Tables<"ai_usage_logs">;
+export type IAIUsageLogInsert = TablesInsert<"ai_usage_logs">;
+export type IAIUsageLogUpdate = TablesUpdate<"ai_usage_logs">;
 
-export type IAIUsageStatus = 'success' | 'error';
+export type IAIUsageStatus = "success" | "error";
 
 export type IAICommand = z.infer<typeof IAICommandSchema>;
 
@@ -49,7 +54,7 @@ export type IAIUsageAnalytics = {
   most_used_command: string;
 };
 
-export type IAIUsageTimeRange = 'day' | 'week' | 'month' | 'year';
+export type IAIUsageTimeRange = "day" | "week" | "month" | "year";
 
 export type IAIUsageByTimeRange = {
   time_range: IAIUsageTimeRange;

@@ -1,12 +1,12 @@
-import { createAIUsageLog } from '../queries';
-import { getAIModelCostDetails } from '../queries/ai-model-pricing-queries';
+import { createAIUsageLog } from "../queries";
+import { getAIModelCostDetails } from "../queries/ai-model-pricing-queries";
 import type {
   ITrackAIUsageRequest,
   IAICommand,
   ITokenUsage,
   ICostDetails,
   IAIUsageStatus,
-} from '../types';
+} from "../types";
 
 class AIUsageTracker {
   private static instance: AIUsageTracker;
@@ -18,7 +18,10 @@ class AIUsageTracker {
     return AIUsageTracker.instance;
   }
 
-  private async calculateCost(ai_model_id: string, tokenUsage: ITokenUsage): Promise<ICostDetails> {
+  private async calculateCost(
+    ai_model_id: string,
+    tokenUsage: ITokenUsage,
+  ): Promise<ICostDetails> {
     const { data: modelData, error } = await getAIModelCostDetails(ai_model_id);
 
     if (error || !modelData) {
@@ -29,11 +32,14 @@ class AIUsageTracker {
       };
     }
 
-    const inputCostPerToken = modelData.input_cost_per_million_tokens / 1_000_000;
-    const outputCostPerToken = modelData.output_cost_per_million_tokens / 1_000_000;
+    const inputCostPerToken =
+      modelData.input_cost_per_million_tokens / 1_000_000;
+    const outputCostPerToken =
+      modelData.output_cost_per_million_tokens / 1_000_000;
 
     const totalCost =
-      tokenUsage.input_tokens * inputCostPerToken + tokenUsage.output_tokens * outputCostPerToken;
+      tokenUsage.input_tokens * inputCostPerToken +
+      tokenUsage.output_tokens * outputCostPerToken;
 
     return {
       input_cost_per_token: inputCostPerToken,
@@ -59,7 +65,10 @@ class AIUsageTracker {
       let totalTokens = 0;
 
       if (params.token_usage) {
-        costDetails = await this.calculateCost(params.ai_model_id, params.token_usage);
+        costDetails = await this.calculateCost(
+          params.ai_model_id,
+          params.token_usage,
+        );
         totalTokens = params.token_usage.total_tokens;
       }
 
@@ -80,7 +89,7 @@ class AIUsageTracker {
 
       await createAIUsageLog(trackingData);
     } catch (error) {
-      console.error('Failed to track AI usage:', error);
+      console.error("Failed to track AI usage:", error);
     }
   }
 
@@ -94,7 +103,7 @@ class AIUsageTracker {
     operation: () => Promise<T>,
   ): Promise<T> {
     const startTime = Date.now();
-    let status: IAIUsageStatus = 'success';
+    let status: IAIUsageStatus = "success";
     let errorMessage: string | undefined;
     let result: T;
 
@@ -102,8 +111,8 @@ class AIUsageTracker {
       result = await operation();
       return result;
     } catch (error) {
-      status = 'error';
-      errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      status = "error";
+      errorMessage = error instanceof Error ? error.message : "Unknown error";
       throw error;
     } finally {
       const duration = Date.now() - startTime;
@@ -116,7 +125,7 @@ class AIUsageTracker {
         request_duration_ms: duration,
         error_message: errorMessage,
         request_payload: params.request_payload,
-        response_payload: status === 'success' ? { success: true } : undefined,
+        response_payload: status === "success" ? { success: true } : undefined,
       });
     }
   }
@@ -131,7 +140,7 @@ class AIUsageTracker {
     operation: () => Promise<{ result: T; tokenUsage?: ITokenUsage }>,
   ): Promise<T> {
     const startTime = Date.now();
-    let status: IAIUsageStatus = 'success';
+    let status: IAIUsageStatus = "success";
     let errorMessage: string | undefined;
     let tokenUsage: ITokenUsage | undefined;
     let result: T;
@@ -142,8 +151,8 @@ class AIUsageTracker {
       tokenUsage = operationResult.tokenUsage;
       return result;
     } catch (error) {
-      status = 'error';
-      errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      status = "error";
+      errorMessage = error instanceof Error ? error.message : "Unknown error";
       throw error;
     } finally {
       const duration = Date.now() - startTime;
@@ -157,7 +166,7 @@ class AIUsageTracker {
         request_duration_ms: duration,
         error_message: errorMessage,
         request_payload: params.request_payload,
-        response_payload: status === 'success' ? { success: true } : undefined,
+        response_payload: status === "success" ? { success: true } : undefined,
       });
     }
   }
@@ -173,11 +182,13 @@ class AIUsageTracker {
     });
   }
 
-  public async trackBatchUsage(usageData: ITrackAIUsageRequest[]): Promise<void> {
+  public async trackBatchUsage(
+    usageData: ITrackAIUsageRequest[],
+  ): Promise<void> {
     try {
       await Promise.all(usageData.map((data) => createAIUsageLog(data)));
     } catch (error) {
-      console.error('Failed to track batch AI usage:', error);
+      console.error("Failed to track batch AI usage:", error);
     }
   }
 
@@ -188,10 +199,13 @@ class AIUsageTracker {
       ai_model_id: string;
       request_payload?: any;
     },
-    operation: () => Promise<{ result: T; getUsage: () => Promise<ITokenUsage | undefined> }>,
+    operation: () => Promise<{
+      result: T;
+      getUsage: () => Promise<ITokenUsage | undefined>;
+    }>,
   ): Promise<T> {
     const startTime = Date.now();
-    let status: IAIUsageStatus = 'success';
+    let status: IAIUsageStatus = "success";
     let errorMessage: string | undefined;
     let tokenUsage: ITokenUsage | undefined;
     let result: T;
@@ -203,13 +217,13 @@ class AIUsageTracker {
       try {
         tokenUsage = await operationResult.getUsage();
       } catch (usageError) {
-        console.warn('Failed to get token usage information:', usageError);
+        console.warn("Failed to get token usage information:", usageError);
       }
 
       return result;
     } catch (error) {
-      status = 'error';
-      errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      status = "error";
+      errorMessage = error instanceof Error ? error.message : "Unknown error";
       throw error;
     } finally {
       const duration = Date.now() - startTime;
@@ -224,7 +238,9 @@ class AIUsageTracker {
         error_message: errorMessage,
         request_payload: params.request_payload,
         response_payload:
-          status === 'success' ? { success: true, has_usage: !!tokenUsage } : undefined,
+          status === "success"
+            ? { success: true, has_usage: !!tokenUsage }
+            : undefined,
       });
     }
   }
@@ -236,10 +252,13 @@ class AIUsageTracker {
       ai_model_id: string;
       request_payload?: any;
     },
-    operation: () => Promise<{ stream: T; getUsage: () => Promise<ITokenUsage | undefined> }>,
+    operation: () => Promise<{
+      stream: T;
+      getUsage: () => Promise<ITokenUsage | undefined>;
+    }>,
   ): Promise<T> {
     const startTime = Date.now();
-    let status: IAIUsageStatus = 'success';
+    let status: IAIUsageStatus = "success";
     let errorMessage: string | undefined;
     let result: T;
 
@@ -254,24 +273,24 @@ class AIUsageTracker {
             user_id: params.user_id,
             command: params.command,
             ai_model_id: params.ai_model_id,
-            status: 'success',
+            status: "success",
             token_usage: tokenUsage,
             request_duration_ms: duration,
             error_message: undefined,
             request_payload: params.request_payload,
             response_payload: { success: true, has_usage: !!tokenUsage },
           }).catch((error) => {
-            console.error('Background usage tracking failed:', error);
+            console.error("Background usage tracking failed:", error);
           });
         },
         (usageError) => {
-          console.warn('Failed to get token usage information:', usageError);
+          console.warn("Failed to get token usage information:", usageError);
           const duration = Date.now() - startTime;
           this.trackUsage({
             user_id: params.user_id,
             command: params.command,
             ai_model_id: params.ai_model_id,
-            status: 'success',
+            status: "success",
             token_usage: undefined,
             request_duration_ms: duration,
             error_message: undefined,
@@ -279,18 +298,21 @@ class AIUsageTracker {
             response_payload: {
               success: true,
               has_usage: false,
-              usage_error: usageError instanceof Error ? usageError.message : 'Unknown usage error',
+              usage_error:
+                usageError instanceof Error
+                  ? usageError.message
+                  : "Unknown usage error",
             },
           }).catch((error) => {
-            console.error('Background usage tracking failed:', error);
+            console.error("Background usage tracking failed:", error);
           });
         },
       );
 
       return result;
     } catch (error) {
-      status = 'error';
-      errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      status = "error";
+      errorMessage = error instanceof Error ? error.message : "Unknown error";
 
       const duration = Date.now() - startTime;
       await this.trackUsage({

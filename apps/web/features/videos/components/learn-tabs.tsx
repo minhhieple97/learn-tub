@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, Library } from 'lucide-react';
-import { Suspense } from 'react';
-import { useQueryStates } from 'nuqs';
-import { AddVideoForm } from './add-video-form';
-import { HowItWorks } from './how-it-works';
-import { VideoLibrary } from './video-library';
-import { VideoLibraryLoading } from './video-library-loading';
-import { learnPageParsers, type TabValue } from '../search-params';
-import { IVideo } from '../types';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Plus, Library } from "lucide-react";
+import { Suspense } from "react";
+import { useQueryStates } from "nuqs";
+import { AddVideoForm } from "./add-video-form";
+import { HowItWorks } from "./how-it-works";
+import { VideoLibrary } from "./video-library";
+import { VideoLibraryLoading } from "./video-library-loading";
+import { learnPageParsers, type TabValue } from "../search-params";
+import { IVideo } from "../types";
 
 type LearnTabsProps = {
   videosPromise: Promise<IVideo[]>;
@@ -24,7 +24,11 @@ export function LearnTabs({ videosPromise, defaultTab }: LearnTabsProps) {
   };
 
   return (
-    <Tabs value={tab || defaultTab} onValueChange={handleTabChange} className="space-y-4">
+    <Tabs
+      value={tab || defaultTab}
+      onValueChange={handleTabChange}
+      className="space-y-4"
+    >
       <TabsList className="grid w-full max-w-md grid-cols-2 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 rounded-lg p-1">
         <TabsTrigger
           value="add"
@@ -42,7 +46,10 @@ export function LearnTabs({ videosPromise, defaultTab }: LearnTabsProps) {
         </TabsTrigger>
       </TabsList>
 
-      <TabsContent value="add" className="space-y-4 animate-in fade-in-50 duration-300">
+      <TabsContent
+        value="add"
+        className="space-y-4 animate-in fade-in-50 duration-300"
+      >
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <div className="lg:col-span-2">
             <AddVideoForm />
@@ -54,7 +61,10 @@ export function LearnTabs({ videosPromise, defaultTab }: LearnTabsProps) {
         </div>
       </TabsContent>
 
-      <TabsContent value="library" className="animate-in fade-in-50 duration-300">
+      <TabsContent
+        value="library"
+        className="animate-in fade-in-50 duration-300"
+      >
         <Suspense fallback={<VideoLibraryLoading />}>
           <VideoLibrary videosPromise={videosPromise} />
         </Suspense>

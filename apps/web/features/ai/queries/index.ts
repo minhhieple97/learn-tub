@@ -7,4 +7,4 @@ export {
   getAIUsageByCommand,
   getUserAIUsageStats,
   getRecentAIUsageLogs,
-} from './ai-usage-queries';
+} from "./ai-usage-queries";

@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { use } from 'react';
-import { VideoLibraryEmpty } from './video-library-empty';
-import { VideoGrid } from './video-grid';
-import { IVideo } from '../types';
+import { use } from "react";
+import { VideoLibraryEmpty } from "./video-library-empty";
+import { VideoGrid } from "./video-grid";
+import { IVideo } from "../types";
 
 type VideoLibraryProps = {
   videosPromise: Promise<IVideo[] | null>;

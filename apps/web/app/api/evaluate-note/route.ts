@@ -80,23 +80,29 @@ export async function GET(request: NextRequest) {
 
     const creditValidation = await validateUserCreditsForOperation(
       profile.id,
-      CREDIT_ACTION_COUNTS[AI_COMMANDS.EVALUATE_NOTE as keyof typeof CREDIT_ACTION_COUNTS] ?? 1,
+      CREDIT_ACTION_COUNTS[
+        AI_COMMANDS.EVALUATE_NOTE as keyof typeof CREDIT_ACTION_COUNTS
+      ] ?? 1,
     );
     if (!creditValidation.success) {
       return new Response(
         JSON.stringify({
-          error: 'Insufficient credits',
+          error: "Insufficient credits",
           details:
-            creditValidation.message || "You don't have enough credits to evaluate this note",
+            creditValidation.message ||
+            "You don't have enough credits to evaluate this note",
         }),
         {
           status: StatusCodes.BAD_REQUEST,
-          headers: { 'Content-Type': RESPONSE_HEADERS.JSON_CONTENT_TYPE },
+          headers: { "Content-Type": RESPONSE_HEADERS.JSON_CONTENT_TYPE },
         },
       );
     }
 
-    const { data: note, error: noteError } = await getNoteForEvaluation(noteId, profile.id);
+    const { data: note, error: noteError } = await getNoteForEvaluation(
+      noteId,
+      profile.id,
+    );
 
     if (noteError || !note) {
       return new Response(ERROR_MESSAGES.NOTE_NOT_FOUND, {
@@ -128,12 +134,19 @@ export async function GET(request: NextRequest) {
             const { done, value } = await reader.read();
             if (done) break;
 
-            controller.enqueue(encoder.encode(`data: ${JSON.stringify(value)}\n\n`));
+            controller.enqueue(
+              encoder.encode(`data: ${JSON.stringify(value)}\n\n`),
+            );
 
             if (value.type === CHUNK_TYPES.COMPLETE && value.content) {
               try {
                 feedback = JSON.parse(value.content) as IFeedback;
-                await createNoteInteraction(profile.id, noteId, aiModelId, feedback);
+                await createNoteInteraction(
+                  profile.id,
+                  noteId,
+                  aiModelId,
+                  feedback,
+                );
 
                 const creditResult = await deductCredits({
                   userId: profile.id,
@@ -145,21 +158,32 @@ export async function GET(request: NextRequest) {
                 });
 
                 if (!creditResult.success) {
-                  console.error('Failed to deduct credits:', creditResult.error);
+                  console.error(
+                    "Failed to deduct credits:",
+                    creditResult.error,
+                  );
                 }
               } catch (parseError) {
-                console.error(ERROR_MESSAGES.FAILED_TO_PARSE_AI_FEEDBACK, parseError);
+                console.error(
+                  ERROR_MESSAGES.FAILED_TO_PARSE_AI_FEEDBACK,
+                  parseError,
+                );
               }
             }
           }
         } catch (error) {
           const errorChunk: StreamChunk = {
             type: CHUNK_TYPES.ERROR,
-            content: error instanceof Error ? error.message : ERROR_MESSAGES.UNKNOWN_ERROR,
+            content:
+              error instanceof Error
+                ? error.message
+                : ERROR_MESSAGES.UNKNOWN_ERROR,
             finished: true,
           };
 
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify(errorChunk)}\n\n`));
+          controller.enqueue(
+            encoder.encode(`data: ${JSON.stringify(errorChunk)}\n\n`),
+          );
         } finally {
           controller.close();
         }

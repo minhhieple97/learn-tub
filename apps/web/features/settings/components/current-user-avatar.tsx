@@ -1,26 +1,29 @@
-'use client';
+"use client";
 
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useUserProfile } from '@/features/auth/queries-client/user-profile';
-import { Skeleton } from '@/components/ui/skeleton';
-import type { ICurrentUserAvatarProps } from '../types';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useUserProfile } from "@/features/auth/queries-client/user-profile";
+import { Skeleton } from "@/components/ui/skeleton";
+import type { ICurrentUserAvatarProps } from "../types";
 
 const sizeClasses = {
-  sm: 'h-8 w-8',
-  md: 'h-10 w-10',
-  lg: 'h-16 w-16',
-  xl: 'h-20 w-20',
+  sm: "h-8 w-8",
+  md: "h-10 w-10",
+  lg: "h-16 w-16",
+  xl: "h-20 w-20",
 };
 
-export const CurrentUserAvatar = ({ className, size = 'md' }: ICurrentUserAvatarProps) => {
+export const CurrentUserAvatar = ({
+  className,
+  size = "md",
+}: ICurrentUserAvatarProps) => {
   const { data: userProfile, isLoading } = useUserProfile();
 
   const getUserInitials = (name: string | null, email: string) => {
     if (name) {
       return name
-        .split(' ')
+        .split(" ")
         .map((word) => word[0])
-        .join('')
+        .join("")
         .toUpperCase()
         .slice(0, 2);
     }
@@ -28,7 +31,9 @@ export const CurrentUserAvatar = ({ className, size = 'md' }: ICurrentUserAvatar
   };
 
   if (isLoading) {
-    return <Skeleton className={`${sizeClasses[size]} rounded-full ${className}`} />;
+    return (
+      <Skeleton className={`${sizeClasses[size]} rounded-full ${className}`} />
+    );
   }
 
   if (!userProfile) {
@@ -41,7 +46,7 @@ export const CurrentUserAvatar = ({ className, size = 'md' }: ICurrentUserAvatar
 
   const profileImage = userProfile.avatar_url;
   const name = userProfile.full_name;
-  const email = userProfile.email || '';
+  const email = userProfile.email || "";
   const initials = getUserInitials(name, email);
 
   return (

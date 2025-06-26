@@ -2,29 +2,36 @@ import {
   CHUNK_TYPES,
   CREDIT_ACTION_COUNTS,
   TRANSACTION_TYPES,
-} from '@/config/constants';
-import { Database, Tables } from '@/database.types';
+} from "@/config/constants";
+import { Database, Tables } from "@/database.types";
 
-export type DbProfile = Tables<'profiles'>;
-export type DbVideo = Tables<'videos'>;
-export type DbNote = Tables<'notes'>;
-export type DbQuizSession = Tables<'quiz_sessions'>;
-export type DbQuizAttempt = Tables<'quiz_attempts'>;
-export type DbCreditBucket = Tables<'credit_buckets'>;
-export type DbCreditTransaction = Tables<'credit_transactions'>;
-export type DbUserSubscription = Tables<'user_subscriptions'>;
-export type DbSubscriptionPlan = Tables<'subscription_plans'>;
-export type DbLearningSession = Tables<'learning_sessions'>;
-export type DbAiUsageLog = Tables<'ai_usage_logs'>;
-export type DbPaymentHistory = Tables<'payment_history'>;
+export type DbProfile = Tables<"profiles">;
+export type DbVideo = Tables<"videos">;
+export type DbNote = Tables<"notes">;
+export type DbQuizSession = Tables<"quiz_sessions">;
+export type DbQuizAttempt = Tables<"quiz_attempts">;
+export type DbCreditBucket = Tables<"credit_buckets">;
+export type DbCreditTransaction = Tables<"credit_transactions">;
+export type DbUserSubscription = Tables<"user_subscriptions">;
+export type DbSubscriptionPlan = Tables<"subscription_plans">;
+export type DbLearningSession = Tables<"learning_sessions">;
+export type DbAiUsageLog = Tables<"ai_usage_logs">;
+export type DbPaymentHistory = Tables<"payment_history">;
 
-export type CreditSourceType = Database['public']['Enums']['credit_source_type_enum'];
-export type CreditBucketStatus = Database['public']['Enums']['credit_bucket_status_enum'];
-export type SubscriptionStatus = Database['public']['Enums']['subscription_status'];
-export type TransactionType = Database['public']['Enums']['transaction_type_enum'];
+export type CreditSourceType =
+  Database["public"]["Enums"]["credit_source_type_enum"];
+export type CreditBucketStatus =
+  Database["public"]["Enums"]["credit_bucket_status_enum"];
+export type SubscriptionStatus =
+  Database["public"]["Enums"]["subscription_status"];
+export type TransactionType =
+  Database["public"]["Enums"]["transaction_type_enum"];
 
 export type StreamChunk = {
-  type: typeof CHUNK_TYPES.FEEDBACK | typeof CHUNK_TYPES.COMPLETE | typeof CHUNK_TYPES.ERROR;
+  type:
+    | typeof CHUNK_TYPES.FEEDBACK
+    | typeof CHUNK_TYPES.COMPLETE
+    | typeof CHUNK_TYPES.ERROR;
   content: string;
   finished?: boolean;
 };
@@ -104,7 +111,7 @@ export type ICreditTransactionType = TransactionType;
 export type IUserProfile = DbProfile;
 
 export type IProfileUpdate = Partial<
-  Pick<DbProfile, 'full_name' | 'avatar_url' | 'learning_preferences'>
+  Pick<DbProfile, "full_name" | "avatar_url" | "learning_preferences">
 >;
 
 export type IProfileSettings = DbProfile;
@@ -131,8 +138,11 @@ export type IAvatarUploadHookReturn = {
   uploadError?: string | null;
 };
 
-export type ITransactionType = (typeof TRANSACTION_TYPES)[keyof typeof TRANSACTION_TYPES];
+export type ITransactionType =
+  (typeof TRANSACTION_TYPES)[keyof typeof TRANSACTION_TYPES];
 
-export type ICreditSourceType = Database['public']['Enums']['credit_source_type_enum'];
+export type ICreditSourceType =
+  Database["public"]["Enums"]["credit_source_type_enum"];
 
-export type ICreditBucketStatus = Database['public']['Enums']['credit_bucket_status_enum'];
+export type ICreditBucketStatus =
+  Database["public"]["Enums"]["credit_bucket_status_enum"];

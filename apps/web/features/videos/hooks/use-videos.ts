@@ -1,6 +1,6 @@
-import { createClient } from '@/lib/supabase/client';
-import { useEffect, useState } from 'react';
-import { IVideo } from '../types';
+import { createClient } from "@/lib/supabase/client";
+import { useEffect, useState } from "react";
+import { IVideo } from "../types";
 type UseVideosReturn = {
   videos: IVideo[] | null;
   loading: boolean;
@@ -22,15 +22,15 @@ export const useVideos = (): UseVideosReturn => {
       const { data: user } = await supabase.auth.getUser();
 
       if (!user.user) {
-        setError('Please log in to view your videos');
+        setError("Please log in to view your videos");
         return;
       }
 
       const { data, error: fetchError } = await supabase
-        .from('videos')
-        .select('*, notes(count)')
-        .eq('user_id', user.user.id)
-        .order('created_at', { ascending: false });
+        .from("videos")
+        .select("*, notes(count)")
+        .eq("user_id", user.user.id)
+        .order("created_at", { ascending: false });
 
       if (fetchError) {
         throw fetchError;
@@ -38,8 +38,8 @@ export const useVideos = (): UseVideosReturn => {
 
       setVideos(data);
     } catch (err) {
-      console.error('Error fetching videos:', err);
-      setError('Failed to load videos');
+      console.error("Error fetching videos:", err);
+      setError("Failed to load videos");
     } finally {
       setLoading(false);
     }

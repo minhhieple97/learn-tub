@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useQuizStore } from '../store';
+import { useQuizStore } from "../store";
 
 /**
  * Utility hook that provides commonly used computed values from the quiz store

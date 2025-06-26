@@ -1,7 +1,7 @@
-import { Button } from '@/components/ui/button';
-import { Save } from 'lucide-react';
-import type { INoteFormActionsProps } from '../types';
-import { Spinner } from '@/components/ui/spinner';
+import { Button } from "@/components/ui/button";
+import { Save } from "lucide-react";
+import type { INoteFormActionsProps } from "../types";
+import { Spinner } from "@/components/ui/spinner";
 
 export const NoteFormActions = ({
   isLoading,
@@ -22,7 +22,7 @@ export const NoteFormActions = ({
         ) : (
           <Save className="mr-2 h-4 w-4" />
         )}
-        {isEditing ? 'Update Note' : 'Save Note'}
+        {isEditing ? "Update Note" : "Save Note"}
       </Button>
 
       {isEditing && (

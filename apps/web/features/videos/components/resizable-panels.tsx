@@ -1,6 +1,6 @@
-import { ReactNode } from 'react';
-import { useResizablePanels } from '../hooks/use-resizable-panels';
-import { PanelResizer } from './panel-resizer';
+import { ReactNode } from "react";
+import { useResizablePanels } from "../hooks/use-resizable-panels";
+import { PanelResizer } from "./panel-resizer";
 
 type ResizablePanelsProps = {
   leftPanel: ReactNode;
@@ -36,9 +36,10 @@ export const ResizablePanels = ({
         style={{ width: `${leftWidth}%` }}
         className={`
           shrink-0 pr-3 will-change-[width]
-          ${isDragging 
-            ? 'transition-none' 
-            : 'transition-[width] duration-300 ease-out'
+          ${
+            isDragging
+              ? "transition-none"
+              : "transition-[width] duration-300 ease-out"
           }
         `}
       >
@@ -58,9 +59,10 @@ export const ResizablePanels = ({
         style={{ width: `${rightWidth}%` }}
         className={`
           shrink-0 pl-3 will-change-[width]
-          ${isDragging 
-            ? 'transition-none' 
-            : 'transition-[width] duration-300 ease-out'
+          ${
+            isDragging
+              ? "transition-none"
+              : "transition-[width] duration-300 ease-out"
           }
         `}
       >

@@ -4,8 +4,8 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import type { ILearningGoal } from '../types';
+} from "@/components/ui/card";
+import type { ILearningGoal } from "../types";
 
 type LearningGoalsCardProps = {
   goals: ILearningGoal[];

@@ -39,4 +39,4 @@ export class PaymentRepository {
   ) {
     return await tx.payment_history.create({ data });
   }
-} 
+}

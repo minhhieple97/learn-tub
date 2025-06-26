@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useCallback } from 'react';
-import { useNotesStore } from '../store';
-import { VALIDATION_LIMITS, TOAST_MESSAGES } from '@/config/constants';
-import { toast, useToast } from '@/hooks/use-toast';
+import { useCallback } from "react";
+import { useNotesStore } from "../store";
+import { VALIDATION_LIMITS, TOAST_MESSAGES } from "@/config/constants";
+import { toast, useToast } from "@/hooks/use-toast";
 
 type ValidationResult = {
   isValid: boolean;
@@ -72,7 +72,7 @@ export const useNoteEditorForm = () => {
     (errors: string[]) => {
       errors.forEach((error) => {
         toast.error({
-          title: 'Validation Error',
+          title: "Validation Error",
           description: error,
         });
       });
@@ -113,7 +113,7 @@ export const useNoteEditorForm = () => {
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
+      if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
         handleAddTag();
       }

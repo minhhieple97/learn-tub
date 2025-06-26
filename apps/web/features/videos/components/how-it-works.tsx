@@ -4,31 +4,31 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Rocket } from 'lucide-react';
+} from "@/components/ui/card";
+import { Rocket } from "lucide-react";
 
 export const HowItWorks = () => {
   const steps = [
     {
       number: 1,
-      title: 'Import YouTube Video',
+      title: "Import YouTube Video",
       description:
-        'Paste any YouTube URL to automatically fetch video details and metadata',
-      color: 'from-blue-500 to-blue-600',
+        "Paste any YouTube URL to automatically fetch video details and metadata",
+      color: "from-blue-500 to-blue-600",
     },
     {
       number: 2,
-      title: 'Take Smart Notes',
+      title: "Take Smart Notes",
       description:
-        'Notes automatically sync with video timestamps for seamless review and navigation',
-      color: 'from-green-500 to-green-600',
+        "Notes automatically sync with video timestamps for seamless review and navigation",
+      color: "from-green-500 to-green-600",
     },
     {
       number: 3,
-      title: 'Get AI Insights',
+      title: "Get AI Insights",
       description:
-        'Receive intelligent feedback, quizzes, and personalized study plans',
-      color: 'from-purple-500 to-purple-600',
+        "Receive intelligent feedback, quizzes, and personalized study plans",
+      color: "from-purple-500 to-purple-600",
     },
   ];
 
@@ -53,13 +53,15 @@ export const HowItWorks = () => {
             </div>
             <div>
               <h4
-                className={`font-semibold text-${step.color.split('-')[0]}-900 dark:text-${
-                  step.color.split('-')[0]
+                className={`font-semibold text-${step.color.split("-")[0]}-900 dark:text-${
+                  step.color.split("-")[0]
                 }-100 mb-1`}
               >
                 {step.title}
               </h4>
-              <p className="text-sm text-slate-600 dark:text-slate-400">{step.description}</p>
+              <p className="text-sm text-slate-600 dark:text-slate-400">
+                {step.description}
+              </p>
             </div>
           </div>
         ))}

@@ -1,7 +1,7 @@
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Brain, Settings } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Brain, Settings } from "lucide-react";
 
 type IEvaluationDialogHeaderProps = {
   showSettingsButton: boolean;

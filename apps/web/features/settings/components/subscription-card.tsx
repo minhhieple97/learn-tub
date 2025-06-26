@@ -1,16 +1,23 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { CreditCard, Gift } from 'lucide-react';
-import { SubscriptionDates } from './subscription-dates';
-import { ManageBillingButton } from './manage-billing-button';
-import { PLAN_ID_MAPPING } from '@/features/payments/constants';
-import type { ISubscriptionCardProps } from '../types';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { CreditCard, Gift } from "lucide-react";
+import { SubscriptionDates } from "./subscription-dates";
+import { ManageBillingButton } from "./manage-billing-button";
+import { PLAN_ID_MAPPING } from "@/features/payments/constants";
+import type { ISubscriptionCardProps } from "../types";
 
 export const SubscriptionCard = ({
   subscription,
   onExecuteBilling,
   isBillingPending,
 }: ISubscriptionCardProps) => {
-  const isFreePlan = subscription.subscription_plans.id === PLAN_ID_MAPPING.FREE;
+  const isFreePlan =
+    subscription.subscription_plans.id === PLAN_ID_MAPPING.FREE;
 
   return (
     <Card>
@@ -40,14 +47,17 @@ export const SubscriptionCard = ({
                   You're on the Free Plan
                 </h3>
                 <p className="text-sm text-blue-700 dark:text-blue-300">
-                  Enjoy {subscription.subscription_plans.credits_per_month} AI credits per month at
-                  no cost. Ready to unlock more features?
+                  Enjoy {subscription.subscription_plans.credits_per_month} AI
+                  credits per month at no cost. Ready to unlock more features?
                 </p>
               </div>
             </div>
           </div>
         ) : (
-          <ManageBillingButton onExecute={onExecuteBilling} isPending={isBillingPending} />
+          <ManageBillingButton
+            onExecute={onExecuteBilling}
+            isPending={isBillingPending}
+          />
         )}
       </CardContent>
     </Card>

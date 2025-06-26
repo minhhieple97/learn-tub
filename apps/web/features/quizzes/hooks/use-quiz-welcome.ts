@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
-import { useQuizStore } from '../store';
-import { useAIModelData } from '@/features/ai/hooks/use-ai-models';
+import { useEffect, useState } from "react";
+import { useQuizStore } from "../store";
+import { useAIModelData } from "@/features/ai/hooks/use-ai-models";
 
 export const useQuizWelcome = () => {
   const [showSettings, setShowSettings] = useState(false);

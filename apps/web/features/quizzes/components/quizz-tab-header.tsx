@@ -1,5 +1,5 @@
-import { Brain } from 'lucide-react';
-import { Card, CardHeader } from '@/components/ui/card';
+import { Brain } from "lucide-react";
+import { Card, CardHeader } from "@/components/ui/card";
 
 export const QuizzTabHeader = () => {
   return (

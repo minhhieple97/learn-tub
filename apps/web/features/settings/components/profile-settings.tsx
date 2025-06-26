@@ -1,14 +1,20 @@
-'use client';
+"use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Spinner } from '@/components/ui/spinner';
-import { Camera, User } from 'lucide-react';
-import { useProfileSettingsForm } from '@/hooks/use-profile-settings-form';
-import { IUserProfile } from '@/types';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Spinner } from "@/components/ui/spinner";
+import { Camera, User } from "lucide-react";
+import { useProfileSettingsForm } from "@/hooks/use-profile-settings-form";
+import { IUserProfile } from "@/types";
 
 type ProfileSettingsProps = {
   userProfile: IUserProfile;
@@ -39,7 +45,9 @@ export const ProfileSettings = ({ userProfile }: ProfileSettingsProps) => {
           <User className="h-5 w-5" />
           Profile Settings
         </CardTitle>
-        <CardDescription>Manage your personal information and avatar</CardDescription>
+        <CardDescription>
+          Manage your personal information and avatar
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Avatar Section */}
@@ -48,10 +56,13 @@ export const ProfileSettings = ({ userProfile }: ProfileSettingsProps) => {
             <Avatar className="h-20 w-20">
               <AvatarImage
                 src={avatarUrl || userProfile.avatar_url || undefined}
-                alt={userProfile.full_name || userProfile.email || ''}
+                alt={userProfile.full_name || userProfile.email || ""}
               />
               <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold text-lg">
-                {getUserInitials(userProfile.full_name, userProfile.email || '')}
+                {getUserInitials(
+                  userProfile.full_name,
+                  userProfile.email || "",
+                )}
               </AvatarFallback>
             </Avatar>
             <Button
@@ -61,7 +72,11 @@ export const ProfileSettings = ({ userProfile }: ProfileSettingsProps) => {
               onClick={handleAvatarClick}
               disabled={isUploading}
             >
-              {isUploading ? <Spinner className="h-3 w-3" /> : <Camera className="h-3 w-3" />}
+              {isUploading ? (
+                <Spinner className="h-3 w-3" />
+              ) : (
+                <Camera className="h-3 w-3" />
+              )}
             </Button>
           </div>
           <div>
@@ -89,7 +104,7 @@ export const ProfileSettings = ({ userProfile }: ProfileSettingsProps) => {
             <Input
               id="email"
               type="email"
-              value={userProfile.email || ''}
+              value={userProfile.email || ""}
               disabled
               className="bg-muted"
             />
@@ -104,23 +119,29 @@ export const ProfileSettings = ({ userProfile }: ProfileSettingsProps) => {
               id="full_name"
               type="text"
               placeholder="Enter your full name"
-              {...register('full_name')}
-              className={errors.full_name ? 'border-destructive' : ''}
+              {...register("full_name")}
+              className={errors.full_name ? "border-destructive" : ""}
             />
             {errors.full_name && (
-              <p className="text-sm text-destructive">{errors.full_name.message}</p>
+              <p className="text-sm text-destructive">
+                {errors.full_name.message}
+              </p>
             )}
           </div>
 
           <div className="flex gap-2 pt-4">
-            <Button type="submit" disabled={!isDirty || isUpdating} className="flex-1">
+            <Button
+              type="submit"
+              disabled={!isDirty || isUpdating}
+              className="flex-1"
+            >
               {isUpdating ? (
                 <>
                   <Spinner className="h-4 w-4 mr-2" />
                   Updating...
                 </>
               ) : (
-                'Update Profile'
+                "Update Profile"
               )}
             </Button>
             <Button

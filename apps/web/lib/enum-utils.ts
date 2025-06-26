@@ -5,7 +5,7 @@ export const createEnumConstants = <T extends string>(
     .filter((value): value is NonNullable<T> => value !== undefined)
     .reduce(
       (acc, value) => {
-        const key = value.toUpperCase().replace(/[^A-Z0-9]/g, '_');
+        const key = value.toUpperCase().replace(/[^A-Z0-9]/g, "_");
         acc[key] = value;
         return acc;
       },

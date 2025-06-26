@@ -1,5 +1,5 @@
-import { IVideo } from '../types';
-import { VideoCard } from './video-card';
+import { IVideo } from "../types";
+import { VideoCard } from "./video-card";
 
 type VideoGridProps = {
   videos: IVideo[];

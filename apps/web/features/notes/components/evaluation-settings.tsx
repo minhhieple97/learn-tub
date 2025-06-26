@@ -1,7 +1,7 @@
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Settings, Brain, Sparkles } from 'lucide-react';
-import { AIModelSelector } from '../../ai/components/ai-model-selector';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Settings, Brain, Sparkles } from "lucide-react";
+import { AIModelSelector } from "../../ai/components/ai-model-selector";
 
 type IEvaluationSettingsProps = {
   provider: string | null;

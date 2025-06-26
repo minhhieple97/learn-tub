@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { useVideoPlayer } from '@/features/videos/hooks/use-video-player';
-import { VideoPageHeader } from './video-page-header';
-import { VideoMainContent } from './video-main-content';
-import { VideoSidebar } from './video-sidebar';
-import { ResizablePanels } from './resizable-panels';
-import { IVideoPageData } from '../types';
+import { useVideoPlayer } from "@/features/videos/hooks/use-video-player";
+import { VideoPageHeader } from "./video-page-header";
+import { VideoMainContent } from "./video-main-content";
+import { VideoSidebar } from "./video-sidebar";
+import { ResizablePanels } from "./resizable-panels";
+import { IVideoPageData } from "../types";
 
 type VideoPageClientProps = {
   video: IVideoPageData;
