@@ -20,7 +20,9 @@ import {
   PAYMENT_CONFIG_URLS,
 } from "@/config/constants";
 
-const stripe = require("stripe")(env.STRIPE_SECRET_KEY);
+import Stripe from 'stripe';
+
+const stripe = new Stripe(env.STRIPE_SECRET_KEY);
 
 export const createCheckoutSessionAction = authAction
   .inputSchema(CreateCheckoutSessionSchema)
