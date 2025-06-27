@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+import { ICachedSubscriptionData } from "@/features/payments";
 import { Redis } from "@upstash/redis";
 
 const redis = Redis.fromEnv();
@@ -87,13 +87,17 @@ export class CacheClient {
     return this.del(CACHE_KEYS.USER_CREDITS(userId));
   }
 
-  static async getUserSubscription<T>(userId: string): Promise<T | null> {
-    return this.get<T>(CACHE_KEYS.USER_SUBSCRIPTION(userId));
+  static async getUserSubscription(
+    userId: string,
+  ): Promise<ICachedSubscriptionData | null> {
+    return this.get<ICachedSubscriptionData>(
+      CACHE_KEYS.USER_SUBSCRIPTION(userId),
+    );
   }
 
-  static async setUserSubscription<T>(
+  static async setUserSubscription(
     userId: string,
-    subscription: T,
+    subscription: ICachedSubscriptionData,
   ): Promise<boolean> {
     return this.set(
       CACHE_KEYS.USER_SUBSCRIPTION(userId),
@@ -129,18 +133,5 @@ export class CacheClient {
       CACHE_KEYS.USER_SUBSCRIPTION(userId),
     ];
     return this.del(keys);
-  }
-
-  static async warmUserCache(
-    userId: string,
-    profile: any,
-    credits: number,
-    subscription: any,
-  ): Promise<void> {
-    await Promise.all([
-      this.setUserProfile(userId, profile),
-      this.setUserCredits(userId, credits),
-      this.setUserSubscription(userId, subscription),
-    ]);
   }
 }

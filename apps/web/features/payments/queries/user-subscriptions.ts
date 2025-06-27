@@ -1,10 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
-import { IUserSubscriptionStatus, ISubscriptionData } from "../types";
 import {
-  CREDIT_BUCKET_STATUS,
-  USER_SUBSCRIPTION_STATUS,
-} from "@/config/constants";
+  IUserSubscriptionStatus,
+  ISubscriptionData,
+  ICachedSubscriptionData,
+} from "../types";
 import { CacheClient } from "@/lib/cache-client";
+import { TIME_CONSTANTS } from "../constants";
 
 export const getUserSubscription = async (userId: string) => {
   const supabase = await createClient();
@@ -117,11 +118,8 @@ export const updateSubscriptionStatus = async (
 
 export const getUserActiveSubscription = async (
   userId: string,
-): Promise<{ data: any; error: any }> => {
-  const cachedSubscription = await CacheClient.getUserSubscription<{
-    data: any;
-    error: any;
-  }>(userId);
+): Promise<ICachedSubscriptionData | null> => {
+  const cachedSubscription = await CacheClient.getUserSubscription(userId);
   if (cachedSubscription) {
     return cachedSubscription;
   }
@@ -150,14 +148,32 @@ export const getUserActiveSubscription = async (
     .gte("current_period_end", now)
     .maybeSingle();
 
-  const result = { data, error };
+  if (!error && data) {
+    const hasActiveSubscription = Boolean(data);
+    const isCancelled = Boolean(data.cancel_at_period_end);
 
-  // Cache the subscription data
-  if (!error) {
-    await CacheClient.setUserSubscription(userId, result);
+    let daysRemaining = 0;
+    if (data.current_period_end) {
+      const endDate = new Date(data.current_period_end);
+      const diffTime = endDate.getTime() - new Date().getTime();
+      daysRemaining = Math.max(
+        0,
+        Math.ceil(diffTime / TIME_CONSTANTS.MILLISECONDS_IN_DAY),
+      );
+    }
+
+    const cachedData = {
+      subscription: data,
+      hasActiveSubscription,
+      isCancelled,
+      daysRemaining,
+    };
+
+    await CacheClient.setUserSubscription(userId, cachedData);
+    return cachedData;
   }
 
-  return result;
+  return null;
 };
 
 export const getUserSubscriptionWithStatus = async (userId: string) => {
@@ -197,7 +213,10 @@ export const getUserSubscriptionWithStatus = async (userId: string) => {
   if (subscription?.current_period_end) {
     const endDate = new Date(subscription.current_period_end);
     const diffTime = endDate.getTime() - new Date().getTime();
-    daysRemaining = Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
+    daysRemaining = Math.max(
+      0,
+      Math.ceil(diffTime / TIME_CONSTANTS.MILLISECONDS_IN_DAY),
+    );
   }
 
   return {

@@ -42,9 +42,6 @@ export async function invalidateAllUserCache(userId: string): Promise<void> {
   await CacheClient.invalidateUserCache(userId);
 }
 
-/**
- * Invalidate cache after credit deduction operations
- */
 export async function invalidateUserCacheOnDeduction(
   userId: string,
 ): Promise<void> {
