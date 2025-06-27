@@ -33,25 +33,14 @@ export class CacheService {
           credits,
         };
 
-        // Create properly typed subscription cache data
         const subscriptionCacheData =
-          subscriptionResult.status === "fulfilled" &&
-          subscriptionResult.value.data
-            ? {
-                data: subscriptionResult.value.data,
-                error: subscriptionResult.value.error,
-              }
+          subscriptionResult.status === 'fulfilled' && subscriptionResult.value.data
+            ? subscriptionResult.value.data
             : {
-                data: {
-                  subscription: null,
-                  hasActiveSubscription: false,
-                  isCancelled: false,
-                  daysRemaining: 0,
-                },
-                error:
-                  subscriptionResult.status === "rejected"
-                    ? subscriptionResult.reason
-                    : null,
+                subscription: null,
+                hasActiveSubscription: false,
+                isCancelled: false,
+                daysRemaining: 0,
               };
 
         await Promise.all([
