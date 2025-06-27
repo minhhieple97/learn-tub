@@ -858,7 +858,6 @@ export type Database = {
           created_at: string | null;
           delay_ms: number;
           id: string;
-          job_id: string;
           priority: number;
           queue_name: string;
           updated_at: string | null;
@@ -868,7 +867,6 @@ export type Database = {
           created_at?: string | null;
           delay_ms?: number;
           id?: string;
-          job_id: string;
           priority?: number;
           queue_name?: string;
           updated_at?: string | null;
@@ -878,7 +876,6 @@ export type Database = {
           created_at?: string | null;
           delay_ms?: number;
           id?: string;
-          job_id?: string;
           priority?: number;
           queue_name?: string;
           updated_at?: string | null;

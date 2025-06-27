@@ -5,7 +5,8 @@ const nextConfig = {
     config.ignoreWarnings = [
       {
         module: /node_modules\/@supabase\/realtime-js/,
-        message: /Critical dependency: the request of a dependency is an expression/,
+        message:
+          /Critical dependency: the request of a dependency is an expression/,
       },
       // Also suppress any other realtime-related warnings
       /Critical dependency: the request of a dependency is an expression.*@supabase\/realtime-js/,
@@ -23,7 +24,7 @@ const nextConfig = {
   },
   // Experimental features that might help with bundle size
   experimental: {
-    optimizePackageImports: ['@supabase/supabase-js'],
+    optimizePackageImports: ["@supabase/supabase-js"],
   },
 };
 
