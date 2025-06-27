@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import {
   credit_bucket_status_enum,
   credit_source_type_enum,
@@ -15,6 +15,8 @@ import {
 
 @Injectable()
 export class SubscriptionRepository {
+  private readonly logger = new Logger(SubscriptionRepository.name);
+
   constructor(private readonly prisma: PrismaService) {}
 
   async findSubscriptionPlanById(
@@ -75,6 +77,7 @@ export class SubscriptionRepository {
         data,
       });
     } catch (error) {
+      this.logger.error(error);
       return null;
     }
   }

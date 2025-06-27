@@ -338,7 +338,6 @@ export class CacheService {
     }
   }
 
-  // Maintenance and utility methods
   async warmUserCache(
     userId: string,
     userData: IUserData,

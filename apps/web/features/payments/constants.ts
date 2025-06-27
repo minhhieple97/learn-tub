@@ -132,3 +132,11 @@ export const WEBHOOK_JOB_OPTIONS = {
     delay: WEBHOOK_RETRY_CONFIG.INITIAL_DELAY,
   },
 } as const;
+
+export const TIME_CONSTANTS = {
+  MILLISECONDS_IN_DAY: 1000 * 60 * 60 * 24,
+} as const;
+
+export const POSTGRES_ERROR_CODES = {
+  NO_ROWS_FOUND: "PGRST116",
+} as const;

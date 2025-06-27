@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { BullModule } from '@nestjs/bullmq';
 import { AppConfigModule, AppConfigService } from '@/src/config';
-import { QUEUE_CONFIG } from '@/src/config/constants';
 import { RedisService } from '@/src/config/redis/redis.service';
 import { RedisModule } from '@/src/config/redis/redis.module';
 

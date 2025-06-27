@@ -12,7 +12,7 @@ export class CacheClientService {
   private readonly redis: Redis;
 
   constructor(private readonly appConfigService: AppConfigService) {
-    this.redis = new Redis(this.appConfigService.redisUrl, {
+    this.redis = new Redis(this.appConfigService.upstashRedisUrl, {
       connectTimeout: 5000,
       lazyConnect: true,
     });

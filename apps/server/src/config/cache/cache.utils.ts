@@ -1,10 +1,9 @@
+import { Logger } from '@nestjs/common';
 import { CacheService } from './cache.service';
 
-// Factory function to create cache invalidation functions
 export const createCacheInvalidationFunctions = (
   cacheService: CacheService,
 ) => ({
-  // Individual user cache invalidation
   invalidateUserCacheOnCreditChange: (userId: string) =>
     cacheService.invalidateUserCacheOnCreditChange(userId),
 
@@ -28,18 +27,14 @@ export class CacheUtils {
   static async safeInvalidate(
     invalidateFunction: () => Promise<any>,
     context: string,
-    logger?: any,
+    logger?: Logger,
   ): Promise<void> {
     try {
+      logger?.log(`🔄 Starting cache invalidation: ${context}`);
       await invalidateFunction();
-      if (logger) {
-        logger.log(`🔄 Cache invalidated successfully: ${context}`);
-      }
+      logger?.log(`🔄 Cache invalidated successfully: ${context}`);
     } catch (error) {
-      if (logger) {
-        logger.error(`❌ Failed to invalidate cache: ${context}`, error);
-      }
-      // Don't throw error to avoid breaking the main flow
+      logger?.error(`❌ Failed to invalidate cache: ${context}`, error);
     }
   }
 
@@ -49,14 +44,13 @@ export class CacheUtils {
     logger?: any,
   ): Promise<void> {
     try {
+      logger?.log(`🔄 Starting batch cache invalidation: ${context}`);
       await Promise.allSettled(invalidationPromises);
       if (logger) {
         logger.log(`🔄 Batch cache invalidation completed: ${context}`);
       }
     } catch (error) {
-      if (logger) {
-        logger.error(`❌ Batch cache invalidation failed: ${context}`, error);
-      }
+      logger?.error(`❌ Batch cache invalidation failed: ${context}`, error);
     }
   }
 }

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { z } from "zod";
 import type { USER_SUBSCRIPTION_STATUS } from "@/config/constants";
 import type {
@@ -519,4 +520,35 @@ export type IWebhookJobOptions = {
     type: "exponential" | "fixed";
     delay: number;
   };
+};
+
+export type ICachedSubscriptionPlan = {
+  id: string;
+  name: string;
+  price_cents: number;
+  stripe_price_id: string;
+  credits_per_month: number;
+  stripe_product_id: string;
+};
+
+export type ICachedUserSubscription = {
+  id: string;
+  user_id: string;
+  plan_id: string;
+  stripe_subscription_id: string | null;
+  stripe_customer_id: string | null;
+  current_period_start: string | null;
+  current_period_end: string | null;
+  cancel_at_period_end: boolean | null;
+  created_at: string | null;
+  updated_at: string | null;
+  status: Database["public"]["Enums"]["subscription_status"];
+  subscription_plans: ICachedSubscriptionPlan;
+};
+
+export type ICachedSubscriptionData = {
+  subscription: ICachedUserSubscription | null;
+  hasActiveSubscription: boolean;
+  isCancelled: boolean;
+  daysRemaining: number;
 };

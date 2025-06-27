@@ -10,14 +10,12 @@ export class RedisService {
     return {
       host: this.appConfigService.redisHost,
       port: this.appConfigService.redisPort,
+      username: this.appConfigService.redisUsername,
       password: this.appConfigService.redisPassword,
-      connectTimeout: 60000,
+      connectTimeout: 5000,
       lazyConnect: true,
-      maxRetriesPerRequest: 3,
+      maxRetriesPerRequest: null,
       retryDelayOnFailover: 100,
-      tls: {
-        rejectUnauthorized: false,
-      },
     };
   }
 }

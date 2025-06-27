@@ -33,7 +33,8 @@
         "QSTASH_NEXT_SIGNING_KEY",
         "QSTASH_TOKEN",
         "NEXT_PUBLIC_STRIPE_PUBLIC_KEY",
-        "CRON_SECRET"
+        "CRON_SECRET",
+        "UPSTASH_REDIS_URL"
       ]
     },
     "dev": {

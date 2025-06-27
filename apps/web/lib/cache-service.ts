@@ -1,7 +1,7 @@
 import { IAuthUserProfileWithCredits } from "@/features/auth/types";
 import { CacheClient } from "./cache-client";
 import { getUserTotalCredits } from "@/features/payments/queries/credit-buckets";
-import { getUserActiveSubscription } from "@/features/payments/queries/user-subscriptions";
+import { getUserSubscriptionWithStatus } from "@/features/payments/queries/user-subscriptions";
 import { getProfileInSession } from "@/features/profile/queries";
 
 export class CacheService {
@@ -14,7 +14,7 @@ export class CacheService {
         await Promise.allSettled([
           getProfileInSession(),
           getUserTotalCredits(userId),
-          getUserActiveSubscription(userId),
+          getUserSubscriptionWithStatus(userId),
         ]);
 
       let profile = null;
@@ -27,23 +27,38 @@ export class CacheService {
         credits = creditsResult.value.totalCredits;
       }
 
-      let subscription = null;
-      if (subscriptionResult.status === "fulfilled") {
-        subscription = subscriptionResult.value;
-      }
-
       if (profile) {
         const userProfileWithCredits: IAuthUserProfileWithCredits = {
           ...profile,
           credits,
         };
 
-        await CacheClient.warmUserCache(
-          userId,
-          userProfileWithCredits,
-          credits,
-          subscription,
-        );
+        // Create properly typed subscription cache data
+        const subscriptionCacheData =
+          subscriptionResult.status === "fulfilled" &&
+          subscriptionResult.value.data
+            ? {
+                data: subscriptionResult.value.data,
+                error: subscriptionResult.value.error,
+              }
+            : {
+                data: {
+                  subscription: null,
+                  hasActiveSubscription: false,
+                  isCancelled: false,
+                  daysRemaining: 0,
+                },
+                error:
+                  subscriptionResult.status === "rejected"
+                    ? subscriptionResult.reason
+                    : null,
+              };
+
+        await Promise.all([
+          CacheClient.setUserProfile(userId, userProfileWithCredits),
+          CacheClient.setUserCredits(userId, credits),
+          CacheClient.setUserSubscription(userId, subscriptionCacheData),
+        ]);
       }
 
       return { success: true };
