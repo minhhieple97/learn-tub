@@ -34,7 +34,8 @@ export class CacheService {
         };
 
         const subscriptionCacheData =
-          subscriptionResult.status === 'fulfilled' && subscriptionResult.value.data
+          subscriptionResult.status === "fulfilled" &&
+          subscriptionResult.value.data
             ? subscriptionResult.value.data
             : {
                 subscription: null,

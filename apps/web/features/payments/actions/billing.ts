@@ -7,28 +7,30 @@ import { checkProfileByUserId } from "@/lib/require-auth";
 import { getUserActiveSubscription } from "../queries";
 import { PAYMENT_CONFIG_URLS } from "@/config/constants";
 
-import Stripe from 'stripe';
+import Stripe from "stripe";
 
 const stripe = new Stripe(env.STRIPE_SECRET_KEY);
 
-export const manageBillingAction = authAction.action(async ({ ctx: { user } }) => {
-  const profile = await checkProfileByUserId(user.id);
+export const manageBillingAction = authAction.action(
+  async ({ ctx: { user } }) => {
+    const profile = await checkProfileByUserId(user.id);
 
-  const subscriptionData = await getUserActiveSubscription(profile.id);
+    const subscriptionData = await getUserActiveSubscription(profile.id);
 
-  if (!subscriptionData?.subscription?.stripe_customer_id) {
-    throw new ActionError('No active subscription found');
-  }
+    if (!subscriptionData?.subscription?.stripe_customer_id) {
+      throw new ActionError("No active subscription found");
+    }
 
-  const session = await stripe.billingPortal.sessions.create({
-    customer: subscriptionData.subscription.stripe_customer_id,
-    return_url: PAYMENT_CONFIG_URLS.cancel_url,
-  });
+    const session = await stripe.billingPortal.sessions.create({
+      customer: subscriptionData.subscription.stripe_customer_id,
+      return_url: PAYMENT_CONFIG_URLS.cancel_url,
+    });
 
-  if (!session.url) {
-    throw new ActionError('Failed to create billing portal session');
-  }
+    if (!session.url) {
+      throw new ActionError("Failed to create billing portal session");
+    }
 
-  console.log('🔗 Billing portal session created successfully');
-  redirect(session.url);
-});
+    console.log("🔗 Billing portal session created successfully");
+    redirect(session.url);
+  },
+);

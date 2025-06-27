@@ -20,7 +20,7 @@ import {
   PAYMENT_CONFIG_URLS,
 } from "@/config/constants";
 
-import Stripe from 'stripe';
+import Stripe from "stripe";
 
 const stripe = new Stripe(env.STRIPE_SECRET_KEY);
 
