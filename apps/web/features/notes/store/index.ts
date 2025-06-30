@@ -5,12 +5,11 @@ import { devtools } from "zustand/middleware";
 import { createClient } from "@/lib/supabase/client";
 import {
   TOAST_MESSAGES,
-  AI_CONFIG,
   AI_API,
   CHUNK_TYPES,
   ERROR_MESSAGES,
   STATUS_STREAMING,
-} from "@/config/constants";
+} from '@/config/constants';
 import type { INote } from "../types";
 import { toast } from "@/hooks/use-toast";
 import { IFeedback } from "@/types";

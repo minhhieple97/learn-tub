@@ -1,22 +1,21 @@
 "use client";
 
 import type React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
-import { TimestampDisplay } from "./timestamp-display";
-import { TagsSection } from "./tags-section";
-import { NoteFormActions } from "./note-form-actions";
-import { useNoteEditorForm } from "../hooks";
-import { VALIDATION_LIMITS } from "@/config/constants";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { TimestampDisplay } from './timestamp-display';
+import { TagsSection } from './tags-section';
+import { NoteFormActions } from './note-form-actions';
+import { RichTextEditor } from './rich-text-editor';
+import { useNoteEditorForm } from '../hooks';
+import { useRichTextEditor } from '../hooks/use-rich-text-editor';
+import { VALIDATION_LIMITS } from '@/config/constants';
 
 export const NoteEditorForm = () => {
   const {
-    formContent,
     currentTimestamp,
     isEditing,
     isSaveDisabled,
     isFormLoading,
-    handleContentChange,
     handleTagInputChange,
     handleAddTag,
     handleKeyDown,
@@ -24,6 +23,8 @@ export const NoteEditorForm = () => {
     removeTag,
     cancelEditing,
   } = useNoteEditorForm();
+
+  const { content, onContentChange, disabled, videoElement, userId, videoId } = useRichTextEditor();
 
   return (
     <Card>
@@ -34,11 +35,14 @@ export const NoteEditorForm = () => {
         <TimestampDisplay timestamp={currentTimestamp} clickable={false} />
 
         <div className="space-y-2">
-          <Textarea
+          <RichTextEditor
+            content={content}
+            onContentChange={onContentChange}
             placeholder="Write your notes here..."
-            value={formContent}
-            onChange={(e) => handleContentChange(e.target.value)}
-            className="min-h-[100px]"
+            videoElement={videoElement}
+            userId={userId}
+            videoId={videoId}
+            disabled={disabled}
           />
         </div>
 

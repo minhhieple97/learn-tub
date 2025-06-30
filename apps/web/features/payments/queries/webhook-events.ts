@@ -107,20 +107,15 @@ export async function createWebhookJob(
 
   const jobData: WebhookJobInsert = {
     webhook_event_id: webhookEventId,
-    job_id: jobId,
     queue_name: queueName,
     priority,
     delay_ms: delayMs,
   };
 
-  const { data, error } = await supabase
-    .from("webhook_jobs")
-    .insert(jobData)
-    .select()
-    .single();
+  const { data, error } = await supabase.from('webhook_jobs').insert(jobData).select().single();
 
   if (error) {
-    console.error("Failed to create webhook job:", error);
+    console.error('Failed to create webhook job:', error);
   }
 
   return { data, error };

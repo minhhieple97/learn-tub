@@ -58,3 +58,44 @@ export const EvaluateNoteQuerySchema = z.object({
   noteId: z.string().uuid("Invalid note ID format"),
   aiModelId: z.string().uuid("Invalid AI Model ID"),
 });
+
+export const uploadScreenshotInputSchema = z.object({
+  fileData: z.string(), // base64 encoded file data
+  fileName: z.string().min(1, 'File name is required'),
+  fileSize: z.number().positive('File size must be positive'),
+  mimeType: z.string().min(1, 'MIME type is required'),
+});
+
+export const saveScreenshotMetadataInputSchema = z.object({
+  videoId: z.string().uuid('Invalid video ID'),
+  fileName: z.string().min(1, 'File name is required'),
+  fileSize: z.number().positive('File size must be positive'),
+  width: z.number().positive('Width must be positive'),
+  height: z.number().positive('Height must be positive'),
+  timestamp: z.number().min(0, 'Timestamp must be non-negative'),
+  videoTitle: z.string().optional(),
+});
+
+export const captureAndSaveScreenshotInputSchema = z.object({
+  videoId: z.string().uuid('Invalid video ID'),
+  fileData: z.string(), // base64 encoded canvas data
+  fileName: z.string().min(1, 'File name is required'),
+  fileSize: z.number().positive('File size must be positive'),
+  width: z.number().positive('Width must be positive'),
+  height: z.number().positive('Height must be positive'),
+  timestamp: z.number().min(0, 'Timestamp must be non-negative'),
+  videoTitle: z.string().optional(),
+  noteId: z.string().uuid().optional(),
+});
+
+export const handleImagePasteInputSchema = z.object({
+  fileData: z.string(), // base64 encoded file data
+  fileName: z.string().min(1, 'File name is required'),
+  fileSize: z.number().positive('File size must be positive'),
+  mimeType: z.string().min(1, 'MIME type is required'),
+});
+
+export const deleteImageInputSchema = z.object({
+  imageUrl: z.string().url('Invalid image URL'),
+  storagePath: z.string().min(1, 'Storage path is required'),
+});

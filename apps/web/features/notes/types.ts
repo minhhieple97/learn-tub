@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   IFeedback,
   IApiResponse,
@@ -5,9 +6,9 @@ import {
   IAsyncHookReturn,
   IAsyncOperationHook,
   ISearchHookReturn,
-} from "@/types";
-import { STATUS_STREAMING } from "@/config/constants";
-import { IVideoPageData } from "../videos/types";
+} from '@/types';
+import { STATUS_STREAMING } from '@/config/constants';
+import { IVideoPageData } from '../videos/types';
 
 export type INote = {
   id: string;
@@ -212,3 +213,137 @@ export type INoteEvaluationStatus =
   | typeof STATUS_STREAMING.STREAMING
   | typeof STATUS_STREAMING.COMPLETED
   | typeof STATUS_STREAMING.ERROR;
+
+// Rich Text Editor Types
+export type IScreenshotResult = {
+  file: File;
+  width: number;
+  height: number;
+  timestamp: number;
+};
+
+export type IUploadResult = {
+  id: string;
+  publicUrl: string;
+  fileName: string;
+  fileSize: number;
+};
+
+export type IRichTextEditorProps = {
+  content: string;
+  onContentChange: (content: string) => void;
+  placeholder?: string;
+  videoElement?: HTMLVideoElement | null;
+  noteId?: string;
+  userId: string;
+  videoId: string;
+  videoTitle?: string;
+  disabled?: boolean;
+};
+
+export type IUseRichTextEditorProps = {
+  initialContent?: string;
+  onContentChange: (content: string) => void;
+  videoId?: string;
+  noteId?: string;
+};
+
+export type IUseRichTextEditorReturn = {
+  editor: any; // TipTap Editor instance
+  isUploading: boolean;
+  uploadStatus: string;
+  handleScreenshot: () => Promise<void>;
+  handleImageUpload: (file: File) => Promise<void>;
+  handleImagePaste: (event: ClipboardEvent) => Promise<void>;
+  canTakeScreenshot: boolean;
+  videoElement: HTMLVideoElement | null;
+  setVideoElement: (element: HTMLVideoElement | null) => void;
+};
+
+export type IUseRichTextEditorHookReturn = {
+  content: string;
+  onContentChange: (content: string) => void;
+  disabled: boolean;
+  videoElement: HTMLVideoElement | null;
+  setVideoElementRef: (element: HTMLVideoElement | null) => void;
+  userId: string;
+  videoId: string;
+  isLoading: boolean;
+  isReady: boolean;
+};
+
+// Database Types
+export type IMediaFile = {
+  id: string;
+  user_id: string;
+  file_name: string;
+  file_type: 'image' | 'video_screenshot';
+  file_size: number;
+  mime_type: string;
+  storage_path: string;
+  public_url: string | null;
+  width: number | null;
+  height: number | null;
+  metadata: Record<string, any>;
+  created_at: string;
+  updated_at: string;
+};
+
+export type IVideoScreenshot = {
+  id: string;
+  media_file_id: string;
+  video_id: string;
+  user_id: string;
+  timestamp_seconds: number;
+  youtube_timestamp: string | null;
+  video_title: string | null;
+  video_thumbnail_url: string | null;
+  created_at: string;
+};
+
+export type INoteMedia = {
+  id: string;
+  note_id: string;
+  media_file_id: string;
+  position_in_content: number | null;
+  created_at: string;
+};
+
+// Extended Note Type with Rich Content
+export type IRichNote = INote & {
+  content_type: 'plain_text' | 'rich_text';
+  rich_content: Record<string, any> | null;
+  content_version: number;
+};
+
+// API Request/Response Types
+export type ILinkScreenshotToNoteRequest = {
+  mediaFileId: string;
+  position?: number;
+};
+
+export type IMediaUploadFormData = {
+  file: File;
+  fileType?: 'image' | 'video_screenshot';
+  videoId?: string;
+  timestamp?: string;
+  videoTitle?: string;
+};
+
+export type IMediaUploadResponse = {
+  success: boolean;
+  data: {
+    id: string;
+    publicUrl: string;
+    fileName: string;
+    fileSize: number;
+    mediaFileId: string;
+  };
+};
+
+export type INoteMediaResponse = {
+  success: boolean;
+  data: (INoteMedia & {
+    media_files: IMediaFile;
+  })[];
+};
