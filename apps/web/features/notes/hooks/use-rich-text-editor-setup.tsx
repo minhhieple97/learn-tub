@@ -12,11 +12,10 @@ import { useNotesStore } from '../store';
 type IUseRichTextEditorSetupProps = {
   content: JSONContent | string;
   placeholder?: string;
-  userId: string;
   videoId: string;
   videoTitle?: string;
   noteId?: string;
-  videoElement?: HTMLVideoElement | null;
+  videoElement: HTMLVideoElement | null;
   disabled?: boolean;
   ImageWithDelete: React.ComponentType<{ node: any; deleteNode: () => void; disabled: boolean }>;
 };
@@ -57,7 +56,6 @@ const createImageExtension = (
 export const useRichTextEditorSetup = ({
   content,
   placeholder = 'Write your notes here...',
-  userId,
   videoId,
   videoTitle,
   noteId,
@@ -79,7 +77,6 @@ export const useRichTextEditorSetup = ({
     handleManualImageDelete,
     triggerImageUpload,
   } = useRichTextEditorActions({
-    userId,
     videoId,
     videoTitle,
     noteId,

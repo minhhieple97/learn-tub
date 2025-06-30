@@ -233,9 +233,8 @@ export type IUploadResult = {
 export type IRichTextEditorProps = {
   content: JSONContent;
   placeholder?: string;
-  videoElement?: HTMLVideoElement | null;
+  videoElement: HTMLVideoElement | null;
   noteId?: string;
-  userId: string;
   videoId: string;
   videoTitle?: string;
   disabled?: boolean;
@@ -265,7 +264,6 @@ export type IUseRichTextEditorHookReturn = {
   disabled: boolean;
   videoElement: HTMLVideoElement | null;
   setVideoElementRef: (element: HTMLVideoElement | null) => void;
-  userId: string;
   videoId: string;
   isLoading: boolean;
   isReady: boolean;
