@@ -6,7 +6,7 @@ import { useAction } from "next-safe-action/hooks";
 import { loginSchema } from "../schemas";
 import { loginAction } from "../actions";
 import type { ILoginFormData } from "../types";
-import { toast, useToast } from "@/hooks/use-toast";
+import { toast } from '@/hooks/use-toast';
 
 type UseLoginReturn = {
   form: ReturnType<typeof useForm<ILoginFormData>>;
@@ -22,13 +22,13 @@ export const useLogin = (): UseLoginReturn => {
   const { execute, isPending } = useAction(loginAction, {
     onError: ({ error }) => {
       toast.error({
-        title: "Error",
-        description: error.serverError || "An unexpected error occurred",
+        title: 'Error',
+        description: error.serverError || 'An unexpected error occurred',
       });
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       toast.success({
-        description: "Successfully signed in!",
+        description: 'Successfully signed in!',
       });
     },
   });
