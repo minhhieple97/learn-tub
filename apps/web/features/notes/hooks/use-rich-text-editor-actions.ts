@@ -13,7 +13,6 @@ import {
 import { Editor } from '@tiptap/react';
 
 type IUseRichTextEditorActionsProps = {
-  userId: string;
   videoId: string;
   videoTitle?: string;
   noteId?: string;

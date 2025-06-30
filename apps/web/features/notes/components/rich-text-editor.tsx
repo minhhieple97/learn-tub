@@ -7,13 +7,11 @@ import { IRichTextEditorProps } from '@/features/notes/types';
 import { useRichTextEditorSetup } from '@/features/notes/hooks';
 import { RICH_TEXT_EDITOR } from '@/features/notes/constants';
 import { ImageWithDelete, Toolbar, StatusBar, LoadingState } from './rich-text-editor/index';
-import { useNotesStore } from '../store';
 
 export const RichTextEditor = ({
   content,
   placeholder = 'Write your notes here...',
   videoElement,
-  userId,
   videoId,
   videoTitle,
   noteId,
@@ -31,7 +29,6 @@ export const RichTextEditor = ({
   } = useRichTextEditorSetup({
     content,
     placeholder,
-    userId,
     videoId,
     videoTitle,
     noteId,
@@ -39,11 +36,9 @@ export const RichTextEditor = ({
     disabled,
     ImageWithDelete,
   });
-  const { setFormContent } = useNotesStore();
   if (!editor) {
     return <LoadingState />;
   }
-
   return (
     <Card>
       <CardHeader className="pb-3">

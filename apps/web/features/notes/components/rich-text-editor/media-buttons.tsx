@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Camera, Image as ImageIcon, Loader2 } from 'lucide-react';
 import { RICH_TEXT_EDITOR, KEYBOARD_SHORTCUTS } from '@/features/notes/constants';
 
-type MediaButtonsProps = {
+type IMediaButtonsProps = {
   onScreenshotClick: () => void;
   onImageUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
   triggerImageUpload: () => void;
@@ -25,7 +25,7 @@ export const MediaButtons = ({
   isUploadingImage,
   disabled,
   videoElement,
-}: MediaButtonsProps) => {
+}: IMediaButtonsProps) => {
   return (
     <>
       <Button

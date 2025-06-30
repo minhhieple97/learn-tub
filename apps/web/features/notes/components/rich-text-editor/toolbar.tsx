@@ -6,7 +6,7 @@ import { Separator } from '@/components/ui/separator';
 import { FormattingButtons } from './formatting-buttons';
 import { MediaButtons } from './media-buttons';
 
-type ToolbarProps = {
+type IToolbarProps = {
   editor: Editor;
   onScreenshotClick: () => void;
   onImageUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
@@ -28,7 +28,7 @@ export const Toolbar = ({
   isUploadingImage,
   disabled,
   videoElement,
-}: ToolbarProps) => {
+}: IToolbarProps) => {
   return (
     <div className="flex items-center gap-1 flex-wrap">
       <FormattingButtons editor={editor} disabled={disabled} />
