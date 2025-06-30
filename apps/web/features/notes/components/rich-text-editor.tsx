@@ -7,10 +7,10 @@ import { IRichTextEditorProps } from '@/features/notes/types';
 import { useRichTextEditorSetup } from '@/features/notes/hooks';
 import { RICH_TEXT_EDITOR } from '@/features/notes/constants';
 import { ImageWithDelete, Toolbar, StatusBar, LoadingState } from './rich-text-editor/index';
+import { useNotesStore } from '../store';
 
 export const RichTextEditor = ({
   content,
-  onContentChange,
   placeholder = 'Write your notes here...',
   videoElement,
   userId,
@@ -30,7 +30,6 @@ export const RichTextEditor = ({
     triggerImageUpload,
   } = useRichTextEditorSetup({
     content,
-    onContentChange,
     placeholder,
     userId,
     videoId,
@@ -40,7 +39,7 @@ export const RichTextEditor = ({
     disabled,
     ImageWithDelete,
   });
-
+  const { setFormContent } = useNotesStore();
   if (!editor) {
     return <LoadingState />;
   }

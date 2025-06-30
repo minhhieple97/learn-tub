@@ -1,16 +1,16 @@
 'use client';
 
 import { useCallback, useMemo, useState, useEffect } from 'react';
-import { useEditor, Editor, ReactNodeViewRenderer } from '@tiptap/react';
+import { useEditor, Editor, ReactNodeViewRenderer, JSONContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
 import Placeholder from '@tiptap/extension-placeholder';
 import { RICH_TEXT_EDITOR } from '@/features/notes/constants';
 import { useRichTextEditorActions } from './use-rich-text-editor-actions';
+import { useNotesStore } from '../store';
 
-type UseRichTextEditorSetupProps = {
-  content: string;
-  onContentChange: (content: string) => void;
+type IUseRichTextEditorSetupProps = {
+  content: JSONContent | string;
   placeholder?: string;
   userId: string;
   videoId: string;
@@ -21,7 +21,7 @@ type UseRichTextEditorSetupProps = {
   ImageWithDelete: React.ComponentType<{ node: any; deleteNode: () => void; disabled: boolean }>;
 };
 
-type UseRichTextEditorSetupReturn = {
+type IUseRichTextEditorSetupReturn = {
   editor: Editor | null;
   isCapturingScreenshot: boolean;
   isUploadingImage: boolean;
@@ -56,7 +56,6 @@ const createImageExtension = (
 
 export const useRichTextEditorSetup = ({
   content,
-  onContentChange,
   placeholder = 'Write your notes here...',
   userId,
   videoId,
@@ -65,7 +64,7 @@ export const useRichTextEditorSetup = ({
   videoElement,
   disabled = false,
   ImageWithDelete,
-}: UseRichTextEditorSetupProps): UseRichTextEditorSetupReturn => {
+}: IUseRichTextEditorSetupProps): IUseRichTextEditorSetupReturn => {
   const [previousImages, setPreviousImages] = useState<string[]>([]);
 
   const {
@@ -93,7 +92,7 @@ export const useRichTextEditorSetup = ({
       createImageExtension(handleImageDelete, handleManualImageDelete, disabled, ImageWithDelete),
     [handleImageDelete, handleManualImageDelete, disabled, ImageWithDelete],
   );
-
+  const { setFormContent } = useNotesStore();
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -108,10 +107,8 @@ export const useRichTextEditorSetup = ({
     content,
     immediatelyRender: false,
     onUpdate: ({ editor }) => {
-      const html = editor.getHTML();
-      onContentChange(html);
-
-      // Check for manually deleted images
+      const json = editor.getJSON();
+      setFormContent(json);
       const currentImages: string[] = [];
       editor.state.doc.descendants((node) => {
         if (node.type.name === 'image' && node.attrs.src) {

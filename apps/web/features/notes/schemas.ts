@@ -32,13 +32,15 @@ export const noteEditorPropsSchema = z.object({
 });
 
 export const saveNoteInputSchema = z.object({
-  videoId: z.string().uuid("Invalid video ID"),
+  videoId: z.string().uuid('Invalid video ID'),
   content: z
-    .string()
-    .min(1, "Content is required")
-    .max(5000, "Content is too long"),
-  timestamp: z.number().min(0, "Timestamp must be positive"),
-  tags: z.array(z.string().min(1).max(50)).max(10, "Too many tags").default([]),
+    .object({
+      type: z.string().optional(),
+      content: z.array(z.any()).optional(),
+    })
+    .passthrough(),
+  timestamp: z.number().min(0, 'Timestamp must be positive'),
+  tags: z.array(z.string().min(1).max(50)).max(10, 'Too many tags').default([]),
 });
 
 export const updateNoteInputSchema = z.object({

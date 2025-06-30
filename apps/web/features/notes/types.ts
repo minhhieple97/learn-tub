@@ -9,10 +9,11 @@ import {
 } from '@/types';
 import { STATUS_STREAMING } from '@/config/constants';
 import { IVideoPageData } from '../videos/types';
+import { JSONContent } from '@tiptap/react';
 
 export type INote = {
   id: string;
-  content: string;
+  content: JSONContent;
   timestamp_seconds: number | null;
   tags: string[] | null;
   created_at: string | null;
@@ -230,8 +231,7 @@ export type IUploadResult = {
 };
 
 export type IRichTextEditorProps = {
-  content: string;
-  onContentChange: (content: string) => void;
+  content: JSONContent;
   placeholder?: string;
   videoElement?: HTMLVideoElement | null;
   noteId?: string;
@@ -261,8 +261,7 @@ export type IUseRichTextEditorReturn = {
 };
 
 export type IUseRichTextEditorHookReturn = {
-  content: string;
-  onContentChange: (content: string) => void;
+  content: JSONContent;
   disabled: boolean;
   videoElement: HTMLVideoElement | null;
   setVideoElementRef: (element: HTMLVideoElement | null) => void;
@@ -346,4 +345,9 @@ export type INoteMediaResponse = {
   data: (INoteMedia & {
     media_files: IMediaFile;
   })[];
+};
+
+export type INotesSearchResponse = {
+  success: boolean;
+  data: INote[];
 };

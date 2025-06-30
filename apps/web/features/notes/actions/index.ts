@@ -11,7 +11,6 @@ export const saveNoteAction = authAction
   .inputSchema(saveNoteInputSchema)
   .action(async ({ parsedInput: { videoId, content, timestamp, tags }, ctx: { user } }) => {
     const profile = await checkProfileByUserId(user.id);
-
     const { data, error } = await createNote({
       videoId,
       userId: profile.id,
@@ -19,8 +18,8 @@ export const saveNoteAction = authAction
       timestamp,
       tags,
     });
-
     if (error || !data) {
+      console.error('Failed to save note:', error);
       throw new ActionError(`Failed to save note: ${error?.message || 'Unknown error'}`);
     }
 

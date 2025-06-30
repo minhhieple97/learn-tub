@@ -7,17 +7,13 @@ import { VideoSidebar } from "./video-sidebar";
 import { ResizablePanels } from "./resizable-panels";
 import { IVideoPageData } from "../types";
 
-type VideoPageClientProps = {
+type IVideoPageClientProps = {
   video: IVideoPageData;
 };
 
-export const VideoPageClient = ({ video }: VideoPageClientProps) => {
-  const {
-    currentTimestamp,
-    targetSeekTime,
-    handleTimeUpdate,
-    handleNoteTimestampClick,
-  } = useVideoPlayer();
+export const VideoPageClient = ({ video }: IVideoPageClientProps) => {
+  const { currentTimestamp, targetSeekTime, handleTimeUpdate, handleNoteTimestampClick } =
+    useVideoPlayer();
 
   const leftPanel = (
     <VideoMainContent

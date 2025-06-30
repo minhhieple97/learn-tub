@@ -1,8 +1,7 @@
 "use client";
 
 import { create } from "zustand";
-import { devtools } from "zustand/middleware";
-import { createClient } from "@/lib/supabase/client";
+import { devtools } from 'zustand/middleware';
 import {
   TOAST_MESSAGES,
   AI_API,
@@ -10,27 +9,23 @@ import {
   ERROR_MESSAGES,
   STATUS_STREAMING,
 } from '@/config/constants';
-import type { INote } from "../types";
-import { toast } from "@/hooks/use-toast";
-import { IFeedback } from "@/types";
-import { INoteEvaluationStatus } from "../types";
+import type { INote } from '../types';
+import { toast } from '@/hooks/use-toast';
+import { IFeedback } from '@/types';
+import { INoteEvaluationStatus } from '../types';
+import { saveNoteAction, updateNoteAction, deleteNoteAction } from '../actions';
+import { JSONContent } from '@tiptap/react';
 
 type NotesState = {
-  notes: INote[];
-  isLoading: boolean;
-  error: string | null;
-  searchQuery: string;
-  searchResults: INote[];
-  isSearching: boolean;
-  isSearchActive: boolean;
-  resultCount: number;
-  formContent: string;
+  // Form state
+  formContent: JSONContent;
   formTags: string[];
   tagInput: string;
   editingNote: INote | null;
   isFormLoading: boolean;
-  currentVideoId: string | null;
+  currentVideoId: string;
   currentTimestamp: number;
+  searchQuery: string;
 
   // Evaluation state
   evaluation: {
@@ -51,22 +46,12 @@ type NotesState = {
 
   setCurrentVideo: (videoId: string) => void;
   setCurrentTimestamp: (timestamp: number) => void;
-  loadNotes: (videoId: string) => Promise<void>;
-  saveNote: (
-    content: string,
-    tags: string[],
-    timestamp: number,
-  ) => Promise<void>;
-  updateNote: (
-    noteId: string,
-    content: string,
-    tags: string[],
-  ) => Promise<void>;
+  saveNote: (content: JSONContent, tags: string[], timestamp: number) => Promise<void>;
+  updateNote: (noteId: string, content: JSONContent, tags: string[]) => Promise<void>;
   deleteNote: (noteId: string) => Promise<void>;
   setSearchQuery: (query: string) => void;
-  performSearch: (query?: string) => Promise<void>;
   clearSearch: () => void;
-  setFormContent: (content: string) => void;
+  setFormContent: (content: JSONContent) => void;
   setFormTags: (tags: string[]) => void;
   setTagInput: (input: string) => void;
   addTag: () => void;
@@ -74,8 +59,6 @@ type NotesState = {
   startEditing: (note: INote) => void;
   cancelEditing: () => void;
   resetForm: () => void;
-  getDisplayNotes: () => INote[];
-  getSearchResultCount: () => number;
 
   openEvaluation: (noteId: string) => void;
   closeEvaluation: () => void;
@@ -93,33 +76,27 @@ type NotesState = {
 export const useNotesStore = create<NotesState>()(
   devtools(
     (set, get) => ({
-      notes: [],
-      isLoading: false,
-      error: null,
-      searchQuery: "",
-      searchResults: [],
-      isSearching: false,
-      isSearchActive: false,
-      resultCount: 0,
-      formContent: "",
+      // Form state
+      formContent: '',
       formTags: [],
-      tagInput: "",
+      tagInput: '',
       editingNote: null,
       isFormLoading: false,
-      currentVideoId: null,
+      currentVideoId: '',
       currentTimestamp: 0,
+      searchQuery: '',
 
       // Evaluation initial state
       evaluation: {
         isOpen: false,
         showSettings: false,
-        activeTab: "evaluate",
+        activeTab: 'evaluate',
         provider: null,
-        aiModelId: "",
+        aiModelId: '',
         currentNoteId: null,
         status: STATUS_STREAMING.IDLE,
         feedback: null,
-        streamingContent: "",
+        streamingContent: '',
         error: null,
         isEvaluating: false,
         isCompleted: false,
@@ -128,76 +105,35 @@ export const useNotesStore = create<NotesState>()(
 
       setCurrentVideo: (videoId: string) => {
         set({ currentVideoId: videoId });
-        get().loadNotes(videoId);
       },
 
       setCurrentTimestamp: (timestamp: number) => {
         set({ currentTimestamp: timestamp });
       },
 
-      loadNotes: async (videoId: string) => {
-        set({ isLoading: true, error: null });
-
-        try {
-          const supabase = createClient();
-          const { data: user } = await supabase.auth.getUser();
-
-          if (!user.user) {
-            throw new Error("User not authenticated");
-          }
-
-          const { data, error } = await supabase
-            .from("notes")
-            .select("*")
-            .eq("video_id", videoId)
-            .eq("user_id", user.user.id)
-            .order("updated_at", { ascending: false });
-
-          if (error) throw error;
-
-          set({ notes: data || [], isLoading: false });
-        } catch (error) {
-          console.error("Error loading notes:", error);
-          set({
-            error:
-              error instanceof Error ? error.message : "Failed to load notes",
-            isLoading: false,
-          });
-        }
-      },
-
-      saveNote: async (content: string, tags: string[], timestamp: number) => {
+      saveNote: async (content: JSONContent, tags: string[], timestamp: number) => {
         const { currentVideoId } = get();
-        if (!currentVideoId || !content.trim()) return;
-
+        if (!currentVideoId) return;
         set({ isFormLoading: true });
-
         try {
-          const supabase = createClient();
-          const { data: user } = await supabase.auth.getUser();
+          const result = await saveNoteAction({
+            videoId: currentVideoId,
+            content,
+            timestamp,
+            tags: tags.length > 0 ? tags : [],
+          });
 
-          if (!user.user) {
-            throw new Error("User not authenticated");
+          if (result?.data?.success) {
+            get().resetForm();
+            // Note: Query invalidation will be handled by the component using useInvalidateNotes
+            toast.success({
+              description: TOAST_MESSAGES.NOTE_SAVED_SUCCESS,
+            });
+          } else {
+            throw new Error(result?.data?.message || 'Failed to save note');
           }
-
-          const { error } = await supabase.from("notes").insert({
-            video_id: currentVideoId,
-            user_id: user.user.id,
-            content: content.trim(),
-            timestamp_seconds: timestamp,
-            tags: tags.length > 0 ? tags : null,
-          });
-
-          if (error) throw error;
-
-          await get().loadNotes(currentVideoId);
-          get().resetForm();
-
-          toast.success({
-            description: TOAST_MESSAGES.NOTE_SAVED_SUCCESS,
-          });
         } catch (error) {
-          console.error("Error saving note:", error);
+          console.error('Error saving note:', error);
           toast.error({
             description: TOAST_MESSAGES.NOTE_SAVE_ERROR,
           });
@@ -206,33 +142,26 @@ export const useNotesStore = create<NotesState>()(
         }
       },
 
-      updateNote: async (noteId: string, content: string, tags: string[]) => {
+      updateNote: async (noteId: string, content: JSONContent, tags: string[]) => {
         set({ isFormLoading: true });
-        const { currentVideoId } = get();
-        if (!currentVideoId) return;
 
         try {
-          const supabase = createClient();
-          const { error } = await supabase
-            .from("notes")
-            .update({
-              content: content.trim(),
-              tags: tags.length > 0 ? tags : null,
-              updated_at: new Date().toISOString(),
-            })
-            .eq("id", noteId);
-
-          if (error) throw error;
-
-          await get().loadNotes(currentVideoId);
-
-          get().resetForm();
-
-          toast.success({
-            description: TOAST_MESSAGES.NOTE_UPDATED_SUCCESS,
+          const result = await updateNoteAction({
+            noteId,
+            content: content.trim(),
+            tags: tags.length > 0 ? tags : [],
           });
+
+          if (result?.data?.success) {
+            get().resetForm();
+            toast.success({
+              description: TOAST_MESSAGES.NOTE_UPDATED_SUCCESS,
+            });
+          } else {
+            throw new Error(result?.data?.message || 'Failed to update note');
+          }
         } catch (error) {
-          console.error("Error updating note:", error);
+          console.error('Error updating note:', error);
           toast.error({
             description: TOAST_MESSAGES.NOTE_UPDATE_ERROR,
           });
@@ -243,26 +172,19 @@ export const useNotesStore = create<NotesState>()(
 
       deleteNote: async (noteId: string) => {
         try {
-          const supabase = createClient();
-          const { error } = await supabase
-            .from("notes")
-            .delete()
-            .eq("id", noteId);
-
-          if (error) throw error;
-
-          set((state) => ({
-            notes: state.notes.filter((note) => note.id !== noteId),
-            searchResults: state.searchResults.filter(
-              (note) => note.id !== noteId,
-            ),
-          }));
-
-          toast.success({
-            description: TOAST_MESSAGES.NOTE_DELETED_SUCCESS,
+          const result = await deleteNoteAction({
+            noteId,
           });
+
+          if (result?.data?.success) {
+            toast.success({
+              description: TOAST_MESSAGES.NOTE_DELETED_SUCCESS,
+            });
+          } else {
+            throw new Error(result?.data?.message || 'Failed to delete note');
+          }
         } catch (error) {
-          console.error("Error deleting note:", error);
+          console.error('Error deleting note:', error);
           toast.error({
             description: TOAST_MESSAGES.NOTE_DELETE_ERROR,
           });
@@ -271,84 +193,15 @@ export const useNotesStore = create<NotesState>()(
 
       setSearchQuery: (query: string) => {
         set({ searchQuery: query });
-        if (query.trim()) {
-          get().performSearch();
-        } else {
-          set({ searchResults: [], isSearchActive: false });
-        }
-      },
-
-      performSearch: async (query?: string) => {
-        const { searchQuery: storeQuery, currentVideoId } = get();
-        const searchQuery = query || storeQuery;
-        if (!currentVideoId) return;
-
-        const hasQuery = searchQuery.trim();
-
-        if (!hasQuery) {
-          set({ searchResults: [], isSearchActive: false });
-          return;
-        }
-
-        set({ isSearching: true, searchQuery });
-
-        try {
-          const supabase = createClient();
-          const dataUser = await supabase.auth.getUser();
-          const user = dataUser.data.user;
-          if (!user) return;
-          const { data: profile } = await supabase
-            .from("profiles")
-            .select("*")
-            .eq("id", user.id)
-            .single();
-          if (!profile) return;
-          let queryBuilder = supabase
-            .from("notes")
-            .select("*")
-            .eq("video_id", currentVideoId)
-            .eq("user_id", profile.id);
-
-          if (hasQuery) {
-            queryBuilder = queryBuilder.ilike(
-              "content",
-              `%${searchQuery.trim()}%`,
-            );
-          }
-
-          const { data, error } = await queryBuilder.order("created_at", {
-            ascending: false,
-          });
-
-          if (error) throw error;
-
-          set({
-            searchResults: data || [],
-            isSearchActive: true,
-            isSearching: false,
-            resultCount: data?.length || 0,
-          });
-        } catch (error) {
-          console.error("Error performing search:", error);
-          set({
-            searchResults: [],
-            isSearchActive: false,
-            isSearching: false,
-          });
-        }
       },
 
       clearSearch: () => {
         set({
-          searchQuery: "",
-          searchResults: [],
-          isSearchActive: false,
-          isSearching: false,
-          resultCount: 0,
+          searchQuery: '',
         });
       },
 
-      setFormContent: (content: string) => {
+      setFormContent: (content: JSONContent) => {
         set({ formContent: content });
       },
 
@@ -366,7 +219,7 @@ export const useNotesStore = create<NotesState>()(
         if (tagInput && !formTags.includes(tagInput)) {
           set({
             formTags: [...formTags, tagInput],
-            tagInput: "",
+            tagInput: '',
           });
         }
       },
@@ -380,9 +233,9 @@ export const useNotesStore = create<NotesState>()(
       startEditing: (note: INote) => {
         set({
           editingNote: note,
-          formContent: note.content,
+          formContent: note.content || {},
           formTags: note.tags || [],
-          tagInput: "",
+          tagInput: '',
         });
       },
 
@@ -392,21 +245,11 @@ export const useNotesStore = create<NotesState>()(
 
       resetForm: () => {
         set({
-          formContent: "",
+          formContent: {},
           formTags: [],
-          tagInput: "",
+          tagInput: '',
           editingNote: null,
         });
-      },
-
-      getDisplayNotes: () => {
-        const { notes, searchResults, isSearchActive } = get();
-        return isSearchActive ? searchResults : notes;
-      },
-
-      getSearchResultCount: () => {
-        const { searchResults } = get();
-        return searchResults.length;
       },
 
       // Evaluation methods
@@ -445,9 +288,7 @@ export const useNotesStore = create<NotesState>()(
           evaluation: {
             ...state.evaluation,
             activeTab: tab,
-            showSettings:
-              tab === "evaluate" &&
-              state.evaluation.status === STATUS_STREAMING.IDLE,
+            showSettings: tab === 'evaluate' && state.evaluation.status === STATUS_STREAMING.IDLE,
           },
         }));
       },
@@ -478,7 +319,7 @@ export const useNotesStore = create<NotesState>()(
               status: STATUS_STREAMING.EVALUATING,
               error: null,
               feedback: null,
-              streamingContent: "",
+              streamingContent: '',
               isEvaluating: true,
               isCompleted: false,
               hasError: false,
@@ -491,9 +332,7 @@ export const useNotesStore = create<NotesState>()(
           const response = await fetch(streamUrl);
 
           if (!response.ok) {
-            throw new Error(
-              `${ERROR_MESSAGES.FAILED_TO_EVALUATE_NOTE}: ${response.statusText}`,
-            );
+            throw new Error(`${ERROR_MESSAGES.FAILED_TO_EVALUATE_NOTE}: ${response.statusText}`);
           }
 
           if (!response.body) {
@@ -509,7 +348,7 @@ export const useNotesStore = create<NotesState>()(
 
           const reader = response.body.getReader();
           const decoder = new TextDecoder();
-          let buffer = "";
+          let buffer = '';
 
           while (true) {
             const { done, value } = await reader.read();
@@ -517,34 +356,29 @@ export const useNotesStore = create<NotesState>()(
             if (done) break;
 
             buffer += decoder.decode(value, { stream: true });
-            const lines = buffer.split("\n");
-            buffer = lines.pop() || "";
+            const lines = buffer.split('\n');
+            buffer = lines.pop() || '';
 
             for (const line of lines) {
               if (line.startsWith(AI_API.SSE_DATA_PREFIX)) {
                 try {
-                  const chunk = JSON.parse(
-                    line.slice(AI_API.SSE_DATA_PREFIX_LENGTH),
-                  );
+                  const chunk = JSON.parse(line.slice(AI_API.SSE_DATA_PREFIX_LENGTH));
 
                   if (chunk.type === CHUNK_TYPES.FEEDBACK) {
                     set((state) => ({
                       evaluation: {
                         ...state.evaluation,
-                        streamingContent:
-                          state.evaluation.streamingContent + chunk.content,
+                        streamingContent: state.evaluation.streamingContent + chunk.content,
                       },
                     }));
                   } else if (chunk.type === CHUNK_TYPES.COMPLETE) {
-                    const completeFeedback: IFeedback = JSON.parse(
-                      chunk.content,
-                    );
+                    const completeFeedback: IFeedback = JSON.parse(chunk.content);
                     set((state) => ({
                       evaluation: {
                         ...state.evaluation,
                         feedback: completeFeedback,
                         status: STATUS_STREAMING.COMPLETED,
-                        streamingContent: "",
+                        streamingContent: '',
                         isEvaluating: false,
                         isCompleted: true,
                       },
@@ -555,31 +389,27 @@ export const useNotesStore = create<NotesState>()(
                         ...state.evaluation,
                         error: chunk.content,
                         status: STATUS_STREAMING.ERROR,
-                        streamingContent: "",
+                        streamingContent: '',
                         isEvaluating: false,
                         hasError: true,
                       },
                     }));
                   }
                 } catch (parseError) {
-                  console.error(
-                    ERROR_MESSAGES.FAILED_TO_PARSE_CHUNK,
-                    parseError,
-                  );
+                  console.error(ERROR_MESSAGES.FAILED_TO_PARSE_CHUNK, parseError);
                 }
               }
             }
           }
         } catch (err) {
           console.log(err);
-          const errorMessage =
-            err instanceof Error ? err.message : ERROR_MESSAGES.UNKNOWN_ERROR;
+          const errorMessage = err instanceof Error ? err.message : ERROR_MESSAGES.UNKNOWN_ERROR;
           set((state) => ({
             evaluation: {
               ...state.evaluation,
               error: errorMessage,
               status: STATUS_STREAMING.ERROR,
-              streamingContent: "",
+              streamingContent: '',
               isEvaluating: false,
               hasError: true,
             },
@@ -593,7 +423,7 @@ export const useNotesStore = create<NotesState>()(
             ...state.evaluation,
             status: STATUS_STREAMING.IDLE,
             feedback: null,
-            streamingContent: "",
+            streamingContent: '',
             error: null,
             isEvaluating: false,
             isCompleted: false,
@@ -627,7 +457,7 @@ export const useNotesStore = create<NotesState>()(
             ...state.evaluation,
             status: STATUS_STREAMING.IDLE,
             feedback: null,
-            streamingContent: "",
+            streamingContent: '',
             error: null,
             isEvaluating: false,
             isCompleted: false,
@@ -638,7 +468,7 @@ export const useNotesStore = create<NotesState>()(
       },
     }),
     {
-      name: "notes-store",
+      name: 'notes-store',
     },
   ),
 );
