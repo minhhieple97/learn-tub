@@ -4,6 +4,7 @@ import { Json } from '@/database.types';
 import { INoteEvaluationResult } from '@/features/quizzes/types';
 import { MEDIA_UPLOAD, MEDIA_SOURCES, FileType, FILE_TYPES } from '../constants';
 import { formatTimestamp } from '@/lib/utils';
+import { JSONContent } from '@tiptap/react';
 
 export async function getNotesByVideoId(videoId: string, userId: string): Promise<INote[]> {
   const supabase = await createClient();
@@ -20,7 +21,7 @@ export async function getNotesByVideoId(videoId: string, userId: string): Promis
     throw new Error(`Failed to fetch notes: ${error.message}`);
   }
 
-  return data || [];
+  return (data || []) as INote[];
 }
 
 export async function getNoteById(noteId: string, userId: string): Promise<INote | null> {
@@ -42,7 +43,7 @@ export async function getNoteById(noteId: string, userId: string): Promise<INote
     throw new Error(`Failed to fetch note: ${error.message}`);
   }
 
-  return data;
+  return data as INote;
 }
 
 export async function getNoteForEvaluation(noteId: string, userId: string) {
@@ -95,7 +96,7 @@ export async function getUserNotes(userId: string, limit?: number): Promise<INot
     throw new Error(`Failed to fetch user notes: ${error.message}`);
   }
 
-  return data || [];
+  return (data || []) as INote[];
 }
 
 export const searchNotes = async (userId: string, searchTerm: string): Promise<INote[]> => {
@@ -118,7 +119,7 @@ export const searchNotes = async (userId: string, searchTerm: string): Promise<I
     throw new Error(`Failed to search notes: ${error.message}`);
   }
 
-  return data || [];
+  return (data || []) as INote[];
 };
 
 export const createNoteInteraction = async (
@@ -569,7 +570,7 @@ export const createNote = async ({
 }: {
   videoId: string;
   userId: string;
-  content: string;
+  content: JSONContent;
   timestamp: number;
   tags: string[];
 }) => {

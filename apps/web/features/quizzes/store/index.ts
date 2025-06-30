@@ -167,7 +167,6 @@ export const useQuizStore = create<QuizState>()(
               difficulty: settings.difficulty,
               aiModelId: settings.aiModelId,
             });
-            console.log("result", result);
             if (result?.data?.success) {
               set({
                 questions: result.data.questions || [],

@@ -3,29 +3,26 @@
 import { useState, useEffect } from "react";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useNotesStore } from "../store";
-import { SEARCH_CONFIG } from "@/config/constants";
+import { useNotesSearch as useNotesSearchQuery } from './use-notes-queries';
+import { SEARCH_CONFIG } from '@/config/constants';
 
 export const useNotesSearch = () => {
-  const {
-    isSearching,
-    isSearchActive,
-    resultCount,
-    performSearch,
-    clearSearch,
-  } = useNotesStore();
-  const [inputValue, setInputValue] = useState("");
-  const debouncedSearchQuery = useDebounce(
-    inputValue,
-    SEARCH_CONFIG.DEBOUNCE_DELAY,
+  const { searchQuery, setSearchQuery, clearSearch, currentVideoId } = useNotesStore();
+  const [inputValue, setInputValue] = useState(searchQuery);
+  const debouncedSearchQuery = useDebounce(inputValue, SEARCH_CONFIG.DEBOUNCE_DELAY);
+
+  // Use react-query search hook
+  const { data: searchResults, isLoading: isSearching } = useNotesSearchQuery(
+    currentVideoId || '',
+    debouncedSearchQuery,
   );
 
+  const isSearchActive = Boolean(debouncedSearchQuery.trim());
+  const resultCount = searchResults?.length || 0;
+
   useEffect(() => {
-    if (debouncedSearchQuery.trim()) {
-      performSearch(debouncedSearchQuery.trim());
-      return;
-    }
-    clearSearch();
-  }, [debouncedSearchQuery, performSearch, clearSearch]);
+    setSearchQuery(debouncedSearchQuery);
+  }, [debouncedSearchQuery, setSearchQuery]);
 
   const handleInputChange = (value: string) => {
     const trimmedValue = value.slice(0, SEARCH_CONFIG.MAX_QUERY_LENGTH);
@@ -33,7 +30,7 @@ export const useNotesSearch = () => {
   };
 
   const handleClearSearch = () => {
-    setInputValue("");
+    setInputValue('');
     clearSearch();
   };
 

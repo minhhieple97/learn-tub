@@ -24,7 +24,7 @@ export const NoteEditorForm = () => {
     cancelEditing,
   } = useNoteEditorForm();
 
-  const { content, onContentChange, disabled, videoElement, userId, videoId } = useRichTextEditor();
+  const { content, disabled, videoElement, userId, videoId } = useRichTextEditor();
 
   return (
     <Card>
@@ -37,7 +37,6 @@ export const NoteEditorForm = () => {
         <div className="space-y-2">
           <RichTextEditor
             content={content}
-            onContentChange={onContentChange}
             placeholder="Write your notes here..."
             videoElement={videoElement}
             userId={userId}

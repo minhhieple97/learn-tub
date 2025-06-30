@@ -496,8 +496,7 @@ export type Database = {
       }
       notes: {
         Row: {
-          content: string
-          content_type: string | null
+          content: Json
           content_version: number | null
           created_at: string | null
           id: string
@@ -509,8 +508,7 @@ export type Database = {
           video_id: string
         }
         Insert: {
-          content: string
-          content_type?: string | null
+          content: Json
           content_version?: number | null
           created_at?: string | null
           id?: string
@@ -522,8 +520,7 @@ export type Database = {
           video_id: string
         }
         Update: {
-          content?: string
-          content_type?: string | null
+          content?: Json
           content_version?: number | null
           created_at?: string | null
           id?: string

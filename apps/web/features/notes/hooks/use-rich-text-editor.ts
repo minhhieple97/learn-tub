@@ -10,7 +10,7 @@ export const useRichTextEditor = (): IUseRichTextEditorHookReturn => {
   const [videoElement, setVideoElement] = useState<HTMLVideoElement | null>(null);
   const videoElementRef = useRef<HTMLVideoElement | null>(null);
 
-  const { formContent, currentVideoId, setFormContent, isFormLoading } = useNotesStore();
+  const { formContent, currentVideoId, isFormLoading } = useNotesStore();
 
   // Get authenticated user
   useEffect(() => {
@@ -44,14 +44,9 @@ export const useRichTextEditor = (): IUseRichTextEditorHookReturn => {
     }
   }, [videoElement]);
 
-  const handleContentChange = (content: string) => {
-    setFormContent(content);
-  };
-
   return {
     // Editor props
     content: formContent,
-    onContentChange: handleContentChange,
     disabled: isFormLoading,
 
     // Video context
