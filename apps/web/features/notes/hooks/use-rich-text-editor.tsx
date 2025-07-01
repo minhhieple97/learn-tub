@@ -1,7 +1,16 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useMemo, useState, useEffect, useRef } from "react";
+import {
+  useEditor,
+  Editor,
+  ReactNodeViewRenderer,
+  JSONContent,
+} from "@tiptap/react";
 import { useAction } from "next-safe-action/hooks";
+import StarterKit from "@tiptap/starter-kit";
+import Image from "@tiptap/extension-image";
+import Placeholder from "@tiptap/extension-placeholder";
 import { toast } from "@/hooks/use-toast";
 import {
   MEDIA_UPLOAD,
@@ -14,46 +23,78 @@ import {
   handleImagePasteAction,
   deleteImageAction,
 } from "@/features/notes/actions/media-actions";
-import { Editor } from "@tiptap/react";
+import { useNotesStore } from "../store";
+import { IUseRichTextEditorHookReturn } from "../types";
 
-type IUseRichTextEditorActionsProps = {
-  videoId: string;
-  videoTitle?: string;
-  noteId?: string;
-  videoElement?: HTMLVideoElement | null;
-  disabled?: boolean;
-};
-
-type IUseRichTextEditorActionsReturn = {
+type UseRichTextEditorReturn = IUseRichTextEditorHookReturn & {
+  editor: Editor | null;
   isCapturingScreenshot: boolean;
   isUploadingImage: boolean;
   isDeletingImage: boolean;
   fileInputRef: React.RefObject<HTMLInputElement | null>;
-  handleScreenshot: (editor: Editor) => Promise<void>;
-  handleImageUpload: (
-    event: React.ChangeEvent<HTMLInputElement>,
-    editor: Editor,
-  ) => Promise<void>;
-  handleImagePaste: (event: ClipboardEvent, editor: Editor) => Promise<boolean>;
-  handleImageDelete: (imageUrl: string, editor: Editor) => Promise<void>;
-  handleManualImageDelete: (imageUrl: string) => Promise<void>;
+  onScreenshotClick: () => void;
+  onImageUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
   triggerImageUpload: () => void;
-  validateImageFile: (file: File) => boolean;
-  resetFileInput: () => void;
 };
 
-export const useRichTextEditorActions = ({
-  videoId,
-  videoTitle,
-  noteId,
-  videoElement,
-  disabled = false,
-}: IUseRichTextEditorActionsProps): IUseRichTextEditorActionsReturn => {
+// Create custom Image extension
+const createImageExtension = (
+  onDelete: (imageUrl: string, editor: Editor) => void,
+  onManualDelete: (imageUrl: string) => void,
+  disabled: boolean,
+  ImageWithDelete: React.ComponentType<{
+    node: any;
+    deleteNode: () => void;
+    disabled: boolean;
+  }>,
+) => {
+  return Image.extend({
+    addNodeView() {
+      return ReactNodeViewRenderer(({ node, deleteNode, editor }) => (
+        <ImageWithDelete
+          node={node}
+          deleteNode={() => {
+            onDelete(node.attrs.src, editor);
+            deleteNode();
+          }}
+          disabled={disabled}
+        />
+      ));
+    },
+  });
+};
+
+export const useRichTextEditor = (): UseRichTextEditorReturn => {
+  // Get state from store
+  const {
+    formContent,
+    currentVideoId,
+    isFormLoading,
+    youtubePlayer,
+    setYouTubePlayer,
+    setFormContent,
+    videoTitle,
+    noteId,
+  } = useNotesStore();
+
+  // Use store values directly
+  const content = formContent;
+  const videoId = currentVideoId;
+  const videoElement = youtubePlayer;
+  const disabled = isFormLoading;
+  const placeholder = "Write your notes here...";
+
+  // For now, we'll use a default ImageWithDelete component or make it optional
+  const ImageWithDelete = undefined;
+
+  // Media action states
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isCapturingScreenshot, setIsCapturingScreenshot] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [isDeletingImage, setIsDeletingImage] = useState(false);
+  const [previousImages, setPreviousImages] = useState<string[]>([]);
 
+  // Action hooks
   const { executeAsync: executeScreenshotCapture } = useAction(
     captureAndSaveScreenshotAction,
   );
@@ -63,6 +104,7 @@ export const useRichTextEditorActions = ({
   const { executeAsync: executeImagePaste } = useAction(handleImagePasteAction);
   const { executeAsync: executeImageDelete } = useAction(deleteImageAction);
 
+  // Utility functions
   const validateImageFile = useCallback((file: File): boolean => {
     if (!file.type.startsWith("image/")) {
       toast.error({
@@ -85,6 +127,15 @@ export const useRichTextEditorActions = ({
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
+  }, []);
+
+  const convertFileToBase64 = useCallback((file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = () => reject(new Error("Failed to read file"));
+      reader.readAsDataURL(file);
+    });
   }, []);
 
   const captureVideoFrame = useCallback(
@@ -146,15 +197,7 @@ export const useRichTextEditorActions = ({
     [],
   );
 
-  const convertFileToBase64 = useCallback((file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = () => reject(new Error("Failed to read file"));
-      reader.readAsDataURL(file);
-    });
-  }, []);
-
+  // Media action handlers
   const handleScreenshot = useCallback(
     async (editor: Editor) => {
       if (!videoElement || !editor || disabled) {
@@ -261,7 +304,7 @@ export const useRichTextEditorActions = ({
     ],
   );
 
-  const handleImagePasteCallback = useCallback(
+  const handleImagePaste = useCallback(
     async (event: ClipboardEvent, editor: Editor): Promise<boolean> => {
       if (disabled || !editor) return false;
 
@@ -316,7 +359,7 @@ export const useRichTextEditorActions = ({
       try {
         // Extract storage path from URL
         const url = new URL(imageUrl);
-        const storagePath = url.pathname.split("/").slice(-3).join("/"); // Extract the path after bucket name
+        const storagePath = url.pathname.split("/").slice(-3).join("/");
 
         const result = await executeImageDelete({
           imageUrl,
@@ -365,24 +408,144 @@ export const useRichTextEditorActions = ({
     [disabled, executeImageDelete],
   );
 
+  // Create custom image extension
+  const CustomImage = useMemo(() => {
+    if (!ImageWithDelete) return null;
+
+    return createImageExtension(
+      handleImageDelete,
+      handleManualImageDelete,
+      disabled,
+      ImageWithDelete,
+    );
+  }, [handleImageDelete, handleManualImageDelete, disabled, ImageWithDelete]);
+
+  // Editor setup
+  const editor = useEditor({
+    extensions: [
+      StarterKit,
+      ...(CustomImage
+        ? [
+            CustomImage.configure({
+              inline: false,
+              allowBase64: false,
+            }),
+          ]
+        : [
+            Image.configure({
+              inline: false,
+              allowBase64: false,
+            }),
+          ]),
+      Placeholder.configure({
+        placeholder,
+      }),
+    ],
+    content: typeof content === "string" ? undefined : content,
+    immediatelyRender: false,
+    onUpdate: ({ editor }) => {
+      const json = editor.getJSON();
+      setFormContent(json);
+
+      const currentImages: string[] = [];
+      editor.state.doc.descendants((node) => {
+        if (node.type.name === "image" && node.attrs.src) {
+          currentImages.push(node.attrs.src);
+        }
+      });
+
+      // Find images that were removed
+      const removedImages = previousImages.filter(
+        (src) => !currentImages.includes(src),
+      );
+
+      // Clean up removed images
+      removedImages.forEach((imageUrl) => {
+        handleManualImageDelete(imageUrl);
+      });
+
+      setPreviousImages(currentImages);
+    },
+    editable: !disabled,
+    editorProps: {
+      attributes: {
+        class: RICH_TEXT_EDITOR.PROSE_CLASSES,
+      },
+      handlePaste: (view, event, slice) => {
+        const items = event.clipboardData?.items;
+        if (items) {
+          for (const item of Array.from(items)) {
+            if (item.type.startsWith("image/")) {
+              handleImagePaste(event, editor as Editor);
+              return true;
+            }
+          }
+        }
+        return false;
+      },
+    },
+  });
+
+  // Initialize previous images when editor content first loads
+  useEffect(() => {
+    if (editor && !previousImages.length) {
+      const currentImages: string[] = [];
+      editor.state.doc.descendants((node) => {
+        if (node.type.name === "image" && node.attrs.src) {
+          currentImages.push(node.attrs.src);
+        }
+      });
+      setPreviousImages(currentImages);
+    }
+  }, [editor, previousImages.length]);
+
+  // Event handlers for components
+  const onScreenshotClick = useCallback(() => {
+    if (editor) {
+      handleScreenshot(editor);
+    }
+  }, [editor, handleScreenshot]);
+
+  const onImageUpload = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      if (editor) {
+        handleImageUpload(event, editor);
+      }
+    },
+    [editor, handleImageUpload],
+  );
+
   const triggerImageUpload = useCallback(() => {
     if (!disabled) {
       fileInputRef.current?.click();
     }
   }, [disabled]);
 
+  const setVideoElementRef = useCallback(
+    (player: any) => {
+      setYouTubePlayer(player);
+    },
+    [setYouTubePlayer],
+  );
+
   return {
+    // Store-based values (for backward compatibility)
+    content,
+    disabled,
+    videoElement,
+    setVideoElementRef,
+    videoId,
+    isLoading: isFormLoading,
+    isReady: Boolean(videoId && videoElement),
+
+    // Editor-specific values
+    editor,
     isCapturingScreenshot,
     isUploadingImage,
     isDeletingImage,
     fileInputRef,
-    handleScreenshot,
-    handleImageUpload,
-    handleImagePaste: handleImagePasteCallback,
-    handleImageDelete,
-    handleManualImageDelete,
+    onScreenshotClick,
+    onImageUpload,
     triggerImageUpload,
-    validateImageFile,
-    resetFileInput,
   };
 };
