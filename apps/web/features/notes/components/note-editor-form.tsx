@@ -7,7 +7,6 @@ import { TagsSection } from "./tags-section";
 import { NoteFormActions } from "./note-form-actions";
 import { RichTextEditor } from "./rich-text-editor";
 import { useNoteEditorForm } from "../hooks";
-import { useRichTextEditor } from "../hooks/use-rich-text-editor";
 import { VALIDATION_LIMITS } from "@/config/constants";
 
 export const NoteEditorForm = () => {
@@ -24,7 +23,7 @@ export const NoteEditorForm = () => {
     cancelEditing,
   } = useNoteEditorForm();
 
-  const { content, disabled, videoElement, videoId } = useRichTextEditor();
+  // The useRichTextEditor hook is now used directly in RichTextEditor component
 
   return (
     <Card>
@@ -35,13 +34,7 @@ export const NoteEditorForm = () => {
         <TimestampDisplay timestamp={currentTimestamp} clickable={false} />
 
         <div className="space-y-2">
-          <RichTextEditor
-            content={content}
-            placeholder="Write your notes here..."
-            videoElement={videoElement}
-            videoId={videoId}
-            disabled={disabled}
-          />
+          <RichTextEditor />
         </div>
 
         <TagsSection

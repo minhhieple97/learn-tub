@@ -3,18 +3,11 @@
 import React from "react";
 import { Loader2 } from "lucide-react";
 import { KEYBOARD_SHORTCUTS } from "@/features/notes/constants";
+import { useRichTextEditor } from "@/features/notes/hooks/use-rich-text-editor";
 
-type StatusBarProps = {
-  isCapturingScreenshot: boolean;
-  isUploadingImage: boolean;
-  isDeletingImage: boolean;
-};
-
-export const StatusBar = ({
-  isCapturingScreenshot,
-  isUploadingImage,
-  isDeletingImage,
-}: StatusBarProps) => {
+export const StatusBar = () => {
+  const { isCapturingScreenshot, isUploadingImage, isDeletingImage } =
+    useRichTextEditor();
   const isLoading =
     isCapturingScreenshot || isUploadingImage || isDeletingImage;
 

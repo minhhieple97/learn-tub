@@ -7,28 +7,19 @@ import {
   RICH_TEXT_EDITOR,
   KEYBOARD_SHORTCUTS,
 } from "@/features/notes/constants";
+import { useRichTextEditor } from "@/features/notes/hooks/use-rich-text-editor";
 
-type IMediaButtonsProps = {
-  onScreenshotClick: () => void;
-  onImageUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  triggerImageUpload: () => void;
-  fileInputRef: React.RefObject<HTMLInputElement | null>;
-  isCapturingScreenshot: boolean;
-  isUploadingImage: boolean;
-  disabled: boolean;
-  videoElement?: HTMLVideoElement | null;
-};
-
-export const MediaButtons = ({
-  onScreenshotClick,
-  onImageUpload,
-  triggerImageUpload,
-  fileInputRef,
-  isCapturingScreenshot,
-  isUploadingImage,
-  disabled,
-  videoElement,
-}: IMediaButtonsProps) => {
+export const MediaButtons = () => {
+  const {
+    onScreenshotClick,
+    onImageUpload,
+    triggerImageUpload,
+    fileInputRef,
+    isCapturingScreenshot,
+    isUploadingImage,
+    disabled,
+    videoElement,
+  } = useRichTextEditor();
   return (
     <>
       <Button

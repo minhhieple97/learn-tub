@@ -27,6 +27,10 @@ type INotesState = {
   currentTimestamp: number;
   searchQuery: string;
 
+  // Video metadata for rich text editor
+  videoTitle?: string;
+  noteId?: string;
+
   // YouTube Player state
   youtubePlayer: any | null;
   playerState: number;
@@ -58,6 +62,8 @@ type INotesState = {
 
   setCurrentVideo: (videoId: string) => void;
   setCurrentTimestamp: (timestamp: number) => void;
+  setVideoTitle: (title: string) => void;
+  setNoteId: (noteId: string | undefined) => void;
   saveNote: (
     content: JSONContent,
     tags: string[],
@@ -124,6 +130,10 @@ export const useNotesStore = create<INotesState>()(
       currentTimestamp: 0,
       searchQuery: "",
 
+      // Video metadata
+      videoTitle: undefined,
+      noteId: undefined,
+
       // YouTube Player initial state
       youtubePlayer: null,
       playerState: -1,
@@ -159,6 +169,14 @@ export const useNotesStore = create<INotesState>()(
 
       setCurrentTimestamp: (timestamp: number) => {
         set({ currentTimestamp: timestamp });
+      },
+
+      setVideoTitle: (title: string) => {
+        set({ videoTitle: title });
+      },
+
+      setNoteId: (noteId: string | undefined) => {
+        set({ noteId });
       },
 
       saveNote: async (
