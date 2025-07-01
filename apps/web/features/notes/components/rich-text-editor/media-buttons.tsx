@@ -1,9 +1,12 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Camera, Image as ImageIcon, Loader2 } from 'lucide-react';
-import { RICH_TEXT_EDITOR, KEYBOARD_SHORTCUTS } from '@/features/notes/constants';
+import React from "react";
+import { Button } from "@/components/ui/button";
+import { Camera, Image as ImageIcon, Loader2 } from "lucide-react";
+import {
+  RICH_TEXT_EDITOR,
+  KEYBOARD_SHORTCUTS,
+} from "@/features/notes/constants";
 
 type IMediaButtonsProps = {
   onScreenshotClick: () => void;

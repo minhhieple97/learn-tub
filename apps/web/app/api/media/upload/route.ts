@@ -1,52 +1,64 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getUserInSession } from '@/features/profile/queries';
+import { NextRequest, NextResponse } from "next/server";
+import { getUserInSession } from "@/features/profile/queries";
 import {
   uploadFileToStorage,
   getPublicUrl,
   createMediaFile,
   createVideoScreenshot,
   cleanupStorageFile,
-} from '@/features/notes/queries';
-import { MEDIA_UPLOAD, FILE_TYPES } from '@/features/notes/constants';
-import { StatusCodes } from 'http-status-codes';
-import { formatTimestamp } from '@/lib/utils';
+} from "@/features/notes/queries";
+import { MEDIA_UPLOAD, FILE_TYPES } from "@/features/notes/constants";
+import { StatusCodes } from "http-status-codes";
+import { formatTimestamp } from "@/lib/utils";
 
 export async function POST(request: NextRequest) {
   try {
     const user = await getUserInSession();
     if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: StatusCodes.UNAUTHORIZED });
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: StatusCodes.UNAUTHORIZED },
+      );
     }
 
     const formData = await request.formData();
-    const file = formData.get('file') as File;
-    const fileType = (formData.get('fileType') as 'image' | 'video_screenshot') || FILE_TYPES.IMAGE;
-    const videoId = formData.get('videoId') as string;
-    const timestamp = formData.get('timestamp') as string;
-    const videoTitle = formData.get('videoTitle') as string;
+    const file = formData.get("file") as File;
+    const fileType =
+      (formData.get("fileType") as "image" | "video_screenshot") ||
+      FILE_TYPES.IMAGE;
+    const videoId = formData.get("videoId") as string;
+    const timestamp = formData.get("timestamp") as string;
+    const videoTitle = formData.get("videoTitle") as string;
 
     if (!file) {
-      return NextResponse.json({ error: 'No file provided' }, { status: StatusCodes.BAD_REQUEST });
+      return NextResponse.json(
+        { error: "No file provided" },
+        { status: StatusCodes.BAD_REQUEST },
+      );
     }
 
-    if (!file.type.startsWith('image/')) {
+    if (!file.type.startsWith("image/")) {
       return NextResponse.json(
-        { error: 'Only image files are allowed' },
+        { error: "Only image files are allowed" },
         { status: StatusCodes.BAD_REQUEST },
       );
     }
 
     if (file.size > MEDIA_UPLOAD.MAX_FILE_SIZE) {
       return NextResponse.json(
-        { error: 'File size must be less than 5MB' },
+        { error: "File size must be less than 5MB" },
         { status: StatusCodes.BAD_REQUEST },
       );
     }
 
-    const fileExtension = file.name.split('.').pop();
+    const fileExtension = file.name.split(".").pop();
     const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExtension}`;
 
-    const { error: uploadError, storagePath } = await uploadFileToStorage(file, user.id, fileName);
+    const { error: uploadError, storagePath } = await uploadFileToStorage(
+      file,
+      user.id,
+      fileName,
+    );
 
     if (uploadError) {
       return NextResponse.json(
@@ -75,7 +87,9 @@ export async function POST(request: NextRequest) {
     if (dbError || !mediaFile) {
       await cleanupStorageFile(storagePath);
       return NextResponse.json(
-        { error: `Database error: ${dbError?.message || 'Failed to create media file'}` },
+        {
+          error: `Database error: ${dbError?.message || "Failed to create media file"}`,
+        },
         { status: StatusCodes.INTERNAL_SERVER_ERROR },
       );
     }
@@ -91,7 +105,10 @@ export async function POST(request: NextRequest) {
       });
 
       if (screenshotError) {
-        console.error('Failed to create video screenshot record:', screenshotError);
+        console.error(
+          "Failed to create video screenshot record:",
+          screenshotError,
+        );
       }
     }
 
@@ -106,12 +123,10 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Error uploading media:', error);
+    console.error("Error uploading media:", error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: "Internal server error" },
       { status: StatusCodes.INTERNAL_SERVER_ERROR },
     );
   }
 }
-
-

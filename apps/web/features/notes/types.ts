@@ -6,10 +6,10 @@ import {
   IAsyncHookReturn,
   IAsyncOperationHook,
   ISearchHookReturn,
-} from '@/types';
-import { STATUS_STREAMING } from '@/config/constants';
-import { IVideoPageData } from '../videos/types';
-import { JSONContent } from '@tiptap/react';
+} from "@/types";
+import { STATUS_STREAMING } from "@/config/constants";
+import { IVideoPageData } from "../videos/types";
+import { JSONContent } from "@tiptap/react";
 
 export type INote = {
   id: string;
@@ -233,7 +233,7 @@ export type IUploadResult = {
 export type IRichTextEditorProps = {
   content: JSONContent;
   placeholder?: string;
-  videoElement: HTMLVideoElement | null;
+  videoElement: any; // YouTube player instance or HTMLVideoElement
   noteId?: string;
   videoId: string;
   videoTitle?: string;
@@ -255,15 +255,15 @@ export type IUseRichTextEditorReturn = {
   handleImageUpload: (file: File) => Promise<void>;
   handleImagePaste: (event: ClipboardEvent) => Promise<void>;
   canTakeScreenshot: boolean;
-  videoElement: HTMLVideoElement | null;
-  setVideoElement: (element: HTMLVideoElement | null) => void;
+  videoElement: any; // YouTube player instance or HTMLVideoElement
+  setVideoElement: (element: any) => void;
 };
 
 export type IUseRichTextEditorHookReturn = {
   content: JSONContent;
   disabled: boolean;
-  videoElement: HTMLVideoElement | null;
-  setVideoElementRef: (element: HTMLVideoElement | null) => void;
+  videoElement: any; // YouTube player instance (can be HTMLVideoElement | YouTube Player | null)
+  setVideoElementRef: (element: any) => void; // Accept both HTMLVideoElement and YouTube player
   videoId: string;
   isLoading: boolean;
   isReady: boolean;
@@ -274,7 +274,7 @@ export type IMediaFile = {
   id: string;
   user_id: string;
   file_name: string;
-  file_type: 'image' | 'video_screenshot';
+  file_type: "image" | "video_screenshot";
   file_size: number;
   mime_type: string;
   storage_path: string;
@@ -308,7 +308,7 @@ export type INoteMedia = {
 
 // Extended Note Type with Rich Content
 export type IRichNote = INote & {
-  content_type: 'plain_text' | 'rich_text';
+  content_type: "plain_text" | "rich_text";
   rich_content: Record<string, any> | null;
   content_version: number;
 };
@@ -321,7 +321,7 @@ export type ILinkScreenshotToNoteRequest = {
 
 export type IMediaUploadFormData = {
   file: File;
-  fileType?: 'image' | 'video_screenshot';
+  fileType?: "image" | "video_screenshot";
   videoId?: string;
   timestamp?: string;
   videoTitle?: string;

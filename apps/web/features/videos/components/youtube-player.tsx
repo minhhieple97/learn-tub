@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,8 +12,7 @@ import {
   VolumeX,
 } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
-import { useYouTubeAPI } from "../hooks/use-youtube-api";
-import { useYouTubePlayer } from "../hooks/use-youtube-player";
+import { useNotesStore } from "@/features/notes/store";
 import { useLearningSession } from "../hooks/use-learning-session";
 import { usePlayerControls } from "../hooks/use-player-controls";
 import { IVideoPageData } from "../types";
@@ -30,31 +30,111 @@ export const YouTubePlayer = ({
   onTimeUpdate,
   targetSeekTime,
 }: IYouTubePlayerProps) => {
-  const { isApiLoaded, YT } = useYouTubeAPI();
+  const playerRef = useRef<HTMLDivElement>(null);
+  const playerInstanceRef = useRef<any>(null);
 
-  const { player, playerState, duration, playerRef } = useYouTubePlayer({
-    youtubeId: video.youtube_id,
+  const {
+    youtubePlayer,
+    playerState,
+    duration,
     isApiLoaded,
+    setYouTubePlayer,
+    setPlayerState,
+    setDuration,
+    currentTime,
+    volume,
+    isMuted,
+    setCurrentTime,
+    setVolume,
+    setIsMuted,
+  } = useNotesStore();
+
+  // Initialize YouTube player when API is loaded
+  useEffect(() => {
+    if (!isApiLoaded || !playerRef.current || !window.YT) return;
+
+    // Destroy existing player if any
+    if (playerInstanceRef.current) {
+      if (typeof playerInstanceRef.current.destroy === "function") {
+        playerInstanceRef.current.destroy();
+      }
+      playerInstanceRef.current = null;
+      setYouTubePlayer(null);
+    }
+
+    const onPlayerReady = (event: any) => {
+      const player = event.target;
+      setYouTubePlayer(player);
+      setDuration(player.getDuration());
+      setVolume(player.getVolume());
+      setIsMuted(player.isMuted());
+
+      if (initialTimestamp > 0 && initialTimestamp < player.getDuration()) {
+        player.seekTo(initialTimestamp, true);
+      }
+    };
+
+    const onPlayerStateChange = (event: any) => {
+      setPlayerState(event.data);
+    };
+
+    const newPlayer = new window.YT.Player(playerRef.current, {
+      videoId: video.youtube_id,
+      playerVars: {
+        autoplay: 0,
+        controls: 0,
+        disablekb: 1,
+        enablejsapi: 1,
+        modestbranding: 1,
+        rel: 0,
+        showinfo: 0,
+      },
+      events: {
+        onReady: onPlayerReady,
+        onStateChange: onPlayerStateChange,
+      },
+    });
+
+    playerInstanceRef.current = newPlayer;
+
+    return () => {
+      if (
+        playerInstanceRef.current &&
+        typeof playerInstanceRef.current.destroy === "function"
+      ) {
+        playerInstanceRef.current.destroy();
+      }
+      playerInstanceRef.current = null;
+      setYouTubePlayer(null);
+    };
+  }, [
+    isApiLoaded,
+    video.youtube_id,
     initialTimestamp,
-  });
+    setYouTubePlayer,
+    setPlayerState,
+    setDuration,
+    setVolume,
+    setIsMuted,
+  ]);
 
   useLearningSession({
-    player,
+    player: youtubePlayer,
     videoId: video.id,
     playerState,
     initialTimestamp,
   });
 
   const {
-    currentTime,
-    isMuted,
+    currentTime: controlsCurrentTime,
+    isMuted: controlsIsMuted,
     handlePlayPause,
     handleSeek,
     toggleMute,
     skipForward,
     skipBackward,
   } = usePlayerControls({
-    player,
+    player: youtubePlayer,
     playerState,
     initialTimestamp,
     onTimeUpdate,
@@ -68,7 +148,12 @@ export const YouTubePlayer = ({
   };
 
   const isPlaying =
-    typeof window !== "undefined" && playerState === YT?.PlayerState?.PLAYING;
+    typeof window !== "undefined" &&
+    playerState === window.YT?.PlayerState?.PLAYING;
+  const displayCurrentTime =
+    controlsCurrentTime !== undefined ? controlsCurrentTime : currentTime;
+  const displayIsMuted =
+    controlsIsMuted !== undefined ? controlsIsMuted : isMuted;
 
   return (
     <Card className="w-full overflow-hidden">
@@ -77,9 +162,9 @@ export const YouTubePlayer = ({
       </div>
       <div className="p-4 space-y-4">
         <div className="flex items-center space-x-2">
-          <span className="text-sm">{formatTime(currentTime)}</span>
+          <span className="text-sm">{formatTime(displayCurrentTime)}</span>
           <Slider
-            value={[currentTime]}
+            value={[displayCurrentTime]}
             min={0}
             max={duration}
             step={1}
@@ -106,7 +191,7 @@ export const YouTubePlayer = ({
           </div>
           <div className="flex items-center space-x-2">
             <Button variant="ghost" size="icon" onClick={toggleMute}>
-              {isMuted ? (
+              {displayIsMuted ? (
                 <VolumeX className="h-4 w-4" />
               ) : (
                 <Volume2 className="h-4 w-4" />

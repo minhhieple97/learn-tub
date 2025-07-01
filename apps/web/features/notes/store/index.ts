@@ -1,22 +1,22 @@
 "use client";
 
 import { create } from "zustand";
-import { devtools } from 'zustand/middleware';
+import { devtools } from "zustand/middleware";
 import {
   TOAST_MESSAGES,
   AI_API,
   CHUNK_TYPES,
   ERROR_MESSAGES,
   STATUS_STREAMING,
-} from '@/config/constants';
-import type { INote } from '../types';
-import { toast } from '@/hooks/use-toast';
-import { IFeedback } from '@/types';
-import { INoteEvaluationStatus } from '../types';
-import { saveNoteAction, updateNoteAction, deleteNoteAction } from '../actions';
-import { JSONContent } from '@tiptap/react';
+} from "@/config/constants";
+import type { INote } from "../types";
+import { toast } from "@/hooks/use-toast";
+import { IFeedback } from "@/types";
+import { INoteEvaluationStatus } from "../types";
+import { saveNoteAction, updateNoteAction, deleteNoteAction } from "../actions";
+import { JSONContent } from "@tiptap/react";
 
-type NotesState = {
+type INotesState = {
   // Form state
   formContent: JSONContent;
   formTags: string[];
@@ -26,6 +26,18 @@ type NotesState = {
   currentVideoId: string;
   currentTimestamp: number;
   searchQuery: string;
+
+  // YouTube Player state
+  youtubePlayer: any | null;
+  playerState: number;
+  duration: number;
+  isApiLoaded: boolean;
+  targetSeekTime: number | undefined;
+
+  // Player Controls state
+  currentTime: number;
+  volume: number;
+  isMuted: boolean;
 
   // Evaluation state
   evaluation: {
@@ -46,8 +58,16 @@ type NotesState = {
 
   setCurrentVideo: (videoId: string) => void;
   setCurrentTimestamp: (timestamp: number) => void;
-  saveNote: (content: JSONContent, tags: string[], timestamp: number) => Promise<void>;
-  updateNote: (noteId: string, content: JSONContent, tags: string[]) => Promise<void>;
+  saveNote: (
+    content: JSONContent,
+    tags: string[],
+    timestamp: number,
+  ) => Promise<void>;
+  updateNote: (
+    noteId: string,
+    content: JSONContent,
+    tags: string[],
+  ) => Promise<void>;
   deleteNote: (noteId: string) => Promise<void>;
   setSearchQuery: (query: string) => void;
   clearSearch: () => void;
@@ -59,6 +79,24 @@ type NotesState = {
   startEditing: (note: INote) => void;
   cancelEditing: () => void;
   resetForm: () => void;
+
+  // YouTube Player actions
+  setYouTubePlayer: (player: any) => void;
+  setPlayerState: (state: number) => void;
+  setDuration: (duration: number) => void;
+  setIsApiLoaded: (loaded: boolean) => void;
+  setTargetSeekTime: (time: number | undefined) => void;
+
+  // Player Controls actions
+  setCurrentTime: (time: number) => void;
+  setVolume: (volume: number) => void;
+  setIsMuted: (muted: boolean) => void;
+  handleTimeUpdate: (time: number) => void;
+  handleNoteTimestampClick: (time: number) => void;
+
+  // YouTube API management
+  initializeYouTubeAPI: () => void;
+  destroyYouTubePlayer: () => void;
 
   openEvaluation: (noteId: string) => void;
   closeEvaluation: () => void;
@@ -73,30 +111,42 @@ type NotesState = {
   adjustEvaluationSettings: () => void;
 };
 
-export const useNotesStore = create<NotesState>()(
+export const useNotesStore = create<INotesState>()(
   devtools(
     (set, get) => ({
       // Form state
-      formContent: '',
+      formContent: {},
       formTags: [],
-      tagInput: '',
+      tagInput: "",
       editingNote: null,
       isFormLoading: false,
-      currentVideoId: '',
+      currentVideoId: "",
       currentTimestamp: 0,
-      searchQuery: '',
+      searchQuery: "",
+
+      // YouTube Player initial state
+      youtubePlayer: null,
+      playerState: -1,
+      duration: 0,
+      isApiLoaded: false,
+      targetSeekTime: undefined,
+
+      // Player Controls initial state
+      currentTime: 0,
+      volume: 100,
+      isMuted: false,
 
       // Evaluation initial state
       evaluation: {
         isOpen: false,
         showSettings: false,
-        activeTab: 'evaluate',
+        activeTab: "evaluate",
         provider: null,
-        aiModelId: '',
+        aiModelId: "",
         currentNoteId: null,
         status: STATUS_STREAMING.IDLE,
         feedback: null,
-        streamingContent: '',
+        streamingContent: "",
         error: null,
         isEvaluating: false,
         isCompleted: false,
@@ -111,7 +161,11 @@ export const useNotesStore = create<NotesState>()(
         set({ currentTimestamp: timestamp });
       },
 
-      saveNote: async (content: JSONContent, tags: string[], timestamp: number) => {
+      saveNote: async (
+        content: JSONContent,
+        tags: string[],
+        timestamp: number,
+      ) => {
         const { currentVideoId } = get();
         if (!currentVideoId) return;
         set({ isFormLoading: true });
@@ -130,10 +184,10 @@ export const useNotesStore = create<NotesState>()(
               description: TOAST_MESSAGES.NOTE_SAVED_SUCCESS,
             });
           } else {
-            throw new Error(result?.data?.message || 'Failed to save note');
+            throw new Error(result?.data?.message || "Failed to save note");
           }
         } catch (error) {
-          console.error('Error saving note:', error);
+          console.error("Error saving note:", error);
           toast.error({
             description: TOAST_MESSAGES.NOTE_SAVE_ERROR,
           });
@@ -142,7 +196,11 @@ export const useNotesStore = create<NotesState>()(
         }
       },
 
-      updateNote: async (noteId: string, content: JSONContent, tags: string[]) => {
+      updateNote: async (
+        noteId: string,
+        content: JSONContent,
+        tags: string[],
+      ) => {
         set({ isFormLoading: true });
 
         try {
@@ -158,10 +216,10 @@ export const useNotesStore = create<NotesState>()(
               description: TOAST_MESSAGES.NOTE_UPDATED_SUCCESS,
             });
           } else {
-            throw new Error(result?.data?.message || 'Failed to update note');
+            throw new Error(result?.data?.message || "Failed to update note");
           }
         } catch (error) {
-          console.error('Error updating note:', error);
+          console.error("Error updating note:", error);
           toast.error({
             description: TOAST_MESSAGES.NOTE_UPDATE_ERROR,
           });
@@ -181,10 +239,10 @@ export const useNotesStore = create<NotesState>()(
               description: TOAST_MESSAGES.NOTE_DELETED_SUCCESS,
             });
           } else {
-            throw new Error(result?.data?.message || 'Failed to delete note');
+            throw new Error(result?.data?.message || "Failed to delete note");
           }
         } catch (error) {
-          console.error('Error deleting note:', error);
+          console.error("Error deleting note:", error);
           toast.error({
             description: TOAST_MESSAGES.NOTE_DELETE_ERROR,
           });
@@ -197,7 +255,7 @@ export const useNotesStore = create<NotesState>()(
 
       clearSearch: () => {
         set({
-          searchQuery: '',
+          searchQuery: "",
         });
       },
 
@@ -219,7 +277,7 @@ export const useNotesStore = create<NotesState>()(
         if (tagInput && !formTags.includes(tagInput)) {
           set({
             formTags: [...formTags, tagInput],
-            tagInput: '',
+            tagInput: "",
           });
         }
       },
@@ -235,7 +293,7 @@ export const useNotesStore = create<NotesState>()(
           editingNote: note,
           formContent: note.content || {},
           formTags: note.tags || [],
-          tagInput: '',
+          tagInput: "",
         });
       },
 
@@ -247,8 +305,93 @@ export const useNotesStore = create<NotesState>()(
         set({
           formContent: {},
           formTags: [],
-          tagInput: '',
+          tagInput: "",
           editingNote: null,
+        });
+      },
+
+      // YouTube Player methods
+      setYouTubePlayer: (player: any) => {
+        set({ youtubePlayer: player });
+      },
+
+      setPlayerState: (state: number) => {
+        set({ playerState: state });
+      },
+
+      setDuration: (duration: number) => {
+        set({ duration });
+      },
+
+      setIsApiLoaded: (loaded: boolean) => {
+        set({ isApiLoaded: loaded });
+      },
+
+      setTargetSeekTime: (time: number | undefined) => {
+        set({ targetSeekTime: time });
+      },
+
+      // Player Controls methods
+      setCurrentTime: (time: number) => {
+        set({ currentTime: time });
+      },
+
+      setVolume: (volume: number) => {
+        set({ volume });
+      },
+
+      setIsMuted: (muted: boolean) => {
+        set({ isMuted: muted });
+      },
+
+      handleTimeUpdate: (time: number) => {
+        const flooredTime = Math.floor(time);
+        set({
+          currentTimestamp: flooredTime,
+          currentTime: flooredTime,
+        });
+      },
+
+      handleNoteTimestampClick: (time: number) => {
+        set({ targetSeekTime: time });
+      },
+
+      // YouTube API management
+      initializeYouTubeAPI: () => {
+        if (typeof window === "undefined") {
+          return;
+        }
+
+        if (window.YT) {
+          set({ isApiLoaded: true });
+          return;
+        }
+
+        const tag = document.createElement("script");
+        tag.src = "https://www.youtube.com/iframe_api";
+        const firstScriptTag = document.getElementsByTagName("script")[0];
+        if (firstScriptTag) {
+          firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+        } else {
+          document.head.appendChild(tag);
+        }
+
+        window.onYouTubeIframeAPIReady = () => {
+          set({ isApiLoaded: true });
+        };
+      },
+
+      destroyYouTubePlayer: () => {
+        const { youtubePlayer } = get();
+        if (youtubePlayer && typeof youtubePlayer.destroy === "function") {
+          youtubePlayer.destroy();
+        }
+        set({
+          youtubePlayer: null,
+          playerState: -1,
+          duration: 0,
+          currentTime: 0,
+          targetSeekTime: undefined,
         });
       },
 
@@ -288,7 +431,9 @@ export const useNotesStore = create<NotesState>()(
           evaluation: {
             ...state.evaluation,
             activeTab: tab,
-            showSettings: tab === 'evaluate' && state.evaluation.status === STATUS_STREAMING.IDLE,
+            showSettings:
+              tab === "evaluate" &&
+              state.evaluation.status === STATUS_STREAMING.IDLE,
           },
         }));
       },
@@ -319,7 +464,7 @@ export const useNotesStore = create<NotesState>()(
               status: STATUS_STREAMING.EVALUATING,
               error: null,
               feedback: null,
-              streamingContent: '',
+              streamingContent: "",
               isEvaluating: true,
               isCompleted: false,
               hasError: false,
@@ -332,7 +477,9 @@ export const useNotesStore = create<NotesState>()(
           const response = await fetch(streamUrl);
 
           if (!response.ok) {
-            throw new Error(`${ERROR_MESSAGES.FAILED_TO_EVALUATE_NOTE}: ${response.statusText}`);
+            throw new Error(
+              `${ERROR_MESSAGES.FAILED_TO_EVALUATE_NOTE}: ${response.statusText}`,
+            );
           }
 
           if (!response.body) {
@@ -348,7 +495,7 @@ export const useNotesStore = create<NotesState>()(
 
           const reader = response.body.getReader();
           const decoder = new TextDecoder();
-          let buffer = '';
+          let buffer = "";
 
           while (true) {
             const { done, value } = await reader.read();
@@ -356,29 +503,34 @@ export const useNotesStore = create<NotesState>()(
             if (done) break;
 
             buffer += decoder.decode(value, { stream: true });
-            const lines = buffer.split('\n');
-            buffer = lines.pop() || '';
+            const lines = buffer.split("\n");
+            buffer = lines.pop() || "";
 
             for (const line of lines) {
               if (line.startsWith(AI_API.SSE_DATA_PREFIX)) {
                 try {
-                  const chunk = JSON.parse(line.slice(AI_API.SSE_DATA_PREFIX_LENGTH));
+                  const chunk = JSON.parse(
+                    line.slice(AI_API.SSE_DATA_PREFIX_LENGTH),
+                  );
 
                   if (chunk.type === CHUNK_TYPES.FEEDBACK) {
                     set((state) => ({
                       evaluation: {
                         ...state.evaluation,
-                        streamingContent: state.evaluation.streamingContent + chunk.content,
+                        streamingContent:
+                          state.evaluation.streamingContent + chunk.content,
                       },
                     }));
                   } else if (chunk.type === CHUNK_TYPES.COMPLETE) {
-                    const completeFeedback: IFeedback = JSON.parse(chunk.content);
+                    const completeFeedback: IFeedback = JSON.parse(
+                      chunk.content,
+                    );
                     set((state) => ({
                       evaluation: {
                         ...state.evaluation,
                         feedback: completeFeedback,
                         status: STATUS_STREAMING.COMPLETED,
-                        streamingContent: '',
+                        streamingContent: "",
                         isEvaluating: false,
                         isCompleted: true,
                       },
@@ -389,27 +541,31 @@ export const useNotesStore = create<NotesState>()(
                         ...state.evaluation,
                         error: chunk.content,
                         status: STATUS_STREAMING.ERROR,
-                        streamingContent: '',
+                        streamingContent: "",
                         isEvaluating: false,
                         hasError: true,
                       },
                     }));
                   }
                 } catch (parseError) {
-                  console.error(ERROR_MESSAGES.FAILED_TO_PARSE_CHUNK, parseError);
+                  console.error(
+                    ERROR_MESSAGES.FAILED_TO_PARSE_CHUNK,
+                    parseError,
+                  );
                 }
               }
             }
           }
         } catch (err) {
           console.log(err);
-          const errorMessage = err instanceof Error ? err.message : ERROR_MESSAGES.UNKNOWN_ERROR;
+          const errorMessage =
+            err instanceof Error ? err.message : ERROR_MESSAGES.UNKNOWN_ERROR;
           set((state) => ({
             evaluation: {
               ...state.evaluation,
               error: errorMessage,
               status: STATUS_STREAMING.ERROR,
-              streamingContent: '',
+              streamingContent: "",
               isEvaluating: false,
               hasError: true,
             },
@@ -423,7 +579,7 @@ export const useNotesStore = create<NotesState>()(
             ...state.evaluation,
             status: STATUS_STREAMING.IDLE,
             feedback: null,
-            streamingContent: '',
+            streamingContent: "",
             error: null,
             isEvaluating: false,
             isCompleted: false,
@@ -457,7 +613,7 @@ export const useNotesStore = create<NotesState>()(
             ...state.evaluation,
             status: STATUS_STREAMING.IDLE,
             feedback: null,
-            streamingContent: '',
+            streamingContent: "",
             error: null,
             isEvaluating: false,
             isCompleted: false,
@@ -468,7 +624,7 @@ export const useNotesStore = create<NotesState>()(
       },
     }),
     {
-      name: 'notes-store',
+      name: "notes-store",
     },
   ),
 );

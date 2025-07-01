@@ -1,5 +1,5 @@
-import { IScreenshotResult } from '@/features/notes/types';
-import { RICH_TEXT_EDITOR } from '@/features/notes/constants';
+import { IScreenshotResult } from "@/features/notes/types";
+import { RICH_TEXT_EDITOR } from "@/features/notes/constants";
 
 /**
  * Client-side function to capture video frame
@@ -9,14 +9,14 @@ export const captureVideoFrame = (
 ): Promise<IScreenshotResult> | null => {
   try {
     if (!videoElement || videoElement.readyState < 2) {
-      throw new Error('Video not ready for screenshot');
+      throw new Error("Video not ready for screenshot");
     }
 
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
 
     if (!ctx) {
-      throw new Error('Could not get canvas context');
+      throw new Error("Could not get canvas context");
     }
 
     canvas.width = videoElement.videoWidth;
@@ -30,12 +30,12 @@ export const captureVideoFrame = (
       canvas.toBlob(
         (blob) => {
           if (!blob) {
-            reject(new Error('Failed to create screenshot blob'));
+            reject(new Error("Failed to create screenshot blob"));
             return;
           }
 
           const fileName = `screenshot-${Date.now()}.png`;
-          const file = new File([blob], fileName, { type: 'image/png' });
+          const file = new File([blob], fileName, { type: "image/png" });
 
           resolve({
             file,
@@ -44,12 +44,12 @@ export const captureVideoFrame = (
             timestamp,
           });
         },
-        'image/png',
+        "image/png",
         RICH_TEXT_EDITOR.SCREENSHOT_QUALITY,
       );
     });
   } catch (error) {
-    console.error('Error capturing video frame:', error);
+    console.error("Error capturing video frame:", error);
     return null;
   }
 };
@@ -61,7 +61,7 @@ export const convertFileToBase64 = (file: File): Promise<string> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(reader.result as string);
-    reader.onerror = () => reject(new Error('Failed to read file'));
+    reader.onerror = () => reject(new Error("Failed to read file"));
     reader.readAsDataURL(file);
   });
 };
@@ -77,16 +77,16 @@ export const convertCanvasToBase64 = (
     canvas.toBlob(
       (blob) => {
         if (!blob) {
-          reject(new Error('Failed to create canvas blob'));
+          reject(new Error("Failed to create canvas blob"));
           return;
         }
 
         const reader = new FileReader();
         reader.onload = () => resolve(reader.result as string);
-        reader.onerror = () => reject(new Error('Failed to read canvas blob'));
+        reader.onerror = () => reject(new Error("Failed to read canvas blob"));
         reader.readAsDataURL(blob);
       },
-      'image/png',
+      "image/png",
       quality,
     );
   });
@@ -100,7 +100,7 @@ export const getImageFromClipboard = (event: ClipboardEvent): File | null => {
   if (!items) return null;
 
   for (const item of Array.from(items)) {
-    if (item.type.startsWith('image/')) {
+    if (item.type.startsWith("image/")) {
       const file = item.getAsFile();
       if (file) {
         return file;

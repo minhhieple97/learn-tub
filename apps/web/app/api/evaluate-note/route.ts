@@ -113,7 +113,10 @@ export async function GET(request: NextRequest) {
     const evaluationRequest: INoteEvaluationRequest = {
       noteId,
       aiModelId,
-      content: note.content,
+      content:
+        typeof note.content === "string"
+          ? note.content
+          : JSON.stringify(note.content || ""),
       userId: profile.id,
       context: {
         timestamp: note.timestamp_seconds,
