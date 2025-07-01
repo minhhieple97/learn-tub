@@ -1,26 +1,38 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getUserInSession } from '@/features/profile/queries';
-import { getNoteById, updateNote, deleteNote } from '@/features/notes/queries';
-import { StatusCodes } from 'http-status-codes';
-import { z } from 'zod';
+import { NextRequest, NextResponse } from "next/server";
+import { getUserInSession } from "@/features/profile/queries";
+import { getNoteById, updateNote, deleteNote } from "@/features/notes/queries";
+import { StatusCodes } from "http-status-codes";
+import { z } from "zod";
 
 const updateNoteSchema = z.object({
-  content: z.string().min(1, 'Content is required').max(5000, 'Content is too long'),
-  tags: z.array(z.string().min(1).max(50)).max(10, 'Too many tags').default([]),
+  content: z
+    .string()
+    .min(1, "Content is required")
+    .max(5000, "Content is too long"),
+  tags: z.array(z.string().min(1).max(50)).max(10, "Too many tags").default([]),
 });
 
-export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
   try {
     const user = await getUserInSession();
     if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: StatusCodes.UNAUTHORIZED });
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: StatusCodes.UNAUTHORIZED },
+      );
     }
 
     const noteId = (await params).id;
     const note = await getNoteById(noteId, user.id);
 
     if (!note) {
-      return NextResponse.json({ error: 'Note not found' }, { status: StatusCodes.NOT_FOUND });
+      return NextResponse.json(
+        { error: "Note not found" },
+        { status: StatusCodes.NOT_FOUND },
+      );
     }
 
     return NextResponse.json({
@@ -28,19 +40,25 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       data: note,
     });
   } catch (error) {
-    console.error('Error fetching note:', error);
+    console.error("Error fetching note:", error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: "Internal server error" },
       { status: StatusCodes.INTERNAL_SERVER_ERROR },
     );
   }
 }
 
-export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
   try {
     const user = await getUserInSession();
     if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: StatusCodes.UNAUTHORIZED });
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: StatusCodes.UNAUTHORIZED },
+      );
     }
 
     const noteId = (await params).id;
@@ -50,7 +68,10 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     // Check if note exists and belongs to user
     const existingNote = await getNoteById(noteId, user.id);
     if (!existingNote) {
-      return NextResponse.json({ error: 'Note not found' }, { status: StatusCodes.NOT_FOUND });
+      return NextResponse.json(
+        { error: "Note not found" },
+        { status: StatusCodes.NOT_FOUND },
+      );
     }
 
     const { error } = await updateNote({
@@ -69,18 +90,18 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
     return NextResponse.json({
       success: true,
-      message: 'Note updated successfully',
+      message: "Note updated successfully",
     });
   } catch (error) {
-    console.error('Error updating note:', error);
+    console.error("Error updating note:", error);
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'Invalid request data', details: error.errors },
+        { error: "Invalid request data", details: error.errors },
         { status: StatusCodes.BAD_REQUEST },
       );
     }
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: "Internal server error" },
       { status: StatusCodes.INTERNAL_SERVER_ERROR },
     );
   }
@@ -93,14 +114,20 @@ export async function DELETE(
   try {
     const user = await getUserInSession();
     if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: StatusCodes.UNAUTHORIZED });
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: StatusCodes.UNAUTHORIZED },
+      );
     }
 
     const noteId = (await params).id;
 
     const existingNote = await getNoteById(noteId, user.id);
     if (!existingNote) {
-      return NextResponse.json({ error: 'Note not found' }, { status: StatusCodes.NOT_FOUND });
+      return NextResponse.json(
+        { error: "Note not found" },
+        { status: StatusCodes.NOT_FOUND },
+      );
     }
 
     const { error } = await deleteNote({
@@ -117,12 +144,12 @@ export async function DELETE(
 
     return NextResponse.json({
       success: true,
-      message: 'Note deleted successfully',
+      message: "Note deleted successfully",
     });
   } catch (error) {
-    console.error('Error deleting note:', error);
+    console.error("Error deleting note:", error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: "Internal server error" },
       { status: StatusCodes.INTERNAL_SERVER_ERROR },
     );
   }

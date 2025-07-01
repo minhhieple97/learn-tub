@@ -1,36 +1,47 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { ActionError, authAction } from '@/lib/safe-action';
-import { saveNoteInputSchema, updateNoteInputSchema, deleteNoteInputSchema } from '../schemas';
-import { createNote, updateNote, deleteNote } from '../queries';
-import { routes } from '@/routes';
-import { checkProfileByUserId } from '@/lib/require-auth';
+import { ActionError, authAction } from "@/lib/safe-action";
+import {
+  saveNoteInputSchema,
+  updateNoteInputSchema,
+  deleteNoteInputSchema,
+} from "../schemas";
+import { createNote, updateNote, deleteNote } from "../queries";
+import { routes } from "@/routes";
+import { checkProfileByUserId } from "@/lib/require-auth";
 
 export const saveNoteAction = authAction
   .inputSchema(saveNoteInputSchema)
-  .action(async ({ parsedInput: { videoId, content, timestamp, tags }, ctx: { user } }) => {
-    const profile = await checkProfileByUserId(user.id);
-    const { data, error } = await createNote({
-      videoId,
-      userId: profile.id,
-      content,
-      timestamp,
-      tags,
-    });
-    if (error || !data) {
-      console.error('Failed to save note:', error);
-      throw new ActionError(`Failed to save note: ${error?.message || 'Unknown error'}`);
-    }
+  .action(
+    async ({
+      parsedInput: { videoId, content, timestamp, tags },
+      ctx: { user },
+    }) => {
+      const profile = await checkProfileByUserId(user.id);
+      const { data, error } = await createNote({
+        videoId,
+        userId: profile.id,
+        content,
+        timestamp,
+        tags,
+      });
+      if (error || !data) {
+        console.error("Failed to save note:", error);
+        throw new ActionError(
+          `Failed to save note: ${error?.message || "Unknown error"}`,
+        );
+      }
 
-    revalidatePath(`/learn/${videoId}`);
+      revalidatePath(`/learn/${videoId}`);
 
-    return {
-      success: true,
-      noteId: data.id,
-      message: 'Note saved successfully',
-    };
-  });
+      return {
+        success: true,
+        noteId: data.id,
+        message: "Note saved successfully",
+      };
+    },
+  );
 
 export const updateNoteAction = authAction
   .inputSchema(updateNoteInputSchema)
@@ -53,7 +64,7 @@ export const updateNoteAction = authAction
     return {
       success: true,
       noteId,
-      message: 'Note updated successfully',
+      message: "Note updated successfully",
     };
   });
 
@@ -76,6 +87,6 @@ export const deleteNoteAction = authAction
     return {
       success: true,
       noteId,
-      message: 'Note deleted successfully',
+      message: "Note deleted successfully",
     };
   });

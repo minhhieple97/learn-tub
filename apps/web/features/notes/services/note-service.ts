@@ -5,24 +5,29 @@ import {
   ERROR_MESSAGES,
   EVALUATION_ERRORS,
   AI_QUIZZ_CONFIG,
-} from '@/config/constants';
-import { INoteEvaluationRequest } from '@/features/notes/types';
-import { IFeedback, StreamChunk } from '@/types';
-import { aiUsageTracker } from '@/features/ai';
-import { AIClientFactory } from '@/features/ai/services/ai-client';
-import { getAIModelName } from '../queries';
+} from "@/config/constants";
+import { INoteEvaluationRequest } from "@/features/notes/types";
+import { IFeedback, StreamChunk } from "@/types";
+import { aiUsageTracker } from "@/features/ai";
+import { AIClientFactory } from "@/features/ai/services/ai-client";
+import { getAIModelName } from "../queries";
 
 type StreamController = ReadableStreamDefaultController<StreamChunk>;
 
 class NoteService {
-  async evaluateNote(request: INoteEvaluationRequest): Promise<ReadableStream<StreamChunk>> {
+  async evaluateNote(
+    request: INoteEvaluationRequest,
+  ): Promise<ReadableStream<StreamChunk>> {
     const { aiModelId, content, context, userId } = request;
     const prompt = this.createEvaluationPrompt(content, context);
 
-    const { data: modelData, error: modelError } = await getAIModelName(aiModelId);
+    const { data: modelData, error: modelError } =
+      await getAIModelName(aiModelId);
 
     if (modelError || !modelData?.model_name) {
-      throw new Error(`${EVALUATION_ERRORS.UNSUPPORTED_PROVIDER}: ${aiModelId}`);
+      throw new Error(
+        `${EVALUATION_ERRORS.UNSUPPORTED_PROVIDER}: ${aiModelId}`,
+      );
     }
 
     const modelName = modelData.model_name;
@@ -30,7 +35,7 @@ class NoteService {
     return aiUsageTracker.wrapStreamingOperation(
       {
         user_id: userId,
-        command: 'evaluate_note' as const,
+        command: "evaluate_note" as const,
         ai_model_id: aiModelId,
         request_payload: { prompt_length: prompt.length },
       },
@@ -42,13 +47,14 @@ class NoteService {
           prompt,
         );
 
-        const { stream, getUsage } = await aiClient.streamChatCompletionWithUsage({
-          model: modelName,
-          messages,
-          stream_options: {
-            include_usage: true,
-          },
-        });
+        const { stream, getUsage } =
+          await aiClient.streamChatCompletionWithUsage({
+            model: modelName,
+            messages,
+            stream_options: {
+              include_usage: true,
+            },
+          });
 
         const transformedStream = this.createStreamFromAIClient(stream);
 
@@ -62,7 +68,7 @@ class NoteService {
 
   private createEvaluationPrompt(
     content: string,
-    context?: INoteEvaluationRequest['context'],
+    context?: INoteEvaluationRequest["context"],
   ): string {
     const contextualInfo = this.buildContextualInfo(context);
 
@@ -92,8 +98,10 @@ Focus on:
 Be constructive and educational in your feedback.`;
   }
 
-  private buildContextualInfo(context?: INoteEvaluationRequest['context']): string {
-    if (!context) return '';
+  private buildContextualInfo(
+    context?: INoteEvaluationRequest["context"],
+  ): string {
+    if (!context) return "";
 
     const contextParts: string[] = [];
 
@@ -106,10 +114,12 @@ Be constructive and educational in your feedback.`;
     }
 
     if (context.timestamp) {
-      contextParts.push(`Timestamp: ${this.formatTimestamp(context.timestamp)}`);
+      contextParts.push(
+        `Timestamp: ${this.formatTimestamp(context.timestamp)}`,
+      );
     }
 
-    return contextParts.join('\n');
+    return contextParts.join("\n");
   }
 
   private formatTimestamp(seconds: number): string {
@@ -118,7 +128,9 @@ Be constructive and educational in your feedback.`;
     const secs = seconds % 60;
 
     const pad = (num: number) =>
-      num.toString().padStart(AI_FORMAT.TIMESTAMP_PADDING, AI_FORMAT.TIMESTAMP_PAD_CHAR);
+      num
+        .toString()
+        .padStart(AI_FORMAT.TIMESTAMP_PADDING, AI_FORMAT.TIMESTAMP_PAD_CHAR);
 
     if (hours > 0) {
       return `${hours}:${pad(minutes)}:${pad(secs)}`;
@@ -127,7 +139,10 @@ Be constructive and educational in your feedback.`;
     return `${minutes}:${pad(secs)}`;
   }
 
-  formatFeedbackForCopy(feedback: IFeedback, format: 'plain' | 'markdown'): string {
+  formatFeedbackForCopy(
+    feedback: IFeedback,
+    format: "plain" | "markdown",
+  ): string {
     return format === AI_FORMAT.COPY_FORMATS.MARKDOWN
       ? this.formatAsMarkdown(feedback)
       : this.formatAsPlainText(feedback);
@@ -142,13 +157,13 @@ ${feedback.summary}
 ## Overall Score: ${feedback.overall_score}/10
 
 ## ✅ Correct Points
-${this.formatListItems(feedback.correct_points, '-')}
+${this.formatListItems(feedback.correct_points, "-")}
 
 ## ❌ Points to Review
-${this.formatListItems(feedback.incorrect_points, '-')}
+${this.formatListItems(feedback.incorrect_points, "-")}
 
 ## 💡 Improvement Suggestions
-${this.formatListItems(feedback.improvement_suggestions, '-')}
+${this.formatListItems(feedback.improvement_suggestions, "-")}
 
 ## Detailed Analysis
 ${feedback.detailed_analysis}`;
@@ -162,20 +177,20 @@ Summary: ${feedback.summary}
 Overall Score: ${feedback.overall_score}/10
 
 Correct Points:
-${this.formatListItems(feedback.correct_points, '•')}
+${this.formatListItems(feedback.correct_points, "•")}
 
 Points to Review:
-${this.formatListItems(feedback.incorrect_points, '•')}
+${this.formatListItems(feedback.incorrect_points, "•")}
 
 Improvement Suggestions:
-${this.formatListItems(feedback.improvement_suggestions, '•')}
+${this.formatListItems(feedback.improvement_suggestions, "•")}
 
 Detailed Analysis:
 ${feedback.detailed_analysis}`;
   }
 
   private formatListItems(items: string[], bullet: string): string {
-    return items.map((item) => `${bullet} ${item}`).join('\n');
+    return items.map((item) => `${bullet} ${item}`).join("\n");
   }
 
   private createStreamFromAIClient(
@@ -187,14 +202,14 @@ ${feedback.detailed_analysis}`;
     return new ReadableStream<StreamChunk>({
       async start(controller) {
         try {
-          let fullContent = '';
+          let fullContent = "";
           const reader = aiStream.getReader();
 
           while (true) {
             const { done, value } = await reader.read();
             if (done) break;
 
-            const content = value.choices[0]?.delta?.content || '';
+            const content = value.choices[0]?.delta?.content || "";
             fullContent += content;
 
             controller.enqueue({
@@ -219,42 +234,48 @@ ${feedback.detailed_analysis}`;
       if (cleanedText.startsWith(AI_QUIZZ_CONFIG.MARKDOWN_JSON_START)) {
         cleanedText = cleanedText.replace(
           new RegExp(`^${AI_QUIZZ_CONFIG.MARKDOWN_JSON_START}\\s*`),
-          '',
+          "",
         );
       }
       if (cleanedText.startsWith(AI_QUIZZ_CONFIG.MARKDOWN_CODE_START)) {
         cleanedText = cleanedText.replace(
           new RegExp(`^${AI_QUIZZ_CONFIG.MARKDOWN_CODE_START}\\s*`),
-          '',
+          "",
         );
       }
       if (cleanedText.endsWith(AI_QUIZZ_CONFIG.MARKDOWN_CODE_END)) {
         cleanedText = cleanedText.replace(
           new RegExp(`\\s*${AI_QUIZZ_CONFIG.MARKDOWN_CODE_END}$`),
-          '',
+          "",
         );
       }
 
-      const jsonMatch = cleanedText.match(new RegExp(AI_QUIZZ_CONFIG.JSON_REGEX_PATTERN));
+      const jsonMatch = cleanedText.match(
+        new RegExp(AI_QUIZZ_CONFIG.JSON_REGEX_PATTERN),
+      );
       if (jsonMatch) {
         cleanedText = jsonMatch[0];
       }
 
       const parsed = JSON.parse(cleanedText) as IFeedback;
 
-      if (!parsed.summary || typeof parsed.overall_score !== 'number') {
-        throw new Error('Invalid feedback format: missing required fields');
+      if (!parsed.summary || typeof parsed.overall_score !== "number") {
+        throw new Error("Invalid feedback format: missing required fields");
       }
 
       return {
-        summary: parsed.summary || '',
-        correct_points: Array.isArray(parsed.correct_points) ? parsed.correct_points : [],
-        incorrect_points: Array.isArray(parsed.incorrect_points) ? parsed.incorrect_points : [],
+        summary: parsed.summary || "",
+        correct_points: Array.isArray(parsed.correct_points)
+          ? parsed.correct_points
+          : [],
+        incorrect_points: Array.isArray(parsed.incorrect_points)
+          ? parsed.incorrect_points
+          : [],
         improvement_suggestions: Array.isArray(parsed.improvement_suggestions)
           ? parsed.improvement_suggestions
           : [],
         overall_score: parsed.overall_score || 0,
-        detailed_analysis: parsed.detailed_analysis || '',
+        detailed_analysis: parsed.detailed_analysis || "",
       };
     } catch (error) {
       console.error(error);
@@ -262,7 +283,10 @@ ${feedback.detailed_analysis}`;
     }
   }
 
-  private handleStreamCompletion(controller: StreamController, fullContent: string): void {
+  private handleStreamCompletion(
+    controller: StreamController,
+    fullContent: string,
+  ): void {
     try {
       const feedback = this.parseFeedbackFromResponse(fullContent);
       controller.enqueue({
@@ -281,8 +305,12 @@ ${feedback.detailed_analysis}`;
     }
   }
 
-  private handleStreamError(controller: StreamController, error: unknown): void {
-    const errorMessage = error instanceof Error ? error.message : ERROR_MESSAGES.UNKNOWN_ERROR;
+  private handleStreamError(
+    controller: StreamController,
+    error: unknown,
+  ): void {
+    const errorMessage =
+      error instanceof Error ? error.message : ERROR_MESSAGES.UNKNOWN_ERROR;
 
     controller.enqueue({
       type: CHUNK_TYPES.ERROR,

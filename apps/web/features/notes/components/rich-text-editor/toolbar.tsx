@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { Editor } from '@tiptap/react';
-import { Separator } from '@/components/ui/separator';
-import { FormattingButtons } from './formatting-buttons';
-import { MediaButtons } from './media-buttons';
+import React from "react";
+import { Editor } from "@tiptap/react";
+import { Separator } from "@/components/ui/separator";
+import { FormattingButtons } from "./formatting-buttons";
+import { MediaButtons } from "./media-buttons";
 
 type IToolbarProps = {
   editor: Editor;

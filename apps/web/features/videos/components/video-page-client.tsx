@@ -1,6 +1,7 @@
 "use client";
 
-import { useVideoPlayer } from "@/features/videos/hooks/use-video-player";
+import { useEffect } from "react";
+import { useNotesStore } from "@/features/notes/store";
 import { VideoPageHeader } from "./video-page-header";
 import { VideoMainContent } from "./video-main-content";
 import { VideoSidebar } from "./video-sidebar";
@@ -12,8 +13,20 @@ type IVideoPageClientProps = {
 };
 
 export const VideoPageClient = ({ video }: IVideoPageClientProps) => {
-  const { currentTimestamp, targetSeekTime, handleTimeUpdate, handleNoteTimestampClick } =
-    useVideoPlayer();
+  const {
+    currentTimestamp,
+    targetSeekTime,
+    handleTimeUpdate,
+    handleNoteTimestampClick,
+    initializeYouTubeAPI,
+    setCurrentVideo,
+  } = useNotesStore();
+
+  // Initialize YouTube API and set current video
+  useEffect(() => {
+    initializeYouTubeAPI();
+    setCurrentVideo(video.id);
+  }, [video.id, initializeYouTubeAPI, setCurrentVideo]);
 
   const leftPanel = (
     <VideoMainContent

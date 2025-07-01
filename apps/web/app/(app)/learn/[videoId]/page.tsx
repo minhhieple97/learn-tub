@@ -1,9 +1,9 @@
-import { notFound } from 'next/navigation';
-import { VideoPageClient } from '@/features/videos/components';
-import { getVideoPageData } from '@/features/videos/queries';
-import getQueryClient from '@/lib/get-query-client';
-import { dehydrate, HydrationBoundary } from '@tanstack/react-query';
-import { fetchNotes, NOTES_QUERY_KEYS } from '@/features/notes/hooks/use-notes-queries';
+import { notFound } from "next/navigation";
+import { VideoPageClient } from "@/features/videos/components";
+import { getVideoPageData } from "@/features/videos/queries";
+import getQueryClient from "@/lib/get-query-client";
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
+import { fetchNotes } from "@/features/notes/hooks/use-notes-queries";
 
 type IVideoPageProps = {
   params: Promise<{
@@ -15,7 +15,7 @@ export default async function VideoPage({ params }: IVideoPageProps) {
   const { videoId } = await params;
   const queryClient = getQueryClient();
   await queryClient.prefetchQuery({
-    queryKey: ['notes', videoId],
+    queryKey: ["notes", videoId],
     queryFn: () => fetchNotes(videoId),
   });
   const dehydratedState = dehydrate(queryClient);

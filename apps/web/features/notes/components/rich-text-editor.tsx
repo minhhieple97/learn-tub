@@ -1,16 +1,21 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { EditorContent } from '@tiptap/react';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { IRichTextEditorProps } from '@/features/notes/types';
-import { useRichTextEditorSetup } from '@/features/notes/hooks';
-import { RICH_TEXT_EDITOR } from '@/features/notes/constants';
-import { ImageWithDelete, Toolbar, StatusBar, LoadingState } from './rich-text-editor/index';
+import React from "react";
+import { EditorContent } from "@tiptap/react";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { IRichTextEditorProps } from "@/features/notes/types";
+import { useRichTextEditorSetup } from "@/features/notes/hooks";
+import { RICH_TEXT_EDITOR } from "@/features/notes/constants";
+import {
+  ImageWithDelete,
+  Toolbar,
+  StatusBar,
+  LoadingState,
+} from "./rich-text-editor/index";
 
 export const RichTextEditor = ({
   content,
-  placeholder = 'Write your notes here...',
+  placeholder = "Write your notes here...",
   videoElement,
   videoId,
   videoTitle,

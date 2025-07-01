@@ -3,8 +3,8 @@
 import { useCallback } from "react";
 import { useNotesStore } from "../store";
 import { VALIDATION_LIMITS, TOAST_MESSAGES } from "@/config/constants";
-import { toast } from '@/hooks/use-toast';
-import { useInvalidateNotes } from './use-notes-queries';
+import { toast } from "@/hooks/use-toast";
+import { useInvalidateNotes } from "./use-notes-queries";
 
 type IValidationResult = {
   isValid: boolean;
@@ -37,7 +37,9 @@ export const useNoteEditorForm = () => {
       errors.push(TOAST_MESSAGES.VALIDATION_TOO_MANY_TAGS);
     }
 
-    const invalidTags = tags.filter((tag) => tag.length > VALIDATION_LIMITS.TAG_MAX_LENGTH);
+    const invalidTags = tags.filter(
+      (tag) => tag.length > VALIDATION_LIMITS.TAG_MAX_LENGTH,
+    );
     if (invalidTags.length > 0) {
       errors.push(TOAST_MESSAGES.VALIDATION_TAG_TOO_LONG);
     }
@@ -55,7 +57,7 @@ export const useNoteEditorForm = () => {
   const showValidationErrors = useCallback((errors: string[]) => {
     errors.forEach((error) => {
       toast.error({
-        title: 'Validation Error',
+        title: "Validation Error",
         description: error,
       });
     });
@@ -85,7 +87,7 @@ export const useNoteEditorForm = () => {
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
+      if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
         handleAddTag();
       }
@@ -114,7 +116,7 @@ export const useNoteEditorForm = () => {
       }
     } catch (error) {
       // Error handling is done in the store methods
-      console.error('Error in handleSave:', error);
+      console.error("Error in handleSave:", error);
     }
   }, [
     formContent,

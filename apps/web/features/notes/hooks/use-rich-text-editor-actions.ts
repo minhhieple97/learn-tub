@@ -1,16 +1,20 @@
-'use client';
+"use client";
 
-import { useCallback, useRef, useState } from 'react';
-import { useAction } from 'next-safe-action/hooks';
-import { toast } from '@/hooks/use-toast';
-import { MEDIA_UPLOAD, RICH_TEXT_EDITOR, TOAST_MESSAGES } from '@/features/notes/constants';
+import { useCallback, useRef, useState } from "react";
+import { useAction } from "next-safe-action/hooks";
+import { toast } from "@/hooks/use-toast";
+import {
+  MEDIA_UPLOAD,
+  RICH_TEXT_EDITOR,
+  TOAST_MESSAGES,
+} from "@/features/notes/constants";
 import {
   captureAndSaveScreenshotAction,
   uploadScreenshotAction,
   handleImagePasteAction,
   deleteImageAction,
-} from '@/features/notes/actions/media-actions';
-import { Editor } from '@tiptap/react';
+} from "@/features/notes/actions/media-actions";
+import { Editor } from "@tiptap/react";
 
 type IUseRichTextEditorActionsProps = {
   videoId: string;
@@ -26,7 +30,10 @@ type IUseRichTextEditorActionsReturn = {
   isDeletingImage: boolean;
   fileInputRef: React.RefObject<HTMLInputElement | null>;
   handleScreenshot: (editor: Editor) => Promise<void>;
-  handleImageUpload: (event: React.ChangeEvent<HTMLInputElement>, editor: Editor) => Promise<void>;
+  handleImageUpload: (
+    event: React.ChangeEvent<HTMLInputElement>,
+    editor: Editor,
+  ) => Promise<void>;
   handleImagePaste: (event: ClipboardEvent, editor: Editor) => Promise<boolean>;
   handleImageDelete: (imageUrl: string, editor: Editor) => Promise<void>;
   handleManualImageDelete: (imageUrl: string) => Promise<void>;
@@ -47,13 +54,17 @@ export const useRichTextEditorActions = ({
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [isDeletingImage, setIsDeletingImage] = useState(false);
 
-  const { executeAsync: executeScreenshotCapture } = useAction(captureAndSaveScreenshotAction);
-  const { executeAsync: executeImageUpload } = useAction(uploadScreenshotAction);
+  const { executeAsync: executeScreenshotCapture } = useAction(
+    captureAndSaveScreenshotAction,
+  );
+  const { executeAsync: executeImageUpload } = useAction(
+    uploadScreenshotAction,
+  );
   const { executeAsync: executeImagePaste } = useAction(handleImagePasteAction);
   const { executeAsync: executeImageDelete } = useAction(deleteImageAction);
 
   const validateImageFile = useCallback((file: File): boolean => {
-    if (!file.type.startsWith('image/')) {
+    if (!file.type.startsWith("image/")) {
       toast.error({
         description: TOAST_MESSAGES.INVALID_FILE_TYPE,
       });
@@ -72,7 +83,7 @@ export const useRichTextEditorActions = ({
 
   const resetFileInput = useCallback(() => {
     if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+      fileInputRef.current.value = "";
     }
   }, []);
 
@@ -89,14 +100,14 @@ export const useRichTextEditorActions = ({
       return new Promise((resolve, reject) => {
         try {
           if (!video || video.readyState < 2) {
-            throw new Error('Video not ready for screenshot');
+            throw new Error("Video not ready for screenshot");
           }
 
-          const canvas = document.createElement('canvas');
-          const ctx = canvas.getContext('2d');
+          const canvas = document.createElement("canvas");
+          const ctx = canvas.getContext("2d");
 
           if (!ctx) {
-            throw new Error('Could not get canvas context');
+            throw new Error("Could not get canvas context");
           }
 
           canvas.width = video.videoWidth;
@@ -106,7 +117,7 @@ export const useRichTextEditorActions = ({
           canvas.toBlob(
             (blob) => {
               if (!blob) {
-                reject(new Error('Failed to create screenshot blob'));
+                reject(new Error("Failed to create screenshot blob"));
                 return;
               }
 
@@ -121,10 +132,10 @@ export const useRichTextEditorActions = ({
                   height: canvas.height,
                 });
               };
-              reader.onerror = () => reject(new Error('Failed to read blob'));
+              reader.onerror = () => reject(new Error("Failed to read blob"));
               reader.readAsDataURL(blob);
             },
-            'image/png',
+            "image/png",
             RICH_TEXT_EDITOR.SCREENSHOT_QUALITY,
           );
         } catch (error) {
@@ -139,7 +150,7 @@ export const useRichTextEditorActions = ({
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = () => resolve(reader.result as string);
-      reader.onerror = () => reject(new Error('Failed to read file'));
+      reader.onerror = () => reject(new Error("Failed to read file"));
       reader.readAsDataURL(file);
     });
   }, []);
@@ -171,13 +182,17 @@ export const useRichTextEditorActions = ({
         });
 
         if (result.data?.success && result.data?.data?.publicUrl) {
-          editor.chain().focus().setImage({ src: result.data.data.publicUrl }).run();
+          editor
+            .chain()
+            .focus()
+            .setImage({ src: result.data.data.publicUrl })
+            .run();
           toast.success({
             description: TOAST_MESSAGES.SCREENSHOT_SUCCESS,
           });
         }
       } catch (error) {
-        console.error('Error capturing screenshot:', error);
+        console.error("Error capturing screenshot:", error);
         toast.error({
           description: TOAST_MESSAGES.SCREENSHOT_ERROR,
         });
@@ -219,12 +234,16 @@ export const useRichTextEditorActions = ({
         });
 
         if (result?.data?.success && result.data?.data) {
-          editor.chain().focus().setImage({ src: result.data.data.publicUrl }).run();
+          editor
+            .chain()
+            .focus()
+            .setImage({ src: result.data.data.publicUrl })
+            .run();
         } else {
-          throw new Error('Failed to upload image');
+          throw new Error("Failed to upload image");
         }
       } catch (error) {
-        console.error('Error uploading image:', error);
+        console.error("Error uploading image:", error);
         toast.error({
           description: TOAST_MESSAGES.IMAGE_UPLOAD_ERROR,
         });
@@ -233,7 +252,13 @@ export const useRichTextEditorActions = ({
         resetFileInput();
       }
     },
-    [disabled, validateImageFile, resetFileInput, convertFileToBase64, executeImageUpload],
+    [
+      disabled,
+      validateImageFile,
+      resetFileInput,
+      convertFileToBase64,
+      executeImageUpload,
+    ],
   );
 
   const handleImagePasteCallback = useCallback(
@@ -245,7 +270,7 @@ export const useRichTextEditorActions = ({
 
       // Check if clipboard contains images
       for (const item of Array.from(items)) {
-        if (item.type.startsWith('image/')) {
+        if (item.type.startsWith("image/")) {
           try {
             const file = item.getAsFile();
             if (!file) continue;
@@ -254,17 +279,21 @@ export const useRichTextEditorActions = ({
 
             const result = await executeImagePaste({
               fileData,
-              fileName: `pasted-image-${Date.now()}.${file.type.split('/')[1]}`,
+              fileName: `pasted-image-${Date.now()}.${file.type.split("/")[1]}`,
               fileSize: file.size,
               mimeType: file.type,
             });
 
             if (result?.data?.success && result.data.data) {
-              editor.chain().focus().setImage({ src: result.data.data.publicUrl }).run();
+              editor
+                .chain()
+                .focus()
+                .setImage({ src: result.data.data.publicUrl })
+                .run();
             }
             return true; // Prevent default paste behavior
           } catch (error) {
-            console.error('Error pasting image:', error);
+            console.error("Error pasting image:", error);
             toast.error({
               description: TOAST_MESSAGES.IMAGE_PASTE_ERROR,
             });
@@ -287,7 +316,7 @@ export const useRichTextEditorActions = ({
       try {
         // Extract storage path from URL
         const url = new URL(imageUrl);
-        const storagePath = url.pathname.split('/').slice(-3).join('/'); // Extract the path after bucket name
+        const storagePath = url.pathname.split("/").slice(-3).join("/"); // Extract the path after bucket name
 
         const result = await executeImageDelete({
           imageUrl,
@@ -300,7 +329,7 @@ export const useRichTextEditorActions = ({
           const { doc } = state;
 
           doc.descendants((node, pos) => {
-            if (node.type.name === 'image' && node.attrs.src === imageUrl) {
+            if (node.type.name === "image" && node.attrs.src === imageUrl) {
               const transaction = state.tr.delete(pos, pos + node.nodeSize);
               dispatch(transaction);
               return false; // Stop traversing
@@ -308,7 +337,7 @@ export const useRichTextEditorActions = ({
           });
         }
       } catch (error) {
-        console.error('Error deleting image:', error);
+        console.error("Error deleting image:", error);
         toast.error({
           description: TOAST_MESSAGES.IMAGE_DELETE_ERROR,
         });
@@ -324,13 +353,13 @@ export const useRichTextEditorActions = ({
       if (disabled) return;
       try {
         const url = new URL(imageUrl);
-        const storagePath = url.pathname.split('/').slice(-3).join('/');
+        const storagePath = url.pathname.split("/").slice(-3).join("/");
         await executeImageDelete({
           imageUrl,
           storagePath,
         });
       } catch (error) {
-        console.error('Error cleaning up deleted image:', error);
+        console.error("Error cleaning up deleted image:", error);
       }
     },
     [disabled, executeImageDelete],

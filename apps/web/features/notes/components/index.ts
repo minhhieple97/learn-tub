@@ -1,6 +1,6 @@
 export { NoteEditor } from "./note-editor";
 export { NoteEditorForm } from "./note-editor-form";
-export { RichTextEditor } from './rich-text-editor';
+export { RichTextEditor } from "./rich-text-editor";
 export { NotesList } from "./notes-list";
 export { NotesListWithSearch } from "./notes-list-with-search";
 export { NotesSearch } from "./notes-search";

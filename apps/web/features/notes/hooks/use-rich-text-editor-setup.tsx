@@ -1,13 +1,18 @@
-'use client';
+"use client";
 
-import { useCallback, useMemo, useState, useEffect } from 'react';
-import { useEditor, Editor, ReactNodeViewRenderer, JSONContent } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
-import Image from '@tiptap/extension-image';
-import Placeholder from '@tiptap/extension-placeholder';
-import { RICH_TEXT_EDITOR } from '@/features/notes/constants';
-import { useRichTextEditorActions } from './use-rich-text-editor-actions';
-import { useNotesStore } from '../store';
+import { useCallback, useMemo, useState, useEffect } from "react";
+import {
+  useEditor,
+  Editor,
+  ReactNodeViewRenderer,
+  JSONContent,
+} from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+import Image from "@tiptap/extension-image";
+import Placeholder from "@tiptap/extension-placeholder";
+import { RICH_TEXT_EDITOR } from "@/features/notes/constants";
+import { useRichTextEditorActions } from "./use-rich-text-editor-actions";
+import { useNotesStore } from "../store";
 
 type IUseRichTextEditorSetupProps = {
   content: JSONContent | string;
@@ -17,7 +22,11 @@ type IUseRichTextEditorSetupProps = {
   noteId?: string;
   videoElement: HTMLVideoElement | null;
   disabled?: boolean;
-  ImageWithDelete: React.ComponentType<{ node: any; deleteNode: () => void; disabled: boolean }>;
+  ImageWithDelete: React.ComponentType<{
+    node: any;
+    deleteNode: () => void;
+    disabled: boolean;
+  }>;
 };
 
 type IUseRichTextEditorSetupReturn = {
@@ -36,7 +45,11 @@ const createImageExtension = (
   onDelete: (imageUrl: string, editor: Editor) => void,
   onManualDelete: (imageUrl: string) => void,
   disabled: boolean,
-  ImageWithDelete: React.ComponentType<{ node: any; deleteNode: () => void; disabled: boolean }>,
+  ImageWithDelete: React.ComponentType<{
+    node: any;
+    deleteNode: () => void;
+    disabled: boolean;
+  }>,
 ) =>
   Image.extend({
     addNodeView() {
@@ -55,7 +68,7 @@ const createImageExtension = (
 
 export const useRichTextEditorSetup = ({
   content,
-  placeholder = 'Write your notes here...',
+  placeholder = "Write your notes here...",
   videoId,
   videoTitle,
   noteId,
@@ -86,7 +99,12 @@ export const useRichTextEditorSetup = ({
 
   const CustomImage = useMemo(
     () =>
-      createImageExtension(handleImageDelete, handleManualImageDelete, disabled, ImageWithDelete),
+      createImageExtension(
+        handleImageDelete,
+        handleManualImageDelete,
+        disabled,
+        ImageWithDelete,
+      ),
     [handleImageDelete, handleManualImageDelete, disabled, ImageWithDelete],
   );
   const { setFormContent } = useNotesStore();
@@ -108,13 +126,15 @@ export const useRichTextEditorSetup = ({
       setFormContent(json);
       const currentImages: string[] = [];
       editor.state.doc.descendants((node) => {
-        if (node.type.name === 'image' && node.attrs.src) {
+        if (node.type.name === "image" && node.attrs.src) {
           currentImages.push(node.attrs.src);
         }
       });
 
       // Find images that were removed
-      const removedImages = previousImages.filter((src) => !currentImages.includes(src));
+      const removedImages = previousImages.filter(
+        (src) => !currentImages.includes(src),
+      );
 
       // Clean up removed images
       removedImages.forEach((imageUrl) => {
@@ -132,7 +152,7 @@ export const useRichTextEditorSetup = ({
         const items = event.clipboardData?.items;
         if (items) {
           for (const item of Array.from(items)) {
-            if (item.type.startsWith('image/')) {
+            if (item.type.startsWith("image/")) {
               handleImagePaste(event, editor as Editor);
               return true;
             }
@@ -148,7 +168,7 @@ export const useRichTextEditorSetup = ({
     if (editor && !previousImages.length) {
       const currentImages: string[] = [];
       editor.state.doc.descendants((node) => {
-        if (node.type.name === 'image' && node.attrs.src) {
+        if (node.type.name === "image" && node.attrs.src) {
           currentImages.push(node.attrs.src);
         }
       });

@@ -1,8 +1,12 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { getUserInSession } from '@/features/profile/queries';
-import { getNotesByVideoId, getUserNotes, searchNotes } from '@/features/notes/queries';
-import { StatusCodes } from 'http-status-codes';
-import { z } from 'zod';
+import { NextRequest, NextResponse } from "next/server";
+import { getUserInSession } from "@/features/profile/queries";
+import {
+  getNotesByVideoId,
+  getUserNotes,
+  searchNotes,
+} from "@/features/notes/queries";
+import { StatusCodes } from "http-status-codes";
+import { z } from "zod";
 
 const getNotesQuerySchema = z.object({
   videoId: z.string().uuid().nullable().optional(),
@@ -14,14 +18,17 @@ export async function GET(request: NextRequest) {
   try {
     const user = await getUserInSession();
     if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: StatusCodes.UNAUTHORIZED });
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: StatusCodes.UNAUTHORIZED },
+      );
     }
 
     const { searchParams } = new URL(request.url);
     const params = getNotesQuerySchema.parse({
-      videoId: searchParams.get('videoId'),
-      limit: searchParams.get('limit'),
-      search: searchParams.get('search'),
+      videoId: searchParams.get("videoId"),
+      limit: searchParams.get("limit"),
+      search: searchParams.get("search"),
     });
 
     if (params.search) {
@@ -44,11 +51,10 @@ export async function GET(request: NextRequest) {
       data: notes,
     });
   } catch (error) {
-    console.error('Error fetching notes:', error);
+    console.error("Error fetching notes:", error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: "Internal server error" },
       { status: StatusCodes.INTERNAL_SERVER_ERROR },
     );
   }
 }
-

@@ -3,17 +3,21 @@
 import { useState, useEffect } from "react";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useNotesStore } from "../store";
-import { useNotesSearch as useNotesSearchQuery } from './use-notes-queries';
-import { SEARCH_CONFIG } from '@/config/constants';
+import { useNotesSearch as useNotesSearchQuery } from "./use-notes-queries";
+import { SEARCH_CONFIG } from "@/config/constants";
 
 export const useNotesSearch = () => {
-  const { searchQuery, setSearchQuery, clearSearch, currentVideoId } = useNotesStore();
+  const { searchQuery, setSearchQuery, clearSearch, currentVideoId } =
+    useNotesStore();
   const [inputValue, setInputValue] = useState(searchQuery);
-  const debouncedSearchQuery = useDebounce(inputValue, SEARCH_CONFIG.DEBOUNCE_DELAY);
+  const debouncedSearchQuery = useDebounce(
+    inputValue,
+    SEARCH_CONFIG.DEBOUNCE_DELAY,
+  );
 
   // Use react-query search hook
   const { data: searchResults, isLoading: isSearching } = useNotesSearchQuery(
-    currentVideoId || '',
+    currentVideoId || "",
     debouncedSearchQuery,
   );
 
@@ -30,7 +34,7 @@ export const useNotesSearch = () => {
   };
 
   const handleClearSearch = () => {
-    setInputValue('');
+    setInputValue("");
     clearSearch();
   };
 
