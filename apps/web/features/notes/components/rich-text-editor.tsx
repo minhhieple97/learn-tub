@@ -34,8 +34,6 @@ export const RichTextEditor = () => {
           editor={editor}
           className={`min-h-[${RICH_TEXT_EDITOR.MIN_HEIGHT}px] border-t`}
         />
-
-        <StatusBar />
       </CardContent>
     </Card>
   );
