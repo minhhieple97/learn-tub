@@ -57,9 +57,6 @@ export const useAddVideoForm = (): IUseAddVideoFormReturn => {
 
   const handleSuccess = (data: IActionResult) => {
     if (data?.success && data?.videoId) {
-      toast.success({
-        description: TOAST_MESSAGES.VIDEO_ADDED_SUCCESS,
-      });
       router.push(`${routes.learn}/${data.videoId}`);
     }
   };
