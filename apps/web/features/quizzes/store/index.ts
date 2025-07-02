@@ -299,8 +299,6 @@ export const useQuizStore = create<QuizState>()(
                 isEvaluating: false,
                 timeTakenSeconds: finalTimeTaken,
               });
-
-              toast.success({ description: "Quiz submitted successfully!" });
             } else {
               throw new Error(result?.serverError || "Failed to evaluate quiz");
             }
