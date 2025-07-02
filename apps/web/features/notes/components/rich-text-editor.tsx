@@ -8,14 +8,7 @@ import { RICH_TEXT_EDITOR } from "@/features/notes/constants";
 import { Toolbar, LoadingState } from "./rich-text-editor/index";
 
 export const RichTextEditor = () => {
-  const {
-    editor,
-    disabled,
-    onImageUpload,
-    triggerImageUpload,
-    fileInputRef,
-    isUploadingImage,
-  } = useRichTextEditor();
+  const { editor, disabled } = useRichTextEditor();
 
   if (!editor) {
     return <LoadingState />;
@@ -24,14 +17,7 @@ export const RichTextEditor = () => {
   return (
     <Card>
       <CardHeader className="pb-3">
-        <Toolbar
-          editor={editor}
-          disabled={disabled}
-          onImageUpload={onImageUpload}
-          triggerImageUpload={triggerImageUpload}
-          fileInputRef={fileInputRef}
-          isUploadingImage={isUploadingImage}
-        />
+        <Toolbar editor={editor} disabled={disabled} />
       </CardHeader>
 
       <CardContent className="p-0">

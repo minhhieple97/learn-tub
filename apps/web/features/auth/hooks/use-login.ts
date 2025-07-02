@@ -22,10 +22,10 @@ export const useLogin = (): UseLoginReturn => {
   const { execute, isPending } = useAction(loginAction, {
     onError: ({ error }) => {
       toast.error({
-        title: 'Error',
-        description: error.serverError || 'An unexpected error occurred',
+        title: "Error",
+        description: error.serverError || "An unexpected error occurred",
       });
-    }
+    },
   });
 
   const form = useForm<ILoginFormData>({

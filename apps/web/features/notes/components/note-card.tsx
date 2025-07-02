@@ -5,15 +5,16 @@ import { NoteCardActions } from "./note-card-actions";
 import type { INote } from "../types";
 import { NoteEvaluation } from "@/features/notes/components/note-evaluation";
 import { RichContentRenderer } from "./rich-content-renderer";
+import { useNotesStore } from "../store";
 
 type NoteCardProps = {
   note: INote;
-  onTimestampClick?: (timestamp: number) => void;
 };
 
-export const NoteCard = ({ note, onTimestampClick }: NoteCardProps) => {
+export const NoteCard = ({ note }: NoteCardProps) => {
+  const { handleNoteTimestampClick } = useNotesStore((state) => state);
   const handleTimestampClick = (timestamp: number) =>
-    onTimestampClick?.(timestamp);
+    handleNoteTimestampClick(timestamp);
 
   return (
     <Card className="overflow-hidden">
@@ -21,7 +22,7 @@ export const NoteCard = ({ note, onTimestampClick }: NoteCardProps) => {
         <TimestampDisplay
           timestamp={note.timestamp_seconds}
           onClick={handleTimestampClick}
-          clickable={!!onTimestampClick}
+          clickable={true}
         />
         <div className="flex items-center gap-2">
           <NoteEvaluation noteId={note.id} />

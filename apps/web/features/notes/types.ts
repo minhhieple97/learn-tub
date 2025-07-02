@@ -24,8 +24,6 @@ export type INote = {
 
 export type INoteEditorProps = {
   video: IVideoPageData;
-  currentTimestamp: number;
-  onTimestampClick?: (time: number) => void;
 };
 
 export type ICreateNotePayload = {

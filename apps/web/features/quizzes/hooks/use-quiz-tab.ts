@@ -1,18 +1,9 @@
 import { useEffect } from "react";
 import { useQuizStore } from "../store";
 import { IQuizAnswerOption } from "../types";
+import { useNotesStore } from "@/features/notes/store";
 
-type UseQuizTabProps = {
-  videoId: string;
-  videoTitle?: string;
-  videoDescription?: string;
-};
-
-export const useQuizTab = ({
-  videoId,
-  videoTitle,
-  videoDescription,
-}: UseQuizTabProps) => {
+export const useQuizTab = () => {
   const {
     questions,
     answers,
@@ -37,10 +28,16 @@ export const useQuizTab = ({
     getAnsweredCount,
     getFormattedTime,
   } = useQuizStore();
-
+  const { currentVideo } = useNotesStore();
   useEffect(() => {
-    setVideoContext(videoId, videoTitle, videoDescription);
-  }, [videoId, videoTitle, videoDescription, setVideoContext]);
+    if (currentVideo?.id && currentVideo?.title && currentVideo?.description) {
+      setVideoContext(
+        currentVideo.id,
+        currentVideo.title,
+        currentVideo.description,
+      );
+    }
+  }, [currentVideo, setVideoContext]);
 
   const currentQuestion = getCurrentQuestion();
   const currentAnswer = getCurrentAnswer();

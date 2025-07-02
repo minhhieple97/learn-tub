@@ -10,7 +10,7 @@ type INoteCardActionsProps = {
 };
 
 export const NoteCardActions = ({ noteId, note }: INoteCardActionsProps) => {
-  const { editingNote, startEditing, deleteNote, currentVideoId } =
+  const { editingNote, startEditing, deleteNote, currentVideo } =
     useNotesStore();
   const { invalidateByVideo, invalidateSearch } = useInvalidateNotes();
 
@@ -23,9 +23,9 @@ export const NoteCardActions = ({ noteId, note }: INoteCardActionsProps) => {
       await deleteNote(noteId);
 
       // Invalidate queries to refetch data
-      if (currentVideoId) {
-        invalidateByVideo(currentVideoId);
-        invalidateSearch(currentVideoId);
+      if (currentVideo) {
+        invalidateByVideo(currentVideo.id);
+        invalidateSearch(currentVideo.id);
       }
     } catch (error) {
       console.error("Error in handleDelete:", error);

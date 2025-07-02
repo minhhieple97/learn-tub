@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { create } from "zustand";
@@ -15,6 +16,7 @@ import { IFeedback } from "@/types";
 import { INoteEvaluationStatus } from "../types";
 import { saveNoteAction, updateNoteAction, deleteNoteAction } from "../actions";
 import { JSONContent } from "@tiptap/react";
+import { IVideoPageData } from "@/features/videos/types";
 
 type INotesState = {
   // Form state
@@ -23,7 +25,7 @@ type INotesState = {
   tagInput: string;
   editingNote: INote | null;
   isFormLoading: boolean;
-  currentVideoId: string;
+  currentVideo: IVideoPageData | null;
   currentTimestamp: number;
   searchQuery: string;
 
@@ -60,7 +62,7 @@ type INotesState = {
     hasError: boolean;
   };
 
-  setCurrentVideo: (videoId: string) => void;
+  setCurrentVideo: (video: IVideoPageData) => void;
   setCurrentTimestamp: (timestamp: number) => void;
   setVideoTitle: (title: string) => void;
   setNoteId: (noteId: string | undefined) => void;
@@ -126,7 +128,7 @@ export const useNotesStore = create<INotesState>()(
       tagInput: "",
       editingNote: null,
       isFormLoading: false,
-      currentVideoId: "",
+      currentVideo: null,
       currentTimestamp: 0,
       searchQuery: "",
 
@@ -163,8 +165,8 @@ export const useNotesStore = create<INotesState>()(
         hasError: false,
       },
 
-      setCurrentVideo: (videoId: string) => {
-        set({ currentVideoId: videoId });
+      setCurrentVideo: (video: IVideoPageData) => {
+        set({ currentVideo: video });
       },
 
       setCurrentTimestamp: (timestamp: number) => {
@@ -184,12 +186,12 @@ export const useNotesStore = create<INotesState>()(
         tags: string[],
         timestamp: number,
       ) => {
-        const { currentVideoId } = get();
-        if (!currentVideoId) return;
+        const { currentVideo } = get();
+        if (!currentVideo) return;
         set({ isFormLoading: true });
         try {
           const result = await saveNoteAction({
-            videoId: currentVideoId,
+            videoId: currentVideo.id,
             content,
             timestamp,
             tags: tags.length > 0 ? tags : [],

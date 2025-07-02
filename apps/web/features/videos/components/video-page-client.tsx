@@ -13,40 +13,20 @@ type IVideoPageClientProps = {
 };
 
 export const VideoPageClient = ({ video }: IVideoPageClientProps) => {
-  const {
-    currentTimestamp,
-    targetSeekTime,
-    handleTimeUpdate,
-    handleNoteTimestampClick,
-    initializeYouTubeAPI,
-    setCurrentVideo,
-  } = useNotesStore();
+  const { initializeYouTubeAPI, setCurrentVideo } = useNotesStore();
 
-  // Initialize YouTube API and set current video
   useEffect(() => {
     initializeYouTubeAPI();
-    setCurrentVideo(video.id);
-  }, [video.id, initializeYouTubeAPI, setCurrentVideo]);
+    setCurrentVideo(video);
+  }, [video, initializeYouTubeAPI, setCurrentVideo]);
 
-  const leftPanel = (
-    <VideoMainContent
-      video={video}
-      onTimeUpdate={handleTimeUpdate}
-      targetSeekTime={targetSeekTime}
-    />
-  );
+  const leftPanel = <VideoMainContent />;
 
-  const rightPanel = (
-    <VideoSidebar
-      video={video}
-      currentTimestamp={currentTimestamp}
-      onTimestampClick={handleNoteTimestampClick}
-    />
-  );
+  const rightPanel = <VideoSidebar />;
 
   return (
     <div className="space-y-6">
-      <VideoPageHeader video={video} />
+      <VideoPageHeader />
 
       <ResizablePanels
         leftPanel={leftPanel}

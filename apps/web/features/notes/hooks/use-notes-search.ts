@@ -7,7 +7,7 @@ import { useNotesSearch as useNotesSearchQuery } from "./use-notes-queries";
 import { SEARCH_CONFIG } from "@/config/constants";
 
 export const useNotesSearch = () => {
-  const { searchQuery, setSearchQuery, clearSearch, currentVideoId } =
+  const { searchQuery, setSearchQuery, clearSearch, currentVideo } =
     useNotesStore();
   const [inputValue, setInputValue] = useState(searchQuery);
   const debouncedSearchQuery = useDebounce(
@@ -15,9 +15,8 @@ export const useNotesSearch = () => {
     SEARCH_CONFIG.DEBOUNCE_DELAY,
   );
 
-  // Use react-query search hook
   const { data: searchResults, isLoading: isSearching } = useNotesSearchQuery(
-    currentVideoId || "",
+    currentVideo?.id,
     debouncedSearchQuery,
   );
 
