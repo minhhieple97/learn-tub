@@ -10,34 +10,10 @@ import {
 import { useRichTextEditor } from "@/features/notes/hooks/use-rich-text-editor";
 
 export const MediaButtons = () => {
-  const {
-    onScreenshotClick,
-    onImageUpload,
-    triggerImageUpload,
-    fileInputRef,
-    isCapturingScreenshot,
-    isUploadingImage,
-    disabled,
-    videoElement,
-  } = useRichTextEditor();
+  const { onImageUpload, triggerImageUpload, fileInputRef, isUploadingImage, disabled } =
+    useRichTextEditor();
   return (
     <>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={onScreenshotClick}
-        disabled={disabled || isCapturingScreenshot || !videoElement}
-        className="h-8 px-3 bg-red-50 hover:bg-red-100 text-red-700 hover:text-red-800 border-red-200"
-        title={`Capture screenshot from video (${KEYBOARD_SHORTCUTS.SCREENSHOT})`}
-      >
-        {isCapturingScreenshot ? (
-          <Loader2 className="h-4 w-4 animate-spin mr-1" />
-        ) : (
-          <Camera className="h-4 w-4 mr-1" />
-        )}
-        Screenshot
-      </Button>
-
       <Button
         variant="ghost"
         size="sm"
