@@ -197,10 +197,6 @@ export const useNotesStore = create<INotesState>()(
 
           if (result?.data?.success) {
             get().resetForm();
-            // Note: Query invalidation will be handled by the component using useInvalidateNotes
-            toast.success({
-              description: TOAST_MESSAGES.NOTE_SAVED_SUCCESS,
-            });
           } else {
             throw new Error(result?.data?.message || "Failed to save note");
           }
