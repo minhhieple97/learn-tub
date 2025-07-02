@@ -3,6 +3,7 @@
 import React, { FC, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { JSONContent } from "@tiptap/react";
+import { ImageIcon } from "lucide-react";
 
 type IRichContentRendererProps = {
   content: JSONContent | null;
@@ -72,21 +73,25 @@ const RenderNode: FC<IRenderNodeProps> = ({
       return <br />;
 
     case "image":
-      const imageStyle = showFullImages
-        ? {
-            maxWidth: "100%",
-            height: "auto",
-            borderRadius: "8px",
-            border: "1px solid rgba(0, 0, 0, 0.1)",
-            marginTop: "8px",
-            marginBottom: "8px",
-          }
-        : {
-            maxWidth: `${maxImageWidth}px`,
-            height: "auto",
-            borderRadius: "4px",
-            border: "1px solid rgba(0, 0, 0, 0.1)",
-          };
+      // If we're not showing full images, display an icon instead
+      if (!showFullImages) {
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 rounded text-xs text-gray-600 border">
+            <ImageIcon className="h-3 w-3" />
+            <span>Image</span>
+          </span>
+        );
+      }
+
+      // For full images, use the existing logic
+      const imageStyle = {
+        maxWidth: "100%",
+        height: "auto",
+        borderRadius: "8px",
+        border: "1px solid rgba(0, 0, 0, 0.1)",
+        marginTop: "8px",
+        marginBottom: "8px",
+      };
 
       return (
         <img

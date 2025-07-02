@@ -58,6 +58,37 @@ const createImageExtension = (
         />
       ));
     },
+
+    // Ensure proper serialization by explicitly defining how to convert to JSON
+    addStorage() {
+      return {
+        ...this.parent?.(),
+      };
+    },
+
+    // Override the parseHTML to ensure attrs are preserved
+    parseHTML() {
+      return [
+        {
+          tag: "img[src]",
+          getAttrs: (element) => {
+            const img = element as HTMLImageElement;
+            return {
+              src: img.getAttribute("src"),
+              alt: img.getAttribute("alt"),
+              title: img.getAttribute("title"),
+              width: img.getAttribute("width"),
+              height: img.getAttribute("height"),
+            };
+          },
+        },
+      ];
+    },
+
+    // Ensure proper rendering to HTML with all attributes
+    renderHTML({ HTMLAttributes }) {
+      return ["img", HTMLAttributes];
+    },
   });
 };
 
@@ -734,7 +765,7 @@ export const useRichTextEditor = (): IUseRichTextEditorReturn => {
 
       const currentImages: string[] = [];
       editor.state.doc.descendants((node) => {
-        if (node.type.name === "image" && node.attrs.src) {
+        if (node.type.name === "image" && node.attrs?.src) {
           // Only track completed uploads (not blob URLs that are still uploading)
           const isUploadingImage = uploadingImages.current.has(node.attrs.src);
           if (!isUploadingImage) {
@@ -774,6 +805,20 @@ export const useRichTextEditor = (): IUseRichTextEditorReturn => {
       },
     },
   });
+
+  // Sync editor content with formContent changes (for reset functionality)
+  useEffect(() => {
+    if (editor && formContent) {
+      const currentEditorContent = editor.getJSON();
+      const isContentDifferent =
+        JSON.stringify(currentEditorContent) !== JSON.stringify(formContent);
+
+      // Only update if content is actually different to avoid infinite loops
+      if (isContentDifferent) {
+        editor.commands.setContent(formContent);
+      }
+    }
+  }, [editor, formContent]);
 
   useEffect(() => {
     if (editor && !previousImages.length) {

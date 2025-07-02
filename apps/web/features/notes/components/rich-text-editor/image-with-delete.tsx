@@ -14,7 +14,11 @@ type IImageWithDeleteProps = {
   disabled: boolean;
 };
 
-export const ImageWithDelete = ({ node, deleteNode, disabled }: IImageWithDeleteProps) => {
+export const ImageWithDelete = ({
+  node,
+  deleteNode,
+  disabled,
+}: IImageWithDeleteProps) => {
   const [isHovered, setIsHovered] = useState(false);
   const { execute: executeDelete, isExecuting } = useAction(deleteImageAction, {
     onSuccess: () => {
@@ -22,7 +26,7 @@ export const ImageWithDelete = ({ node, deleteNode, disabled }: IImageWithDelete
     },
     onError: () => {
       toast.error({
-        description: 'Failed to delete image. Please try again.',
+        description: "Failed to delete image. Please try again.",
       });
     },
   });
@@ -32,23 +36,23 @@ export const ImageWithDelete = ({ node, deleteNode, disabled }: IImageWithDelete
 
     const imageUrl = node.attrs.src;
 
-    if (imageUrl.startsWith('blob:')) {
+    if (imageUrl.startsWith("blob:")) {
       deleteNode();
       return;
     }
 
     try {
       const url = new URL(imageUrl);
-      const storagePath = url.pathname.split('/').slice(-3).join('/');
+      const storagePath = url.pathname.split("/").slice(-3).join("/");
 
       executeDelete({
         imageUrl,
         storagePath,
       });
     } catch (error) {
-      console.error('Error deleting image:', error);
+      console.error("Error deleting image:", error);
       toast.error({
-        description: 'Failed to delete image. Please try again.',
+        description: "Failed to delete image. Please try again.",
       });
     }
   }, [node.attrs.src, disabled, isExecuting, executeDelete, deleteNode]);
@@ -62,8 +66,8 @@ export const ImageWithDelete = ({ node, deleteNode, disabled }: IImageWithDelete
       >
         <img
           src={node.attrs.src}
-          alt={node.attrs.alt || ''}
-          title={node.attrs.title || ''}
+          alt={node.attrs.alt || ""}
+          title={node.attrs.title || ""}
           className="max-w-full h-auto rounded-lg shadow-sm my-4 block"
           draggable={false}
         />
@@ -87,7 +91,7 @@ export const ImageWithDelete = ({ node, deleteNode, disabled }: IImageWithDelete
           </div>
         )}
 
-        {node.attrs.src.startsWith('blob:') && (
+        {node.attrs.src.startsWith("blob:") && (
           <div className="absolute top-2 left-2 bg-blue-500 text-white text-xs px-2 py-1 rounded opacity-75">
             Uploading...
           </div>
