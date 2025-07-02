@@ -182,10 +182,6 @@ export const useQuizStore = create<QuizState>()(
               });
 
               get().startTimer();
-
-              toast.success({
-                description: "Quiz questions generated successfully!",
-              });
             } else {
               throw new Error(
                 result?.serverError || "Failed to generate questions",
