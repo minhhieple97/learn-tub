@@ -637,7 +637,7 @@ export const updateNote = async ({
 }: {
   noteId: string;
   userId: string;
-  content: string;
+  content: JSONContent;
   tags: string[];
 }) => {
   const supabase = await createClient();

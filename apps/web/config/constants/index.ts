@@ -1,5 +1,5 @@
 import { env } from "@/env.mjs";
-import { Constants } from '@/database.types';
+import { Constants } from "@/database.types";
 import { createEnumConstants } from "@/lib/enum-utils";
 
 export const YOUTUBE_API = {
@@ -42,23 +42,23 @@ export const VALIDATION_LIMITS = {
 } as const;
 
 export const TOAST_MESSAGES = {
-  VIDEO_ADDED_SUCCESS: 'Video added successfully!',
+  VIDEO_ADDED_SUCCESS: "Video added successfully!",
   VIDEO_EXISTS_ERROR: "You've already added this video",
-  INVALID_URL_ERROR: 'Invalid YouTube URL',
-  VIDEO_NOT_FOUND_ERROR: 'YouTube video not found or is private/unavailable',
-  UNEXPECTED_ERROR: 'An unexpected error occurred',
-  NOTE_UPDATED_SUCCESS: 'Note updated successfully!',
-  NOTE_DELETED_SUCCESS: 'Note deleted successfully!',
-  NOTE_SAVE_ERROR: 'Failed to save note. Please try again.',
-  NOTE_UPDATE_ERROR: 'Failed to update note. Please try again.',
-  NOTE_DELETE_ERROR: 'Failed to delete note. Please try again.',
-  AUTH_ERROR: 'You must be logged in to perform this action',
-  VALIDATION_NOTE_TOO_LONG: 'Note content cannot exceed 1000 characters',
-  VALIDATION_TAG_TOO_LONG: 'Tag cannot exceed 100 characters',
-  VALIDATION_TOO_MANY_TAGS: 'Cannot have more than 10 tags',
-  VALIDATION_EMPTY_CONTENT: 'Note content cannot be empty',
-  FEEDBACK_COPY_SUCCESS: 'Feedback copied to clipboard',
-  FEEDBACK_COPY_ERROR: 'Failed to copy feedback',
+  INVALID_URL_ERROR: "Invalid YouTube URL",
+  VIDEO_NOT_FOUND_ERROR: "YouTube video not found or is private/unavailable",
+  UNEXPECTED_ERROR: "An unexpected error occurred",
+  NOTE_UPDATED_SUCCESS: "Note updated successfully!",
+  NOTE_DELETED_SUCCESS: "Note deleted successfully!",
+  NOTE_SAVE_ERROR: "Failed to save note. Please try again.",
+  NOTE_UPDATE_ERROR: "Failed to update note. Please try again.",
+  NOTE_DELETE_ERROR: "Failed to delete note. Please try again.",
+  AUTH_ERROR: "You must be logged in to perform this action",
+  VALIDATION_NOTE_TOO_LONG: "Note content cannot exceed 1000 characters",
+  VALIDATION_TAG_TOO_LONG: "Tag cannot exceed 100 characters",
+  VALIDATION_TOO_MANY_TAGS: "Cannot have more than 10 tags",
+  VALIDATION_EMPTY_CONTENT: "Note content cannot be empty",
+  FEEDBACK_COPY_SUCCESS: "Feedback copied to clipboard",
+  FEEDBACK_COPY_ERROR: "Failed to copy feedback",
 } as const;
 
 export const AI_CONFIG = {

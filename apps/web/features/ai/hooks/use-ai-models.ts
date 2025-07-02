@@ -12,7 +12,7 @@ type IUseAIModelsOptions = {
   provider_id?: string;
   model_name?: string;
   is_active?: boolean;
-  type?: 'all' | 'options' | 'provider' | 'providers';
+  type?: "all" | "options" | "provider" | "providers";
   enabled?: boolean;
 };
 
@@ -30,20 +30,23 @@ export const AI_MODELS_CONFIG = {
 const fetchAIModels = async (options: IUseAIModelsOptions) => {
   const searchParams = new URLSearchParams();
 
-  if (options.provider_id) searchParams.set('provider_id', options.provider_id);
-  if (options.model_name) searchParams.set('model_name', options.model_name);
-  if (typeof options.is_active === 'boolean')
-    searchParams.set('is_active', String(options.is_active));
-  if (options.type) searchParams.set('type', options.type);
+  if (options.provider_id) searchParams.set("provider_id", options.provider_id);
+  if (options.model_name) searchParams.set("model_name", options.model_name);
+  if (typeof options.is_active === "boolean")
+    searchParams.set("is_active", String(options.is_active));
+  if (options.type) searchParams.set("type", options.type);
 
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), AI_MODELS_CONFIG.REQUEST_TIMEOUT);
+  const timeoutId = setTimeout(
+    () => controller.abort(),
+    AI_MODELS_CONFIG.REQUEST_TIMEOUT,
+  );
 
   try {
     const response = await fetch(`/api/ai-models?${searchParams.toString()}`, {
       signal: controller.signal,
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
     });
 
@@ -51,7 +54,9 @@ const fetchAIModels = async (options: IUseAIModelsOptions) => {
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.details || error.error || 'Failed to fetch AI models');
+      throw new Error(
+        error.details || error.error || "Failed to fetch AI models",
+      );
     }
 
     return response.json();

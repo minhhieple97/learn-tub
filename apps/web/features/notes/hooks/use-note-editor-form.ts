@@ -132,10 +132,25 @@ export const useNoteEditorForm = () => {
     invalidateSearch,
   ]);
 
+  const hasValidContent = useCallback(() => {
+    if (!formContent || typeof formContent !== "object") return false;
+
+    const isEmpty =
+      formContent.type === "doc" &&
+      Array.isArray(formContent.content) &&
+      formContent.content.length === 0;
+
+    if (isEmpty) return false;
+
+    const hasText = JSON.stringify(formContent).includes('"text"');
+    return hasText;
+  }, [formContent]);
+
   const isFormValid = useCallback(() => {
     const tagsValidation = validateTags(formTags);
-    return tagsValidation.isValid;
-  }, [formTags, validateTags]);
+    const hasContent = hasValidContent();
+    return tagsValidation.isValid && hasContent;
+  }, [formTags, validateTags, hasValidContent]);
 
   const isEditing = !!editingNote;
   const isSaveDisabled = isFormLoading || !isFormValid();

@@ -121,7 +121,7 @@ export const useNotesStore = create<INotesState>()(
   devtools(
     (set, get) => ({
       // Form state
-      formContent: {},
+      formContent: { type: "doc", content: [] },
       formTags: [],
       tagInput: "",
       editingNote: null,
@@ -220,15 +220,12 @@ export const useNotesStore = create<INotesState>()(
         try {
           const result = await updateNoteAction({
             noteId,
-            content: content.trim(),
+            content,
             tags: tags.length > 0 ? tags : [],
           });
 
           if (result?.data?.success) {
             get().resetForm();
-            toast.success({
-              description: TOAST_MESSAGES.NOTE_UPDATED_SUCCESS,
-            });
           } else {
             throw new Error(result?.data?.message || "Failed to update note");
           }
@@ -305,7 +302,7 @@ export const useNotesStore = create<INotesState>()(
       startEditing: (note: INote) => {
         set({
           editingNote: note,
-          formContent: note.content || {},
+          formContent: note.content || { type: "doc", content: [] },
           formTags: note.tags || [],
           tagInput: "",
         });
@@ -317,7 +314,7 @@ export const useNotesStore = create<INotesState>()(
 
       resetForm: () => {
         set({
-          formContent: {},
+          formContent: { type: "doc", content: [] },
           formTags: [],
           tagInput: "",
           editingNote: null,

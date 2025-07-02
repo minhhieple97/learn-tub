@@ -46,9 +46,11 @@ export const saveNoteInputSchema = z.object({
 export const updateNoteInputSchema = z.object({
   noteId: z.string().uuid("Invalid note ID"),
   content: z
-    .string()
-    .min(1, "Content is required")
-    .max(5000, "Content is too long"),
+    .object({
+      type: z.string().optional(),
+      content: z.array(z.any()).optional(),
+    })
+    .passthrough(),
   tags: z.array(z.string().min(1).max(50)).max(10, "Too many tags").default([]),
 });
 
