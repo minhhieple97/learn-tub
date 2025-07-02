@@ -7,22 +7,16 @@ import {
   RICH_TEXT_EDITOR,
   KEYBOARD_SHORTCUTS,
 } from "@/features/notes/constants";
+import { useRichTextEditor } from "../../hooks";
 
-type MediaButtonsProps = {
-  onImageUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  triggerImageUpload: () => void;
-  fileInputRef: React.RefObject<HTMLInputElement | null>;
-  isUploadingImage: boolean;
-  disabled: boolean;
-};
-
-export const MediaButtons = ({
-  onImageUpload,
-  triggerImageUpload,
-  fileInputRef,
-  isUploadingImage,
-  disabled,
-}: MediaButtonsProps) => {
+export const MediaButtons = () => {
+  const {
+    fileInputRef,
+    isUploadingImage,
+    disabled,
+    triggerImageUpload,
+    onImageUpload,
+  } = useRichTextEditor();
   return (
     <>
       <Button

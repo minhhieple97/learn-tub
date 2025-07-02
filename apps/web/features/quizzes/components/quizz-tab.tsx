@@ -8,17 +8,7 @@ import { QuizzNavigation } from "./quizz-navigation";
 import { QuizzResults } from "./quizz-results";
 import { useQuizTab } from "../hooks/use-quiz-tab";
 
-type IQuizzTabProps = {
-  videoId: string;
-  videoTitle?: string;
-  videoDescription?: string;
-};
-
-export const QuizzTab = ({
-  videoId,
-  videoTitle,
-  videoDescription,
-}: IQuizzTabProps) => {
+export const QuizzTab = () => {
   const {
     questions,
     answers,
@@ -41,7 +31,7 @@ export const QuizzTab = ({
     goToQuestion,
     submitQuiz,
     quizState,
-  } = useQuizTab({ videoId, videoTitle, videoDescription });
+  } = useQuizTab();
 
   const renderContent = () => {
     if (quizState.showResults) {

@@ -19,7 +19,7 @@ export const useNoteEditorForm = () => {
     editingNote,
     isFormLoading,
     currentTimestamp,
-    currentVideoId,
+    currentVideo,
     setTagInput,
     addTag,
     removeTag,
@@ -110,9 +110,9 @@ export const useNoteEditorForm = () => {
       }
 
       // Invalidate queries to refetch data
-      if (currentVideoId) {
-        invalidateByVideo(currentVideoId);
-        invalidateSearch(currentVideoId);
+      if (currentVideo) {
+        invalidateByVideo(currentVideo.id);
+        invalidateSearch(currentVideo.id);
       }
     } catch (error) {
       // Error handling is done in the store methods
@@ -123,7 +123,7 @@ export const useNoteEditorForm = () => {
     formTags,
     editingNote,
     currentTimestamp,
-    currentVideoId,
+    currentVideo,
     validateTags,
     showValidationErrors,
     updateNote,

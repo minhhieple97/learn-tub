@@ -18,17 +18,11 @@ import { usePlayerControls } from "../hooks/use-player-controls";
 import { IVideoPageData } from "../types";
 
 type IYouTubePlayerProps = {
-  video: IVideoPageData;
   initialTimestamp?: number;
-  onTimeUpdate?: (time: number) => void;
-  targetSeekTime?: number;
 };
 
 export const YouTubePlayer = ({
-  video,
   initialTimestamp = 0,
-  onTimeUpdate,
-  targetSeekTime,
 }: IYouTubePlayerProps) => {
   const playerRef = useRef<HTMLDivElement>(null);
   const playerInstanceRef = useRef<any>(null);
@@ -42,18 +36,17 @@ export const YouTubePlayer = ({
     setPlayerState,
     setDuration,
     currentTime,
-    volume,
     isMuted,
-    setCurrentTime,
     setVolume,
     setIsMuted,
+    currentVideo,
+    targetSeekTime,
+    handleTimeUpdate,
   } = useNotesStore();
 
-  // Initialize YouTube player when API is loaded
   useEffect(() => {
     if (!isApiLoaded || !playerRef.current || !window.YT) return;
 
-    // Destroy existing player if any
     if (playerInstanceRef.current) {
       if (typeof playerInstanceRef.current.destroy === "function") {
         playerInstanceRef.current.destroy();
@@ -79,7 +72,7 @@ export const YouTubePlayer = ({
     };
 
     const newPlayer = new window.YT.Player(playerRef.current, {
-      videoId: video.youtube_id,
+      videoId: currentVideo?.youtube_id,
       playerVars: {
         autoplay: 0,
         controls: 0,
@@ -109,7 +102,7 @@ export const YouTubePlayer = ({
     };
   }, [
     isApiLoaded,
-    video.youtube_id,
+    currentVideo?.youtube_id,
     initialTimestamp,
     setYouTubePlayer,
     setPlayerState,
@@ -120,7 +113,7 @@ export const YouTubePlayer = ({
 
   useLearningSession({
     player: youtubePlayer,
-    videoId: video.id,
+    videoId: currentVideo?.id!,
     playerState,
     initialTimestamp,
   });
@@ -137,8 +130,8 @@ export const YouTubePlayer = ({
     player: youtubePlayer,
     playerState,
     initialTimestamp,
-    onTimeUpdate,
     targetSeekTime,
+    onTimeUpdate: handleTimeUpdate,
   });
 
   const formatTime = (seconds: number): string => {
