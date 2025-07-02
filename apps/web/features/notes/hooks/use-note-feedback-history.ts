@@ -42,12 +42,11 @@ export const useNoteFeedbackHistory = () => {
 
       if (result.data?.success) {
         setHistory((prev) => prev.filter((item) => item.id !== feedbackId));
-        toast.success("Feedback deleted successfully");
       } else {
-        toast.error(result.serverError || "Failed to delete feedback");
+        toast.error(result.serverError || 'Failed to delete feedback');
       }
-    } catch (_err) {
-      toast.error("Failed to delete feedback");
+    } catch {
+      toast.error('Failed to delete feedback');
     }
   }, []);
 
