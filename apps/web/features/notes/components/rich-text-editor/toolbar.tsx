@@ -9,16 +9,33 @@ import { MediaButtons } from "./media-buttons";
 type IToolbarProps = {
   editor: Editor;
   disabled: boolean;
+  onImageUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  triggerImageUpload: () => void;
+  fileInputRef: React.RefObject<HTMLInputElement | null>;
+  isUploadingImage: boolean;
 };
 
-export const Toolbar = ({ editor, disabled }: IToolbarProps) => {
+export const Toolbar = ({
+  editor,
+  disabled,
+  onImageUpload,
+  triggerImageUpload,
+  fileInputRef,
+  isUploadingImage,
+}: IToolbarProps) => {
   return (
     <div className="flex items-center gap-1 flex-wrap">
       <FormattingButtons editor={editor} disabled={disabled} />
 
       <Separator orientation="vertical" className="mx-2 h-6" />
 
-      <MediaButtons />
+      <MediaButtons
+        onImageUpload={onImageUpload}
+        triggerImageUpload={triggerImageUpload}
+        fileInputRef={fileInputRef}
+        isUploadingImage={isUploadingImage}
+        disabled={disabled}
+      />
     </div>
   );
 };

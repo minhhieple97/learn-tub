@@ -259,15 +259,14 @@ export type IUseRichTextEditorReturn = {
   setVideoElement: (element: any) => void;
 };
 
-export type IUseRichTextEditorHookReturn = {
-  content: JSONContent;
-  disabled: boolean;
-  videoElement: any; // YouTube player instance (can be HTMLVideoElement | YouTube Player | null)
-  setVideoElementRef: (element: any) => void; // Accept both HTMLVideoElement and YouTube player
-  videoId: string;
-  isLoading: boolean;
-  isReady: boolean;
-};
+// export type IUseRichTextEditorHookReturn = {
+//   disabled: boolean;
+//   videoElement: any;
+//   setVideoElementRef: (element: any) => void;
+//   videoId: string;
+//   isLoading: boolean;
+//   isReady: boolean;
+// };
 
 // Database Types
 export type IMediaFile = {

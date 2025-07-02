@@ -5,28 +5,33 @@ import { EditorContent } from "@tiptap/react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useRichTextEditor } from "@/features/notes/hooks/use-rich-text-editor";
 import { RICH_TEXT_EDITOR } from "@/features/notes/constants";
-import { Toolbar, StatusBar, LoadingState } from "./rich-text-editor/index";
+import { Toolbar, LoadingState } from "./rich-text-editor/index";
 
 export const RichTextEditor = () => {
   const {
     editor,
-    isCapturingScreenshot,
-    isUploadingImage,
-    isDeletingImage,
-    fileInputRef,
-    onScreenshotClick,
+    disabled,
     onImageUpload,
     triggerImageUpload,
-    videoElement,
-    disabled,
+    fileInputRef,
+    isUploadingImage,
   } = useRichTextEditor();
+
   if (!editor) {
     return <LoadingState />;
   }
+
   return (
     <Card>
       <CardHeader className="pb-3">
-        <Toolbar editor={editor} disabled={disabled} />
+        <Toolbar
+          editor={editor}
+          disabled={disabled}
+          onImageUpload={onImageUpload}
+          triggerImageUpload={triggerImageUpload}
+          fileInputRef={fileInputRef}
+          isUploadingImage={isUploadingImage}
+        />
       </CardHeader>
 
       <CardContent className="p-0">
