@@ -2,13 +2,14 @@ import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { CacheService } from "@/lib/cache-service";
 import { env } from "@/env.mjs";
+import { StatusCodes } from "http-status-codes";
 
 export async function GET() {
   try {
     const headersList = await headers();
     const authHeader = headersList.get("authorization");
     if (authHeader !== `Bearer ${env.CRON_SECRET}`) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: StatusCodes.UNAUTHORIZED });
     }
 
     const result = await CacheService.performCacheMaintenance();
@@ -28,7 +29,7 @@ export async function GET() {
         error: "Cache maintenance failed",
         timestamp: new Date().toISOString(),
       },
-      { status: 500 },
+      { status: StatusCodes.INTERNAL_SERVER_ERROR },
     );
   }
 }
