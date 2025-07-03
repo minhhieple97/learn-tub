@@ -4,15 +4,17 @@ import { TimestampDisplay } from "./timestamp-display";
 import { NoteCardActions } from "./note-card-actions";
 import type { INote } from "../types";
 import { NoteEvaluation } from "@/features/notes/components/note-evaluation";
+import { RichContentRenderer } from "./rich-content-renderer";
+import { useNotesStore } from "../store";
 
 type NoteCardProps = {
   note: INote;
-  onTimestampClick?: (timestamp: number) => void;
 };
 
-export const NoteCard = ({ note, onTimestampClick }: NoteCardProps) => {
+export const NoteCard = ({ note }: NoteCardProps) => {
+  const { handleNoteTimestampClick } = useNotesStore((state) => state);
   const handleTimestampClick = (timestamp: number) =>
-    onTimestampClick?.(timestamp);
+    handleNoteTimestampClick(timestamp);
 
   return (
     <Card className="overflow-hidden">
@@ -20,15 +22,19 @@ export const NoteCard = ({ note, onTimestampClick }: NoteCardProps) => {
         <TimestampDisplay
           timestamp={note.timestamp_seconds}
           onClick={handleTimestampClick}
-          clickable={!!onTimestampClick}
+          clickable={true}
         />
         <div className="flex items-center gap-2">
           <NoteEvaluation noteId={note.id} />
-          <NoteCardActions noteId={note.id} />
+          <NoteCardActions noteId={note.id} note={note} />
         </div>
       </div>
       <CardContent className="p-4">
-        <p className="whitespace-pre-wrap">{note.content}</p>
+        <RichContentRenderer
+          content={note.content}
+          maxImageWidth={150}
+          showFullImages={false}
+        />
         {note.tags && note.tags.length > 0 && (
           <div className="flex flex-wrap gap-2 mt-2">
             {note.tags.map((tag) => (

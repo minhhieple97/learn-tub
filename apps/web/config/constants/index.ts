@@ -1,5 +1,5 @@
 import { env } from "@/env.mjs";
-import { Database, Constants } from "@/database.types";
+import { Constants } from "@/database.types";
 import { createEnumConstants } from "@/lib/enum-utils";
 
 export const YOUTUBE_API = {
@@ -47,7 +47,6 @@ export const TOAST_MESSAGES = {
   INVALID_URL_ERROR: "Invalid YouTube URL",
   VIDEO_NOT_FOUND_ERROR: "YouTube video not found or is private/unavailable",
   UNEXPECTED_ERROR: "An unexpected error occurred",
-  NOTE_SAVED_SUCCESS: "Note saved successfully!",
   NOTE_UPDATED_SUCCESS: "Note updated successfully!",
   NOTE_DELETED_SUCCESS: "Note deleted successfully!",
   NOTE_SAVE_ERROR: "Failed to save note. Please try again.",

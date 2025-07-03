@@ -1,11 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import { createClient } from "@/lib/supabase/client";
 import {
   TOAST_MESSAGES,
-  AI_CONFIG,
   AI_API,
   CHUNK_TYPES,
   ERROR_MESSAGES,
@@ -15,23 +14,36 @@ import type { INote } from "../types";
 import { toast } from "@/hooks/use-toast";
 import { IFeedback } from "@/types";
 import { INoteEvaluationStatus } from "../types";
+import { saveNoteAction, updateNoteAction, deleteNoteAction } from "../actions";
+import { JSONContent } from "@tiptap/react";
+import { IVideoPageData } from "@/features/videos/types";
 
-type NotesState = {
-  notes: INote[];
-  isLoading: boolean;
-  error: string | null;
-  searchQuery: string;
-  searchResults: INote[];
-  isSearching: boolean;
-  isSearchActive: boolean;
-  resultCount: number;
-  formContent: string;
+type INotesState = {
+  // Form state
+  formContent: JSONContent;
   formTags: string[];
   tagInput: string;
   editingNote: INote | null;
   isFormLoading: boolean;
-  currentVideoId: string | null;
+  currentVideo: IVideoPageData | null;
   currentTimestamp: number;
+  searchQuery: string;
+
+  // Video metadata for rich text editor
+  videoTitle?: string;
+  noteId?: string;
+
+  // YouTube Player state
+  youtubePlayer: any | null;
+  playerState: number;
+  duration: number;
+  isApiLoaded: boolean;
+  targetSeekTime: number | undefined;
+
+  // Player Controls state
+  currentTime: number;
+  volume: number;
+  isMuted: boolean;
 
   // Evaluation state
   evaluation: {
@@ -50,24 +62,24 @@ type NotesState = {
     hasError: boolean;
   };
 
-  setCurrentVideo: (videoId: string) => void;
+  setCurrentVideo: (video: IVideoPageData) => void;
   setCurrentTimestamp: (timestamp: number) => void;
-  loadNotes: (videoId: string) => Promise<void>;
+  setVideoTitle: (title: string) => void;
+  setNoteId: (noteId: string | undefined) => void;
   saveNote: (
-    content: string,
+    content: JSONContent,
     tags: string[],
     timestamp: number,
   ) => Promise<void>;
   updateNote: (
     noteId: string,
-    content: string,
+    content: JSONContent,
     tags: string[],
   ) => Promise<void>;
   deleteNote: (noteId: string) => Promise<void>;
   setSearchQuery: (query: string) => void;
-  performSearch: (query?: string) => Promise<void>;
   clearSearch: () => void;
-  setFormContent: (content: string) => void;
+  setFormContent: (content: JSONContent) => void;
   setFormTags: (tags: string[]) => void;
   setTagInput: (input: string) => void;
   addTag: () => void;
@@ -75,8 +87,24 @@ type NotesState = {
   startEditing: (note: INote) => void;
   cancelEditing: () => void;
   resetForm: () => void;
-  getDisplayNotes: () => INote[];
-  getSearchResultCount: () => number;
+
+  // YouTube Player actions
+  setYouTubePlayer: (player: any) => void;
+  setPlayerState: (state: number) => void;
+  setDuration: (duration: number) => void;
+  setIsApiLoaded: (loaded: boolean) => void;
+  setTargetSeekTime: (time: number | undefined) => void;
+
+  // Player Controls actions
+  setCurrentTime: (time: number) => void;
+  setVolume: (volume: number) => void;
+  setIsMuted: (muted: boolean) => void;
+  handleTimeUpdate: (time: number) => void;
+  handleNoteTimestampClick: (time: number) => void;
+
+  // YouTube API management
+  initializeYouTubeAPI: () => void;
+  destroyYouTubePlayer: () => void;
 
   openEvaluation: (noteId: string) => void;
   closeEvaluation: () => void;
@@ -91,24 +119,34 @@ type NotesState = {
   adjustEvaluationSettings: () => void;
 };
 
-export const useNotesStore = create<NotesState>()(
+export const useNotesStore = create<INotesState>()(
   devtools(
     (set, get) => ({
-      notes: [],
-      isLoading: false,
-      error: null,
-      searchQuery: "",
-      searchResults: [],
-      isSearching: false,
-      isSearchActive: false,
-      resultCount: 0,
-      formContent: "",
+      // Form state
+      formContent: { type: "doc", content: [] },
       formTags: [],
       tagInput: "",
       editingNote: null,
       isFormLoading: false,
-      currentVideoId: null,
+      currentVideo: null,
       currentTimestamp: 0,
+      searchQuery: "",
+
+      // Video metadata
+      videoTitle: undefined,
+      noteId: undefined,
+
+      // YouTube Player initial state
+      youtubePlayer: null,
+      playerState: -1,
+      duration: 0,
+      isApiLoaded: false,
+      targetSeekTime: undefined,
+
+      // Player Controls initial state
+      currentTime: 0,
+      volume: 100,
+      isMuted: false,
 
       // Evaluation initial state
       evaluation: {
@@ -127,76 +165,42 @@ export const useNotesStore = create<NotesState>()(
         hasError: false,
       },
 
-      setCurrentVideo: (videoId: string) => {
-        set({ currentVideoId: videoId });
-        get().loadNotes(videoId);
+      setCurrentVideo: (video: IVideoPageData) => {
+        set({ currentVideo: video });
       },
 
       setCurrentTimestamp: (timestamp: number) => {
         set({ currentTimestamp: timestamp });
       },
 
-      loadNotes: async (videoId: string) => {
-        set({ isLoading: true, error: null });
-
-        try {
-          const supabase = createClient();
-          const { data: user } = await supabase.auth.getUser();
-
-          if (!user.user) {
-            throw new Error("User not authenticated");
-          }
-
-          const { data, error } = await supabase
-            .from("notes")
-            .select("*")
-            .eq("video_id", videoId)
-            .eq("user_id", user.user.id)
-            .order("updated_at", { ascending: false });
-
-          if (error) throw error;
-
-          set({ notes: data || [], isLoading: false });
-        } catch (error) {
-          console.error("Error loading notes:", error);
-          set({
-            error:
-              error instanceof Error ? error.message : "Failed to load notes",
-            isLoading: false,
-          });
-        }
+      setVideoTitle: (title: string) => {
+        set({ videoTitle: title });
       },
 
-      saveNote: async (content: string, tags: string[], timestamp: number) => {
-        const { currentVideoId } = get();
-        if (!currentVideoId || !content.trim()) return;
+      setNoteId: (noteId: string | undefined) => {
+        set({ noteId });
+      },
 
+      saveNote: async (
+        content: JSONContent,
+        tags: string[],
+        timestamp: number,
+      ) => {
+        const { currentVideo } = get();
+        if (!currentVideo) return;
         set({ isFormLoading: true });
-
         try {
-          const supabase = createClient();
-          const { data: user } = await supabase.auth.getUser();
-
-          if (!user.user) {
-            throw new Error("User not authenticated");
+          const result = await saveNoteAction({
+            videoId: currentVideo.id,
+            content: content as { type: "doc"; content?: any[] },
+            timestamp,
+            tags: tags.length > 0 ? tags : [],
+          });
+          if (result?.data?.success) {
+            get().resetForm();
+          } else {
+            throw new Error(result?.data?.message || "Failed to save note");
           }
-
-          const { error } = await supabase.from("notes").insert({
-            video_id: currentVideoId,
-            user_id: user.user.id,
-            content: content.trim(),
-            timestamp_seconds: timestamp,
-            tags: tags.length > 0 ? tags : null,
-          });
-
-          if (error) throw error;
-
-          await get().loadNotes(currentVideoId);
-          get().resetForm();
-
-          toast.success({
-            description: TOAST_MESSAGES.NOTE_SAVED_SUCCESS,
-          });
         } catch (error) {
           console.error("Error saving note:", error);
           toast.error({
@@ -207,31 +211,25 @@ export const useNotesStore = create<NotesState>()(
         }
       },
 
-      updateNote: async (noteId: string, content: string, tags: string[]) => {
+      updateNote: async (
+        noteId: string,
+        content: JSONContent,
+        tags: string[],
+      ) => {
         set({ isFormLoading: true });
-        const { currentVideoId } = get();
-        if (!currentVideoId) return;
 
         try {
-          const supabase = createClient();
-          const { error } = await supabase
-            .from("notes")
-            .update({
-              content: content.trim(),
-              tags: tags.length > 0 ? tags : null,
-              updated_at: new Date().toISOString(),
-            })
-            .eq("id", noteId);
-
-          if (error) throw error;
-
-          await get().loadNotes(currentVideoId);
-
-          get().resetForm();
-
-          toast.success({
-            description: TOAST_MESSAGES.NOTE_UPDATED_SUCCESS,
+          const result = await updateNoteAction({
+            noteId,
+            content: content as { type: "doc"; content?: any[] },
+            tags: tags.length > 0 ? tags : [],
           });
+
+          if (result?.data?.success) {
+            get().resetForm();
+          } else {
+            throw new Error(result?.data?.message || "Failed to update note");
+          }
         } catch (error) {
           console.error("Error updating note:", error);
           toast.error({
@@ -244,24 +242,17 @@ export const useNotesStore = create<NotesState>()(
 
       deleteNote: async (noteId: string) => {
         try {
-          const supabase = createClient();
-          const { error } = await supabase
-            .from("notes")
-            .delete()
-            .eq("id", noteId);
-
-          if (error) throw error;
-
-          set((state) => ({
-            notes: state.notes.filter((note) => note.id !== noteId),
-            searchResults: state.searchResults.filter(
-              (note) => note.id !== noteId,
-            ),
-          }));
-
-          toast.success({
-            description: TOAST_MESSAGES.NOTE_DELETED_SUCCESS,
+          const result = await deleteNoteAction({
+            noteId,
           });
+
+          if (result?.data?.success) {
+            toast.success({
+              description: TOAST_MESSAGES.NOTE_DELETED_SUCCESS,
+            });
+          } else {
+            throw new Error(result?.data?.message || "Failed to delete note");
+          }
         } catch (error) {
           console.error("Error deleting note:", error);
           toast.error({
@@ -272,84 +263,15 @@ export const useNotesStore = create<NotesState>()(
 
       setSearchQuery: (query: string) => {
         set({ searchQuery: query });
-        if (query.trim()) {
-          get().performSearch();
-        } else {
-          set({ searchResults: [], isSearchActive: false });
-        }
-      },
-
-      performSearch: async (query?: string) => {
-        const { searchQuery: storeQuery, currentVideoId } = get();
-        const searchQuery = query || storeQuery;
-        if (!currentVideoId) return;
-
-        const hasQuery = searchQuery.trim();
-
-        if (!hasQuery) {
-          set({ searchResults: [], isSearchActive: false });
-          return;
-        }
-
-        set({ isSearching: true, searchQuery });
-
-        try {
-          const supabase = createClient();
-          const dataUser = await supabase.auth.getUser();
-          const user = dataUser.data.user;
-          if (!user) return;
-          const { data: profile } = await supabase
-            .from("profiles")
-            .select("*")
-            .eq("id", user.id)
-            .single();
-          if (!profile) return;
-          let queryBuilder = supabase
-            .from("notes")
-            .select("*")
-            .eq("video_id", currentVideoId)
-            .eq("user_id", profile.id);
-
-          if (hasQuery) {
-            queryBuilder = queryBuilder.ilike(
-              "content",
-              `%${searchQuery.trim()}%`,
-            );
-          }
-
-          const { data, error } = await queryBuilder.order("created_at", {
-            ascending: false,
-          });
-
-          if (error) throw error;
-
-          set({
-            searchResults: data || [],
-            isSearchActive: true,
-            isSearching: false,
-            resultCount: data?.length || 0,
-          });
-        } catch (error) {
-          console.error("Error performing search:", error);
-          set({
-            searchResults: [],
-            isSearchActive: false,
-            isSearching: false,
-          });
-        }
       },
 
       clearSearch: () => {
         set({
           searchQuery: "",
-          searchResults: [],
-          isSearchActive: false,
-          isSearching: false,
-          resultCount: 0,
         });
       },
 
-      setFormContent: (content: string) => {
+      setFormContent: (content: JSONContent) => {
         set({ formContent: content });
       },
 
@@ -381,7 +303,7 @@ export const useNotesStore = create<NotesState>()(
       startEditing: (note: INote) => {
         set({
           editingNote: note,
-          formContent: note.content,
+          formContent: note.content || { type: "doc", content: [] },
           formTags: note.tags || [],
           tagInput: "",
         });
@@ -393,21 +315,96 @@ export const useNotesStore = create<NotesState>()(
 
       resetForm: () => {
         set({
-          formContent: "",
+          formContent: { type: "doc", content: [] },
           formTags: [],
           tagInput: "",
           editingNote: null,
         });
       },
 
-      getDisplayNotes: () => {
-        const { notes, searchResults, isSearchActive } = get();
-        return isSearchActive ? searchResults : notes;
+      // YouTube Player methods
+      setYouTubePlayer: (player: any) => {
+        set({ youtubePlayer: player });
       },
 
-      getSearchResultCount: () => {
-        const { searchResults } = get();
-        return searchResults.length;
+      setPlayerState: (state: number) => {
+        set({ playerState: state });
+      },
+
+      setDuration: (duration: number) => {
+        set({ duration });
+      },
+
+      setIsApiLoaded: (loaded: boolean) => {
+        set({ isApiLoaded: loaded });
+      },
+
+      setTargetSeekTime: (time: number | undefined) => {
+        set({ targetSeekTime: time });
+      },
+
+      // Player Controls methods
+      setCurrentTime: (time: number) => {
+        set({ currentTime: time });
+      },
+
+      setVolume: (volume: number) => {
+        set({ volume });
+      },
+
+      setIsMuted: (muted: boolean) => {
+        set({ isMuted: muted });
+      },
+
+      handleTimeUpdate: (time: number) => {
+        const flooredTime = Math.floor(time);
+        set({
+          currentTimestamp: flooredTime,
+          currentTime: flooredTime,
+        });
+      },
+
+      handleNoteTimestampClick: (time: number) => {
+        set({ targetSeekTime: time });
+      },
+
+      // YouTube API management
+      initializeYouTubeAPI: () => {
+        if (typeof window === "undefined") {
+          return;
+        }
+
+        if (window.YT) {
+          set({ isApiLoaded: true });
+          return;
+        }
+
+        const tag = document.createElement("script");
+        tag.src = "https://www.youtube.com/iframe_api";
+        const firstScriptTag = document.getElementsByTagName("script")[0];
+        if (firstScriptTag) {
+          firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+        } else {
+          document.head.appendChild(tag);
+        }
+
+        window.onYouTubeIframeAPIReady = () => {
+          set({ isApiLoaded: true });
+        };
+      },
+
+      destroyYouTubePlayer: () => {
+        const { youtubePlayer } = get();
+        if (youtubePlayer && typeof youtubePlayer.destroy === "function") {
+          youtubePlayer.destroy();
+        }
+        set({
+          youtubePlayer: null,
+          playerState: -1,
+          duration: 0,
+          currentTime: 0,
+          targetSeekTime: undefined,
+        });
       },
 
       // Evaluation methods

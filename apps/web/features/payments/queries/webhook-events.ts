@@ -98,7 +98,6 @@ export async function updateWebhookEventStatus(
 
 export async function createWebhookJob(
   webhookEventId: string,
-  jobId: string,
   queueName: string,
   priority = 0,
   delayMs = 0,
@@ -107,7 +106,6 @@ export async function createWebhookJob(
 
   const jobData: WebhookJobInsert = {
     webhook_event_id: webhookEventId,
-    job_id: jobId,
     queue_name: queueName,
     priority,
     delay_ms: delayMs,

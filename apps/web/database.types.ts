@@ -340,6 +340,62 @@ export type Database = {
           },
         ];
       };
+      media_files: {
+        Row: {
+          created_at: string | null;
+          file_name: string;
+          file_size: number;
+          file_type: Database["public"]["Enums"]["file_type_enum"];
+          height: number | null;
+          id: string;
+          metadata: Json | null;
+          mime_type: string;
+          public_url: string | null;
+          storage_path: string;
+          updated_at: string | null;
+          user_id: string;
+          width: number | null;
+        };
+        Insert: {
+          created_at?: string | null;
+          file_name: string;
+          file_size: number;
+          file_type: Database["public"]["Enums"]["file_type_enum"];
+          height?: number | null;
+          id?: string;
+          metadata?: Json | null;
+          mime_type: string;
+          public_url?: string | null;
+          storage_path: string;
+          updated_at?: string | null;
+          user_id: string;
+          width?: number | null;
+        };
+        Update: {
+          created_at?: string | null;
+          file_name?: string;
+          file_size?: number;
+          file_type?: Database["public"]["Enums"]["file_type_enum"];
+          height?: number | null;
+          id?: string;
+          metadata?: Json | null;
+          mime_type?: string;
+          public_url?: string | null;
+          storage_path?: string;
+          updated_at?: string | null;
+          user_id?: string;
+          width?: number | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "media_files_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       note_interactions: {
         Row: {
           ai_model_id: string | null;
@@ -399,11 +455,52 @@ export type Database = {
           },
         ];
       };
-      notes: {
+      note_media: {
         Row: {
-          content: string;
           created_at: string | null;
           id: string;
+          media_file_id: string;
+          note_id: string;
+          position_in_content: number | null;
+        };
+        Insert: {
+          created_at?: string | null;
+          id?: string;
+          media_file_id: string;
+          note_id: string;
+          position_in_content?: number | null;
+        };
+        Update: {
+          created_at?: string | null;
+          id?: string;
+          media_file_id?: string;
+          note_id?: string;
+          position_in_content?: number | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "note_media_media_file_id_fkey";
+            columns: ["media_file_id"];
+            isOneToOne: false;
+            referencedRelation: "media_files";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "note_media_note_id_fkey";
+            columns: ["note_id"];
+            isOneToOne: false;
+            referencedRelation: "notes";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      notes: {
+        Row: {
+          content: Json;
+          content_version: number | null;
+          created_at: string | null;
+          id: string;
+          rich_content: Json | null;
           tags: string[] | null;
           timestamp_seconds: number | null;
           updated_at: string | null;
@@ -411,9 +508,11 @@ export type Database = {
           video_id: string;
         };
         Insert: {
-          content: string;
+          content: Json;
+          content_version?: number | null;
           created_at?: string | null;
           id?: string;
+          rich_content?: Json | null;
           tags?: string[] | null;
           timestamp_seconds?: number | null;
           updated_at?: string | null;
@@ -421,9 +520,11 @@ export type Database = {
           video_id: string;
         };
         Update: {
-          content?: string;
+          content?: Json;
+          content_version?: number | null;
           created_at?: string | null;
           id?: string;
+          rich_content?: Json | null;
           tags?: string[] | null;
           timestamp_seconds?: number | null;
           updated_at?: string | null;
@@ -748,6 +849,64 @@ export type Database = {
           },
         ];
       };
+      video_screenshots: {
+        Row: {
+          created_at: string | null;
+          id: string;
+          media_file_id: string;
+          timestamp_seconds: number;
+          user_id: string;
+          video_id: string;
+          video_thumbnail_url: string | null;
+          video_title: string | null;
+          youtube_timestamp: string | null;
+        };
+        Insert: {
+          created_at?: string | null;
+          id?: string;
+          media_file_id: string;
+          timestamp_seconds: number;
+          user_id: string;
+          video_id: string;
+          video_thumbnail_url?: string | null;
+          video_title?: string | null;
+          youtube_timestamp?: string | null;
+        };
+        Update: {
+          created_at?: string | null;
+          id?: string;
+          media_file_id?: string;
+          timestamp_seconds?: number;
+          user_id?: string;
+          video_id?: string;
+          video_thumbnail_url?: string | null;
+          video_title?: string | null;
+          youtube_timestamp?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "video_screenshots_media_file_id_fkey";
+            columns: ["media_file_id"];
+            isOneToOne: false;
+            referencedRelation: "media_files";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "video_screenshots_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "video_screenshots_video_id_fkey";
+            columns: ["video_id"];
+            isOneToOne: false;
+            referencedRelation: "videos";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       videos: {
         Row: {
           channel_name: string | null;
@@ -912,6 +1071,7 @@ export type Database = {
       [_ in never]: never;
     };
     Enums: {
+      content_type_enum: "plain_text" | "rich_text";
       credit_bucket_status_enum:
         | "active"
         | "exhausted"
@@ -928,6 +1088,7 @@ export type Database = {
         | "promotional"
         | "compensation"
         | "cancelled_plan";
+      file_type_enum: "image" | "video_screenshot";
       subscription_status: "active" | "exhausted" | "expired" | "cancelled";
       transaction_type_enum:
         | "monthly_reset"
@@ -1070,6 +1231,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      content_type_enum: ["plain_text", "rich_text"],
       credit_bucket_status_enum: [
         "active",
         "exhausted",
@@ -1088,6 +1250,7 @@ export const Constants = {
         "compensation",
         "cancelled_plan",
       ],
+      file_type_enum: ["image", "video_screenshot"],
       subscription_status: ["active", "exhausted", "expired", "cancelled"],
       transaction_type_enum: [
         "monthly_reset",

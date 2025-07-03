@@ -3,29 +3,29 @@
 import { useState, useEffect } from "react";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useNotesStore } from "../store";
+import { useNotesSearch as useNotesSearchQuery } from "./use-notes-queries";
 import { SEARCH_CONFIG } from "@/config/constants";
 
 export const useNotesSearch = () => {
-  const {
-    isSearching,
-    isSearchActive,
-    resultCount,
-    performSearch,
-    clearSearch,
-  } = useNotesStore();
-  const [inputValue, setInputValue] = useState("");
+  const { searchQuery, setSearchQuery, clearSearch, currentVideo } =
+    useNotesStore();
+  const [inputValue, setInputValue] = useState(searchQuery);
   const debouncedSearchQuery = useDebounce(
     inputValue,
     SEARCH_CONFIG.DEBOUNCE_DELAY,
   );
 
+  const { data: searchResults, isLoading: isSearching } = useNotesSearchQuery(
+    currentVideo?.id,
+    debouncedSearchQuery,
+  );
+
+  const isSearchActive = Boolean(debouncedSearchQuery.trim());
+  const resultCount = searchResults?.length || 0;
+
   useEffect(() => {
-    if (debouncedSearchQuery.trim()) {
-      performSearch(debouncedSearchQuery.trim());
-      return;
-    }
-    clearSearch();
-  }, [debouncedSearchQuery, performSearch, clearSearch]);
+    setSearchQuery(debouncedSearchQuery);
+  }, [debouncedSearchQuery, setSearchQuery]);
 
   const handleInputChange = (value: string) => {
     const trimmedValue = value.slice(0, SEARCH_CONFIG.MAX_QUERY_LENGTH);
