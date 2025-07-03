@@ -6,20 +6,14 @@ import {
   linkMediaToNote,
   getNoteMediaByNoteId,
   unlinkMediaFromNote,
-} from "@/features/notes/queries";
-import { StatusCodes } from "http-status-codes";
+} from '@/features/notes/queries';
+import { StatusCodes } from 'http-status-codes';
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
-) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await getUserInSession();
     if (!user) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: StatusCodes.UNAUTHORIZED },
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: StatusCodes.UNAUTHORIZED });
     }
 
     const noteId = (await params).id;
@@ -28,23 +22,20 @@ export async function POST(
 
     if (!mediaFileId) {
       return NextResponse.json(
-        { error: "Media file ID is required" },
-        { status: 400 },
+        { error: 'Media file ID is required' },
+        { status: StatusCodes.BAD_REQUEST },
       );
     }
 
     const note = await getNoteById(noteId, user.id);
     if (!note) {
-      return NextResponse.json({ error: "Note not found" }, { status: 404 });
+      return NextResponse.json({ error: 'Note not found' }, { status: StatusCodes.NOT_FOUND });
     }
 
-    const { data: mediaFile, error: mediaError } = await getMediaFileById(
-      mediaFileId,
-      user.id,
-    );
+    const { data: mediaFile, error: mediaError } = await getMediaFileById(mediaFileId, user.id);
     if (mediaError || !mediaFile) {
       return NextResponse.json(
-        { error: "Media file not found" },
+        { error: 'Media file not found' },
         { status: StatusCodes.NOT_FOUND },
       );
     }
@@ -66,35 +57,28 @@ export async function POST(
       data: noteMedia,
     });
   } catch (error) {
-    console.error("Error linking screenshot to note:", error);
+    console.error('Error linking screenshot to note:', error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: 'Internal server error' },
       { status: StatusCodes.INTERNAL_SERVER_ERROR },
     );
   }
 }
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> },
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const user = await getUserInSession();
     if (!user) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: StatusCodes.UNAUTHORIZED },
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: StatusCodes.UNAUTHORIZED });
     }
 
     const noteId = (await params).id;
 
-    const { data: noteMedia, error: noteMediaError } =
-      await getNoteMediaByNoteId(noteId, user.id);
+    const { data: noteMedia, error: noteMediaError } = await getNoteMediaByNoteId(noteId, user.id);
     if (noteMediaError) {
       return NextResponse.json(
         { error: `Failed to fetch note media: ${noteMediaError.message}` },
-        { status: 500 },
+        { status: StatusCodes.INTERNAL_SERVER_ERROR },
       );
     }
 
@@ -103,10 +87,10 @@ export async function GET(
       data: noteMedia,
     });
   } catch (error) {
-    console.error("Error fetching note media:", error);
+    console.error('Error fetching note media:', error);
     return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
+      { error: 'Internal server error' },
+      { status: StatusCodes.INTERNAL_SERVER_ERROR },
     );
   }
 }

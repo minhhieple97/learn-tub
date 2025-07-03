@@ -77,7 +77,7 @@ export async function GET(request: NextRequest) {
     }
 
     return new Response(JSON.stringify(data), {
-      status: 200,
+      status: StatusCodes.OK,
       headers: RESPONSE_HEADERS,
     });
   } catch (error) {

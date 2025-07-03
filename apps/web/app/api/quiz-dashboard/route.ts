@@ -82,8 +82,8 @@ export async function GET(request: NextRequest) {
     const data = await getQuizDashboardData(profile.id, filters);
 
     return new Response(JSON.stringify(data), {
-      status: 200,
-      headers: { "Content-Type": RESPONSE_HEADERS.JSON_CONTENT_TYPE },
+      status: StatusCodes.OK,
+      headers: { 'Content-Type': RESPONSE_HEADERS.JSON_CONTENT_TYPE },
     });
   } catch (error) {
     console.error("Quiz dashboard API error:", error);

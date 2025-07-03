@@ -6,16 +6,13 @@ import { KEYBOARD_SHORTCUTS } from "@/features/notes/constants";
 import { useRichTextEditor } from "@/features/notes/hooks/use-rich-text-editor";
 
 export const StatusBar = () => {
-  const { isCapturingScreenshot, isUploadingImage, isDeletingImage } =
-    useRichTextEditor();
-  const isLoading =
-    isCapturingScreenshot || isUploadingImage || isDeletingImage;
+  const { isUploadingImage, isDeletingImage } = useRichTextEditor();
+  const isLoading = isUploadingImage || isDeletingImage;
 
   const getLoadingText = () => {
-    if (isCapturingScreenshot) return "Capturing...";
-    if (isUploadingImage) return "Uploading...";
-    if (isDeletingImage) return "Deleting...";
-    return "";
+    if (isUploadingImage) return 'Uploading...';
+    if (isDeletingImage) return 'Deleting...';
+    return '';
   };
 
   return (
