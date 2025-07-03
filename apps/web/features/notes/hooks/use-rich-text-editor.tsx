@@ -1,7 +1,12 @@
 "use client";
 
 import { useCallback, useMemo, useState, useEffect, useRef } from "react";
-import { useEditor, Editor, ReactNodeViewRenderer } from "@tiptap/react";
+import {
+  useEditor,
+  Editor,
+  ReactNodeViewRenderer,
+  JSONContent,
+} from "@tiptap/react";
 import { useAction } from "next-safe-action/hooks";
 import StarterKit from "@tiptap/starter-kit";
 import Image from "@tiptap/extension-image";
@@ -13,25 +18,56 @@ import {
   TOAST_MESSAGES,
 } from "@/features/notes/constants";
 import {
+  VALIDATION_LIMITS,
+  TOAST_MESSAGES as GLOBAL_TOAST_MESSAGES,
+} from "@/config/constants";
+import {
   captureAndSaveScreenshotAction,
   uploadScreenshotAction,
   handleImagePasteAction,
   deleteImageAction,
 } from "@/features/notes/actions/media-actions";
 import { useNotesStore } from "../store";
+import { useInvalidateNotes } from "./use-notes-queries";
 import { ImageWithDelete } from "../components/rich-text-editor/image-with-delete";
 
+type IValidationResult = {
+  isValid: boolean;
+  errors: string[];
+};
+
 type IUseRichTextEditorReturn = {
+  // Rich text editor properties
   editor: Editor | null;
-  isCapturingScreenshot: boolean;
   isUploadingImage: boolean;
   isDeletingImage: boolean;
   fileInputRef: React.RefObject<HTMLInputElement | null>;
   onImageUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
   triggerImageUpload: () => void;
   disabled: boolean;
-  setVideoElementRef: (element: any) => void;
   isLoading: boolean;
+
+  // Form state properties
+  formContent: any;
+  formTags: string[];
+  tagInput: string;
+  editingNote: any;
+  isFormLoading: boolean;
+  currentTimestamp: number;
+  isEditing: boolean;
+  isSaveDisabled: boolean;
+
+  // Form handlers
+  handleTagInputChange: (input: string) => void;
+  handleAddTag: () => void;
+  handleKeyDown: (e: React.KeyboardEvent) => void;
+  handleSave: () => Promise<void>;
+  removeTag: (tag: string) => void;
+  cancelEditing: () => void;
+
+  // Validation methods
+  isFormValid: () => boolean;
+  validateTagInput: (tagInput: string) => boolean;
 };
 
 const createImageExtension = (
@@ -58,13 +94,6 @@ const createImageExtension = (
       ));
     },
 
-    // Ensure proper serialization by explicitly defining how to convert to JSON
-    addStorage() {
-      return {
-        ...this.parent?.(),
-      };
-    },
-
     // Override the parseHTML to ensure attrs are preserved
     parseHTML() {
       return [
@@ -72,10 +101,17 @@ const createImageExtension = (
           tag: "img[src]",
           getAttrs: (element) => {
             const img = element as HTMLImageElement;
+            const src = img.getAttribute("src");
+
+            // Validate that we have a proper src attribute
+            if (!src || src.trim() === "") {
+              return false; // Don't parse images without valid src
+            }
+
             return {
-              src: img.getAttribute("src"),
-              alt: img.getAttribute("alt"),
-              title: img.getAttribute("title"),
+              src: src,
+              alt: img.getAttribute("alt") || "",
+              title: img.getAttribute("title") || "",
               width: img.getAttribute("width"),
               height: img.getAttribute("height"),
             };
@@ -86,43 +122,208 @@ const createImageExtension = (
 
     // Ensure proper rendering to HTML with all attributes
     renderHTML({ HTMLAttributes }) {
+      // Ensure src attribute is present before rendering
+      if (!HTMLAttributes.src || HTMLAttributes.src.trim() === "") {
+        return ["div", { class: "image-placeholder" }, "Invalid image"];
+      }
       return ["img", HTMLAttributes];
+    },
+
+    // Add custom validation for the src attribute
+    addProseMirrorPlugins() {
+      return [...(this.parent?.() || [])];
+    },
+
+    // Ensure proper serialization and JSON handling
+    addStorage() {
+      return {
+        ...this.parent?.(),
+        // Ensure proper JSON serialization
+        toJSON: (node: any) => {
+          const attrs = node.attrs || {};
+
+          // Don't serialize images without valid src
+          if (!attrs.src || attrs.src.trim() === "") {
+            return null;
+          }
+
+          return {
+            type: "image",
+            attrs: {
+              src: attrs.src,
+              alt: attrs.alt || "",
+              title: attrs.title || "",
+              width: attrs.width,
+              height: attrs.height,
+            },
+          };
+        },
+      };
     },
   });
 };
 
 export const useRichTextEditor = (): IUseRichTextEditorReturn => {
-  // Get state from store
   const {
     formContent,
-    currentVideo,
+    formTags,
+    tagInput,
+    editingNote,
     isFormLoading,
-    youtubePlayer,
-    setYouTubePlayer,
+    currentTimestamp,
+    currentVideo,
     setFormContent,
-    videoTitle,
-    noteId,
+    setTagInput,
+    addTag,
+    removeTag,
+    cancelEditing,
+    saveNote,
+    updateNote,
   } = useNotesStore();
+
+  const { invalidateByVideo, invalidateSearch } = useInvalidateNotes();
 
   const disabled = isFormLoading;
   const placeholder = "Write your notes here...";
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [isCapturingScreenshot, setIsCapturingScreenshot] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [isDeletingImage, setIsDeletingImage] = useState(false);
   const [previousImages, setPreviousImages] = useState<string[]>([]);
-  const uploadingImages = useRef<Map<string, string>>(new Map()); // blobUrl -> fileName
+  const uploadingImages = useRef<Map<string, string>>(new Map());
 
-  const { executeAsync: executeScreenshotCapture } = useAction(
-    captureAndSaveScreenshotAction,
-  );
   const { executeAsync: executeImageUpload } = useAction(
     uploadScreenshotAction,
   );
   const { executeAsync: executeImagePaste } = useAction(handleImagePasteAction);
   const { executeAsync: executeImageDelete } = useAction(deleteImageAction);
 
+  // Form validation methods
+  const validateTags = useCallback((tags: string[]): IValidationResult => {
+    const errors: string[] = [];
+
+    if (tags.length > VALIDATION_LIMITS.MAX_TAGS_COUNT) {
+      errors.push(GLOBAL_TOAST_MESSAGES.VALIDATION_TOO_MANY_TAGS);
+    }
+
+    const invalidTags = tags.filter(
+      (tag) => tag.length > VALIDATION_LIMITS.TAG_MAX_LENGTH,
+    );
+    if (invalidTags.length > 0) {
+      errors.push(GLOBAL_TOAST_MESSAGES.VALIDATION_TAG_TOO_LONG);
+    }
+
+    return {
+      isValid: errors.length === 0,
+      errors,
+    };
+  }, []);
+
+  const validateTagInput = useCallback((tagInput: string): boolean => {
+    return tagInput.length <= VALIDATION_LIMITS.TAG_MAX_LENGTH;
+  }, []);
+
+  const showValidationErrors = useCallback((errors: string[]) => {
+    errors.forEach((error) => {
+      toast.error({
+        title: "Validation Error",
+        description: error,
+      });
+    });
+  }, []);
+
+  const hasValidContent = useCallback(() => {
+    if (!formContent || typeof formContent !== "object") return false;
+
+    const isEmpty =
+      formContent.type === "doc" &&
+      Array.isArray(formContent.content) &&
+      formContent.content.length === 0;
+
+    if (isEmpty) return false;
+
+    const hasText = JSON.stringify(formContent).includes('"text"');
+    return hasText;
+  }, [formContent]);
+
+  const isFormValid = useCallback(() => {
+    const tagsValidation = validateTags(formTags);
+    const hasContent = hasValidContent();
+    return tagsValidation.isValid && hasContent;
+  }, [formTags, validateTags, hasValidContent]);
+
+  // Form handlers
+  const handleTagInputChange = useCallback(
+    (input: string) => {
+      if (validateTagInput(input)) {
+        setTagInput(input);
+      }
+    },
+    [setTagInput, validateTagInput],
+  );
+
+  const handleAddTag = useCallback(() => {
+    if (!tagInput.trim()) return;
+    if (formTags.length >= VALIDATION_LIMITS.MAX_TAGS_COUNT) {
+      showValidationErrors([GLOBAL_TOAST_MESSAGES.VALIDATION_TOO_MANY_TAGS]);
+      return;
+    }
+
+    if (tagInput.length > VALIDATION_LIMITS.TAG_MAX_LENGTH) {
+      showValidationErrors([GLOBAL_TOAST_MESSAGES.VALIDATION_TAG_TOO_LONG]);
+      return;
+    }
+    addTag();
+  }, [tagInput, formTags.length, addTag, showValidationErrors]);
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        handleAddTag();
+      }
+    },
+    [handleAddTag],
+  );
+
+  const handleSave = useCallback(async () => {
+    const tagsValidation = validateTags(formTags);
+    if (!tagsValidation.isValid) {
+      showValidationErrors(tagsValidation.errors);
+      return;
+    }
+    console.log("formContent", formContent);
+    try {
+      if (editingNote) {
+        // await updateNote(editingNote.id, formContent, formTags);
+      } else {
+        await saveNote(formContent, formTags, currentTimestamp);
+      }
+
+      // Invalidate queries to refetch data
+      if (currentVideo) {
+        invalidateByVideo(currentVideo.id);
+        invalidateSearch(currentVideo.id);
+      }
+    } catch (error) {
+      // Error handling is done in the store methods
+      console.error("Error in handleSave:", error);
+    }
+  }, [
+    formContent,
+    formTags,
+    editingNote,
+    currentTimestamp,
+    currentVideo,
+    validateTags,
+    showValidationErrors,
+    updateNote,
+    saveNote,
+    invalidateByVideo,
+    invalidateSearch,
+  ]);
+
+  // Image handling methods
   const validateImageFile = useCallback((file: File): boolean => {
     if (!file.type.startsWith("image/")) {
       toast.error({
@@ -156,119 +357,6 @@ export const useRichTextEditor = (): IUseRichTextEditorReturn => {
     });
   }, []);
 
-  const preloadImage = useCallback((src: string): Promise<void> => {
-    return new Promise((resolve, reject) => {
-      const img = document.createElement("img");
-      img.onload = () => resolve();
-      img.onerror = () => reject(new Error("Failed to preload image"));
-      img.src = src;
-    });
-  }, []);
-
-  const captureVideoFrame = useCallback(
-    (
-      youtubePlayer: any,
-    ): Promise<{
-      fileData: string;
-      fileName: string;
-      fileSize: number;
-      width: number;
-      height: number;
-    }> => {
-      return new Promise((resolve, reject) => {
-        try {
-          if (!youtubePlayer || typeof youtubePlayer.getIframe !== "function") {
-            throw new Error("YouTube player not ready for screenshot");
-          }
-
-          const iframe = youtubePlayer.getIframe();
-          if (!iframe) {
-            throw new Error("Could not get YouTube iframe");
-          }
-
-          const videoData = youtubePlayer.getVideoData();
-          if (!videoData) {
-            throw new Error("Could not get video data");
-          }
-
-          const width = 854;
-          const height = 480;
-
-          const canvas = document.createElement("canvas");
-          const ctx = canvas.getContext("2d");
-
-          if (!ctx) {
-            throw new Error("Could not get canvas context");
-          }
-
-          canvas.width = width;
-          canvas.height = height;
-
-          const currentTime = youtubePlayer.getCurrentTime();
-          const duration = youtubePlayer.getDuration();
-
-          ctx.fillStyle = "#000000";
-          ctx.fillRect(0, 0, width, height);
-
-          ctx.fillStyle = "#ffffff";
-          ctx.font = "24px Arial";
-          ctx.textAlign = "center";
-          ctx.fillText("YouTube Screenshot", width / 2, height / 2 - 40);
-
-          ctx.font = "18px Arial";
-          const timeText = `${Math.floor(currentTime / 60)}:${Math.floor(
-            currentTime % 60,
-          )
-            .toString()
-            .padStart(2, "0")} / ${Math.floor(duration / 60)}:${Math.floor(
-            duration % 60,
-          )
-            .toString()
-            .padStart(2, "0")}`;
-          ctx.fillText(timeText, width / 2, height / 2);
-
-          if (videoData.title) {
-            ctx.font = "16px Arial";
-            ctx.fillText(
-              videoData.title.substring(0, 50) +
-                (videoData.title.length > 50 ? "..." : ""),
-              width / 2,
-              height / 2 + 30,
-            );
-          }
-
-          canvas.toBlob(
-            (blob) => {
-              if (!blob) {
-                reject(new Error("Failed to create screenshot blob"));
-                return;
-              }
-
-              const reader = new FileReader();
-              reader.onload = () => {
-                const fileName = `screenshot-${Date.now()}.png`;
-                resolve({
-                  fileData: reader.result as string,
-                  fileName,
-                  fileSize: blob.size,
-                  width: canvas.width,
-                  height: canvas.height,
-                });
-              };
-              reader.onerror = () => reject(new Error("Failed to read blob"));
-              reader.readAsDataURL(blob);
-            },
-            "image/png",
-            RICH_TEXT_EDITOR.SCREENSHOT_QUALITY,
-          );
-        } catch (error) {
-          reject(error);
-        }
-      });
-    },
-    [],
-  );
-
   const handleImageUpload = useCallback(
     async (event: React.ChangeEvent<HTMLInputElement>, editor: Editor) => {
       const file = event.target.files?.[0];
@@ -280,22 +368,27 @@ export const useRichTextEditor = (): IUseRichTextEditorReturn => {
         return;
       }
 
-      // Create blob URL for immediate display
       const blobUrl = URL.createObjectURL(file);
-
-      // Track this upload
       uploadingImages.current.set(blobUrl, file.name);
 
-      // Insert image immediately with blob URL
-      editor
-        .chain()
-        .focus()
-        .setImage({
-          src: blobUrl,
-          alt: file.name,
-          title: `Uploading: ${file.name}`,
-        })
-        .run();
+      // Use a more explicit insertion method to ensure proper cursor placement
+      const { state } = editor.view;
+      const { selection } = state;
+
+      // Insert image node at current cursor position
+      const imageNodeType = editor.schema.nodes.image;
+      if (!imageNodeType) {
+        throw new Error("Image node type not found in editor schema");
+      }
+
+      const imageNode = imageNodeType.create({
+        src: blobUrl,
+        alt: file.name,
+        title: `Uploading: ${file.name}`,
+      });
+
+      const transaction = state.tr.insert(selection.from, imageNode);
+      editor.view.dispatch(transaction);
 
       setIsUploadingImage(true);
 
@@ -308,69 +401,57 @@ export const useRichTextEditor = (): IUseRichTextEditorReturn => {
           fileSize: file.size,
           mimeType: file.type,
         });
-
+        console.log("result", result);
         if (result?.data?.success && result.data?.data) {
           const imageUrl = result.data.data.publicUrl;
+          console.log("imageUrl", imageUrl);
+          if (!imageUrl || imageUrl.trim() === "") {
+            throw new Error("Received empty image URL from server");
+          }
 
-          try {
-            // Preload the server image to ensure smooth transition
-            await preloadImage(imageUrl);
+          // Update the blob URL to the real URL in the editor
+          const { state, dispatch } = editor.view;
+          const { doc } = state;
+          let transaction = state.tr;
+          let imageFound = false;
 
-            // Find and update the image with the server URL
-            const { state, dispatch } = editor.view;
-            const { doc } = state;
-            let transaction = state.tr;
+          doc.descendants((node, pos) => {
+            if (node.type.name === "image" && node.attrs.src === blobUrl) {
+              console.log("node", node);
+              transaction = transaction.setNodeMarkup(pos, undefined, {
+                ...node.attrs,
+                src: imageUrl,
+                alt: file.name,
+                title: file.name,
+              });
+              imageFound = true;
+              return false;
+            }
+          });
 
-            doc.descendants((node, pos) => {
-              if (node.type.name === "image" && node.attrs.src === blobUrl) {
-                transaction = transaction.setNodeMarkup(pos, undefined, {
-                  ...node.attrs,
-                  src: imageUrl,
-                  title: `Uploaded image: ${file.name}`,
-                });
-                return false; // Stop after finding the first match
-              }
-            });
-
+          if (imageFound) {
             dispatch(transaction);
-
-            // Clean up
             uploadingImages.current.delete(blobUrl);
             URL.revokeObjectURL(blobUrl);
-          } catch (preloadError) {
+            console.log("Successfully uploaded image:", imageUrl);
+          } else {
             console.warn(
-              "Failed to preload image, updating anyway:",
-              preloadError,
+              "Could not find uploaded image in editor content, but upload succeeded",
             );
-            // Fallback: update even if preload fails
-            const { state, dispatch } = editor.view;
-            const { doc } = state;
-            let transaction = state.tr;
-
-            doc.descendants((node, pos) => {
-              if (node.type.name === "image" && node.attrs.src === blobUrl) {
-                transaction = transaction.setNodeMarkup(pos, undefined, {
-                  ...node.attrs,
-                  src: imageUrl,
-                  title: `Uploaded image: ${file.name}`,
-                });
-                return false;
-              }
-            });
-
-            dispatch(transaction);
             uploadingImages.current.delete(blobUrl);
             URL.revokeObjectURL(blobUrl);
           }
         } else {
-          throw new Error("Failed to upload image");
+          throw new Error(
+            "Failed to upload image - no valid response received",
+          );
         }
       } catch (error) {
         console.error("Error uploading image:", error);
         const errorMessage =
           error instanceof Error ? error.message : "Unknown error occurred";
 
-        // Remove the failed upload image
+        // Remove the failed image upload from editor
         const { state, dispatch } = editor.view;
         const { doc } = state;
         let transaction = state.tr;
@@ -384,7 +465,6 @@ export const useRichTextEditor = (): IUseRichTextEditorReturn => {
 
         dispatch(transaction);
 
-        // Clean up
         uploadingImages.current.delete(blobUrl);
         URL.revokeObjectURL(blobUrl);
 
@@ -402,7 +482,6 @@ export const useRichTextEditor = (): IUseRichTextEditorReturn => {
       resetFileInput,
       convertFileToBase64,
       executeImageUpload,
-      preloadImage,
     ],
   );
 
@@ -418,26 +497,31 @@ export const useRichTextEditor = (): IUseRichTextEditorReturn => {
           const file = item.getAsFile();
           if (!file) continue;
 
-          // Create blob URL for immediate display
           const blobUrl = URL.createObjectURL(file);
           const fileName = `pasted-image-${Date.now()}.${file.type.split("/")[1]}`;
 
           try {
-            // Track this upload
             uploadingImages.current.set(blobUrl, fileName);
 
-            // Insert image immediately with blob URL
-            editor
-              .chain()
-              .focus()
-              .setImage({
-                src: blobUrl,
-                alt: "Pasted image",
-                title: `Uploading: ${fileName}`,
-              })
-              .run();
+            // Use explicit insertion method for pasted images
+            const { state } = editor.view;
+            const { selection } = state;
 
-            // Upload in background
+            // Insert image node at current cursor position
+            const imageNodeType = editor.schema.nodes.image;
+            if (!imageNodeType) {
+              throw new Error("Image node type not found in editor schema");
+            }
+
+            const imageNode = imageNodeType.create({
+              src: blobUrl,
+              alt: "Pasted image",
+              title: `Uploading: ${fileName}`,
+            });
+
+            const transaction = state.tr.insert(selection.from, imageNode);
+            editor.view.dispatch(transaction);
+
             const fileData = await convertFileToBase64(file);
 
             const result = await executeImagePaste({
@@ -450,63 +534,45 @@ export const useRichTextEditor = (): IUseRichTextEditorReturn => {
             if (result?.data?.success && result.data.data) {
               const imageUrl = result.data.data.publicUrl;
 
-              try {
-                // Preload the server image to ensure smooth transition
-                await preloadImage(imageUrl);
+              if (!imageUrl || imageUrl.trim() === "") {
+                throw new Error("Received empty image URL from server");
+              }
 
-                // Find and update the image with the server URL
-                const { state, dispatch } = editor.view;
-                const { doc } = state;
-                let transaction = state.tr;
+              // Update the blob URL to the real URL in the editor
+              const { state, dispatch } = editor.view;
+              const { doc } = state;
+              let transaction = state.tr;
+              let imageFound = false;
 
-                doc.descendants((node, pos) => {
-                  if (
-                    node.type.name === "image" &&
-                    node.attrs.src === blobUrl
-                  ) {
-                    transaction = transaction.setNodeMarkup(pos, undefined, {
-                      ...node.attrs,
-                      src: imageUrl,
-                      title: `Pasted image: ${fileName}`,
-                    });
-                    return false;
-                  }
-                });
+              doc.descendants((node, pos) => {
+                if (node.type.name === "image" && node.attrs.src === blobUrl) {
+                  transaction = transaction.setNodeMarkup(pos, undefined, {
+                    ...node.attrs,
+                    src: imageUrl,
+                    alt: "Pasted image",
+                    title: fileName,
+                  });
+                  imageFound = true;
+                  return false;
+                }
+              });
 
+              if (imageFound) {
                 dispatch(transaction);
-
                 uploadingImages.current.delete(blobUrl);
                 URL.revokeObjectURL(blobUrl);
-              } catch (preloadError) {
+                console.log("Successfully pasted image:", imageUrl);
+              } else {
                 console.warn(
-                  "Failed to preload pasted image, updating anyway:",
-                  preloadError,
+                  "Could not find pasted image in editor content, but upload succeeded",
                 );
-                // Fallback: update even if preload fails
-                const { state, dispatch } = editor.view;
-                const { doc } = state;
-                let transaction = state.tr;
-
-                doc.descendants((node, pos) => {
-                  if (
-                    node.type.name === "image" &&
-                    node.attrs.src === blobUrl
-                  ) {
-                    transaction = transaction.setNodeMarkup(pos, undefined, {
-                      ...node.attrs,
-                      src: imageUrl,
-                      title: `Pasted image: ${fileName}`,
-                    });
-                    return false;
-                  }
-                });
-
-                dispatch(transaction);
                 uploadingImages.current.delete(blobUrl);
                 URL.revokeObjectURL(blobUrl);
               }
             } else {
-              throw new Error("Failed to upload pasted image");
+              throw new Error(
+                "Failed to upload pasted image - no valid response received",
+              );
             }
 
             return true;
@@ -515,6 +581,7 @@ export const useRichTextEditor = (): IUseRichTextEditorReturn => {
             const errorMessage =
               error instanceof Error ? error.message : "Unknown error occurred";
 
+            // Remove the failed image paste from editor
             const { state, dispatch } = editor.view;
             const { doc } = state;
             let transaction = state.tr;
@@ -528,7 +595,6 @@ export const useRichTextEditor = (): IUseRichTextEditorReturn => {
 
             dispatch(transaction);
 
-            // Clean up
             uploadingImages.current.delete(blobUrl);
             URL.revokeObjectURL(blobUrl);
 
@@ -542,7 +608,7 @@ export const useRichTextEditor = (): IUseRichTextEditorReturn => {
 
       return false;
     },
-    [disabled, convertFileToBase64, executeImagePaste, preloadImage],
+    [disabled, convertFileToBase64, executeImagePaste],
   );
 
   const handleImageDelete = useCallback(
@@ -627,26 +693,112 @@ export const useRichTextEditor = (): IUseRichTextEditorReturn => {
     content: formContent,
     immediatelyRender: false,
     onUpdate: ({ editor }) => {
+      // Get HTML and convert back to JSON to ensure proper serialization
+      const html = editor.getHTML();
       const json = editor.getJSON();
-      setFormContent(json);
 
+      // Fix image nodes by extracting attrs from the actual DOM if needed
+      const fixImageNodes = (content: any): any => {
+        if (Array.isArray(content)) {
+          return content.map(fixImageNodes).filter((item) => {
+            // Only filter out image nodes that have no src at all
+            if (item && typeof item === "object" && item.type === "image") {
+              // If attrs is a function or missing, try to reconstruct from editor state
+              if (
+                typeof item.attrs === "function" ||
+                !item.attrs ||
+                !item.attrs.src
+              ) {
+                return false; // Remove invalid image nodes
+              }
+              return item.attrs && item.attrs.src; // Keep images with valid src
+            }
+            return true;
+          });
+        } else if (content && typeof content === "object") {
+          if (content.type === "image") {
+            // Ensure image node has proper attrs
+            if (typeof content.attrs === "function" || !content.attrs) {
+              return null; // Remove invalid image node
+            }
+            return content;
+          }
+          if (content.content) {
+            const fixedContent = fixImageNodes(content.content);
+            return {
+              ...content,
+              content: fixedContent,
+            };
+          }
+          return content;
+        }
+        return content;
+      };
+
+      // Process the JSON to fix any image node issues
+      let processedJson = { ...json };
+      if (processedJson.content) {
+        processedJson.content = fixImageNodes(processedJson.content);
+      }
+
+      // Double-check by manually extracting image data from editor state
+      const imageNodes: any[] = [];
+      editor.state.doc.descendants((node, pos) => {
+        if (node.type.name === "image" && node.attrs) {
+          imageNodes.push({
+            pos,
+            attrs: { ...node.attrs }, // Create a plain object copy
+          });
+        }
+      });
+
+      // Ensure image nodes in JSON have correct attrs
+      if (processedJson.content && Array.isArray(processedJson.content)) {
+        let imageIndex = 0;
+        processedJson.content = processedJson.content.map((item: any) => {
+          if (item && item.type === "image") {
+            if (imageIndex < imageNodes.length) {
+              return {
+                type: "image",
+                attrs: imageNodes[imageIndex++].attrs,
+              };
+            }
+          }
+          return item;
+        });
+      }
+
+      // Check if content actually changed to avoid unnecessary updates
+      const currentContent = JSON.stringify(formContent);
+      const newContent = JSON.stringify(processedJson);
+
+      if (currentContent !== newContent) {
+        console.log("Saving content with fixed images:", processedJson);
+        setFormContent(processedJson);
+      }
+
+      // Track valid images for cleanup (only real URLs, not blob URLs)
       const currentImages: string[] = [];
       editor.state.doc.descendants((node) => {
-        if (node.type.name === "image" && node.attrs?.src) {
-          // Only track completed uploads (not blob URLs that are still uploading)
+        if (
+          node.type.name === "image" &&
+          node.attrs?.src &&
+          node.attrs.src.trim() !== ""
+        ) {
           const isUploadingImage = uploadingImages.current.has(node.attrs.src);
-          if (!isUploadingImage) {
+          const isBlobUrl = node.attrs.src.startsWith("blob:");
+          // Only track real URLs (not blob URLs or uploading images) for cleanup
+          if (!isUploadingImage && !isBlobUrl) {
             currentImages.push(node.attrs.src);
           }
         }
       });
 
-      // Find images that were removed (only track server URLs, not blob URLs)
+      // Clean up removed images (only from real URLs, not blob URLs)
       const removedImages = previousImages.filter(
         (src) => !currentImages.includes(src) && !src.startsWith("blob:"),
       );
 
-      // Clean up removed images
       removedImages.forEach((imageUrl) => {
         handleManualImageDelete(imageUrl);
       });
@@ -714,65 +866,41 @@ export const useRichTextEditor = (): IUseRichTextEditorReturn => {
     }
   }, [disabled]);
 
-  const testImageInsertion = useCallback(() => {
-    if (!editor) {
-      console.error("❌ Editor not available for test");
-      return;
-    }
-
-    console.log("🧪 Testing image insertion...");
-
-    const testImageUrl =
-      "https://via.placeholder.com/300x200/0066cc/ffffff?text=Test+Screenshot";
-
-    try {
-      const result = editor
-        .chain()
-        .focus()
-        .setImage({
-          src: testImageUrl,
-          alt: "Test screenshot",
-          title: "Test screenshot for debugging",
-        })
-        .run();
-
-      console.log("🧪 Test insertion result:", result);
-      console.log("🧪 Editor HTML after test:", editor.getHTML());
-
-      const hasTestImage = editor.getHTML().includes(testImageUrl);
-      console.log("🧪 Test image found in editor:", hasTestImage);
-
-      if (!hasTestImage) {
-        toast.error({ description: "Test image insertion failed" });
-      }
-    } catch (error) {
-      console.error("🧪 Test insertion error:", error);
-      toast.error({ description: "Test image insertion error" });
-    }
-  }, [editor]);
-
-  if (typeof window !== "undefined") {
-    (window as any).testImageInsertion = testImageInsertion;
-  }
-
-  const setVideoElementRef = useCallback(
-    (player: any) => {
-      setYouTubePlayer(player);
-    },
-    [setYouTubePlayer],
-  );
+  // Computed values
+  const isEditing = Boolean(editingNote);
+  const isSaveDisabled = isFormLoading || !isFormValid();
 
   return {
-    disabled,
-    setVideoElementRef,
-    isLoading: isFormLoading,
-
+    // Rich text editor properties
     editor,
-    isCapturingScreenshot,
     isUploadingImage,
     isDeletingImage,
     fileInputRef,
     onImageUpload,
     triggerImageUpload,
+    disabled,
+    isLoading: isFormLoading,
+
+    // Form state properties
+    formContent,
+    formTags,
+    tagInput,
+    editingNote,
+    isFormLoading,
+    currentTimestamp,
+    isEditing,
+    isSaveDisabled,
+
+    // Form handlers
+    handleTagInputChange,
+    handleAddTag,
+    handleKeyDown,
+    handleSave,
+    removeTag,
+    cancelEditing,
+
+    // Validation methods
+    isFormValid,
+    validateTagInput,
   };
 };

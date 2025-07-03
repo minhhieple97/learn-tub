@@ -6,11 +6,13 @@ import { TimestampDisplay } from "./timestamp-display";
 import { TagsSection } from "./tags-section";
 import { NoteFormActions } from "./note-form-actions";
 import { RichTextEditor } from "./rich-text-editor";
-import { useNoteEditorForm } from "../hooks";
+import { useRichTextEditor } from "../hooks";
 import { VALIDATION_LIMITS } from "@/config/constants";
 
 export const NoteEditorForm = () => {
   const {
+    editor,
+    disabled,
     currentTimestamp,
     isEditing,
     isSaveDisabled,
@@ -21,9 +23,7 @@ export const NoteEditorForm = () => {
     handleSave,
     removeTag,
     cancelEditing,
-  } = useNoteEditorForm();
-
-  // The useRichTextEditor hook is now used directly in RichTextEditor component
+  } = useRichTextEditor();
 
   return (
     <Card>
@@ -34,7 +34,7 @@ export const NoteEditorForm = () => {
         <TimestampDisplay timestamp={currentTimestamp} clickable={false} />
 
         <div className="space-y-2">
-          <RichTextEditor />
+          <RichTextEditor editor={editor} disabled={disabled} />
         </div>
 
         <TagsSection
