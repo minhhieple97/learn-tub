@@ -1,15 +1,20 @@
 "use client";
 
 import React from "react";
-import { EditorContent } from "@tiptap/react";
+import { EditorContent, Editor } from "@tiptap/react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { useRichTextEditor } from "@/features/notes/hooks/use-rich-text-editor";
 import { RICH_TEXT_EDITOR } from "@/features/notes/constants";
 import { Toolbar, LoadingState } from "./rich-text-editor/index";
 
-export const RichTextEditor = () => {
-  const { editor, disabled } = useRichTextEditor();
+type IRichTextEditorProps = {
+  editor: Editor | null;
+  disabled?: boolean;
+};
 
+export const RichTextEditor = ({
+  editor,
+  disabled = false,
+}: IRichTextEditorProps) => {
   if (!editor) {
     return <LoadingState />;
   }
