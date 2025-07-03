@@ -1,4 +1,129 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { z } from "zod";
+
+// TipTap/ProseMirror node schemas
+const textNodeSchema = z.object({
+  type: z.literal("text"),
+  text: z.string(),
+  marks: z.array(z.any()).optional(),
+});
+
+const imageAttrsSchema = z.object({
+  src: z.string().url("Invalid image URL"),
+  alt: z.string().optional(),
+  title: z.string().optional(),
+  width: z.union([z.string(), z.number()]).optional(),
+  height: z.union([z.string(), z.number()]).optional(),
+});
+
+const imageNodeSchema = z.object({
+  type: z.literal("image"),
+  attrs: imageAttrsSchema,
+});
+
+const paragraphNodeSchema = z.object({
+  type: z.literal("paragraph"),
+  content: z.array(textNodeSchema).optional(),
+});
+
+const headingNodeSchema = z.object({
+  type: z.literal("heading"),
+  attrs: z.object({
+    level: z.number().min(1).max(6),
+  }),
+  content: z.array(textNodeSchema).optional(),
+});
+
+const blockquoteNodeSchema = z.object({
+  type: z.literal("blockquote"),
+  content: z
+    .array(z.union([paragraphNodeSchema, headingNodeSchema]))
+    .optional(),
+});
+
+const bulletListNodeSchema = z.object({
+  type: z.literal("bulletList"),
+  content: z
+    .array(
+      z.object({
+        type: z.literal("listItem"),
+        content: z.array(paragraphNodeSchema).optional(),
+      }),
+    )
+    .optional(),
+});
+
+const orderedListNodeSchema = z.object({
+  type: z.literal("orderedList"),
+  attrs: z
+    .object({
+      start: z.number().optional(),
+    })
+    .optional(),
+  content: z
+    .array(
+      z.object({
+        type: z.literal("listItem"),
+        content: z.array(paragraphNodeSchema).optional(),
+      }),
+    )
+    .optional(),
+});
+
+const hardBreakNodeSchema = z.object({
+  type: z.literal("hardBreak"),
+});
+
+const codeBlockNodeSchema = z.object({
+  type: z.literal("codeBlock"),
+  attrs: z
+    .object({
+      language: z.string().optional(),
+    })
+    .optional(),
+  content: z.array(textNodeSchema).optional(),
+});
+
+// Union of all possible content nodes
+const contentNodeSchema: z.ZodType<any> = z.lazy(() =>
+  z.union([
+    paragraphNodeSchema,
+    headingNodeSchema,
+    blockquoteNodeSchema,
+    bulletListNodeSchema,
+    orderedListNodeSchema,
+    imageNodeSchema,
+    hardBreakNodeSchema,
+    codeBlockNodeSchema,
+  ]),
+);
+
+const documentContentSchema = z.object({
+  type: z.literal("doc"),
+  content: z.array(contentNodeSchema).optional(),
+});
+
+// TypeScript type exports
+export type TextNode = z.infer<typeof textNodeSchema>;
+export type ImageAttrs = z.infer<typeof imageAttrsSchema>;
+export type ImageNode = z.infer<typeof imageNodeSchema>;
+export type ParagraphNode = z.infer<typeof paragraphNodeSchema>;
+export type HeadingNode = z.infer<typeof headingNodeSchema>;
+export type BlockquoteNode = z.infer<typeof blockquoteNodeSchema>;
+export type BulletListNode = z.infer<typeof bulletListNodeSchema>;
+export type OrderedListNode = z.infer<typeof orderedListNodeSchema>;
+export type HardBreakNode = z.infer<typeof hardBreakNodeSchema>;
+export type CodeBlockNode = z.infer<typeof codeBlockNodeSchema>;
+export type ContentNode = z.infer<typeof contentNodeSchema>;
+export type DocumentContent = z.infer<typeof documentContentSchema>;
+
+// Main schema type exports
+export type Note = z.infer<typeof noteSchema>;
+export type CreateNotePayload = z.infer<typeof createNotePayloadSchema>;
+export type UpdateNotePayload = z.infer<typeof updateNotePayloadSchema>;
+export type SaveNoteInput = z.infer<typeof saveNoteInputSchema>;
+export type UpdateNoteInput = z.infer<typeof updateNoteInputSchema>;
+export type DeleteNoteInput = z.infer<typeof deleteNoteInputSchema>;
 
 export const noteSchema = z.object({
   id: z.string().uuid(),
@@ -33,24 +158,14 @@ export const noteEditorPropsSchema = z.object({
 
 export const saveNoteInputSchema = z.object({
   videoId: z.string().uuid("Invalid video ID"),
-  content: z
-    .object({
-      type: z.string().optional(),
-      content: z.array(z.any()).optional(),
-    })
-    .passthrough(),
+  content: documentContentSchema,
   timestamp: z.number().min(0, "Timestamp must be positive"),
   tags: z.array(z.string().min(1).max(50)).max(10, "Too many tags").default([]),
 });
 
 export const updateNoteInputSchema = z.object({
   noteId: z.string().uuid("Invalid note ID"),
-  content: z
-    .object({
-      type: z.string().optional(),
-      content: z.array(z.any()).optional(),
-    })
-    .passthrough(),
+  content: documentContentSchema,
   tags: z.array(z.string().min(1).max(50)).max(10, "Too many tags").default([]),
 });
 
