@@ -192,11 +192,10 @@ export const useNotesStore = create<INotesState>()(
         try {
           const result = await saveNoteAction({
             videoId: currentVideo.id,
-            content,
+            content: content as { type: "doc"; content?: any[] },
             timestamp,
             tags: tags.length > 0 ? tags : [],
           });
-
           if (result?.data?.success) {
             get().resetForm();
           } else {
@@ -222,7 +221,7 @@ export const useNotesStore = create<INotesState>()(
         try {
           const result = await updateNoteAction({
             noteId,
-            content,
+            content: content as { type: "doc"; content?: any[] },
             tags: tags.length > 0 ? tags : [],
           });
 
