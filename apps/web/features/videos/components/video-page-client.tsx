@@ -1,43 +1,32 @@
 "use client";
 
-import { useVideoPlayer } from "@/features/videos/hooks/use-video-player";
+import { useEffect } from "react";
+import { useNotesStore } from "@/features/notes/store";
 import { VideoPageHeader } from "./video-page-header";
 import { VideoMainContent } from "./video-main-content";
 import { VideoSidebar } from "./video-sidebar";
 import { ResizablePanels } from "./resizable-panels";
 import { IVideoPageData } from "../types";
 
-type VideoPageClientProps = {
+type IVideoPageClientProps = {
   video: IVideoPageData;
 };
 
-export const VideoPageClient = ({ video }: VideoPageClientProps) => {
-  const {
-    currentTimestamp,
-    targetSeekTime,
-    handleTimeUpdate,
-    handleNoteTimestampClick,
-  } = useVideoPlayer();
+export const VideoPageClient = ({ video }: IVideoPageClientProps) => {
+  const { initializeYouTubeAPI, setCurrentVideo } = useNotesStore();
 
-  const leftPanel = (
-    <VideoMainContent
-      video={video}
-      onTimeUpdate={handleTimeUpdate}
-      targetSeekTime={targetSeekTime}
-    />
-  );
+  useEffect(() => {
+    initializeYouTubeAPI();
+    setCurrentVideo(video);
+  }, [video, initializeYouTubeAPI, setCurrentVideo]);
 
-  const rightPanel = (
-    <VideoSidebar
-      video={video}
-      currentTimestamp={currentTimestamp}
-      onTimestampClick={handleNoteTimestampClick}
-    />
-  );
+  const leftPanel = <VideoMainContent />;
+
+  const rightPanel = <VideoSidebar />;
 
   return (
     <div className="space-y-6">
-      <VideoPageHeader video={video} />
+      <VideoPageHeader />
 
       <ResizablePanels
         leftPanel={leftPanel}

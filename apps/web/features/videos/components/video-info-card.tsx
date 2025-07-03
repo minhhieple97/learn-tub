@@ -1,11 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { IVideoPageData } from "../types";
+import { useNotesStore } from "@/features/notes/store";
 
-type VideoInfoCardProps = {
-  video: IVideoPageData;
-};
-
-export const VideoInfoCard = ({ video }: VideoInfoCardProps) => {
+export const VideoInfoCard = () => {
+  const { currentVideo } = useNotesStore();
   return (
     <Card className="mt-4">
       <CardHeader>
@@ -13,14 +10,14 @@ export const VideoInfoCard = ({ video }: VideoInfoCardProps) => {
       </CardHeader>
       <CardContent>
         <p className="text-sm">
-          {video.description || "No description available."}
+          {currentVideo?.description || "No description available."}
         </p>
         <div className="mt-4 text-sm text-muted-foreground">
-          <p>Channel: {video.channel_name || "Unknown"}</p>
+          <p>Channel: {currentVideo?.channel_name || "Unknown"}</p>
           <p>
             Published:{" "}
-            {video.published_at
-              ? new Date(video.published_at).toLocaleDateString()
+            {currentVideo?.published_at
+              ? new Date(currentVideo.published_at).toLocaleDateString()
               : "Publication date unknown"}
           </p>
         </div>

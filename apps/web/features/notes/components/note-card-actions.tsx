@@ -1,24 +1,35 @@
 import { Button } from "@/components/ui/button";
 import { Pencil, Trash2 } from "lucide-react";
 import { useNotesStore } from "../store";
+import { useNotesQuery, useInvalidateNotes } from "../hooks/use-notes-queries";
+import type { INote } from "../types";
 
 type INoteCardActionsProps = {
   noteId: string;
+  note: INote; // Pass the note data directly
 };
 
-export const NoteCardActions = ({ noteId }: INoteCardActionsProps) => {
-  const { editingNote, startEditing, deleteNote, notes } = useNotesStore();
-
-  const currentNote = notes.find((note) => note.id === noteId);
+export const NoteCardActions = ({ noteId, note }: INoteCardActionsProps) => {
+  const { editingNote, startEditing, deleteNote, currentVideo } =
+    useNotesStore();
+  const { invalidateByVideo, invalidateSearch } = useInvalidateNotes();
 
   const handleEdit = () => {
-    if (currentNote) {
-      startEditing(currentNote);
-    }
+    startEditing(note);
   };
 
-  const handleDelete = () => {
-    deleteNote(noteId);
+  const handleDelete = async () => {
+    try {
+      await deleteNote(noteId);
+
+      // Invalidate queries to refetch data
+      if (currentVideo) {
+        invalidateByVideo(currentVideo.id);
+        invalidateSearch(currentVideo.id);
+      }
+    } catch (error) {
+      console.error("Error in handleDelete:", error);
+    }
   };
 
   return (

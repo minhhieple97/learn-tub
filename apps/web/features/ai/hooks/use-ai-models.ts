@@ -12,9 +12,20 @@ type IUseAIModelsOptions = {
   provider_id?: string;
   model_name?: string;
   is_active?: boolean;
-  type?: "all" | "options" | "provider";
+  type?: "all" | "options" | "provider" | "providers";
   enabled?: boolean;
 };
+
+// Constants for cache configuration and timeouts
+export const AI_MODELS_CONFIG = {
+  CACHE_TIMES: {
+    STALE_TIME: 5 * 60 * 1000, // 5 minutes
+    GC_TIME: 10 * 60 * 1000, // 10 minutes
+  },
+  REQUEST_TIMEOUT: 10000, // 10 seconds
+  RETRY_COUNT: 3,
+  MAX_RETRY_DELAY: 30000, // 30 seconds
+} as const;
 
 const fetchAIModels = async (options: IUseAIModelsOptions) => {
   const searchParams = new URLSearchParams();
@@ -25,24 +36,45 @@ const fetchAIModels = async (options: IUseAIModelsOptions) => {
     searchParams.set("is_active", String(options.is_active));
   if (options.type) searchParams.set("type", options.type);
 
-  const response = await fetch(`/api/ai-models?${searchParams.toString()}`);
+  const controller = new AbortController();
+  const timeoutId = setTimeout(
+    () => controller.abort(),
+    AI_MODELS_CONFIG.REQUEST_TIMEOUT,
+  );
 
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(
-      error.details || error.error || "Failed to fetch AI models",
-    );
+  try {
+    const response = await fetch(`/api/ai-models?${searchParams.toString()}`, {
+      signal: controller.signal,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(
+        error.details || error.error || "Failed to fetch AI models",
+      );
+    }
+
+    return response.json();
+  } catch (error) {
+    clearTimeout(timeoutId);
+    throw error;
   }
-
-  return response.json();
 };
 
-// Cache configuration constants
+// Optimized cache configuration constants
 const AI_MODELS_CACHE_CONFIG = {
-  staleTime: 5 * 60 * 1000,
-  gcTime: 10 * 60 * 1000,
+  staleTime: AI_MODELS_CONFIG.CACHE_TIMES.STALE_TIME,
+  gcTime: AI_MODELS_CONFIG.CACHE_TIMES.GC_TIME,
   refetchOnWindowFocus: false,
   refetchOnMount: false,
+  retry: AI_MODELS_CONFIG.RETRY_COUNT,
+  retryDelay: (attemptIndex: number) =>
+    Math.min(1000 * 2 ** attemptIndex, AI_MODELS_CONFIG.MAX_RETRY_DELAY),
 } as const;
 
 export const useAIModels = (options: IUseAIModelsOptions = {}) => {

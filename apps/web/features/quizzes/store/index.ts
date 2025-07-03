@@ -167,7 +167,6 @@ export const useQuizStore = create<QuizState>()(
               difficulty: settings.difficulty,
               aiModelId: settings.aiModelId,
             });
-            console.log("result", result);
             if (result?.data?.success) {
               set({
                 questions: result.data.questions || [],
@@ -183,10 +182,6 @@ export const useQuizStore = create<QuizState>()(
               });
 
               get().startTimer();
-
-              toast.success({
-                description: "Quiz questions generated successfully!",
-              });
             } else {
               throw new Error(
                 result?.serverError || "Failed to generate questions",
@@ -304,8 +299,6 @@ export const useQuizStore = create<QuizState>()(
                 isEvaluating: false,
                 timeTakenSeconds: finalTimeTaken,
               });
-
-              toast.success({ description: "Quiz submitted successfully!" });
             } else {
               throw new Error(result?.serverError || "Failed to evaluate quiz");
             }

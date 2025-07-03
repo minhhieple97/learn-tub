@@ -2,28 +2,28 @@
 
 import type React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
 import { TimestampDisplay } from "./timestamp-display";
 import { TagsSection } from "./tags-section";
 import { NoteFormActions } from "./note-form-actions";
-import { useNoteEditorForm } from "../hooks";
+import { RichTextEditor } from "./rich-text-editor";
+import { useRichTextEditor } from "../hooks";
 import { VALIDATION_LIMITS } from "@/config/constants";
 
 export const NoteEditorForm = () => {
   const {
-    formContent,
+    editor,
+    disabled,
     currentTimestamp,
     isEditing,
     isSaveDisabled,
     isFormLoading,
-    handleContentChange,
     handleTagInputChange,
     handleAddTag,
     handleKeyDown,
     handleSave,
     removeTag,
     cancelEditing,
-  } = useNoteEditorForm();
+  } = useRichTextEditor();
 
   return (
     <Card>
@@ -34,12 +34,7 @@ export const NoteEditorForm = () => {
         <TimestampDisplay timestamp={currentTimestamp} clickable={false} />
 
         <div className="space-y-2">
-          <Textarea
-            placeholder="Write your notes here..."
-            value={formContent}
-            onChange={(e) => handleContentChange(e.target.value)}
-            className="min-h-[100px]"
-          />
+          <RichTextEditor editor={editor} disabled={disabled} />
         </div>
 
         <TagsSection

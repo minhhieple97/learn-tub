@@ -4,12 +4,10 @@ import Link from "next/link";
 import { routes } from "@/routes";
 import { tabValues } from "../search-params";
 import { IVideoPageData } from "../types";
+import { useNotesStore } from "@/features/notes/store";
 
-type IVideoPageHeaderProps = {
-  video: IVideoPageData;
-};
-
-export const VideoPageHeader = ({ video }: IVideoPageHeaderProps) => {
+export const VideoPageHeader = () => {
+  const { currentVideo } = useNotesStore();
   return (
     <div className="flex items-center justify-between">
       <div>
@@ -19,9 +17,11 @@ export const VideoPageHeader = ({ video }: IVideoPageHeaderProps) => {
             Back to Videos
           </Link>
         </Button>
-        <h1 className="text-2xl font-bold">{video.title}</h1>
-        {video.courses && (
-          <p className="text-muted-foreground">Course: {video.courses.title}</p>
+        <h1 className="text-2xl font-bold">{currentVideo?.title}</h1>
+        {currentVideo?.courses && (
+          <p className="text-muted-foreground">
+            Course: {currentVideo.courses.title}
+          </p>
         )}
       </div>
     </div>

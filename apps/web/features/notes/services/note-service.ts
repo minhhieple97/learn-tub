@@ -1,12 +1,10 @@
 import {
-  AI_DEFAULTS,
   CHUNK_TYPES,
   AI_SYSTEM_MESSAGES,
   AI_FORMAT,
   ERROR_MESSAGES,
   EVALUATION_ERRORS,
   AI_QUIZZ_CONFIG,
-  AI_COMMANDS,
 } from "@/config/constants";
 import { INoteEvaluationRequest } from "@/features/notes/types";
 import { IFeedback, StreamChunk } from "@/types";
@@ -280,6 +278,7 @@ ${feedback.detailed_analysis}`;
         detailed_analysis: parsed.detailed_analysis || "",
       };
     } catch (error) {
+      console.error(error);
       throw new Error(EVALUATION_ERRORS.FAILED_TO_PARSE_RESPONSE);
     }
   }
