@@ -8,23 +8,10 @@ import { NoteFormActions } from "./note-form-actions";
 import { RichTextEditor } from "./rich-text-editor";
 import { useRichTextEditor } from "../hooks";
 import { VALIDATION_LIMITS } from "@/config/constants";
+import { useNotesStore } from "../store";
 
 export const NoteEditorForm = () => {
-  const {
-    editor,
-    disabled,
-    currentTimestamp,
-    isEditing,
-    isSaveDisabled,
-    isFormLoading,
-    handleTagInputChange,
-    handleAddTag,
-    handleKeyDown,
-    handleSave,
-    removeTag,
-    cancelEditing,
-  } = useRichTextEditor();
-
+  const { currentTimestamp } = useNotesStore();
   return (
     <Card>
       <CardHeader>
@@ -34,23 +21,12 @@ export const NoteEditorForm = () => {
         <TimestampDisplay timestamp={currentTimestamp} clickable={false} />
 
         <div className="space-y-2">
-          <RichTextEditor editor={editor} disabled={disabled} />
+          <RichTextEditor />
         </div>
 
-        <TagsSection
-          onTagInputChange={handleTagInputChange}
-          onAddTag={handleAddTag}
-          onRemoveTag={removeTag}
-          onKeyDown={handleKeyDown}
-        />
+        <TagsSection />
 
-        <NoteFormActions
-          isLoading={isFormLoading}
-          isEditing={isEditing}
-          onSave={handleSave}
-          onCancel={cancelEditing}
-          disabled={isSaveDisabled}
-        />
+        <NoteFormActions />
       </CardContent>
     </Card>
   );

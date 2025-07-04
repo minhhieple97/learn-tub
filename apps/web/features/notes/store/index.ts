@@ -569,7 +569,6 @@ export const useNotesStore = create<INotesState>()(
             }
           }
         } catch (err) {
-          console.log(err);
           const errorMessage =
             err instanceof Error ? err.message : ERROR_MESSAGES.UNKNOWN_ERROR;
           set((state) => ({
