@@ -1,6 +1,6 @@
 "use client";
 
-import { QueryClient, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { INote, INotesSearchResponse } from "../types";
 
