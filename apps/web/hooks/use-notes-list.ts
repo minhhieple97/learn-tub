@@ -1,5 +1,8 @@
 import { useNotesStore } from "@/features/notes/store";
-import { useNotesQuery, useNotesSearch } from "@/features/notes/hooks/use-notes-queries";
+import {
+  useNotesQuery,
+  useNotesSearch,
+} from "@/features/notes/hooks/use-notes-queries";
 import { INote } from "@/features/notes/types";
 import { IVideoPageData } from "@/features/videos/types";
 
@@ -11,7 +14,7 @@ type INotesListData = {
   searchQuery: string;
   currentVideo: IVideoPageData | null;
   emptyMessage: string;
-}
+};
 
 export const useNotesList = (): INotesListData => {
   const currentVideo = useNotesStore((state) => state.currentVideo);
@@ -44,4 +47,4 @@ export const useNotesList = (): INotesListData => {
     currentVideo,
     emptyMessage,
   };
-}; 
+};

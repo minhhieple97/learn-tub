@@ -1,22 +1,29 @@
 "use client";
 
 import { useCallback, useMemo, useState, useEffect, useRef } from "react";
-import { useEditor, Editor, ReactNodeViewRenderer } from '@tiptap/react';
-import { useAction } from 'next-safe-action/hooks';
-import StarterKit from '@tiptap/starter-kit';
-import Image from '@tiptap/extension-image';
-import Placeholder from '@tiptap/extension-placeholder';
-import { toast } from '@/hooks/use-toast';
-import { MEDIA_UPLOAD, RICH_TEXT_EDITOR, TOAST_MESSAGES } from '@/features/notes/constants';
-import { VALIDATION_LIMITS, TOAST_MESSAGES as GLOBAL_TOAST_MESSAGES } from '@/config/constants';
+import { useEditor, Editor, ReactNodeViewRenderer } from "@tiptap/react";
+import { useAction } from "next-safe-action/hooks";
+import StarterKit from "@tiptap/starter-kit";
+import Image from "@tiptap/extension-image";
+import Placeholder from "@tiptap/extension-placeholder";
+import { toast } from "@/hooks/use-toast";
+import {
+  MEDIA_UPLOAD,
+  RICH_TEXT_EDITOR,
+  TOAST_MESSAGES,
+} from "@/features/notes/constants";
+import {
+  VALIDATION_LIMITS,
+  TOAST_MESSAGES as GLOBAL_TOAST_MESSAGES,
+} from "@/config/constants";
 import {
   uploadScreenshotAction,
   handleImagePasteAction,
   deleteImageAction,
-} from '@/features/notes/actions/media-actions';
-import { useNotesStore } from '../store';
-import { useInvalidateNotes } from './use-notes-queries';
-import { ImageWithDelete } from '../components/rich-text-editor/image-with-delete';
+} from "@/features/notes/actions/media-actions";
+import { useNotesStore } from "../store";
+import { useInvalidateNotes } from "./use-notes-queries";
+import { ImageWithDelete } from "../components/rich-text-editor/image-with-delete";
 
 type IValidationResult = {
   isValid: boolean;
@@ -85,22 +92,22 @@ const createImageExtension = (
     parseHTML() {
       return [
         {
-          tag: 'img[src]',
+          tag: "img[src]",
           getAttrs: (element) => {
             const img = element as HTMLImageElement;
-            const src = img.getAttribute('src');
+            const src = img.getAttribute("src");
 
             // Validate that we have a proper src attribute
-            if (!src || src.trim() === '') {
+            if (!src || src.trim() === "") {
               return false; // Don't parse images without valid src
             }
 
             return {
               src: src,
-              alt: img.getAttribute('alt') || '',
-              title: img.getAttribute('title') || '',
-              width: img.getAttribute('width'),
-              height: img.getAttribute('height'),
+              alt: img.getAttribute("alt") || "",
+              title: img.getAttribute("title") || "",
+              width: img.getAttribute("width"),
+              height: img.getAttribute("height"),
             };
           },
         },
@@ -110,10 +117,10 @@ const createImageExtension = (
     // Ensure proper rendering to HTML with all attributes
     renderHTML({ HTMLAttributes }) {
       // Ensure src attribute is present before rendering
-      if (!HTMLAttributes.src || HTMLAttributes.src.trim() === '') {
-        return ['div', { class: 'image-placeholder' }, 'Invalid image'];
+      if (!HTMLAttributes.src || HTMLAttributes.src.trim() === "") {
+        return ["div", { class: "image-placeholder" }, "Invalid image"];
       }
-      return ['img', HTMLAttributes];
+      return ["img", HTMLAttributes];
     },
 
     // Add custom validation for the src attribute
@@ -130,16 +137,16 @@ const createImageExtension = (
           const attrs = node.attrs || {};
 
           // Don't serialize images without valid src
-          if (!attrs.src || attrs.src.trim() === '') {
+          if (!attrs.src || attrs.src.trim() === "") {
             return null;
           }
 
           return {
-            type: 'image',
+            type: "image",
             attrs: {
               src: attrs.src,
-              alt: attrs.alt || '',
-              title: attrs.title || '',
+              alt: attrs.alt || "",
+              title: attrs.title || "",
               width: attrs.width,
               height: attrs.height,
             },
@@ -171,7 +178,7 @@ export const useRichTextEditor = (): IUseRichTextEditorReturn => {
   const { invalidateByVideo, invalidateSearch } = useInvalidateNotes();
 
   const disabled = isFormLoading;
-  const placeholder = 'Write your notes here...';
+  const placeholder = "Write your notes here...";
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
@@ -179,7 +186,9 @@ export const useRichTextEditor = (): IUseRichTextEditorReturn => {
   const [previousImages, setPreviousImages] = useState<string[]>([]);
   const uploadingImages = useRef<Map<string, string>>(new Map());
 
-  const { executeAsync: executeImageUpload } = useAction(uploadScreenshotAction);
+  const { executeAsync: executeImageUpload } = useAction(
+    uploadScreenshotAction,
+  );
   const { executeAsync: executeImagePaste } = useAction(handleImagePasteAction);
   const { executeAsync: executeImageDelete } = useAction(deleteImageAction);
 
@@ -191,7 +200,9 @@ export const useRichTextEditor = (): IUseRichTextEditorReturn => {
       errors.push(GLOBAL_TOAST_MESSAGES.VALIDATION_TOO_MANY_TAGS);
     }
 
-    const invalidTags = tags.filter((tag) => tag.length > VALIDATION_LIMITS.TAG_MAX_LENGTH);
+    const invalidTags = tags.filter(
+      (tag) => tag.length > VALIDATION_LIMITS.TAG_MAX_LENGTH,
+    );
     if (invalidTags.length > 0) {
       errors.push(GLOBAL_TOAST_MESSAGES.VALIDATION_TAG_TOO_LONG);
     }
@@ -209,17 +220,17 @@ export const useRichTextEditor = (): IUseRichTextEditorReturn => {
   const showValidationErrors = useCallback((errors: string[]) => {
     errors.forEach((error) => {
       toast.error({
-        title: 'Validation Error',
+        title: "Validation Error",
         description: error,
       });
     });
   }, []);
 
   const hasValidContent = useCallback(() => {
-    if (!formContent || typeof formContent !== 'object') return false;
+    if (!formContent || typeof formContent !== "object") return false;
 
     const isEmpty =
-      formContent.type === 'doc' &&
+      formContent.type === "doc" &&
       Array.isArray(formContent.content) &&
       formContent.content.length === 0;
 
@@ -261,7 +272,7 @@ export const useRichTextEditor = (): IUseRichTextEditorReturn => {
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
+      if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
         handleAddTag();
       }
@@ -275,7 +286,7 @@ export const useRichTextEditor = (): IUseRichTextEditorReturn => {
       showValidationErrors(tagsValidation.errors);
       return;
     }
-    console.log('formContent', formContent);
+    console.log("formContent", formContent);
     try {
       if (editingNote) {
         // await updateNote(editingNote.id, formContent, formTags);
@@ -290,7 +301,7 @@ export const useRichTextEditor = (): IUseRichTextEditorReturn => {
       }
     } catch (error) {
       // Error handling is done in the store methods
-      console.error('Error in handleSave:', error);
+      console.error("Error in handleSave:", error);
     }
   }, [
     formContent,
@@ -308,7 +319,7 @@ export const useRichTextEditor = (): IUseRichTextEditorReturn => {
 
   // Image handling methods
   const validateImageFile = useCallback((file: File): boolean => {
-    if (!file.type.startsWith('image/')) {
+    if (!file.type.startsWith("image/")) {
       toast.error({
         description: TOAST_MESSAGES.INVALID_FILE_TYPE,
       });
@@ -327,7 +338,7 @@ export const useRichTextEditor = (): IUseRichTextEditorReturn => {
 
   const resetFileInput = useCallback(() => {
     if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+      fileInputRef.current.value = "";
     }
   }, []);
 
@@ -335,7 +346,7 @@ export const useRichTextEditor = (): IUseRichTextEditorReturn => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = () => resolve(reader.result as string);
-      reader.onerror = () => reject(new Error('Failed to read file'));
+      reader.onerror = () => reject(new Error("Failed to read file"));
       reader.readAsDataURL(file);
     });
   }, []);
@@ -361,7 +372,7 @@ export const useRichTextEditor = (): IUseRichTextEditorReturn => {
       // Insert image node at current cursor position
       const imageNodeType = editor.schema.nodes.image;
       if (!imageNodeType) {
-        throw new Error('Image node type not found in editor schema');
+        throw new Error("Image node type not found in editor schema");
       }
 
       const imageNode = imageNodeType.create({
@@ -384,12 +395,12 @@ export const useRichTextEditor = (): IUseRichTextEditorReturn => {
           fileSize: file.size,
           mimeType: file.type,
         });
-        console.log('result', result);
+        console.log("result", result);
         if (result?.data?.success && result.data?.data) {
           const imageUrl = result.data.data.publicUrl;
-          console.log('imageUrl', imageUrl);
-          if (!imageUrl || imageUrl.trim() === '') {
-            throw new Error('Received empty image URL from server');
+          console.log("imageUrl", imageUrl);
+          if (!imageUrl || imageUrl.trim() === "") {
+            throw new Error("Received empty image URL from server");
           }
 
           // Update the blob URL to the real URL in the editor
@@ -399,8 +410,8 @@ export const useRichTextEditor = (): IUseRichTextEditorReturn => {
           let imageFound = false;
 
           doc.descendants((node, pos) => {
-            if (node.type.name === 'image' && node.attrs.src === blobUrl) {
-              console.log('node', node);
+            if (node.type.name === "image" && node.attrs.src === blobUrl) {
+              console.log("node", node);
               transaction = transaction.setNodeMarkup(pos, undefined, {
                 ...node.attrs,
                 src: imageUrl,
@@ -416,18 +427,23 @@ export const useRichTextEditor = (): IUseRichTextEditorReturn => {
             dispatch(transaction);
             uploadingImages.current.delete(blobUrl);
             URL.revokeObjectURL(blobUrl);
-            console.log('Successfully uploaded image:', imageUrl);
+            console.log("Successfully uploaded image:", imageUrl);
           } else {
-            console.warn('Could not find uploaded image in editor content, but upload succeeded');
+            console.warn(
+              "Could not find uploaded image in editor content, but upload succeeded",
+            );
             uploadingImages.current.delete(blobUrl);
             URL.revokeObjectURL(blobUrl);
           }
         } else {
-          throw new Error('Failed to upload image - no valid response received');
+          throw new Error(
+            "Failed to upload image - no valid response received",
+          );
         }
       } catch (error) {
-        console.error('Error uploading image:', error);
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+        console.error("Error uploading image:", error);
+        const errorMessage =
+          error instanceof Error ? error.message : "Unknown error occurred";
 
         // Remove the failed image upload from editor
         const { state, dispatch } = editor.view;
@@ -435,7 +451,7 @@ export const useRichTextEditor = (): IUseRichTextEditorReturn => {
         let transaction = state.tr;
 
         doc.descendants((node, pos) => {
-          if (node.type.name === 'image' && node.attrs.src === blobUrl) {
+          if (node.type.name === "image" && node.attrs.src === blobUrl) {
             transaction = transaction.delete(pos, pos + node.nodeSize);
             return false;
           }
@@ -454,7 +470,13 @@ export const useRichTextEditor = (): IUseRichTextEditorReturn => {
         resetFileInput();
       }
     },
-    [disabled, validateImageFile, resetFileInput, convertFileToBase64, executeImageUpload],
+    [
+      disabled,
+      validateImageFile,
+      resetFileInput,
+      convertFileToBase64,
+      executeImageUpload,
+    ],
   );
 
   const handleImagePaste = useCallback(
@@ -465,12 +487,12 @@ export const useRichTextEditor = (): IUseRichTextEditorReturn => {
       if (!items) return false;
 
       for (const item of Array.from(items)) {
-        if (item.type.startsWith('image/')) {
+        if (item.type.startsWith("image/")) {
           const file = item.getAsFile();
           if (!file) continue;
 
           const blobUrl = URL.createObjectURL(file);
-          const fileName = `pasted-image-${Date.now()}.${file.type.split('/')[1]}`;
+          const fileName = `pasted-image-${Date.now()}.${file.type.split("/")[1]}`;
 
           try {
             uploadingImages.current.set(blobUrl, fileName);
@@ -482,12 +504,12 @@ export const useRichTextEditor = (): IUseRichTextEditorReturn => {
             // Insert image node at current cursor position
             const imageNodeType = editor.schema.nodes.image;
             if (!imageNodeType) {
-              throw new Error('Image node type not found in editor schema');
+              throw new Error("Image node type not found in editor schema");
             }
 
             const imageNode = imageNodeType.create({
               src: blobUrl,
-              alt: 'Pasted image',
+              alt: "Pasted image",
               title: `Uploading: ${fileName}`,
             });
 
@@ -506,8 +528,8 @@ export const useRichTextEditor = (): IUseRichTextEditorReturn => {
             if (result?.data?.success && result.data.data) {
               const imageUrl = result.data.data.publicUrl;
 
-              if (!imageUrl || imageUrl.trim() === '') {
-                throw new Error('Received empty image URL from server');
+              if (!imageUrl || imageUrl.trim() === "") {
+                throw new Error("Received empty image URL from server");
               }
 
               // Update the blob URL to the real URL in the editor
@@ -517,11 +539,11 @@ export const useRichTextEditor = (): IUseRichTextEditorReturn => {
               let imageFound = false;
 
               doc.descendants((node, pos) => {
-                if (node.type.name === 'image' && node.attrs.src === blobUrl) {
+                if (node.type.name === "image" && node.attrs.src === blobUrl) {
                   transaction = transaction.setNodeMarkup(pos, undefined, {
                     ...node.attrs,
                     src: imageUrl,
-                    alt: 'Pasted image',
+                    alt: "Pasted image",
                     title: fileName,
                   });
                   imageFound = true;
@@ -533,20 +555,25 @@ export const useRichTextEditor = (): IUseRichTextEditorReturn => {
                 dispatch(transaction);
                 uploadingImages.current.delete(blobUrl);
                 URL.revokeObjectURL(blobUrl);
-                console.log('Successfully pasted image:', imageUrl);
+                console.log("Successfully pasted image:", imageUrl);
               } else {
-                console.warn('Could not find pasted image in editor content, but upload succeeded');
+                console.warn(
+                  "Could not find pasted image in editor content, but upload succeeded",
+                );
                 uploadingImages.current.delete(blobUrl);
                 URL.revokeObjectURL(blobUrl);
               }
             } else {
-              throw new Error('Failed to upload pasted image - no valid response received');
+              throw new Error(
+                "Failed to upload pasted image - no valid response received",
+              );
             }
 
             return true;
           } catch (error) {
-            console.error('Error pasting image:', error);
-            const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+            console.error("Error pasting image:", error);
+            const errorMessage =
+              error instanceof Error ? error.message : "Unknown error occurred";
 
             // Remove the failed image paste from editor
             const { state, dispatch } = editor.view;
@@ -554,7 +581,7 @@ export const useRichTextEditor = (): IUseRichTextEditorReturn => {
             let transaction = state.tr;
 
             doc.descendants((node, pos) => {
-              if (node.type.name === 'image' && node.attrs.src === blobUrl) {
+              if (node.type.name === "image" && node.attrs.src === blobUrl) {
                 transaction = transaction.delete(pos, pos + node.nodeSize);
                 return false;
               }
@@ -586,7 +613,7 @@ export const useRichTextEditor = (): IUseRichTextEditorReturn => {
 
       try {
         const url = new URL(imageUrl);
-        const storagePath = url.pathname.split('/').slice(-3).join('/');
+        const storagePath = url.pathname.split("/").slice(-3).join("/");
 
         const result = await executeImageDelete({
           imageUrl,
@@ -598,7 +625,7 @@ export const useRichTextEditor = (): IUseRichTextEditorReturn => {
           const { doc } = state;
 
           doc.descendants((node, pos) => {
-            if (node.type.name === 'image' && node.attrs.src === imageUrl) {
+            if (node.type.name === "image" && node.attrs.src === imageUrl) {
               const transaction = state.tr.delete(pos, pos + node.nodeSize);
               dispatch(transaction);
               return false;
@@ -606,7 +633,7 @@ export const useRichTextEditor = (): IUseRichTextEditorReturn => {
           });
         }
       } catch (error) {
-        console.error('Error deleting image:', error);
+        console.error("Error deleting image:", error);
         toast.error({
           description: TOAST_MESSAGES.IMAGE_DELETE_ERROR,
         });
@@ -622,13 +649,13 @@ export const useRichTextEditor = (): IUseRichTextEditorReturn => {
       if (disabled) return;
       try {
         const url = new URL(imageUrl);
-        const storagePath = url.pathname.split('/').slice(-3).join('/');
+        const storagePath = url.pathname.split("/").slice(-3).join("/");
         await executeImageDelete({
           imageUrl,
           storagePath,
         });
       } catch (error) {
-        console.error('Error cleaning up deleted image:', error);
+        console.error("Error cleaning up deleted image:", error);
       }
     },
     [disabled, executeImageDelete],
@@ -650,8 +677,8 @@ export const useRichTextEditor = (): IUseRichTextEditorReturn => {
         inline: false,
         allowBase64: true,
         HTMLAttributes: {
-          class: 'max-w-xs h-auto rounded-lg shadow-sm my-4 block',
-          style: 'max-height: 200px; object-fit: contain;',
+          class: "max-w-xs h-auto rounded-lg shadow-sm my-4 block",
+          style: "max-height: 200px; object-fit: contain;",
         },
       }),
       Placeholder.configure({
@@ -670,19 +697,23 @@ export const useRichTextEditor = (): IUseRichTextEditorReturn => {
         if (Array.isArray(content)) {
           return content.map(fixImageNodes).filter((item) => {
             // Only filter out image nodes that have no src at all
-            if (item && typeof item === 'object' && item.type === 'image') {
+            if (item && typeof item === "object" && item.type === "image") {
               // If attrs is a function or missing, try to reconstruct from editor state
-              if (typeof item.attrs === 'function' || !item.attrs || !item.attrs.src) {
+              if (
+                typeof item.attrs === "function" ||
+                !item.attrs ||
+                !item.attrs.src
+              ) {
                 return false; // Remove invalid image nodes
               }
               return item.attrs && item.attrs.src; // Keep images with valid src
             }
             return true;
           });
-        } else if (content && typeof content === 'object') {
-          if (content.type === 'image') {
+        } else if (content && typeof content === "object") {
+          if (content.type === "image") {
             // Ensure image node has proper attrs
-            if (typeof content.attrs === 'function' || !content.attrs) {
+            if (typeof content.attrs === "function" || !content.attrs) {
               return null; // Remove invalid image node
             }
             return content;
@@ -708,7 +739,7 @@ export const useRichTextEditor = (): IUseRichTextEditorReturn => {
       // Double-check by manually extracting image data from editor state
       const imageNodes: any[] = [];
       editor.state.doc.descendants((node, pos) => {
-        if (node.type.name === 'image' && node.attrs) {
+        if (node.type.name === "image" && node.attrs) {
           imageNodes.push({
             pos,
             attrs: { ...node.attrs }, // Create a plain object copy
@@ -720,10 +751,10 @@ export const useRichTextEditor = (): IUseRichTextEditorReturn => {
       if (processedJson.content && Array.isArray(processedJson.content)) {
         let imageIndex = 0;
         processedJson.content = processedJson.content.map((item: any) => {
-          if (item && item.type === 'image') {
+          if (item && item.type === "image") {
             if (imageIndex < imageNodes.length) {
               return {
-                type: 'image',
+                type: "image",
                 attrs: imageNodes[imageIndex++].attrs,
               };
             }
@@ -737,16 +768,20 @@ export const useRichTextEditor = (): IUseRichTextEditorReturn => {
       const newContent = JSON.stringify(processedJson);
 
       if (currentContent !== newContent) {
-        console.log('Saving content with fixed images:', processedJson);
+        console.log("Saving content with fixed images:", processedJson);
         setFormContent(processedJson);
       }
 
       // Track valid images for cleanup (only real URLs, not blob URLs)
       const currentImages: string[] = [];
       editor.state.doc.descendants((node) => {
-        if (node.type.name === 'image' && node.attrs?.src && node.attrs.src.trim() !== '') {
+        if (
+          node.type.name === "image" &&
+          node.attrs?.src &&
+          node.attrs.src.trim() !== ""
+        ) {
           const isUploadingImage = uploadingImages.current.has(node.attrs.src);
-          const isBlobUrl = node.attrs.src.startsWith('blob:');
+          const isBlobUrl = node.attrs.src.startsWith("blob:");
           // Only track real URLs (not blob URLs or uploading images) for cleanup
           if (!isUploadingImage && !isBlobUrl) {
             currentImages.push(node.attrs.src);
@@ -756,7 +791,7 @@ export const useRichTextEditor = (): IUseRichTextEditorReturn => {
 
       // Clean up removed images (only from real URLs, not blob URLs)
       const removedImages = previousImages.filter(
-        (src) => !currentImages.includes(src) && !src.startsWith('blob:'),
+        (src) => !currentImages.includes(src) && !src.startsWith("blob:"),
       );
 
       removedImages.forEach((imageUrl) => {
@@ -774,7 +809,7 @@ export const useRichTextEditor = (): IUseRichTextEditorReturn => {
         const items = event.clipboardData?.items;
         if (items) {
           for (const item of Array.from(items)) {
-            if (item.type.startsWith('image/')) {
+            if (item.type.startsWith("image/")) {
               handleImagePaste(event, editor as Editor);
               return true;
             }
@@ -803,7 +838,7 @@ export const useRichTextEditor = (): IUseRichTextEditorReturn => {
     if (editor && !previousImages.length) {
       const currentImages: string[] = [];
       editor.state.doc.descendants((node) => {
-        if (node.type.name === 'image' && node.attrs.src) {
+        if (node.type.name === "image" && node.attrs.src) {
           currentImages.push(node.attrs.src);
         }
       });

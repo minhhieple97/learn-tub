@@ -3,7 +3,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 export const NotesListSkeleton = () => {
   return (
     <div className="space-y-2">
-      <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">Your Notes</h3>
+      <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100">
+        Your Notes
+      </h3>
       <div className="max-h-96 overflow-y-auto pr-2 space-y-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-800">
         {Array.from({ length: 3 }).map((_, index) => (
           <div

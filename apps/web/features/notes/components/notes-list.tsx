@@ -1,6 +1,6 @@
 import { NoteCard } from "./note-card";
 import { NotesListSkeleton } from "./notes-list-skeleton";
-import { useNotesList } from '@/hooks/use-notes-list';
+import { useNotesList } from "@/hooks/use-notes-list";
 
 export const NotesList = () => {
   const { displayNotes, isLoading, isEmpty, emptyMessage } = useNotesList();
@@ -13,7 +13,9 @@ export const NotesList = () => {
     return (
       <div className="space-y-2">
         <h3 className="text-lg font-medium">Your Notes</h3>
-        <p className="text-sm text-gray-500 dark:text-gray-400">{emptyMessage}</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400">
+          {emptyMessage}
+        </p>
       </div>
     );
   }
