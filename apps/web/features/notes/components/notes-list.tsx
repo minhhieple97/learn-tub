@@ -1,36 +1,19 @@
 import { NoteCard } from "./note-card";
 import { NotesListSkeleton } from "./notes-list-skeleton";
-import { useNotesStore } from "../store";
-import { useNotesQuery, useNotesSearch } from "../hooks/use-notes-queries";
+import { useNotesList } from '@/hooks/use-notes-list';
 
 export const NotesList = () => {
-  const currentVideo = useNotesStore((state) => state.currentVideo);
-  const searchQuery = useNotesStore((state) => state.searchQuery);
-
-  const { data: allNotes, isLoading: isLoadingNotes } = useNotesQuery(
-    currentVideo?.id,
-  );
-  const { data: searchResults, isLoading: isSearching } = useNotesSearch(
-    currentVideo?.id,
-    searchQuery,
-  );
-
-  const displayNotes = searchQuery.trim() ? searchResults : allNotes;
-  const isLoading = searchQuery.trim() ? isSearching : isLoadingNotes;
+  const { displayNotes, isLoading, isEmpty, emptyMessage } = useNotesList();
 
   if (isLoading) {
     return <NotesListSkeleton />;
   }
 
-  if (!displayNotes || displayNotes.length === 0) {
+  if (isEmpty) {
     return (
       <div className="space-y-2">
         <h3 className="text-lg font-medium">Your Notes</h3>
-        <p className="text-sm text-gray-500">
-          {searchQuery.trim()
-            ? "No notes found matching your search."
-            : "No notes yet. Start taking notes to see them here."}
-        </p>
+        <p className="text-sm text-gray-500 dark:text-gray-400">{emptyMessage}</p>
       </div>
     );
   }
@@ -38,8 +21,8 @@ export const NotesList = () => {
   return (
     <div className="space-y-2">
       <h3 className="text-lg font-medium">Your Notes</h3>
-      <div className="max-h-96 overflow-y-auto pr-2 space-y-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-        {displayNotes.map((note) => (
+      <div className="max-h-96 overflow-y-auto pr-2 space-y-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-800">
+        {displayNotes?.map((note) => (
           <NoteCard key={note.id} note={note} />
         ))}
       </div>
