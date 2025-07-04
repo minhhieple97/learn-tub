@@ -80,7 +80,7 @@ export const useNoteEvaluation = () => {
           }
         }
       } catch (err) {
-        console.log(err);
+        console.error(err);
         setError(
           err instanceof Error ? err.message : ERROR_MESSAGES.UNKNOWN_ERROR,
         );

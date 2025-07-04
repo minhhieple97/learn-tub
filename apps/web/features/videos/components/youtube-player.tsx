@@ -13,7 +13,6 @@ import {
 } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { useNotesStore } from "@/features/notes/store";
-import { useLearningSession } from "../hooks/use-learning-session";
 import { usePlayerControls } from "../hooks/use-player-controls";
 import { IVideoPageData } from "../types";
 
@@ -110,13 +109,6 @@ export const YouTubePlayer = ({
     setVolume,
     setIsMuted,
   ]);
-
-  useLearningSession({
-    player: youtubePlayer,
-    videoId: currentVideo?.id!,
-    playerState,
-    initialTimestamp,
-  });
 
   const {
     currentTime: controlsCurrentTime,

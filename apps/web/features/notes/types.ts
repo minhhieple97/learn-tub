@@ -70,13 +70,6 @@ export type INoteEditorFormRef = {
   setEditingNote: (note: INote | null) => void;
 };
 
-export type ITagsSectionProps = {
-  onTagInputChange: (tagInput: string) => void;
-  onAddTag: () => void;
-  onRemoveTag: (tag: string) => void;
-  onKeyDown: (e: React.KeyboardEvent) => void;
-};
-
 export type INotesListProps = {
   notes: INote[];
   onTimestampClick?: (timestamp: number) => void;
@@ -95,14 +88,6 @@ export type ITimestampDisplayProps = {
   timestamp: number | null;
   onClick?: (timestamp: number) => void;
   clickable?: boolean;
-};
-
-export type INoteFormActionsProps = {
-  isLoading: boolean;
-  isEditing: boolean;
-  onSave: () => void;
-  onCancel: () => void;
-  disabled?: boolean;
 };
 
 export type IUseVideoIdReturn = IAsyncHookReturn<string | null>;

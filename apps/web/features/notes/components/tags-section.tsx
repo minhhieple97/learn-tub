@@ -5,17 +5,15 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, X } from "lucide-react";
-import type { ITagsSectionProps } from "../types";
 import { VALIDATION_LIMITS } from "@/config/constants";
 import { useNotesStore } from "../store";
+import { useRichTextEditor } from "../hooks";
 
-export const TagsSection = ({
-  onAddTag,
-  onRemoveTag,
-  onKeyDown,
-  onTagInputChange,
-}: ITagsSectionProps) => {
+export const TagsSection = () => {
   const { formTags, tagInput } = useNotesStore();
+  const { handleTagInputChange, handleAddTag, removeTag, handleKeyDown } =
+    useRichTextEditor();
+
   return (
     <div className="space-y-4">
       {formTags.length > 0 && (
@@ -29,7 +27,7 @@ export const TagsSection = ({
               {tag}
               <X
                 className="h-3 w-3 cursor-pointer hover:text-red-600 dark:hover:text-red-400 transition-colors duration-200"
-                onClick={() => onRemoveTag(tag)}
+                onClick={() => removeTag(tag)}
               />
             </Badge>
           ))}
@@ -41,15 +39,15 @@ export const TagsSection = ({
             <Input
               placeholder="Add tags..."
               value={tagInput}
-              onChange={(e) => onTagInputChange(e.target.value)}
-              onKeyDown={onKeyDown}
+              onChange={(e) => handleTagInputChange(e.target.value)}
+              onKeyDown={handleKeyDown}
               className="w-full border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-500 dark:placeholder:text-slate-400 focus:border-blue-500 dark:focus:border-blue-400 focus:ring-blue-500/20 dark:focus:ring-blue-400/20"
             />
           </div>
           <Button
             variant="outline"
             size="icon"
-            onClick={onAddTag}
+            onClick={handleAddTag}
             className="border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:border-blue-400 dark:hover:border-blue-500 transition-all duration-200"
           >
             <Plus className="h-4 w-4" />

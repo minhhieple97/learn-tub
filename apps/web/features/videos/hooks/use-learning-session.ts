@@ -13,7 +13,7 @@ type IUseLearningSessionProps = {
   videoId: string;
   playerState: number;
   initialTimestamp: number;
-}
+};
 
 interface PlayerMethods {
   getCurrentTime?: () => number;
@@ -46,7 +46,7 @@ export const useLearningSession = ({
       queryClient.setQueryData(learningSessionKeys.session(videoId), data);
     },
     onError: (error) => {
-      console.error('Error creating/updating session:', error);
+      console.error("Error creating/updating session:", error);
     },
   });
 
@@ -56,7 +56,7 @@ export const useLearningSession = ({
       queryClient.setQueryData(learningSessionKeys.session(videoId), data);
     },
     onError: (error) => {
-      console.error('Error updating session progress:', error);
+      console.error("Error updating session progress:", error);
     },
   });
 
@@ -65,8 +65,12 @@ export const useLearningSession = ({
     duration: number;
   } => {
     const typedPlayer = player as PlayerMethods;
-    const currentTime = typedPlayer.getCurrentTime ? Math.floor(typedPlayer.getCurrentTime()) : 0;
-    const duration = typedPlayer.getDuration ? Math.floor(typedPlayer.getDuration()) : 0;
+    const currentTime = typedPlayer.getCurrentTime
+      ? Math.floor(typedPlayer.getCurrentTime())
+      : 0;
+    const duration = typedPlayer.getDuration
+      ? Math.floor(typedPlayer.getDuration())
+      : 0;
 
     return {
       currentTime,
@@ -89,18 +93,19 @@ export const useLearningSession = ({
 
         await createSessionMutation.mutateAsync(sessionData);
       } catch (error) {
-        console.error('Error tracking initial session:', error);
+        console.error("Error tracking initial session:", error);
       }
     };
 
-    if (player && typeof player.getDuration === 'function') {
+    if (player && typeof player.getDuration === "function") {
       trackInitialSession();
     }
   }, [player, videoId, initialTimestamp, createSessionMutation, getPlayerData]);
 
   useEffect(() => {
     const isPlaying =
-      typeof window !== 'undefined' && playerState === window.YT?.PlayerState?.PLAYING;
+      typeof window !== "undefined" &&
+      playerState === window.YT?.PlayerState?.PLAYING;
 
     if (!player || !isPlaying || updateProgressMutation.isPending) {
       return;
@@ -118,7 +123,7 @@ export const useLearningSession = ({
 
         await updateProgressMutation.mutateAsync(updateData);
       } catch (error) {
-        console.error('Error updating progress:', error);
+        console.error("Error updating progress:", error);
       }
     };
 
@@ -130,7 +135,9 @@ export const useLearningSession = ({
   }, [player, playerState, videoId, updateProgressMutation, getPlayerData]);
 
   useEffect(() => {
-    const isEnded = typeof window !== 'undefined' && playerState === window.YT?.PlayerState?.ENDED;
+    const isEnded =
+      typeof window !== "undefined" &&
+      playerState === window.YT?.PlayerState?.ENDED;
 
     if (!isEnded || !player || updateProgressMutation.isPending) return;
 
@@ -147,7 +154,7 @@ export const useLearningSession = ({
 
         await updateProgressMutation.mutateAsync(updateData);
       } catch (error) {
-        console.error('Error marking session as completed:', error);
+        console.error("Error marking session as completed:", error);
       }
     };
 
