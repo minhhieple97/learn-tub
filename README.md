@@ -305,12 +305,12 @@ npm run db           # Pull and reset database
   - Implement Prisma wrapper for atomic credit deduction and allocation
   - Ensure data consistency across credit buckets and user balances
 
-- **📝 Rich Text Editor for Notes**
+- **📝 Rich Text Editor for Notes** ✅ **(done)**
   - Implement advanced text editor for note-taking with formatting capabilities
   - Add support for rich text, markdown, and structured content
   - Enhance note-taking experience with better editing tools
 
-- **🖼️ Image Support in Notes**
+- **🖼️ Image Support in Notes** ✅ **(done)**
   - Allow users to paste and insert images directly into the text editor
   - Implement image upload, storage, and optimization
   - Support drag-and-drop image functionality
