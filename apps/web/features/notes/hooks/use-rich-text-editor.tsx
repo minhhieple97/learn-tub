@@ -278,25 +278,21 @@ export const useRichTextEditor = (): IUseRichTextEditorReturn => {
   );
 
   const handleSave = useCallback(async () => {
+    if (!currentVideo) return;
+
     const tagsValidation = validateTags(formTags);
     if (!tagsValidation.isValid) {
       showValidationErrors(tagsValidation.errors);
       return;
     }
     try {
-      if (editingNote) {
-        // await updateNote(editingNote.id, formContent, formTags);
-      } else {
-        await saveNote(formContent, formTags, currentTimestamp);
-      }
+      editingNote
+        ? await updateNote(editingNote.id, formContent, formTags)
+        : await saveNote(formContent, formTags, currentTimestamp);
 
-      // Invalidate queries to refetch data
-      if (currentVideo) {
-        invalidateByVideo(currentVideo.id);
-        invalidateSearch(currentVideo.id);
-      }
+      invalidateByVideo(currentVideo.id);
+      invalidateSearch(currentVideo.id);
     } catch (error) {
-      // Error handling is done in the store methods
       console.error("Error in handleSave:", error);
     }
   }, [

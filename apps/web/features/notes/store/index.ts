@@ -192,7 +192,7 @@ export const useNotesStore = create<INotesState>()(
         try {
           const result = await saveNoteAction({
             videoId: currentVideo.id,
-            content: content as { type: "doc"; content?: any[] },
+            content,
             timestamp,
             tags: tags.length > 0 ? tags : [],
           });
@@ -221,7 +221,7 @@ export const useNotesStore = create<INotesState>()(
         try {
           const result = await updateNoteAction({
             noteId,
-            content: content as { type: "doc"; content?: any[] },
+            content,
             tags: tags.length > 0 ? tags : [],
           });
 

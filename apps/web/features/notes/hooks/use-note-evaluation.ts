@@ -1,6 +1,5 @@
 import { useState, useCallback } from "react";
 import {
-  AI_CONFIG,
   AI_API,
   CHUNK_TYPES,
   ERROR_MESSAGES,
