@@ -102,7 +102,7 @@ LearnTub is a modern learning platform that transforms passive YouTube video wat
    pnpm install
    ```
 
-   Create a `.env` file in the `apps/server` directory with the server-specific environment variables (see `apps/server/README.md` for details).
+   Create a `.env` file in the `apps/server` base from file .env.example.
 
 4. **Database Setup**
 
@@ -122,40 +122,14 @@ LearnTub is a modern learning platform that transforms passive YouTube video wat
 
 5. **Web Application Environment Setup**
 
-   Create a `.env` file in the `apps/web` directory with the following environment variables:
+   Navigate to the server application and install dependencies:
 
-   ```env
-   # Supabase Configuration
-   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-   SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
-
-   # YouTube API Configuration
-   YOUTUBE_API_KEY=your_youtube_api_key
-
-   # AI Configuration
-   OPENAI_API_KEY=your_openai_api_key
-   GEMINI_API_KEY=your_gemini_api_key
-
-   # QStash Configuration (for background jobs)
-   QSTASH_CURRENT_SIGNING_KEY=your_qstash_current_signing_key
-   QSTASH_NEXT_SIGNING_KEY=your_qstash_next_signing_key
-   QSTASH_TOKEN=your_qstash_token
-
-   # Upstash Redis Configuration (for caching and rate limiting)
-   UPSTASH_REDIS_REST_URL=your_upstash_redis_rest_url
-   UPSTASH_REDIS_REST_TOKEN=your_upstash_redis_rest_token
-
-   # Stripe Configuration
-   NEXT_PUBLIC_STRIPE_PUBLIC_KEY=your_stripe_public_key
-   STRIPE_SECRET_KEY=your_stripe_secret_key
-   STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
-
-   # App Configuration
-   NEXT_PUBLIC_APP_URL=http://localhost:3000
-   NODE_ENV=development
-   CRON_SECRET=your_cron_secret
+   ```bash
+   cd apps/web
+   pnpm install
    ```
+
+   Create a `.env` file in the `apps/web` base on .env.example.
 
 6. **Run the development server**
 
