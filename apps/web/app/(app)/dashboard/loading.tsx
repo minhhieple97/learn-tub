@@ -85,55 +85,7 @@ function AIInsightsSkeleton() {
   );
 }
 
-function RecentVideosCardSkeleton() {
-  return (
-    <Card>
-      <CardHeader>
-        <Skeleton className="mb-2 h-6 w-32" />
-        <Skeleton className="h-4 w-56" />
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="flex items-center space-x-4">
-              <Skeleton className="h-12 w-16 rounded" />
-              <div className="flex-1">
-                <Skeleton className="mb-2 h-4 w-48" />
-                <Skeleton className="h-3 w-24" />
-              </div>
-            </div>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
 
-function LearningGoalsCardSkeleton() {
-  return (
-    <Card>
-      <CardHeader>
-        <Skeleton className="mb-2 h-6 w-32" />
-        <Skeleton className="h-4 w-52" />
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          {Array.from({ length: 2 }).map((_, i) => (
-            <div key={i}>
-              <div className="mb-1 flex justify-between text-sm">
-                <Skeleton className="h-4 w-28" />
-                <Skeleton className="h-4 w-12" />
-              </div>
-              <div className="h-2 w-full rounded-full bg-gray-200">
-                <Skeleton className="h-2 w-3/5 rounded-full" />
-              </div>
-            </div>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
 
 export default function Loading() {
   return (
@@ -143,11 +95,6 @@ export default function Loading() {
       <StatsGridSkeleton />
 
       <AIInsightsSkeleton />
-
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <RecentVideosCardSkeleton />
-        <LearningGoalsCardSkeleton />
-      </div>
     </div>
   );
 }
