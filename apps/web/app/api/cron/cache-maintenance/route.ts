@@ -9,7 +9,10 @@ export async function GET() {
     const headersList = await headers();
     const authHeader = headersList.get("authorization");
     if (authHeader !== `Bearer ${env.CRON_SECRET}`) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: StatusCodes.UNAUTHORIZED });
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: StatusCodes.UNAUTHORIZED },
+      );
     }
 
     const result = await CacheService.performCacheMaintenance();

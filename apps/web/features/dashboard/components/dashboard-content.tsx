@@ -33,7 +33,6 @@ export const DashboardContent = ({
       <StatsGrid stats={stats} />
 
       <InsightsDashboard data={insightsData} />
-
     </div>
   );
 };

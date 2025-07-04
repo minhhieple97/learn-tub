@@ -10,9 +10,9 @@ export const StatusBar = () => {
   const isLoading = isUploadingImage || isDeletingImage;
 
   const getLoadingText = () => {
-    if (isUploadingImage) return 'Uploading...';
-    if (isDeletingImage) return 'Deleting...';
-    return '';
+    if (isUploadingImage) return "Uploading...";
+    if (isDeletingImage) return "Deleting...";
+    return "";
   };
 
   return (

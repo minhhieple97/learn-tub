@@ -83,7 +83,7 @@ export async function GET(request: NextRequest) {
 
     return new Response(JSON.stringify(data), {
       status: StatusCodes.OK,
-      headers: { 'Content-Type': RESPONSE_HEADERS.JSON_CONTENT_TYPE },
+      headers: { "Content-Type": RESPONSE_HEADERS.JSON_CONTENT_TYPE },
     });
   } catch (error) {
     console.error("Quiz dashboard API error:", error);
