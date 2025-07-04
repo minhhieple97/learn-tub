@@ -19,11 +19,11 @@ export async function getNotesByVideoId(
   const supabase = await createClient();
 
   const { data, error } = await supabase
-    .from("notes")
-    .select("*")
-    .eq("video_id", videoId)
-    .eq("user_id", userId)
-    .order("timestamp_seconds", { ascending: true });
+    .from('notes')
+    .select('*')
+    .eq('video_id', videoId)
+    .eq('user_id', userId)
+    .order('updated_at', { ascending: false });
 
   if (error) {
     console.error("Error fetching notes:", error);
