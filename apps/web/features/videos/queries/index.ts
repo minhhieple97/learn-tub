@@ -23,13 +23,18 @@ export const searchUserVideos = async (
   searchQuery?: string | null,
 ): Promise<IVideo[]> => {
   const supabase = await createClient();
-  let query = supabase.from('videos').select('*, notes(count)').eq('user_id', userId);
+  let query = supabase
+    .from("videos")
+    .select("*, notes(count)")
+    .eq("user_id", userId);
 
   if (searchQuery) {
-    query = query.ilike('title', `%${searchQuery}%`);
+    query = query.ilike("title", `%${searchQuery}%`);
   }
 
-  const { data: videos, error } = await query.order('created_at', { ascending: false });
+  const { data: videos, error } = await query.order("created_at", {
+    ascending: false,
+  });
 
   if (error) {
     throw new Error(`Failed to search videos: ${error.message}`);

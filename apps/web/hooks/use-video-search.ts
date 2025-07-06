@@ -6,8 +6,8 @@ import { debounce } from "lodash";
 
 export const useVideoSearch = (): IUseVideoSearchReturn => {
   const router = useRouter();
-  const [searchQuery, setSearchQuery] = useQueryState('q');
-  const [localSearchQuery, setLocalSearchQuery] = useState(searchQuery || '');
+  const [searchQuery, setSearchQuery] = useQueryState("q");
+  const [localSearchQuery, setLocalSearchQuery] = useState(searchQuery || "");
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedSetSearchQuery = useCallback(
@@ -33,11 +33,11 @@ export const useVideoSearch = (): IUseVideoSearchReturn => {
   );
 
   useEffect(() => {
-    setLocalSearchQuery(searchQuery || '');
+    setLocalSearchQuery(searchQuery || "");
   }, [searchQuery]);
 
   return {
     searchQuery: localSearchQuery,
     setSearchQuery: handleSearch,
   };
-}; 
+};

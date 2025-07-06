@@ -1,11 +1,16 @@
-import Link from 'next/link';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Clock, BookOpen, Play, Eye, Calendar } from 'lucide-react';
-import { IVideo } from '../types';
-import { formatDistanceToNow, formatDuration } from '@/lib/utils';
-import { routes } from '@/routes';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import Link from "next/link";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Clock, BookOpen, Play, Eye, Calendar } from "lucide-react";
+import { IVideo } from "../types";
+import { formatDistanceToNow, formatDuration } from "@/lib/utils";
+import { routes } from "@/routes";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 type VideoCardProps = {
   video: IVideo;
@@ -18,7 +23,8 @@ export const VideoCard = ({ video }: VideoCardProps) => {
         <div className="aspect-video relative overflow-hidden rounded-t-2xl flex-shrink-0">
           <img
             src={
-              video.thumbnail_url || `https://img.youtube.com/vi/${video.youtube_id}/hqdefault.jpg`
+              video.thumbnail_url ||
+              `https://img.youtube.com/vi/${video.youtube_id}/hqdefault.jpg`
             }
             alt={video.title}
             className="object-cover w-full h-full group-hover:scale-125 transition-transform duration-700 ease-out"
@@ -42,10 +48,10 @@ export const VideoCard = ({ video }: VideoCardProps) => {
                   <h3
                     className="font-bold text-xl text-slate-900 dark:text-slate-100 group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors duration-300 leading-tight h-[3.5rem] overflow-hidden"
                     style={{
-                      display: '-webkit-box',
+                      display: "-webkit-box",
                       WebkitLineClamp: 2,
-                      WebkitBoxOrient: 'vertical',
-                      textOverflow: 'ellipsis',
+                      WebkitBoxOrient: "vertical",
+                      textOverflow: "ellipsis",
                     }}
                   >
                     {video.title}
