@@ -57,3 +57,8 @@ export type IUseAddVideoFormReturn = {
   execute: (input: { videoUrl: string; tutorial?: string }) => void;
   canSubmit: boolean;
 };
+
+export type IUseVideoSearchReturn = {
+  searchQuery: string;
+  setSearchQuery: (value: string) => void;
+};

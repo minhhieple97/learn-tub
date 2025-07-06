@@ -9,9 +9,8 @@ type PageProps = {
 };
 
 export default async function LearnPage({ searchParams }: PageProps) {
-  const videosPromise = getLearnPageData();
-
-  const { tab } = await learnPageCache.parse(searchParams);
+  const { tab, q } = await learnPageCache.parse(searchParams);
+  const videosPromise = getLearnPageData(q);
 
   return (
     <div className="bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/30 dark:from-slate-900 dark:via-blue-950/20 dark:to-indigo-950/20">
