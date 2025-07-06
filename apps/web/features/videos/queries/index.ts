@@ -18,9 +18,31 @@ export const getUserVideos = async (userId: string): Promise<IVideo[]> => {
   return videos;
 };
 
-export const getLearnPageData = async () => {
+export const searchUserVideos = async (
+  userId: string,
+  searchQuery?: string | null,
+): Promise<IVideo[]> => {
+  const supabase = await createClient();
+  let query = supabase.from('videos').select('*, notes(count)').eq('user_id', userId);
+
+  if (searchQuery) {
+    query = query.ilike('title', `%${searchQuery}%`);
+  }
+
+  const { data: videos, error } = await query.order('created_at', { ascending: false });
+
+  if (error) {
+    throw new Error(`Failed to search videos: ${error.message}`);
+  }
+
+  return videos;
+};
+
+export const getLearnPageData = async (searchQuery?: string | null) => {
   const profile = await checkProfile();
-  const videosPromise = getUserVideos(profile.id);
+  const videosPromise = searchQuery
+    ? searchUserVideos(profile.id, searchQuery)
+    : getUserVideos(profile.id);
   return videosPromise;
 };
 
