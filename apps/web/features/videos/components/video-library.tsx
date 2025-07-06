@@ -1,15 +1,14 @@
 "use client";
 
-import { use } from "react";
-import { VideoLibraryEmpty } from "./video-library-empty";
+import { use } from 'react';
 import { VideoGrid } from "./video-grid";
 import { IVideo } from "../types";
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { useVideoSearch } from '@/hooks/use-video-search';
 import { Input } from '@/components/ui/input';
-import { Search, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { X } from 'lucide-react';
 
 type VideoLibraryProps = {
   videosPromise: Promise<IVideo[] | null>;
@@ -18,7 +17,6 @@ type VideoLibraryProps = {
 export const VideoLibrary = ({ videosPromise }: VideoLibraryProps) => {
   const videos = use(videosPromise);
   const { searchQuery, setSearchQuery } = useVideoSearch();
-
 
   return (
     <TooltipProvider>
