@@ -19,9 +19,6 @@ export const VideoLibrary = ({ videosPromise }: VideoLibraryProps) => {
   const videos = use(videosPromise);
   const { searchQuery, setSearchQuery } = useVideoSearch();
 
-  if (!videos || videos.length === 0) {
-    return <VideoLibraryEmpty />;
-  }
 
   return (
     <TooltipProvider>
@@ -52,16 +49,18 @@ export const VideoLibrary = ({ videosPromise }: VideoLibraryProps) => {
           </div>
         </div>
 
-        {videos.length > 0 ? (
+        {videos && videos.length > 0 ? (
           <VideoGrid videos={videos} />
         ) : (
-          <div className="text-center py-16">
+          <div className="text-center py-4">
             <h3 className="text-2xl font-semibold text-slate-800 dark:text-slate-200">
               No Videos Found
             </h3>
-            <p className="text-slate-500 dark:text-slate-400 mt-2">
-              Your search for "{searchQuery}" did not return any results.
-            </p>
+            {searchQuery && (
+              <p className="text-slate-500 dark:text-slate-400 mt-2">
+                Your search for "{searchQuery}" did not return any results.
+              </p>
+            )}
           </div>
         )}
       </div>
