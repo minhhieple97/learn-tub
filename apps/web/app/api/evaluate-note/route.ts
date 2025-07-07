@@ -13,6 +13,7 @@ import {
   getNoteForEvaluation,
 } from "@/features/notes/queries";
 import { noteService } from "@/features/notes/services/note-service";
+import { ContentExtractor } from "@/features/notes/utils/content-extractor";
 import { ActionError } from "@/lib/safe-action";
 import { RateLimiter } from "@/lib/rate-limiter";
 import {
@@ -33,6 +34,22 @@ const EvaluateNoteQuerySchema = z.object({
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
+    const [user, profile] = await Promise.all([
+      getUserInSession(),
+      getProfileInSession(),
+    ]);
+    if (!user || !profile) {
+      return new Response(ERROR_MESSAGES.UNAUTHORIZED, {
+        status: StatusCodes.UNAUTHORIZED,
+      });
+    }
+    const rateLimitResult = await RateLimiter.checkRateLimit(user.id);
+
+    if (!rateLimitResult.allowed) {
+      throw new ActionError(
+        `Rate limit exceeded. Try again in a minute. Remaining: ${rateLimitResult.remaining}`,
+      );
+    }
 
     const queryParams = {
       noteId: searchParams.get("noteId"),
@@ -59,24 +76,6 @@ export async function GET(request: NextRequest) {
     }
 
     const { noteId, aiModelId } = validationResult.data;
-
-    const [user, profile] = await Promise.all([
-      getUserInSession(),
-      getProfileInSession(),
-    ]);
-    if (!user || !profile) {
-      return new Response(ERROR_MESSAGES.UNAUTHORIZED, {
-        status: StatusCodes.UNAUTHORIZED,
-      });
-    }
-
-    const rateLimitResult = await RateLimiter.checkRateLimit(user.id);
-
-    if (!rateLimitResult.allowed) {
-      throw new ActionError(
-        `Rate limit exceeded. Try again in a minute. Remaining: ${rateLimitResult.remaining}`,
-      );
-    }
 
     const creditValidation = await validateUserCreditsForOperation(
       profile.id,
@@ -110,13 +109,14 @@ export async function GET(request: NextRequest) {
       });
     }
 
+    const textContent = ContentExtractor.processContentForEvaluation(
+      note.content,
+    );
+
     const evaluationRequest: INoteEvaluationRequest = {
       noteId,
       aiModelId,
-      content:
-        typeof note.content === "string"
-          ? note.content
-          : JSON.stringify(note.content || ""),
+      content: textContent,
       userId: profile.id,
       context: {
         timestamp: note.timestamp_seconds,
