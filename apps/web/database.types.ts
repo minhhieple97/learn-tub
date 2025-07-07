@@ -506,6 +506,7 @@ export type Database = {
           updated_at: string | null;
           user_id: string;
           video_id: string;
+          content_text: string | null;
         };
         Insert: {
           content: Json;
@@ -1068,7 +1069,10 @@ export type Database = {
       };
     };
     Functions: {
-      [_ in never]: never;
+      content_text: {
+        Args: { "": Database["public"]["Tables"]["notes"]["Row"] };
+        Returns: string;
+      };
     };
     Enums: {
       content_type_enum: "plain_text" | "rich_text";

@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import React, { useState, useCallback } from 'react';
-import { NodeViewWrapper } from '@tiptap/react';
-import { X, Loader2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { useAction } from 'next-safe-action/hooks';
-import { deleteImageAction } from '@/features/notes/actions/media-actions';
-import { toast } from '@/hooks/use-toast';
+import React, { useState, useCallback } from "react";
+import { NodeViewWrapper } from "@tiptap/react";
+import { X, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useAction } from "next-safe-action/hooks";
+import { deleteImageAction } from "@/features/notes/actions/media-actions";
+import { toast } from "@/hooks/use-toast";
 
 type IImageWithDeleteProps = {
   node: any;
@@ -30,33 +30,33 @@ export const ImageWithDelete = ({
     },
     onError: () => {
       toast.error({
-        description: 'Failed to delete image. Please try again.',
+        description: "Failed to delete image. Please try again.",
       });
     },
   });
 
-    const handleDelete = useCallback(async () => {
+  const handleDelete = useCallback(async () => {
     if (disabled || isExecuting) return;
 
     const imageUrl = node.attrs.src;
 
-    if (imageUrl.startsWith('blob:')) {
+    if (imageUrl.startsWith("blob:")) {
       deleteNode();
       return;
     }
 
     try {
       const url = new URL(imageUrl);
-      const storagePath = url.pathname.split('/').slice(-3).join('/');
+      const storagePath = url.pathname.split("/").slice(-3).join("/");
 
       executeDelete({
         imageUrl,
         storagePath,
       });
     } catch (error) {
-      console.error('Error deleting image:', error);
+      console.error("Error deleting image:", error);
       toast.error({
-        description: 'Failed to delete image. Please try again.',
+        description: "Failed to delete image. Please try again.",
       });
     }
   }, [node.attrs.src, disabled, isExecuting, executeDelete, deleteNode]);
@@ -70,8 +70,8 @@ export const ImageWithDelete = ({
       >
         <img
           src={node.attrs.src}
-          alt={node.attrs?.alt || ''}
-          title={node.attrs?.title || ''}
+          alt={node.attrs?.alt || ""}
+          title={node.attrs?.title || ""}
           className="max-w-full h-auto rounded-lg shadow-sm my-4 block"
           draggable={false}
         />
@@ -95,7 +95,7 @@ export const ImageWithDelete = ({
           </div>
         )}
 
-        {node.attrs.src.startsWith('blob:') && (
+        {node.attrs.src.startsWith("blob:") && (
           <div className="absolute top-2 left-2 bg-blue-500 text-white text-xs px-2 py-1 rounded opacity-75">
             Uploading...
           </div>

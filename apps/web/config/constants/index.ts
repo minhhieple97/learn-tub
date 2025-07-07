@@ -31,7 +31,7 @@ export const TIME_UNITS = {
 } as const;
 
 export const SEARCH_CONFIG = {
-  DEBOUNCE_DELAY: 300,
+  DEBOUNCE_DELAY: 1000,
   MAX_QUERY_LENGTH: 32,
 } as const;
 

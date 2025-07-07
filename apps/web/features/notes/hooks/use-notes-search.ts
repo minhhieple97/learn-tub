@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useDebounce } from "@/hooks/use-debounce";
+import { useState, useEffect, useCallback } from "react";
+import { debounce } from "lodash";
 import { useNotesStore } from "../store";
 import { useNotesSearch as useNotesSearchQuery } from "./use-notes-queries";
 import { SEARCH_CONFIG } from "@/config/constants";
@@ -10,9 +10,13 @@ export const useNotesSearch = () => {
   const { searchQuery, setSearchQuery, clearSearch, currentVideo } =
     useNotesStore();
   const [inputValue, setInputValue] = useState(searchQuery);
-  const debouncedSearchQuery = useDebounce(
-    inputValue,
-    SEARCH_CONFIG.DEBOUNCE_DELAY,
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(searchQuery);
+
+  const debouncedSetSearch = useCallback(
+    debounce((value: string) => {
+      setDebouncedSearchQuery(value);
+    }, SEARCH_CONFIG.DEBOUNCE_DELAY),
+    [],
   );
 
   const { data: searchResults, isLoading: isSearching } = useNotesSearchQuery(
@@ -22,6 +26,13 @@ export const useNotesSearch = () => {
 
   const isSearchActive = Boolean(debouncedSearchQuery.trim());
   const resultCount = searchResults?.length || 0;
+
+  useEffect(() => {
+    debouncedSetSearch(inputValue);
+    return () => {
+      debouncedSetSearch.cancel();
+    };
+  }, [inputValue, debouncedSetSearch]);
 
   useEffect(() => {
     setSearchQuery(debouncedSearchQuery);
@@ -34,6 +45,8 @@ export const useNotesSearch = () => {
 
   const handleClearSearch = () => {
     setInputValue("");
+    setDebouncedSearchQuery("");
+    debouncedSetSearch.cancel();
     clearSearch();
   };
 

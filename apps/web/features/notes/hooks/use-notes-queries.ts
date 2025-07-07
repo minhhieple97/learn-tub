@@ -29,7 +29,7 @@ export const fetchNotes = async (videoId: string): Promise<INote[]> => {
 };
 
 const searchNotes = async (
-  videoId: string,
+  videoId: string | null | undefined,
   searchQuery: string,
 ): Promise<INote[]> => {
   const response = await fetch(
@@ -58,7 +58,7 @@ export const useNotesSearch = (
 ) => {
   return useQuery({
     queryKey: NOTES_QUERY_KEYS.search(videoId || "", searchQuery),
-    queryFn: () => searchNotes(videoId!, searchQuery),
+    queryFn: () => searchNotes(videoId, searchQuery),
     enabled: Boolean(videoId) && Boolean(searchQuery.trim()),
     staleTime: NOTES_CACHE_TIMES.SEARCH_STALE_TIME,
     gcTime: NOTES_CACHE_TIMES.SEARCH_GC_TIME,
