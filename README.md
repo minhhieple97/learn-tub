@@ -141,8 +141,6 @@ LearnTub is a modern learning platform that transforms passive YouTube video wat
    - **Web App:** [http://localhost:3000](http://localhost:3000)
    - **Server API:** [http://localhost:3001](http://localhost:3001)
 
-
-
 ## 🔧 Available Scripts
 
 ```bash
