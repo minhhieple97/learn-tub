@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import {
   Card,
@@ -6,20 +6,20 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Brain, TrendingUp, Zap, Trophy, Clock } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { formatDistanceToNow } from "date-fns";
-import Link from "next/link";
-import { routes } from "@/routes";
-import type { IInsightsData } from "../types";
+} from '@/components/ui/card';
+import { Brain, TrendingUp, Zap, Trophy, Clock } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { formatDistanceToNow } from 'date-fns';
+import Link from 'next/link';
+import { routes } from '@/routes';
+import type { IInsightsData } from '../types';
 
 type InsightsDashboardProps = {
   data: IInsightsData;
 };
 
 export const InsightsDashboard = ({ data }: InsightsDashboardProps) => {
-  const { analysisCount, quizStats, studyPlanCount } = data;
+  const { analysisCount, quizStats } = data;
 
   return (
     <div className="space-y-6">
@@ -127,10 +127,10 @@ export const InsightsDashboard = ({ data }: InsightsDashboardProps) => {
                     <Badge
                       variant={
                         attempt.score >= 80
-                          ? "default"
+                          ? 'default'
                           : attempt.score >= 60
-                            ? "secondary"
-                            : "destructive"
+                            ? 'secondary'
+                            : 'destructive'
                       }
                     >
                       {attempt.score}%
