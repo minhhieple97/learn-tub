@@ -51,9 +51,6 @@ class NoteService {
           await aiClient.streamChatCompletionWithUsage({
             model: modelName,
             messages,
-            stream_options: {
-              include_usage: true,
-            },
           });
 
         const transformedStream = this.createStreamFromAIClient(stream);

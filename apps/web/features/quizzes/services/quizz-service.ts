@@ -3,7 +3,6 @@ import {
   AI_QUIZZ_CONFIG,
   AI_QUIZZ_ERRORS,
   AI_QUIZZ_PROMPTS,
-  AI_COMMANDS,
 } from "@/config/constants";
 import type {
   IEvaluateQuizRequest,
@@ -45,11 +44,11 @@ class QuizzService {
       });
 
       const supabase = await createClient();
-      const { data: modelData, error } = (await supabase
+      const { data: modelData, error } = await supabase
         .from("ai_model_pricing_view")
         .select("model_name")
         .eq("id", aiModelId)
-        .single()) as { data: { model_name: string } | null; error: any };
+        .single();
 
       if (error || !modelData?.model_name) {
         throw new Error(
@@ -283,11 +282,11 @@ ${AI_QUIZZ_PROMPTS.EVALUATION_FOCUS}`;
     userId: string,
   ): Promise<string> {
     const supabase = await createClient();
-    const { data: modelData, error } = (await supabase
+    const { data: modelData, error } = await supabase
       .from("ai_model_pricing_view")
       .select("model_name")
       .eq("id", aiModelId)
-      .single()) as { data: { model_name: string } | null; error: any };
+      .single();
 
     if (error || !modelData?.model_name) {
       throw new Error(`${AI_QUIZZ_ERRORS.UNSUPPORTED_PROVIDER}: ${aiModelId}`);
@@ -329,11 +328,11 @@ ${AI_QUIZZ_PROMPTS.EVALUATION_FOCUS}`;
     userId: string,
   ): Promise<string> {
     const supabase = await createClient();
-    const { data: modelData, error } = (await supabase
+    const { data: modelData, error } = await supabase
       .from("ai_model_pricing_view")
       .select("model_name")
       .eq("id", aiModelId)
-      .single()) as { data: { model_name: string } | null; error: any };
+      .single();
 
     if (error || !modelData?.model_name) {
       throw new Error(`${AI_QUIZZ_ERRORS.UNSUPPORTED_PROVIDER}: ${aiModelId}`);
@@ -375,11 +374,11 @@ ${AI_QUIZZ_PROMPTS.EVALUATION_FOCUS}`;
     userId: string,
   ): Promise<ReadableStream<IQuizStreamChunk>> {
     const supabase = await createClient();
-    const { data: modelData, error } = (await supabase
+    const { data: modelData, error } = await supabase
       .from("ai_model_pricing_view")
       .select("model_name")
       .eq("id", aiModelId)
-      .single()) as { data: { model_name: string } | null; error: any };
+      .single();
 
     if (error || !modelData?.model_name) {
       throw new Error(`${AI_QUIZZ_ERRORS.UNSUPPORTED_PROVIDER}: ${aiModelId}`);
@@ -406,9 +405,6 @@ ${AI_QUIZZ_PROMPTS.EVALUATION_FOCUS}`;
           await aiClient.streamChatCompletionWithUsage({
             model: modelName,
             messages,
-            stream_options: {
-              include_usage: true,
-            },
           });
 
         const transformedStream = this.createStreamFromAIClient(stream);
@@ -427,11 +423,11 @@ ${AI_QUIZZ_PROMPTS.EVALUATION_FOCUS}`;
     userId: string,
   ): Promise<ReadableStream<Uint8Array>> {
     const supabase = await createClient();
-    const { data: modelData, error } = (await supabase
+    const { data: modelData, error } = await supabase
       .from("ai_model_pricing_view")
       .select("model_name")
       .eq("id", aiModelId)
-      .single()) as { data: { model_name: string } | null; error: any };
+      .single();
 
     if (error || !modelData?.model_name) {
       throw new Error(`${AI_QUIZZ_ERRORS.UNSUPPORTED_PROVIDER}: ${aiModelId}`);
@@ -458,9 +454,6 @@ ${AI_QUIZZ_PROMPTS.EVALUATION_FOCUS}`;
           await aiClient.streamChatCompletionWithUsage({
             model: modelName,
             messages,
-            stream_options: {
-              include_usage: true,
-            },
           });
 
         const transformedStream = this.createAPIStreamFromAIClient(stream);
@@ -717,7 +710,7 @@ ${AI_QUIZZ_PROMPTS.EVALUATION_FOCUS}`;
         strengths: parsed.strengths || [],
         performanceByTopic: parsed.performanceByTopic || {},
       };
-    } catch (_error) {
+    } catch {
       const results = questions.map((question) => {
         const userAnswer = answers.find((a) => a.questionId === question.id);
         const selectedAnswer =

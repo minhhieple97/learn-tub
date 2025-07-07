@@ -93,43 +93,7 @@ class AIUsageTracker {
     }
   }
 
-  public async wrapAIOperation<T>(
-    params: {
-      user_id: string;
-      command: IAICommand;
-      ai_model_id: string;
-      request_payload?: any;
-    },
-    operation: () => Promise<T>,
-  ): Promise<T> {
-    const startTime = Date.now();
-    let status: IAIUsageStatus = "success";
-    let errorMessage: string | undefined;
-    let result: T;
-
-    try {
-      result = await operation();
-      return result;
-    } catch (error) {
-      status = "error";
-      errorMessage = error instanceof Error ? error.message : "Unknown error";
-      throw error;
-    } finally {
-      const duration = Date.now() - startTime;
-
-      await this.trackUsage({
-        user_id: params.user_id,
-        command: params.command,
-        ai_model_id: params.ai_model_id,
-        status,
-        request_duration_ms: duration,
-        error_message: errorMessage,
-        request_payload: params.request_payload,
-        response_payload: status === "success" ? { success: true } : undefined,
-      });
-    }
-  }
-
+  // Simplified wrapper for operations that return both result and token usage
   public async wrapAIOperationWithTokens<T>(
     params: {
       user_id: string;
@@ -171,80 +135,7 @@ class AIUsageTracker {
     }
   }
 
-  public async estimateCost(
-    providerId: string,
-    estimatedTokens: { input: number; output: number },
-  ): Promise<ICostDetails> {
-    return this.calculateCost(providerId, {
-      input_tokens: estimatedTokens.input,
-      output_tokens: estimatedTokens.output,
-      total_tokens: estimatedTokens.input + estimatedTokens.output,
-    });
-  }
-
-  public async trackBatchUsage(
-    usageData: ITrackAIUsageRequest[],
-  ): Promise<void> {
-    try {
-      await Promise.all(usageData.map((data) => createAIUsageLog(data)));
-    } catch (error) {
-      console.error("Failed to track batch AI usage:", error);
-    }
-  }
-
-  public async wrapStreamingOperationWithTokens<T>(
-    params: {
-      user_id: string;
-      command: IAICommand;
-      ai_model_id: string;
-      request_payload?: any;
-    },
-    operation: () => Promise<{
-      result: T;
-      getUsage: () => Promise<ITokenUsage | undefined>;
-    }>,
-  ): Promise<T> {
-    const startTime = Date.now();
-    let status: IAIUsageStatus = "success";
-    let errorMessage: string | undefined;
-    let tokenUsage: ITokenUsage | undefined;
-    let result: T;
-
-    try {
-      const operationResult = await operation();
-      result = operationResult.result;
-
-      try {
-        tokenUsage = await operationResult.getUsage();
-      } catch (usageError) {
-        console.warn("Failed to get token usage information:", usageError);
-      }
-
-      return result;
-    } catch (error) {
-      status = "error";
-      errorMessage = error instanceof Error ? error.message : "Unknown error";
-      throw error;
-    } finally {
-      const duration = Date.now() - startTime;
-
-      await this.trackUsage({
-        user_id: params.user_id,
-        command: params.command,
-        ai_model_id: params.ai_model_id,
-        status,
-        token_usage: tokenUsage,
-        request_duration_ms: duration,
-        error_message: errorMessage,
-        request_payload: params.request_payload,
-        response_payload:
-          status === "success"
-            ? { success: true, has_usage: !!tokenUsage }
-            : undefined,
-      });
-    }
-  }
-
+  // Optimized wrapper for streaming operations with AI SDK
   public async wrapStreamingOperation<T extends ReadableStream<any>>(
     params: {
       user_id: string;
@@ -258,68 +149,30 @@ class AIUsageTracker {
     }>,
   ): Promise<T> {
     const startTime = Date.now();
-    let status: IAIUsageStatus = "success";
-    let errorMessage: string | undefined;
-    let result: T;
 
     try {
       const operationResult = await operation();
-      result = operationResult.stream;
+      const { stream, getUsage } = operationResult;
 
-      operationResult.getUsage().then(
-        (tokenUsage) => {
-          const duration = Date.now() - startTime;
-          this.trackUsage({
-            user_id: params.user_id,
-            command: params.command,
-            ai_model_id: params.ai_model_id,
-            status: "success",
-            token_usage: tokenUsage,
-            request_duration_ms: duration,
-            error_message: undefined,
-            request_payload: params.request_payload,
-            response_payload: { success: true, has_usage: !!tokenUsage },
-          }).catch((error) => {
-            console.error("Background usage tracking failed:", error);
-          });
-        },
-        (usageError) => {
-          console.warn("Failed to get token usage information:", usageError);
-          const duration = Date.now() - startTime;
-          this.trackUsage({
-            user_id: params.user_id,
-            command: params.command,
-            ai_model_id: params.ai_model_id,
-            status: "success",
-            token_usage: undefined,
-            request_duration_ms: duration,
-            error_message: undefined,
-            request_payload: params.request_payload,
-            response_payload: {
-              success: true,
-              has_usage: false,
-              usage_error:
-                usageError instanceof Error
-                  ? usageError.message
-                  : "Unknown usage error",
-            },
-          }).catch((error) => {
-            console.error("Background usage tracking failed:", error);
-          });
-        },
-      );
+      // Track usage asynchronously in the background to avoid blocking the stream
+      this.trackStreamingUsageInBackground({
+        ...params,
+        getUsage,
+        startTime,
+      });
 
-      return result;
+      return stream;
     } catch (error) {
-      status = "error";
-      errorMessage = error instanceof Error ? error.message : "Unknown error";
-
+      // Track error immediately since stream won't be created
       const duration = Date.now() - startTime;
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+
       await this.trackUsage({
         user_id: params.user_id,
         command: params.command,
         ai_model_id: params.ai_model_id,
-        status,
+        status: "error",
         token_usage: undefined,
         request_duration_ms: duration,
         error_message: errorMessage,
@@ -328,6 +181,119 @@ class AIUsageTracker {
       });
 
       throw error;
+    }
+  }
+
+  // Background tracking for streaming operations
+  private async trackStreamingUsageInBackground(params: {
+    user_id: string;
+    command: IAICommand;
+    ai_model_id: string;
+    request_payload?: any;
+    getUsage: () => Promise<ITokenUsage | undefined>;
+    startTime: number;
+  }): Promise<void> {
+    try {
+      const tokenUsage = await params.getUsage();
+      const duration = Date.now() - params.startTime;
+
+      await this.trackUsage({
+        user_id: params.user_id,
+        command: params.command,
+        ai_model_id: params.ai_model_id,
+        status: "success",
+        token_usage: tokenUsage,
+        request_duration_ms: duration,
+        error_message: undefined,
+        request_payload: params.request_payload,
+        response_payload: { success: true, has_usage: !!tokenUsage },
+      });
+    } catch (usageError) {
+      // Log usage tracking error but don't fail the operation
+      console.warn("Failed to track streaming usage:", usageError);
+
+      const duration = Date.now() - params.startTime;
+      await this.trackUsage({
+        user_id: params.user_id,
+        command: params.command,
+        ai_model_id: params.ai_model_id,
+        status: "success",
+        token_usage: undefined,
+        request_duration_ms: duration,
+        error_message: undefined,
+        request_payload: params.request_payload,
+        response_payload: {
+          success: true,
+          has_usage: false,
+          usage_error:
+            usageError instanceof Error
+              ? usageError.message
+              : "Unknown usage error",
+        },
+      }).catch((trackingError) => {
+        console.error("Background usage tracking failed:", trackingError);
+      });
+    }
+  }
+
+  // Basic operation wrapper (without token tracking)
+  public async wrapAIOperation<T>(
+    params: {
+      user_id: string;
+      command: IAICommand;
+      ai_model_id: string;
+      request_payload?: any;
+    },
+    operation: () => Promise<T>,
+  ): Promise<T> {
+    const startTime = Date.now();
+    let status: IAIUsageStatus = "success";
+    let errorMessage: string | undefined;
+    let result: T;
+
+    try {
+      result = await operation();
+      return result;
+    } catch (error) {
+      status = "error";
+      errorMessage = error instanceof Error ? error.message : "Unknown error";
+      throw error;
+    } finally {
+      const duration = Date.now() - startTime;
+
+      await this.trackUsage({
+        user_id: params.user_id,
+        command: params.command,
+        ai_model_id: params.ai_model_id,
+        status,
+        request_duration_ms: duration,
+        error_message: errorMessage,
+        request_payload: params.request_payload,
+        response_payload: status === "success" ? { success: true } : undefined,
+      });
+    }
+  }
+
+  // Cost estimation utility
+  public async estimateCost(
+    providerId: string,
+    estimatedTokens: { input: number; output: number },
+  ): Promise<ICostDetails> {
+    return this.calculateCost(providerId, {
+      input_tokens: estimatedTokens.input,
+      output_tokens: estimatedTokens.output,
+      total_tokens: estimatedTokens.input + estimatedTokens.output,
+    });
+  }
+
+  // Batch usage tracking utility
+  public async trackBatchUsage(
+    usageData: ITrackAIUsageRequest[],
+  ): Promise<void> {
+    try {
+      await Promise.all(usageData.map((data) => createAIUsageLog(data)));
+    } catch (error) {
+      console.error("Failed to track batch AI usage:", error);
     }
   }
 }

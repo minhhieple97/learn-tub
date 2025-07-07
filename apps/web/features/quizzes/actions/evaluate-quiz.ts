@@ -7,7 +7,7 @@ import { RateLimiter } from "@/lib/rate-limiter";
 import { checkProfileByUserId } from "@/lib/require-auth";
 import { deductCredits } from "@/features/payments/services";
 import { validateUserCreditsForOperation } from "@/features/payments/queries";
-import { AI_COMMANDS, CREDIT_ACTION_COUNTS } from "@/config/constants";
+import { CREDIT_ACTION_COUNTS } from "@/config/constants";
 
 export const evaluateQuizAction = authAction
   .inputSchema(EvaluateQuizSchema)
