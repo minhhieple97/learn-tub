@@ -1,245 +1,303 @@
+import { openai, createOpenAI } from "@ai-sdk/openai";
+import { google, createGoogleGenerativeAI } from "@ai-sdk/google";
+import { generateText, streamText, LanguageModel, CoreMessage } from "ai";
 import { env } from "@/env.mjs";
 import {
-  AI_CONFIG,
-  AI_DEFAULTS,
   AI_CHAT_ROLES,
-  AI_API,
-  HTTP_CONFIG,
+  AI_CONFIG,
   API_ERROR_MESSAGES,
 } from "@/config/constants";
 import {
   IAICompletionRequest,
-  IAICompletionResponse,
-  IAIStreamChunk,
   IAIMessage,
   ITokenUsage,
 } from "@/features/ai/types";
 
+export type AIStreamChunk = {
+  choices: Array<{
+    delta: {
+      content?: string;
+    };
+    finish_reason?: string;
+  }>;
+  usage?: {
+    prompt_tokens: number;
+    completion_tokens: number;
+    total_tokens: number;
+  };
+};
+
 class AIClient {
-  private readonly baseUrl: string;
-  private readonly apiKey: string;
+  private openaiClient: ReturnType<typeof createOpenAI>;
+  private googleClient: ReturnType<typeof createGoogleGenerativeAI>;
 
   constructor() {
-    this.baseUrl = AI_CONFIG.BASE_URL;
-    this.apiKey = env.OPENAI_API_KEY;
-  }
+    // Configure providers
+    this.openaiClient = createOpenAI({
+      apiKey: env.OPENAI_API_KEY,
+      baseURL: AI_CONFIG.BASE_URL,
+    });
 
-  private createHeaders(): Record<string, string> {
-    return {
-      "Content-Type": HTTP_CONFIG.HEADERS.CONTENT_TYPE,
-      Authorization: `${HTTP_CONFIG.HEADERS.AUTHORIZATION_PREFIX}${this.apiKey}`,
-    };
-  }
-
-  private createRequestBody(request: IAICompletionRequest): string {
-    return JSON.stringify({
-      model: request.model,
-      messages: request.messages,
-      temperature: request.temperature ?? AI_CONFIG.TEMPERATURE,
-      max_tokens: request.max_tokens ?? AI_CONFIG.MAX_TOKENS,
-      stream: request.stream,
-      stream_options: request.stream_options,
+    this.googleClient = createGoogleGenerativeAI({
+      apiKey: env.GEMINI_API_KEY,
+      baseURL: AI_CONFIG.BASE_URL,
     });
   }
 
-  async makeRequest(request: IAICompletionRequest): Promise<Response> {
-    const response = await fetch(
-      `${this.baseUrl}${AI_API.CHAT_COMPLETIONS_PATH}`,
-      {
-        method: HTTP_CONFIG.METHODS.POST,
-        headers: this.createHeaders(),
-        body: this.createRequestBody(request),
-      },
-    );
-
-    if (!response.ok) {
-      throw new Error(
-        `${API_ERROR_MESSAGES.OPENAI_REQUEST_FAILED}: ${response.statusText}`,
-      );
+  private getModel(modelName: string): LanguageModel {
+    if (modelName.startsWith("gpt-")) {
+      return this.openaiClient(modelName);
     }
 
-    return response;
+    if (modelName.startsWith("gemini-")) {
+      return this.googleClient(modelName);
+    }
+
+    console.warn(`Unknown model: ${modelName}, defaulting to OpenAI`);
+    return this.openaiClient(modelName);
+  }
+
+  private convertMessages(messages: IAIMessage[]): CoreMessage[] {
+    return messages.map((msg) => ({
+      role: msg.role as "system" | "user" | "assistant",
+      content: msg.content,
+    }));
+  }
+
+  private convertTokenUsage(usage: any): ITokenUsage {
+    return {
+      input_tokens: usage.promptTokens || 0,
+      output_tokens: usage.completionTokens || 0,
+      total_tokens: usage.totalTokens || 0,
+    };
   }
 
   async chatCompletion(request: IAICompletionRequest): Promise<string> {
-    const response = await this.makeRequest(request);
+    try {
+      const model = this.getModel(request.model);
+      const messages = this.convertMessages(request.messages);
 
-    if (!response.body) {
-      throw new Error("No response body received");
+      const result = await generateText({
+        model,
+        messages,
+        temperature: request.temperature,
+        maxTokens: request.max_tokens,
+      });
+
+      return result.text;
+    } catch (error) {
+      console.error("AI completion error:", error);
+      throw new Error(
+        `${API_ERROR_MESSAGES.OPENAI_REQUEST_FAILED}: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
     }
-
-    const data: IAICompletionResponse = await response.json();
-    return data.choices[0]?.message?.content || "";
   }
 
   async chatCompletionWithUsage(request: IAICompletionRequest): Promise<{
     result: string;
     tokenUsage?: ITokenUsage;
   }> {
-    const response = await this.makeRequest(request);
+    try {
+      const model = this.getModel(request.model);
+      const messages = this.convertMessages(request.messages);
 
-    if (!response.body) {
-      throw new Error("No response body received");
-    }
+      const result = await generateText({
+        model,
+        messages,
+        temperature: request.temperature,
+        maxTokens: request.max_tokens,
+      });
 
-    const data: IAICompletionResponse = await response.json();
-    const result = data.choices[0]?.message?.content || "";
+      const tokenUsage = result.usage
+        ? this.convertTokenUsage(result.usage)
+        : undefined;
 
-    let tokenUsage: ITokenUsage | undefined;
-    if (data.usage) {
-      tokenUsage = {
-        input_tokens: data.usage.prompt_tokens,
-        output_tokens: data.usage.completion_tokens,
-        total_tokens: data.usage.total_tokens,
+      return {
+        result: result.text,
+        tokenUsage,
       };
+    } catch (error) {
+      console.error("AI completion with usage error:", error);
+      throw new Error(
+        `${API_ERROR_MESSAGES.OPENAI_REQUEST_FAILED}: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
     }
-
-    return {
-      result,
-      tokenUsage,
-    };
   }
 
   async streamChatCompletion(
     request: IAICompletionRequest,
   ): Promise<ReadableStream<Uint8Array>> {
-    const streamRequest = { ...request, stream: true };
-    const response = await this.makeRequest(streamRequest);
+    try {
+      const model = this.getModel(request.model);
+      const messages = this.convertMessages(request.messages);
 
-    if (!response.body) {
-      throw new Error("No response body received for streaming");
+      const result = streamText({
+        model,
+        messages,
+        temperature: request.temperature,
+        maxTokens: request.max_tokens,
+      });
+
+      // Convert AI SDK stream to format expected by existing code
+      const encoder = new TextEncoder();
+
+      return new ReadableStream<Uint8Array>({
+        async start(controller) {
+          try {
+            for await (const chunk of result.textStream) {
+              const aiStreamChunk: AIStreamChunk = {
+                choices: [
+                  {
+                    delta: {
+                      content: chunk,
+                    },
+                  },
+                ],
+              };
+
+              const sseData = `data: ${JSON.stringify(aiStreamChunk)}\n\n`;
+              controller.enqueue(encoder.encode(sseData));
+            }
+
+            // Send final chunk
+            const finalChunk: AIStreamChunk = {
+              choices: [
+                {
+                  delta: {},
+                  finish_reason: "stop",
+                },
+              ],
+            };
+
+            const finalData = `data: ${JSON.stringify(finalChunk)}\n\n`;
+            controller.enqueue(encoder.encode(finalData));
+            controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+          } catch (error) {
+            console.error("Stream error:", error);
+            controller.error(error);
+          } finally {
+            controller.close();
+          }
+        },
+      });
+    } catch (error) {
+      console.error("AI streaming error:", error);
+      throw new Error(
+        `${API_ERROR_MESSAGES.OPENAI_REQUEST_FAILED}: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
     }
-
-    return response.body;
   }
 
   async streamChatCompletionWithUsage(request: IAICompletionRequest): Promise<{
     stream: ReadableStream<Uint8Array>;
     getUsage: () => Promise<ITokenUsage | undefined>;
   }> {
-    const streamRequest = {
-      ...request,
-      stream: true,
-      stream_options: { include_usage: true },
-    };
-    const response = await this.makeRequest(streamRequest);
+    try {
+      const model = this.getModel(request.model);
+      const messages = this.convertMessages(request.messages);
 
-    if (!response.body) {
-      throw new Error("No response body received for streaming");
-    }
-
-    let capturedUsage: ITokenUsage | undefined;
-    const usagePromiseResolvers: {
-      resolve: (value: ITokenUsage | undefined) => void;
-      reject: (reason?: unknown) => void;
-    }[] = [];
-
-    const transformedStream = new ReadableStream<Uint8Array>({
-      async start(controller) {
-        try {
-          const reader = response.body!.getReader();
-          const decoder = new TextDecoder();
-          let buffer = "";
-
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-
-            controller.enqueue(value);
-
-            buffer += decoder.decode(value, { stream: true });
-            const lines = buffer.split("\n");
-            buffer = lines.pop() || "";
-
-            for (const line of lines) {
-              if (line.startsWith(AI_API.SSE_DATA_PREFIX)) {
-                const data = line.slice(AI_API.SSE_DATA_PREFIX_LENGTH).trim();
-                if (data === AI_API.SSE_DONE_MESSAGE) continue;
-
-                try {
-                  const parsed: IAIStreamChunk = JSON.parse(data);
-                  if (parsed.usage) {
-                    capturedUsage = {
-                      input_tokens: parsed.usage.prompt_tokens,
-                      output_tokens: parsed.usage.completion_tokens,
-                      total_tokens: parsed.usage.total_tokens,
-                    };
-                    usagePromiseResolvers.forEach(({ resolve }) =>
-                      resolve(capturedUsage),
-                    );
-                    usagePromiseResolvers.length = 0;
-                  }
-                } catch (error) {
-                  console.error(
-                    "Failed to parse streaming chunk for usage:",
-                    error,
-                  );
-                }
-              }
-            }
-          }
-
-          if (buffer.trim()) {
-            const remainingLines = buffer.split("\n");
-            for (const line of remainingLines) {
-              if (line.startsWith(AI_API.SSE_DATA_PREFIX)) {
-                const data = line.slice(AI_API.SSE_DATA_PREFIX_LENGTH).trim();
-                if (data === AI_API.SSE_DONE_MESSAGE) continue;
-
-                try {
-                  const parsed: IAIStreamChunk = JSON.parse(data);
-                  if (parsed.usage) {
-                    capturedUsage = {
-                      input_tokens: parsed.usage.prompt_tokens,
-                      output_tokens: parsed.usage.completion_tokens,
-                      total_tokens: parsed.usage.total_tokens,
-                    };
-                    usagePromiseResolvers.forEach(({ resolve }) =>
-                      resolve(capturedUsage),
-                    );
-                    usagePromiseResolvers.length = 0;
-                  }
-                } catch (error) {
-                  console.error(
-                    "Failed to parse final streaming chunk for usage:",
-                    error,
-                  );
-                }
-              }
-            }
-          }
-
-          usagePromiseResolvers.forEach(({ resolve }) => resolve(undefined));
-        } catch (error) {
-          console.error("Stream processing error:", error);
-          usagePromiseResolvers.forEach(({ reject }) => reject(error));
-          controller.error(error);
-        } finally {
-          controller.close();
-        }
-      },
-    });
-
-    const getUsage = (): Promise<ITokenUsage | undefined> => {
-      if (capturedUsage !== undefined) {
-        return Promise.resolve(capturedUsage);
-      }
-
-      return new Promise((resolve, reject) => {
-        usagePromiseResolvers.push({ resolve, reject });
+      const result = streamText({
+        model,
+        messages,
+        temperature: request.temperature,
+        maxTokens: request.max_tokens,
       });
-    };
 
-    return {
-      stream: transformedStream,
-      getUsage,
-    };
+      let capturedUsage: ITokenUsage | undefined;
+      const usagePromiseResolvers: {
+        resolve: (value: ITokenUsage | undefined) => void;
+        reject: (reason?: unknown) => void;
+      }[] = [];
+
+      const encoder = new TextEncoder();
+      const client = this; // Capture reference to access convertTokenUsage
+
+      const stream = new ReadableStream<Uint8Array>({
+        async start(controller) {
+          try {
+            for await (const chunk of result.textStream) {
+              const aiStreamChunk: AIStreamChunk = {
+                choices: [
+                  {
+                    delta: {
+                      content: chunk,
+                    },
+                  },
+                ],
+              };
+
+              const sseData = `data: ${JSON.stringify(aiStreamChunk)}\n\n`;
+              controller.enqueue(encoder.encode(sseData));
+            }
+
+            // Get final usage
+            const finalResult = await result;
+            if (finalResult.usage) {
+              capturedUsage = client.convertTokenUsage(finalResult.usage);
+
+              // Send usage in final chunk
+              const usageChunk: AIStreamChunk = {
+                choices: [
+                  {
+                    delta: {},
+                    finish_reason: "stop",
+                  },
+                ],
+                usage: {
+                  prompt_tokens: capturedUsage.input_tokens,
+                  completion_tokens: capturedUsage.output_tokens,
+                  total_tokens: capturedUsage.total_tokens,
+                },
+              };
+
+              const usageData = `data: ${JSON.stringify(usageChunk)}\n\n`;
+              controller.enqueue(encoder.encode(usageData));
+
+              // Resolve all pending usage promises
+              usagePromiseResolvers.forEach(({ resolve }) =>
+                resolve(capturedUsage),
+              );
+              usagePromiseResolvers.length = 0;
+            }
+
+            controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+          } catch (error) {
+            console.error("Stream with usage error:", error);
+            usagePromiseResolvers.forEach(({ reject }) => reject(error));
+            controller.error(error);
+          } finally {
+            usagePromiseResolvers.forEach(({ resolve }) => resolve(undefined));
+            controller.close();
+          }
+        },
+      });
+
+      const getUsage = (): Promise<ITokenUsage | undefined> => {
+        if (capturedUsage !== undefined) {
+          return Promise.resolve(capturedUsage);
+        }
+
+        return new Promise((resolve, reject) => {
+          usagePromiseResolvers.push({ resolve, reject });
+        });
+      };
+
+      return {
+        stream,
+        getUsage,
+      };
+    } catch (error) {
+      console.error("AI streaming with usage error:", error);
+      throw new Error(
+        `${API_ERROR_MESSAGES.OPENAI_REQUEST_FAILED}: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
+    }
   }
 
   createStreamFromResponse(
     responseBody: ReadableStream<Uint8Array>,
-  ): ReadableStream<IAIStreamChunk> {
-    return new ReadableStream<IAIStreamChunk>({
+  ): ReadableStream<AIStreamChunk> {
+    return new ReadableStream<AIStreamChunk>({
       async start(controller) {
         try {
           const reader = responseBody.getReader();
@@ -256,12 +314,12 @@ class AIClient {
             buffer = lines.pop() || "";
 
             for (const line of lines) {
-              if (line.startsWith(AI_API.SSE_DATA_PREFIX)) {
-                const data = line.slice(AI_API.SSE_DATA_PREFIX_LENGTH).trim();
-                if (data === AI_API.SSE_DONE_MESSAGE) continue;
+              if (line.startsWith("data: ")) {
+                const data = line.slice(6).trim();
+                if (data === "[DONE]") continue;
 
                 try {
-                  const parsed: IAIStreamChunk = JSON.parse(data);
+                  const parsed: AIStreamChunk = JSON.parse(data);
                   controller.enqueue(parsed);
                 } catch (error) {
                   console.error("Failed to parse streaming chunk:", error);
@@ -274,12 +332,12 @@ class AIClient {
           if (buffer.trim()) {
             const remainingLines = buffer.split("\n");
             for (const line of remainingLines) {
-              if (line.startsWith(AI_API.SSE_DATA_PREFIX)) {
-                const data = line.slice(AI_API.SSE_DATA_PREFIX_LENGTH).trim();
-                if (data === AI_API.SSE_DONE_MESSAGE) continue;
+              if (line.startsWith("data: ")) {
+                const data = line.slice(6).trim();
+                if (data === "[DONE]") continue;
 
                 try {
-                  const parsed: IAIStreamChunk = JSON.parse(data);
+                  const parsed: AIStreamChunk = JSON.parse(data);
                   controller.enqueue(parsed);
                 } catch (error) {
                   console.error(
@@ -328,3 +386,7 @@ export class AIClientFactory {
     return this.client;
   }
 }
+
+// Export singleton instance for internal use
+const aiClient = AIClientFactory.getClient();
+export { aiClient };
