@@ -70,7 +70,6 @@ export const formatDuration = (seconds: number): string => {
   return `${minutes}:${secs.toString().padStart(2, "0")}`;
 };
 
-
 export const formatHoursMinutes = (seconds: number): string => {
   if (!seconds) return "0m";
 
@@ -83,7 +82,6 @@ export const formatHoursMinutes = (seconds: number): string => {
 
   return `${minutes}m`;
 };
-
 
 export const formatChange = (
   current: number,

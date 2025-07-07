@@ -129,7 +129,7 @@ export const searchNotes = async (
     `,
     )
     .eq("user_id", userId)
-    .or(`content.ilike.%${searchTerm}%,tags.cs.{${searchTerm}}`)
+    .or(`content_text.ilike.%${searchTerm}%,tags.cs.{${searchTerm}}`)
     .order("created_at", { ascending: false });
 
   if (error) {
