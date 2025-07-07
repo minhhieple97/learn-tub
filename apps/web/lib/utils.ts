@@ -70,6 +70,77 @@ export const formatDuration = (seconds: number): string => {
   return `${minutes}:${secs.toString().padStart(2, "0")}`;
 };
 
+
+export const formatHoursMinutes = (seconds: number): string => {
+  if (!seconds) return "0m";
+
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+
+  if (hours > 0) {
+    return `${hours}h ${minutes > 0 ? `${minutes}m` : ""}`;
+  }
+
+  return `${minutes}m`;
+};
+
+
+export const formatChange = (
+  current: number,
+  previous: number,
+  unit?: string,
+): string => {
+  if (previous === 0) {
+    return current > 0
+      ? `+${current}${unit || ""} from last week`
+      : "No change";
+  }
+
+  const change = current - previous;
+  const sign = change >= 0 ? "+" : "";
+
+  if (unit) {
+    return `${sign}${change}${unit} from last week`;
+  }
+
+  return `${sign}${change} from last week`;
+};
+
+export const formatTimeChange = (
+  currentSeconds: number,
+  previousSeconds: number,
+): string => {
+  const changeSeconds = currentSeconds - previousSeconds;
+
+  if (changeSeconds === 0) {
+    return "No change";
+  }
+
+  const sign = changeSeconds >= 0 ? "+" : "";
+  const changeFormatted = formatHoursMinutes(Math.abs(changeSeconds));
+
+  return `${sign}${changeFormatted} from last week`;
+};
+
+export const formatStreakChange = (
+  currentStreak: number,
+  previousStreak: number,
+): string => {
+  if (currentStreak === 0) {
+    return "Start your streak!";
+  }
+
+  if (currentStreak > previousStreak) {
+    return "Keep it up!";
+  }
+
+  if (currentStreak === previousStreak) {
+    return "Maintain the streak!";
+  }
+
+  return "Rebuild your streak!";
+};
+
 export const formatTimestamp = (seconds: number) => {
   const mins = Math.floor(seconds / 60);
   const secs = Math.floor(seconds % 60);

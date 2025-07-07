@@ -7,9 +7,13 @@ import { Tables } from "@/database.types";
 
 export type IDashboardStats = {
   totalVideos: number;
+  totalVideosChange: string;
   learningTime: string;
+  learningTimeChange: string;
   notesCreated: number;
+  notesCreatedChange: string;
   streak: number;
+  streakChange: string;
 };
 
 export type IStatCardProps = {

@@ -11,25 +11,25 @@ export const StatsGrid = ({ stats }: StatsGridProps) => {
     {
       title: "Total Videos",
       value: stats.totalVideos,
-      change: "+2 from last week",
+      change: stats.totalVideosChange,
       icon: Video,
     },
     {
       title: "Learning Time",
       value: stats.learningTime,
-      change: "+4h from last week",
+      change: stats.learningTimeChange,
       icon: Clock,
     },
     {
       title: "Notes Created",
       value: stats.notesCreated,
-      change: "+12 from last week",
+      change: stats.notesCreatedChange,
       icon: BookOpen,
     },
     {
       title: "Streak",
       value: `${stats.streak} days`,
-      change: "Keep it up!",
+      change: stats.streakChange,
       icon: TrendingUp,
     },
   ];
