@@ -1,8 +1,6 @@
 import { InsightsDashboard } from "@/features/dashboard/components/insights-dashboard";
 import { DashboardHeader } from "./dashboard-header";
 import { StatsGrid } from "./stats-grid";
-import { RecentVideosCard } from "./recent-videos-card";
-import { LearningGoalsCard } from "./learning-goals-card";
 import type {
   IDashboardStats,
   IRecentVideo,
@@ -19,8 +17,6 @@ type IDashboardContentProps = {
 
 export const DashboardContent = ({
   stats,
-  recentVideos,
-  learningGoals,
   insightsData,
 }: IDashboardContentProps) => {
   return (
