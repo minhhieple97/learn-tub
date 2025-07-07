@@ -141,109 +141,12 @@ LearnTub is a modern learning platform that transforms passive YouTube video wat
    - **Web App:** [http://localhost:3000](http://localhost:3000)
    - **Server API:** [http://localhost:3001](http://localhost:3001)
 
-## 🏗️ Project Structure
 
-```
-learn-tub/                           # Turborepo monorepo root
-├── apps/                            # Applications
-│   ├── web/                         # Next.js Frontend Application
-│   │   ├── app/                     # Next.js App Router: Pages, Layouts, Routes
-│   │   │   ├── (app)/               # Authenticated routes (dashboard, learn, settings)
-│   │   │   ├── (auth)/              # Authentication routes (login, register)
-│   │   │   ├── api/                 # API routes for frontend functionality
-│   │   │   └── auth/                # Auth callback and error pages/routes
-│   │   ├── components/              # Shared UI components
-│   │   │   ├── home/                # Homepage-specific components
-│   │   │   ├── pricing/             # Pricing page components
-│   │   │   ├── shared/              # Shared components across features
-│   │   │   └── ui/                  # Shadcn UI components
-│   │   ├── features/                # Feature-specific modules organized by domain
-│   │   │   ├── ai/                  # AI Usage Tracking & Integration System
-│   │   │   │   ├── components/      # AI model selector and UI components
-│   │   │   │   ├── hooks/           # AI-related React hooks
-│   │   │   │   ├── queries/         # Database operations for AI usage analytics
-│   │   │   │   ├── services/        # AI client service and usage tracker
-│   │   │   │   ├── schemas.ts       # Zod validation schemas for AI operations
-│   │   │   │   └── types.ts         # TypeScript definitions
-│   │   │   ├── auth/                # Authentication & User Management
-│   │   │   ├── dashboard/           # Dashboard & Analytics
-│   │   │   ├── notes/               # Note-taking with AI Evaluation
-│   │   │   ├── payments/            # Payment & Subscription System
-│   │   │   ├── profile/             # User Profile Management
-│   │   │   ├── quizzes/             # AI-Powered Quiz System
-│   │   │   ├── settings/            # User Settings & Preferences
-│   │   │   └── videos/              # Video Management & Player
-│   │   ├── hooks/                   # Global custom React hooks
-│   │   ├── lib/                     # Core utilities and configurations
-│   │   │   ├── cache/               # Caching utilities
-│   │   │   ├── supabase/            # Supabase client configurations
-│   │   │   └── utils/               # Utility functions
-│   │   ├── public/                  # Static assets
-│   │   ├── supabase/                # Supabase local development
-│   │   │   └── migrations/          # Database schema migrations
-│   │   ├── config/                  # Configuration files
-│   │   ├── env.mjs                  # Environment variable validation (t3-env)
-│   │   ├── middleware.ts            # Next.js middleware for route protection
-│   │   ├── package.json             # Web app dependencies
-│   │   ├── tsconfig.json            # TypeScript configuration
-│   │   └── tailwind.config.ts       # Tailwind CSS configuration
-│   └── server/                      # NestJS Backend Application
-│       ├── src/                     # Server source code
-│       │   ├── config/              # Configuration management
-│       │   │   ├── configuration.ts # App configuration
-│       │   │   ├── env-validation.* # Environment validation
-│       │   │   └── index.ts         # Config exports
-│       │   ├── modules/             # NestJS modules
-│       │   │   ├── credit/          # Credit management module
-│       │   │   ├── payment/         # Payment processing module
-│       │   │   ├── prisma/          # Database module
-│       │   │   ├── subscription/    # Subscription management module
-│       │   │   └── webhook/         # Webhook handling module
-│       │   ├── app.controller.ts    # Main app controller
-│       │   ├── app.module.ts        # Root application module
-│       │   ├── app.service.ts       # Main app service
-│       │   └── main.ts              # Application entry point
-│       ├── nest-cli.json            # NestJS CLI configuration
-│       ├── package.json             # Server app dependencies
-│       └── tsconfig.json            # TypeScript configuration
-├── packages/                        # Shared packages
-│   ├── database/                    # Shared database package
-│   │   ├── prisma/                  # Prisma schema and migrations
-│   │   ├── src/                     # Database utilities and types
-│   │   └── package.json             # Database package dependencies
-│   ├── eslint-config/               # Shared ESLint configurations
-│   │   ├── base.js                  # Base ESLint config
-│   │   ├── library.js               # Library-specific config
-│   │   ├── nest.js                  # NestJS-specific config
-│   │   ├── next.js                  # Next.js-specific config
-│   │   ├── react-internal.js        # React internal config
-│   │   └── package.json             # ESLint config dependencies
-│   └── typescript-config/           # Shared TypeScript configurations
-│       ├── base.json                # Base TypeScript config
-│       ├── nestjs.json              # NestJS-specific config
-│       ├── nextjs.json              # Next.js-specific config
-│       ├── react-library.json       # React library config
-│       └── package.json             # TypeScript config dependencies
-├── .gitignore                       # Git ignore rules
-├── package.json                     # Root package.json with workspace config
-├── pnpm-lock.yaml                   # pnpm lockfile
-├── pnpm-workspace.yaml              # pnpm workspace configuration
-├── turbo.json                       # Turborepo configuration
-└── tsconfig.json                    # Root TypeScript configuration
-```
-
-## 🎨 Design System
-
-LearnTub uses a custom neutral color palette with semantic color tokens:
-
-- **Primary Colors:** Sage, Mist, Clay
-- **Neutral Colors:** Pearl, Dust, Stone
-- **Surface Colors:** Optimized for readability and accessibility
-- **Dark Mode:** Full support with automatic theme switching
 
 ## 🔧 Available Scripts
 
 ```bash
+
 # Development
 npm run dev          # Start development server
 
@@ -251,10 +154,6 @@ npm run dev          # Start development server
 npm run build        # Build for production
 npm run start        # Start production server
 
-# Database
-npm run db:pull      # Pull latest schema from Supabase
-npm run db:reset     # Reset database
-npm run db           # Pull and reset database
 ```
 
 ## 🚀 Deployment
