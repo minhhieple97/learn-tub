@@ -1,9 +1,17 @@
-import { createOpenAI } from '@ai-sdk/openai';
-import { createGoogleGenerativeAI } from '@ai-sdk/google';
-import { generateText, streamText, LanguageModel, CoreMessage } from 'ai';
-import { env } from '@/env.mjs';
-import { AI_CHAT_ROLES, AI_CONFIG, API_ERROR_MESSAGES } from '@/config/constants';
-import { IAICompletionRequest, IAIMessage, ITokenUsage } from '@/features/ai/types';
+import { createOpenAI } from "@ai-sdk/openai";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
+import { generateText, streamText, LanguageModel, CoreMessage } from "ai";
+import { env } from "@/env.mjs";
+import {
+  AI_CHAT_ROLES,
+  AI_CONFIG,
+  API_ERROR_MESSAGES,
+} from "@/config/constants";
+import {
+  IAICompletionRequest,
+  IAIMessage,
+  ITokenUsage,
+} from "@/features/ai/types";
 
 export type AIStreamChunk = {
   choices: Array<{
@@ -35,12 +43,12 @@ class AIClient {
     });
   }
 
-  private getModel(modelName: string): LanguageModel {
-    if (modelName.startsWith('gpt-')) {
+  public getModel(modelName: string): LanguageModel {
+    if (modelName.startsWith("gpt-")) {
       return this.openaiClient(modelName);
     }
 
-    if (modelName.startsWith('gemini-')) {
+    if (modelName.startsWith("gemini-")) {
       return this.googleClient(modelName);
     }
 
@@ -50,7 +58,7 @@ class AIClient {
 
   private convertMessages(messages: IAIMessage[]): CoreMessage[] {
     return messages.map((msg) => ({
-      role: msg.role as 'system' | 'user' | 'assistant',
+      role: msg.role as "system" | "user" | "assistant",
       content: msg.content,
     }));
   }
@@ -77,9 +85,9 @@ class AIClient {
 
       return result.text;
     } catch (error) {
-      console.error('AI completion error:', error);
+      console.error("AI completion error:", error);
       throw new Error(
-        `${API_ERROR_MESSAGES.OPENAI_REQUEST_FAILED}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        `${API_ERROR_MESSAGES.OPENAI_REQUEST_FAILED}: ${error instanceof Error ? error.message : "Unknown error"}`,
       );
     }
   }
@@ -99,21 +107,25 @@ class AIClient {
         maxTokens: request.max_tokens,
       });
 
-      const tokenUsage = result.usage ? this.convertTokenUsage(result.usage) : undefined;
+      const tokenUsage = result.usage
+        ? this.convertTokenUsage(result.usage)
+        : undefined;
 
       return {
         result: result.text,
         tokenUsage,
       };
     } catch (error) {
-      console.error('AI completion with usage error:', error);
+      console.error("AI completion with usage error:", error);
       throw new Error(
-        `${API_ERROR_MESSAGES.OPENAI_REQUEST_FAILED}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        `${API_ERROR_MESSAGES.OPENAI_REQUEST_FAILED}: ${error instanceof Error ? error.message : "Unknown error"}`,
       );
     }
   }
 
-  async streamChatCompletion(request: IAICompletionRequest): Promise<ReadableStream<Uint8Array>> {
+  async streamChatCompletion(
+    request: IAICompletionRequest,
+  ): Promise<ReadableStream<Uint8Array>> {
     try {
       const model = this.getModel(request.model);
       const messages = this.convertMessages(request.messages);
@@ -151,16 +163,16 @@ class AIClient {
               choices: [
                 {
                   delta: {},
-                  finish_reason: 'stop',
+                  finish_reason: "stop",
                 },
               ],
             };
 
             const finalData = `data: ${JSON.stringify(finalChunk)}\n\n`;
             controller.enqueue(encoder.encode(finalData));
-            controller.enqueue(encoder.encode('data: [DONE]\n\n'));
+            controller.enqueue(encoder.encode("data: [DONE]\n\n"));
           } catch (error) {
-            console.error('Stream error:', error);
+            console.error("Stream error:", error);
             controller.error(error);
           } finally {
             controller.close();
@@ -168,9 +180,9 @@ class AIClient {
         },
       });
     } catch (error) {
-      console.error('AI streaming error:', error);
+      console.error("AI streaming error:", error);
       throw new Error(
-        `${API_ERROR_MESSAGES.OPENAI_REQUEST_FAILED}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        `${API_ERROR_MESSAGES.OPENAI_REQUEST_FAILED}: ${error instanceof Error ? error.message : "Unknown error"}`,
       );
     }
   }
@@ -183,29 +195,29 @@ class AIClient {
       const model = this.getModel(request.model);
       const messages = this.convertMessages(request.messages);
 
+      let finalUsage: ITokenUsage | undefined;
+
       const result = streamText({
         model,
         messages,
         temperature: request.temperature,
         maxTokens: request.max_tokens,
-        onFinish: (result) => {
-          console.log('result.usage', result.usage);
-          console.log('result.finishReason', result.finishReason);
+        onFinish: ({ usage, finishReason }) => {
+          console.log("Stream finished with reason:", finishReason);
+          if (usage) {
+            finalUsage = this.convertTokenUsage(usage);
+            console.log("Final usage:", finalUsage);
+          }
         },
       });
 
-      // Use AI SDK's built-in usage tracking instead of manual capture
       const getUsage = async (): Promise<ITokenUsage | undefined> => {
-        try {
-          const finalResult = await result;
-          return finalResult.usage ? this.convertTokenUsage(finalResult.usage) : undefined;
-        } catch (error) {
-          console.error('Failed to get usage data:', error);
-          return undefined;
-        }
+        // Wait for stream to complete and return captured usage
+        await result;
+        return finalUsage;
       };
 
-      // Convert AI SDK stream to the expected format
+      // Convert AI SDK stream to the expected SSE format
       const encoder = new TextEncoder();
       const stream = new ReadableStream<Uint8Array>({
         async start(controller) {
@@ -226,33 +238,21 @@ class AIClient {
               controller.enqueue(encoder.encode(sseData));
             }
 
-            // Wait for final result to get usage data
-            const finalResult = await result;
-            const usage = await finalResult.usage;
-            const finishReason = await finalResult.finishReason;
-
-            // Send final chunk with usage if available
+            // Send final chunk with completion signal
             const finalChunk: AIStreamChunk = {
               choices: [
                 {
                   delta: {},
-                  finish_reason: finishReason || 'stop',
+                  finish_reason: "stop",
                 },
               ],
-              ...(usage && {
-                usage: {
-                  prompt_tokens: usage.promptTokens,
-                  completion_tokens: usage.completionTokens,
-                  total_tokens: usage.totalTokens,
-                },
-              }),
             };
 
             const finalData = `data: ${JSON.stringify(finalChunk)}\n\n`;
             controller.enqueue(encoder.encode(finalData));
-            controller.enqueue(encoder.encode('data: [DONE]\n\n'));
+            controller.enqueue(encoder.encode("data: [DONE]\n\n"));
           } catch (error) {
-            console.error('Stream error:', error);
+            console.error("Stream error:", error);
             controller.error(error);
           } finally {
             controller.close();
@@ -265,9 +265,9 @@ class AIClient {
         getUsage,
       };
     } catch (error) {
-      console.error('AI streaming with usage error:', error);
+      console.error("AI streaming with usage error:", error);
       throw new Error(
-        `${API_ERROR_MESSAGES.OPENAI_REQUEST_FAILED}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        `${API_ERROR_MESSAGES.OPENAI_REQUEST_FAILED}: ${error instanceof Error ? error.message : "Unknown error"}`,
       );
     }
   }
@@ -280,7 +280,7 @@ class AIClient {
         try {
           const reader = responseBody.getReader();
           const decoder = new TextDecoder();
-          let buffer = '';
+          let buffer = "";
 
           while (true) {
             const { done, value } = await reader.read();
@@ -288,44 +288,47 @@ class AIClient {
 
             buffer += decoder.decode(value, { stream: true });
 
-            const lines = buffer.split('\n');
-            buffer = lines.pop() || '';
+            const lines = buffer.split("\n");
+            buffer = lines.pop() || "";
 
             for (const line of lines) {
-              if (line.startsWith('data: ')) {
+              if (line.startsWith("data: ")) {
                 const data = line.slice(6).trim();
-                if (data === '[DONE]') continue;
+                if (data === "[DONE]") continue;
 
                 try {
                   const parsed: AIStreamChunk = JSON.parse(data);
                   controller.enqueue(parsed);
                 } catch (error) {
-                  console.error('Failed to parse streaming chunk:', error);
-                  console.error('Problematic data:', data);
+                  console.error("Failed to parse streaming chunk:", error);
+                  console.error("Problematic data:", data);
                 }
               }
             }
           }
 
           if (buffer.trim()) {
-            const remainingLines = buffer.split('\n');
+            const remainingLines = buffer.split("\n");
             for (const line of remainingLines) {
-              if (line.startsWith('data: ')) {
+              if (line.startsWith("data: ")) {
                 const data = line.slice(6).trim();
-                if (data === '[DONE]') continue;
+                if (data === "[DONE]") continue;
 
                 try {
                   const parsed: AIStreamChunk = JSON.parse(data);
                   controller.enqueue(parsed);
                 } catch (error) {
-                  console.error('Failed to parse final streaming chunk:', error);
-                  console.error('Problematic data:', data);
+                  console.error(
+                    "Failed to parse final streaming chunk:",
+                    error,
+                  );
+                  console.error("Problematic data:", data);
                 }
               }
             }
           }
         } catch (error) {
-          console.error('Stream processing error:', error);
+          console.error("Stream processing error:", error);
           controller.error(error);
         } finally {
           controller.close();
@@ -334,7 +337,10 @@ class AIClient {
     });
   }
 
-  createSystemUserMessages(systemMessage: string, userMessage: string): IAIMessage[] {
+  createSystemUserMessages(
+    systemMessage: string,
+    userMessage: string,
+  ): IAIMessage[] {
     return [
       {
         role: AI_CHAT_ROLES.SYSTEM,

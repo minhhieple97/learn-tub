@@ -173,8 +173,8 @@ export type INoteEvaluationRequest = {
   aiModelId: string;
   userId: string;
   context?: {
-    videoTitle?: string;
-    videoDescription?: string;
+    videoTitle: string | null;
+    videoDescription: string | null;
     timestamp: number | null;
   };
 };

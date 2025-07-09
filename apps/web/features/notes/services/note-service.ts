@@ -1,24 +1,25 @@
 import {
-  CHUNK_TYPES,
   AI_SYSTEM_MESSAGES,
   AI_FORMAT,
   ERROR_MESSAGES,
   EVALUATION_ERRORS,
   AI_QUIZZ_CONFIG,
+  AI_COMMANDS,
 } from "@/config/constants";
 import { INoteEvaluationRequest } from "@/features/notes/types";
-import { IFeedback, StreamChunk } from "@/types";
-import { aiUsageTracker } from "@/features/ai";
-import { AIClientFactory } from "@/features/ai/services/ai-client";
-import { getAIModelName } from "../queries";
-
-type StreamController = ReadableStreamDefaultController<StreamChunk>;
+import { IFeedback } from "@/types";
+import { getAIModelName, createNoteInteraction } from "../queries";
+import type { ITokenUsage } from "@/features/ai/types";
+import { streamText } from "ai";
+import { createStreamableValue, StreamableValue } from "ai/rsc";
+import { deductCredits } from "@/features/payments/services/deduction-credit";
+import { aiClient } from "@/features/ai/services/ai-client";
 
 class NoteService {
   async evaluateNote(
     request: INoteEvaluationRequest,
-  ): Promise<ReadableStream<StreamChunk>> {
-    const { aiModelId, content, context, userId } = request;
+  ): Promise<{ value: StreamableValue }> {
+    const { aiModelId, content, context, userId, noteId } = request;
     const prompt = this.createEvaluationPrompt(content, context);
 
     const { data: modelData, error: modelError } =
@@ -32,35 +33,96 @@ class NoteService {
 
     const modelName = modelData.model_name;
 
-    return aiUsageTracker.wrapStreamingOperation(
-      {
-        user_id: userId,
-        command: "evaluate_note" as const,
-        ai_model_id: aiModelId,
-        request_payload: { prompt_length: prompt.length },
-      },
-      async () => {
-        const aiClient = AIClientFactory.getClient();
+    const stream = createStreamableValue("");
 
-        const messages = aiClient.createSystemUserMessages(
-          AI_SYSTEM_MESSAGES.EDUCATIONAL_ASSISTANT,
-          prompt,
-        );
+    (async () => {
+      let streamClosed = false;
 
-        const { stream, getUsage } =
-          await aiClient.streamChatCompletionWithUsage({
-            model: modelName,
-            messages,
+      try {
+        const model = aiClient.getModel(modelName);
+
+        let finalUsage: ITokenUsage | undefined;
+
+        const result = streamText({
+          model,
+          messages: [
+            {
+              role: "system",
+              content: AI_SYSTEM_MESSAGES.EDUCATIONAL_ASSISTANT,
+            },
+            {
+              role: "user",
+              content: prompt,
+            },
+          ],
+          onFinish: ({ usage }) => {
+            if (usage) {
+              finalUsage = {
+                input_tokens: usage.promptTokens || 0,
+                output_tokens: usage.completionTokens || 0,
+                total_tokens: usage.totalTokens || 0,
+              };
+              console.info("Final usage:", finalUsage);
+            }
+          },
+        });
+
+        let fullContent = "";
+
+        for await (const chunk of result.textStream) {
+          fullContent += chunk;
+          stream.update(chunk);
+        }
+
+        try {
+          const feedback = this.parseFeedbackFromResponse(fullContent);
+
+          await createNoteInteraction(userId, noteId, aiModelId, feedback);
+
+          const creditResult = await deductCredits({
+            userId,
+            command: AI_COMMANDS.EVALUATE_NOTE as NonNullable<
+              typeof AI_COMMANDS.EVALUATE_NOTE
+            >,
+            description: `Note evaluation for note: ${noteId}`,
+            relatedActionId: noteId,
           });
 
-        const transformedStream = this.createStreamFromAIClient(stream);
+          if (!creditResult.success) {
+            console.error("Failed to deduct credits:", creditResult.error);
+          }
 
-        return {
-          stream: transformedStream,
-          getUsage,
-        };
-      },
-    );
+          stream.update(`__COMPLETE__${JSON.stringify(feedback)}`);
+        } catch (parseError) {
+          console.error("Failed to parse AI response:", parseError);
+          const fallbackFeedback = {
+            summary:
+              "AI evaluation completed but response format was unexpected",
+            correct_points: [],
+            incorrect_points: [],
+            improvement_suggestions: ["Please try the evaluation again"],
+            overall_score: 0,
+            detailed_analysis: fullContent || "No content received",
+          };
+          stream.update(`__COMPLETE__${JSON.stringify(fallbackFeedback)}`);
+        }
+      } catch (error) {
+        console.error("Evaluation error:", error);
+        const errorMessage =
+          error instanceof Error ? error.message : ERROR_MESSAGES.UNKNOWN_ERROR;
+
+        if (!streamClosed) {
+          stream.error(errorMessage);
+          streamClosed = true;
+        }
+      } finally {
+        if (!streamClosed) {
+          stream.done();
+        }
+      }
+    })();
+
+    return { value: stream.value };
   }
 
   private createEvaluationPrompt(
@@ -68,31 +130,36 @@ class NoteService {
     context?: INoteEvaluationRequest["context"],
   ): string {
     const contextualInfo = this.buildContextualInfo(context);
+    const hasContext = contextualInfo.trim().length > 0;
 
-    return `
-Please evaluate the following learning note and provide detailed feedback:
+    return `You are an educational assistant evaluating a student's learning note. ${hasContext ? "Use the provided context to better understand the subject matter and provide more accurate feedback." : ""}
 
-Note Content: "${content}"
+## Note to Evaluate:
+"${content}"
+
 ${contextualInfo}
 
-Please provide your evaluation in the following JSON format:
+## Evaluation Instructions:
+Analyze this note considering:
+1. **Accuracy**: Are the facts and concepts correct?
+2. **Comprehension**: Does the note demonstrate understanding of key concepts?
+3. **Completeness**: Are important details missing or incomplete?
+4. **Clarity**: Is the information well-organized and clearly expressed?
+5. **Learning Value**: How effective is this note for studying and retention?
+
+${hasContext ? "6. **Contextual Relevance**: How well does the note capture the key points from the source material?" : ""}
+
+## Required Response Format (JSON):
 {
-  "summary": "Brief overall assessment of the note",
-  "correct_points": ["List of correct or well-articulated points"],
-  "incorrect_points": ["List of incorrect or questionable points"],
-  "improvement_suggestions": ["Specific suggestions for improvement"],
-  "overall_score": number (1-10),
-  "detailed_analysis": "Comprehensive analysis with explanations"
+  "summary": "2-3 sentence overall assessment of the note's quality and understanding level",
+  "correct_points": ["Specific correct concepts, facts, or insights well-captured"],
+  "incorrect_points": ["Any inaccuracies, misconceptions, or unclear statements"],
+  "improvement_suggestions": ["Actionable recommendations to enhance the note"],
+  "overall_score": number (1-10 scale: 1-3 Poor, 4-6 Fair, 7-8 Good, 9-10 Excellent),
+  "detailed_analysis": "Comprehensive breakdown of strengths, weaknesses, and educational value"
 }
 
-Focus on:
-1. Accuracy of information
-2. Clarity of understanding
-3. Completeness of key concepts
-4. Areas for improvement
-5. Study effectiveness
-
-Be constructive and educational in your feedback.`;
+Provide constructive, specific feedback that helps the student improve their note-taking and understanding.`;
   }
 
   private buildContextualInfo(
@@ -102,21 +169,31 @@ Be constructive and educational in your feedback.`;
 
     const contextParts: string[] = [];
 
-    if (context.videoTitle) {
-      contextParts.push(`Video Title: "${context.videoTitle}"`);
+    // Handle video title with null check
+    if (context.videoTitle && context.videoTitle.trim()) {
+      contextParts.push(`**Video Title**: "${context.videoTitle}"`);
     }
 
-    if (context.videoDescription) {
-      contextParts.push(`Video Context: "${context.videoDescription}"`);
+    // Handle video description with null check
+    if (context.videoDescription && context.videoDescription.trim()) {
+      contextParts.push(`**Video Description**: "${context.videoDescription}"`);
     }
 
-    if (context.timestamp) {
+    // Handle timestamp with null check
+    if (
+      context.timestamp !== null &&
+      context.timestamp !== undefined &&
+      context.timestamp >= 0
+    ) {
       contextParts.push(
-        `Timestamp: ${this.formatTimestamp(context.timestamp)}`,
+        `**Note Timestamp**: ${this.formatTimestamp(context.timestamp)}`,
       );
     }
 
-    return contextParts.join("\n");
+    // Return formatted context or empty string
+    if (contextParts.length === 0) return "";
+
+    return `\n## Context Information:\n${contextParts.join("\n")}\n`;
   }
 
   private formatTimestamp(seconds: number): string {
@@ -190,40 +267,6 @@ ${feedback.detailed_analysis}`;
     return items.map((item) => `${bullet} ${item}`).join("\n");
   }
 
-  private createStreamFromAIClient(
-    responseBody: ReadableStream<Uint8Array>,
-  ): ReadableStream<StreamChunk> {
-    const aiClient = AIClientFactory.getClient();
-    const aiStream = aiClient.createStreamFromResponse(responseBody);
-
-    return new ReadableStream<StreamChunk>({
-      async start(controller) {
-        try {
-          let fullContent = "";
-          const reader = aiStream.getReader();
-
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-
-            const content = value.choices[0]?.delta?.content || "";
-            fullContent += content;
-
-            controller.enqueue({
-              type: CHUNK_TYPES.FEEDBACK,
-              content,
-              finished: false,
-            });
-          }
-
-          noteService.handleStreamCompletion(controller, fullContent);
-        } catch (error) {
-          noteService.handleStreamError(controller, error);
-        }
-      },
-    });
-  }
-
   private parseFeedbackFromResponse(responseText: string): IFeedback {
     try {
       let cleanedText = responseText.trim();
@@ -278,44 +321,6 @@ ${feedback.detailed_analysis}`;
       console.error(error);
       throw new Error(EVALUATION_ERRORS.FAILED_TO_PARSE_RESPONSE);
     }
-  }
-
-  private handleStreamCompletion(
-    controller: StreamController,
-    fullContent: string,
-  ): void {
-    try {
-      const feedback = this.parseFeedbackFromResponse(fullContent);
-      controller.enqueue({
-        type: CHUNK_TYPES.COMPLETE,
-        content: JSON.stringify(feedback),
-        finished: true,
-      });
-    } catch {
-      controller.enqueue({
-        type: CHUNK_TYPES.ERROR,
-        content: EVALUATION_ERRORS.FAILED_TO_PARSE_RESPONSE,
-        finished: true,
-      });
-    } finally {
-      controller.close();
-    }
-  }
-
-  private handleStreamError(
-    controller: StreamController,
-    error: unknown,
-  ): void {
-    const errorMessage =
-      error instanceof Error ? error.message : ERROR_MESSAGES.UNKNOWN_ERROR;
-
-    controller.enqueue({
-      type: CHUNK_TYPES.ERROR,
-      content: `${EVALUATION_ERRORS.EVALUATION_FAILED}: ${errorMessage}`,
-      finished: true,
-    });
-
-    controller.close();
   }
 }
 
