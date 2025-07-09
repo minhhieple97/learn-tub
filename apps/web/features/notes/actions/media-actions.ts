@@ -24,8 +24,6 @@ export const uploadScreenshotAction = authAction
       parsedInput: { fileData, fileName, fileSize, mimeType },
       ctx: { user },
     }) => {
-      const profile = await checkProfileByUserId(user.id);
-
       // Convert base64 to File
       const base64Data = fileData.split(",")[1];
       if (!base64Data) {
@@ -36,7 +34,7 @@ export const uploadScreenshotAction = authAction
 
       const { error, storagePath } = await uploadScreenshotToStorage(
         file,
-        profile.id,
+        user.id,
       );
 
       if (error) {
@@ -74,9 +72,6 @@ export const captureAndSaveScreenshotAction = authAction
       },
       ctx: { user },
     }) => {
-      const profile = await checkProfileByUserId(user.id);
-
-      // Convert base64 to File
       const base64Data = fileData.split(",")[1];
       if (!base64Data) {
         throw new ActionError("Invalid file data format");
@@ -86,7 +81,7 @@ export const captureAndSaveScreenshotAction = authAction
 
       // Upload file
       const { error: uploadError, storagePath } =
-        await uploadScreenshotToStorage(file, profile.id);
+        await uploadScreenshotToStorage(file, user.id);
 
       if (uploadError) {
         throw new ActionError(
@@ -99,7 +94,7 @@ export const captureAndSaveScreenshotAction = authAction
       // Save metadata
       const { data: metadataResult, error: metadataError } =
         await saveScreenshotMetadata({
-          userId: profile.id,
+          userId: user.id,
           videoId,
           fileName,
           fileSize,

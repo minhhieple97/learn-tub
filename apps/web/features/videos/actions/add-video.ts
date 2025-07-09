@@ -12,7 +12,6 @@ import {
 } from "@/lib/utils";
 import { VIDEO_DEFAULTS, TOAST_MESSAGES } from "@/config/constants";
 import { RateLimiter } from "@/lib/rate-limiter";
-import { checkProfileByUserId } from "@/lib/require-auth";
 
 export const addVideoAction = authAction
   .inputSchema(addVideoSchema)
@@ -25,13 +24,12 @@ export const addVideoAction = authAction
           `Rate limit exceeded. Try again in a minute. Remaining: ${rateLimitResult.remaining}`,
         );
       }
-      const profile = await checkProfileByUserId(user.id);
       const videoId = extractYouTubeId(videoUrl);
       if (!videoId) {
         throw new ActionError(TOAST_MESSAGES.INVALID_URL_ERROR);
       }
 
-      const videoExists = await checkExistingVideo(profile.id, videoId);
+      const videoExists = await checkExistingVideo(user.id, videoId);
       if (videoExists) {
         throw new ActionError(TOAST_MESSAGES.VIDEO_EXISTS_ERROR);
       }
@@ -43,7 +41,7 @@ export const addVideoAction = authAction
       }
 
       const result = await insertVideo({
-        userId: profile.id,
+        userId: user.id,
         youtubeId: videoId,
         title: videoData?.snippet?.title || VIDEO_DEFAULTS.TITLE,
         description:

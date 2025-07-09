@@ -5,7 +5,6 @@ import { quizService } from "../services/quizz-service";
 import { createQuizSession } from "../queries";
 import { getVideoById } from "@/features/videos/queries";
 import { RateLimiter } from "@/lib/rate-limiter";
-import { checkProfileByUserId } from "@/lib/require-auth";
 import { deductCredits } from "@/features/payments/services/deduction-credit";
 import { validateUserCreditsForOperation } from "@/features/payments/queries";
 import { CREDIT_ACTION_COUNTS } from "@/config/constants";
@@ -32,10 +31,8 @@ export const generateQuizQuestionsAction = authAction
       );
     }
 
-    const profile = await checkProfileByUserId(user.id);
-
     const creditValidation = await validateUserCreditsForOperation(
-      profile.id,
+      user.id,
       CREDIT_ACTION_COUNTS["generate_quizz_questions"],
     );
     if (!creditValidation.success) {
@@ -51,7 +48,7 @@ export const generateQuizQuestionsAction = authAction
 
     if (!videoTitle || !videoDescription || videoTutorial === undefined) {
       try {
-        const video = await getVideoById(data.videoId, profile.id);
+        const video = await getVideoById(data.videoId, user.id);
         videoTitle = videoTitle || video.title;
         videoDescription = videoDescription || video.description || undefined;
         if (videoTutorial === undefined) {
@@ -67,7 +64,7 @@ export const generateQuizQuestionsAction = authAction
       videoTitle,
       videoDescription,
       videoTutorial,
-      userId: profile.id,
+      userId: user.id,
     });
 
     if (!response.success) {
@@ -75,7 +72,7 @@ export const generateQuizQuestionsAction = authAction
     }
 
     const quizSession = await createQuizSession({
-      userId: profile.id,
+      userId: user.id,
       videoId: data.videoId,
       title: videoTitle || `Quiz - ${new Date().toLocaleDateString()}`,
       difficulty: data.difficulty,
@@ -86,7 +83,7 @@ export const generateQuizQuestionsAction = authAction
     });
 
     const creditResult = await deductCredits({
-      userId: profile.id,
+      userId: user.id,
       command: "generate_quizz_questions",
       description: `Quiz generation for video: ${data.videoId}`,
       relatedActionId: quizSession.id,

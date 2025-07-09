@@ -4,7 +4,6 @@ import { quizService } from "../services/quizz-service";
 import { saveQuizAttempt } from "../queries";
 import { EvaluateQuizSchema } from "../schema";
 import { RateLimiter } from "@/lib/rate-limiter";
-import { checkProfileByUserId } from "@/lib/require-auth";
 import { deductCredits } from "@/features/payments/services";
 import { validateUserCreditsForOperation } from "@/features/payments/queries";
 import { CREDIT_ACTION_COUNTS } from "@/config/constants";
@@ -20,10 +19,8 @@ export const evaluateQuizAction = authAction
       );
     }
 
-    const profile = await checkProfileByUserId(user.id);
-
     const creditValidation = await validateUserCreditsForOperation(
-      profile.id,
+      user.id,
       CREDIT_ACTION_COUNTS["evaluate_quizz_answers"],
     );
     if (!creditValidation.success) {
@@ -37,7 +34,7 @@ export const evaluateQuizAction = authAction
       answers: data.answers,
       videoContext: data.videoContext,
       aiModelId: data.aiModelId,
-      userId: profile.id,
+      userId: user.id,
     });
 
     if (!response.success || !response.data) {
@@ -46,7 +43,7 @@ export const evaluateQuizAction = authAction
 
     const attempt = await saveQuizAttempt({
       quizSessionId: data.quizSessionId,
-      userId: profile.id,
+      userId: user.id,
       answers: data.answers,
       score: response.data.score,
       totalQuestions: response.data.totalQuestions,
@@ -56,7 +53,7 @@ export const evaluateQuizAction = authAction
     });
 
     const creditResult = await deductCredits({
-      userId: profile.id,
+      userId: user.id,
       command: "evaluate_quizz_answers",
       description: `Quiz evaluation for session: ${data.quizSessionId}`,
       relatedActionId: attempt.id,
