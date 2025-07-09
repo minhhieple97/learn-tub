@@ -18,12 +18,10 @@ import {
 import { routes } from "@/routes";
 import { z } from "zod";
 import {
-  getUserInSession,
   updateProfile,
   uploadAvatarFile,
   updateProfileAvatar,
 } from "@/features/profile/queries";
-import { checkProfileByUserId } from "@/lib/require-auth";
 import { CacheClient } from "@/lib/cache";
 
 export const loginAction = action
@@ -84,9 +82,7 @@ export const signOutAction = action
 export const updateProfileAction = authAction
   .inputSchema(updateProfileSchema)
   .action(async ({ parsedInput, ctx: { user } }) => {
-    const profile = await checkProfileByUserId(user.id);
-
-    const result = await updateProfile(profile.id, parsedInput);
+    const result = await updateProfile(user.id, parsedInput);
 
     if (!result.success) {
       throw new ActionError(result.error || AUTH_ERROR_MESSAGES.UPDATE_FAILED);
@@ -103,8 +99,6 @@ export const updateProfileAction = authAction
 export const uploadAvatarAction = authAction
   .inputSchema(uploadAvatarSchema)
   .action(async ({ parsedInput: { file }, ctx: { user } }) => {
-    const profile = await checkProfileByUserId(user.id);
-
     if (file.size > AVATAR_UPLOAD_CONFIG.MAX_FILE_SIZE) {
       throw new ActionError(AUTH_ERROR_MESSAGES.FILE_TOO_LARGE);
     }
@@ -112,7 +106,7 @@ export const uploadAvatarAction = authAction
       throw new ActionError(AUTH_ERROR_MESSAGES.INVALID_FILE_TYPE);
     }
 
-    const uploadResult = await uploadAvatarFile(profile.id, file, {
+    const uploadResult = await uploadAvatarFile(user.id, file, {
       bucket: AVATAR_UPLOAD_CONFIG.STORAGE_BUCKET,
       cacheControl: AVATAR_UPLOAD_CONFIG.CACHE_CONTROL,
       upsert: false,
@@ -124,10 +118,7 @@ export const uploadAvatarAction = authAction
       );
     }
 
-    const updateResult = await updateProfileAvatar(
-      profile.id,
-      uploadResult.url!,
-    );
+    const updateResult = await updateProfileAvatar(user.id, uploadResult.url!);
 
     if (!updateResult.success) {
       throw new ActionError(

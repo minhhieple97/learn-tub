@@ -8,7 +8,6 @@ import {
 } from "../schemas";
 import { redirect } from "next/navigation";
 import { env } from "@/env.mjs";
-import { checkProfileByUserId } from "@/lib/require-auth";
 import {
   getSubscriptionPlan,
   getUserSubscription,
@@ -27,8 +26,6 @@ const stripe = new Stripe(env.STRIPE_SECRET_KEY);
 export const createCheckoutSessionAction = authAction
   .inputSchema(CreateCheckoutSessionSchema)
   .action(async ({ parsedInput: { productId }, ctx: { user } }) => {
-    const profile = await checkProfileByUserId(user.id);
-
     const { data: plan, error: planError } =
       await getSubscriptionPlan(productId);
 
@@ -37,9 +34,7 @@ export const createCheckoutSessionAction = authAction
       throw new ActionError("Invalid subscription plan");
     }
 
-    const { data: existingSubscription } = await getUserSubscription(
-      profile.id,
-    );
+    const { data: existingSubscription } = await getUserSubscription(user.id);
 
     let customerId: string;
 
@@ -49,7 +44,7 @@ export const createCheckoutSessionAction = authAction
       const customer = await stripe.customers.create({
         email: user.email,
         metadata: {
-          user_id: profile.id,
+          user_id: user.id,
         },
       });
       customerId = customer.id;
@@ -67,7 +62,7 @@ export const createCheckoutSessionAction = authAction
       mode: PAYMENT_CONFIG_MODES.SUBSCRIPTION,
       ...PAYMENT_CONFIG_URLS,
       metadata: {
-        user_id: profile.id,
+        user_id: user.id,
         plan_id: plan.id,
         payment_type: PAYMENT_CONFIG_TYPES.SUBSCRIPTION,
       },
@@ -87,9 +82,7 @@ export const purchaseCreditPackageAction = authAction
       parsedInput: { packageId, credits, productId },
       ctx: { user },
     }) => {
-      const profile = await checkProfileByUserId(user.id);
-
-      const { data: subscription } = await getUserStripeCustomerId(profile.id);
+      const { data: subscription } = await getUserStripeCustomerId(user.id);
 
       let customerId: string;
 
@@ -99,7 +92,7 @@ export const purchaseCreditPackageAction = authAction
         const customer = await stripe.customers.create({
           email: user.email,
           metadata: {
-            user_id: profile.id,
+            user_id: user.id,
           },
         });
         customerId = customer.id;
@@ -117,7 +110,7 @@ export const purchaseCreditPackageAction = authAction
         mode: PAYMENT_CONFIG_MODES.PAYMENT,
         ...PAYMENT_CONFIG_URLS,
         metadata: {
-          user_id: profile.id,
+          user_id: user.id,
           package_id: packageId,
           credits_amount: credits.toString(),
           payment_type: PAYMENT_CONFIG_TYPES.CREDITS,
@@ -136,11 +129,9 @@ export const purchaseCreditPackageAction = authAction
 export const purchaseCreditsAction = authAction
   .inputSchema(PurchaseCreditsSchema)
   .action(async ({ parsedInput: { amount }, ctx: { user } }) => {
-    const profile = await checkProfileByUserId(user.id);
-
     const priceInCents = Math.ceil((amount / 200) * 100);
 
-    const { data: subscription } = await getUserStripeCustomerId(profile.id);
+    const { data: subscription } = await getUserStripeCustomerId(user.id);
 
     let customerId: string;
 
@@ -150,7 +141,7 @@ export const purchaseCreditsAction = authAction
       const customer = await stripe.customers.create({
         email: user.email,
         metadata: {
-          user_id: profile.id,
+          user_id: user.id,
         },
       });
       customerId = customer.id;
@@ -175,7 +166,7 @@ export const purchaseCreditsAction = authAction
       mode: PAYMENT_CONFIG_MODES.PAYMENT,
       ...PAYMENT_CONFIG_URLS,
       metadata: {
-        user_id: profile.id,
+        user_id: user.id,
         credits_amount: amount.toString(),
         payment_type: PAYMENT_CONFIG_TYPES.CREDITS,
       },
