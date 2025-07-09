@@ -220,7 +220,10 @@ class AIUsageTracker {
         status: "success",
         token_usage: undefined,
         request_duration_ms: duration,
-        error_message: undefined,
+        error_message:
+          usageError instanceof Error
+            ? usageError.message
+            : "Unknown usage error",
         request_payload: params.request_payload,
         response_payload: {
           success: true,

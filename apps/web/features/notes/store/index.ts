@@ -3,20 +3,20 @@
 
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import {
-  TOAST_MESSAGES,
-  AI_API,
-  CHUNK_TYPES,
-  ERROR_MESSAGES,
-  STATUS_STREAMING,
-} from "@/config/constants";
+import { TOAST_MESSAGES, STATUS_STREAMING } from "@/config/constants";
 import type { INote } from "../types";
 import { toast } from "@/hooks/use-toast";
 import { IFeedback } from "@/types";
 import { INoteEvaluationStatus } from "../types";
-import { saveNoteAction, updateNoteAction, deleteNoteAction } from "../actions";
+import {
+  saveNoteAction,
+  updateNoteAction,
+  deleteNoteAction,
+  evaluateNoteAction,
+} from "../actions";
 import { JSONContent } from "@tiptap/react";
 import { IVideoPageData } from "@/features/videos/types";
+import { readStreamableValue } from "ai/rsc";
 
 type INotesState = {
   // Form state
@@ -484,18 +484,13 @@ export const useNotesStore = create<INotesState>()(
             },
           }));
 
-          const streamUrl = `${AI_API.EVALUATE_NOTE_PATH}?noteId=${noteId}&aiModelId=${aiModelId}`;
+          const result = await evaluateNoteAction({
+            noteId,
+            aiModelId,
+          });
 
-          const response = await fetch(streamUrl);
-
-          if (!response.ok) {
-            throw new Error(
-              `${ERROR_MESSAGES.FAILED_TO_EVALUATE_NOTE}: ${response.statusText}`,
-            );
-          }
-
-          if (!response.body) {
-            throw new Error(ERROR_MESSAGES.NO_RESPONSE_BODY);
+          if (!result?.data?.output?.value) {
+            throw new Error("No stream data received from server action");
           }
 
           set((state) => ({
@@ -504,73 +499,54 @@ export const useNotesStore = create<INotesState>()(
               status: STATUS_STREAMING.STREAMING,
             },
           }));
-
-          const reader = response.body.getReader();
-          const decoder = new TextDecoder();
-          let buffer = "";
-
-          while (true) {
-            const { done, value } = await reader.read();
-
-            if (done) break;
-
-            buffer += decoder.decode(value, { stream: true });
-            const lines = buffer.split("\n");
-            buffer = lines.pop() || "";
-
-            for (const line of lines) {
-              if (line.startsWith(AI_API.SSE_DATA_PREFIX)) {
+          for await (const delta of readStreamableValue(
+            result.data.output.value,
+          )) {
+            if (delta && typeof delta === "string") {
+              if (delta.startsWith("__COMPLETE__")) {
+                const feedbackJson = delta.slice("__COMPLETE__".length);
                 try {
-                  const chunk = JSON.parse(
-                    line.slice(AI_API.SSE_DATA_PREFIX_LENGTH),
-                  );
-
-                  if (chunk.type === CHUNK_TYPES.FEEDBACK) {
-                    set((state) => ({
-                      evaluation: {
-                        ...state.evaluation,
-                        streamingContent:
-                          state.evaluation.streamingContent + chunk.content,
-                      },
-                    }));
-                  } else if (chunk.type === CHUNK_TYPES.COMPLETE) {
-                    const completeFeedback: IFeedback = JSON.parse(
-                      chunk.content,
-                    );
-                    set((state) => ({
-                      evaluation: {
-                        ...state.evaluation,
-                        feedback: completeFeedback,
-                        status: STATUS_STREAMING.COMPLETED,
-                        streamingContent: "",
-                        isEvaluating: false,
-                        isCompleted: true,
-                      },
-                    }));
-                  } else if (chunk.type === CHUNK_TYPES.ERROR) {
-                    set((state) => ({
-                      evaluation: {
-                        ...state.evaluation,
-                        error: chunk.content,
-                        status: STATUS_STREAMING.ERROR,
-                        streamingContent: "",
-                        isEvaluating: false,
-                        hasError: true,
-                      },
-                    }));
-                  }
+                  const completeFeedback: IFeedback = JSON.parse(feedbackJson);
+                  set((state) => ({
+                    evaluation: {
+                      ...state.evaluation,
+                      feedback: completeFeedback,
+                      status: STATUS_STREAMING.COMPLETED,
+                      streamingContent: "",
+                      isEvaluating: false,
+                      isCompleted: true,
+                    },
+                  }));
                 } catch (parseError) {
                   console.error(
-                    ERROR_MESSAGES.FAILED_TO_PARSE_CHUNK,
+                    "Failed to parse completion feedback:",
                     parseError,
                   );
+                  set((state) => ({
+                    evaluation: {
+                      ...state.evaluation,
+                      error: "Failed to parse evaluation results",
+                      status: STATUS_STREAMING.ERROR,
+                      streamingContent: "",
+                      isEvaluating: false,
+                      hasError: true,
+                    },
+                  }));
                 }
+                break;
+              } else {
+                set((state) => ({
+                  evaluation: {
+                    ...state.evaluation,
+                    streamingContent: state.evaluation.streamingContent + delta,
+                  },
+                }));
               }
             }
           }
         } catch (err) {
           const errorMessage =
-            err instanceof Error ? err.message : ERROR_MESSAGES.UNKNOWN_ERROR;
+            err instanceof Error ? err.message : "Unknown error occurred";
           set((state) => ({
             evaluation: {
               ...state.evaluation,
@@ -581,6 +557,11 @@ export const useNotesStore = create<INotesState>()(
               hasError: true,
             },
           }));
+
+          // Show toast for server action errors
+          toast.error({
+            description: errorMessage,
+          });
         }
       },
 

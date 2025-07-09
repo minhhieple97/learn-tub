@@ -63,7 +63,16 @@ export async function getNoteForEvaluation(noteId: string, userId: string) {
 
   const { data, error } = await supabase
     .from("notes")
-    .select("content, timestamp_seconds")
+    .select(
+      `
+      content, 
+      timestamp_seconds,
+      videos!inner(
+        title,
+        description
+      )
+    `,
+    )
     .eq("id", noteId)
     .eq("user_id", userId)
     .single();
