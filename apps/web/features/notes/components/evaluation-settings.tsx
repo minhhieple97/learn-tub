@@ -2,28 +2,24 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Settings, Brain, Sparkles } from "lucide-react";
 import { AIModelSelector } from "../../ai/components/ai-model-selector";
+import { useNotesStore } from "../store";
 
-type IEvaluationSettingsProps = {
-  provider: string | null;
-  aiModelId: string;
-  onProviderChange: (provider: string) => void;
-  onModelChange: (modelId: string) => void;
-  onEvaluate: () => Promise<void>;
-  onReset?: () => void;
-  isEvaluating?: boolean;
-  showReset?: boolean;
-};
+export const EvaluationSettings = () => {
+  const {
+    evaluation,
+    setProvider,
+    setAiModelId,
+    evaluateNote,
+    resetEvaluation,
+  } = useNotesStore();
 
-export const EvaluationSettings = ({
-  provider,
-  aiModelId,
-  onProviderChange,
-  onModelChange,
-  onEvaluate,
-  onReset,
-  isEvaluating = false,
-  showReset = false,
-}: IEvaluationSettingsProps) => {
+  const handleEvaluate = async () => {
+    if (!evaluation.aiModelId || !evaluation.currentNoteId) return;
+    await evaluateNote(evaluation.currentNoteId, evaluation.aiModelId);
+  };
+
+  const showReset = evaluation.isCompleted || evaluation.hasError;
+
   return (
     <Card className="border-blue-200 bg-gradient-to-r from-blue-50/50 to-purple-50/50">
       <CardHeader className="pb-3">
@@ -34,19 +30,19 @@ export const EvaluationSettings = ({
       </CardHeader>
       <CardContent className="space-y-4">
         <AIModelSelector
-          provider={provider}
-          aiModelId={aiModelId}
-          onProviderChange={onProviderChange}
-          onModelChange={onModelChange}
-          disabled={isEvaluating}
+          provider={evaluation.provider}
+          aiModelId={evaluation.aiModelId}
+          onProviderChange={setProvider}
+          onModelChange={setAiModelId}
+          disabled={evaluation.isEvaluating}
         />
         <div className="flex gap-3 pt-2">
           <Button
-            onClick={onEvaluate}
-            disabled={isEvaluating}
+            onClick={handleEvaluate}
+            disabled={evaluation.isEvaluating}
             className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
           >
-            {isEvaluating ? (
+            {evaluation.isEvaluating ? (
               <>
                 <Brain className="h-4 w-4 mr-2 animate-pulse" />
                 Analyzing...
@@ -58,11 +54,11 @@ export const EvaluationSettings = ({
               </>
             )}
           </Button>
-          {showReset && onReset && (
+          {showReset && (
             <Button
               variant="outline"
-              onClick={onReset}
-              disabled={isEvaluating}
+              onClick={resetEvaluation}
+              disabled={evaluation.isEvaluating}
               className="hover:bg-gray-50"
             >
               Reset
