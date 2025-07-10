@@ -16,16 +16,15 @@ export function HeroSection() {
           </div>
 
           <h1 className="text-slate-900 dark:text-slate-100 mb-8 text-5xl font-bold leading-tight lg:text-7xl">
-            Turn YouTube into Your{" "}
+            Turn YouTube into Your{' '}
             <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
               Learning Platform
             </span>
           </h1>
 
           <p className="text-slate-600 dark:text-slate-300 mx-auto mb-12 max-w-4xl text-xl leading-relaxed lg:text-2xl">
-            Take smart notes, get AI-powered insights, and transform passive
-            video watching into active learning experiences that accelerate your
-            growth.
+            Take smart notes, get AI-powered insights, and transform passive video watching into
+            active learning experiences that accelerate your growth.
           </p>
 
           <div className="mb-16 flex flex-col items-center justify-center gap-4 sm:flex-row">
@@ -37,17 +36,6 @@ export function HeroSection() {
               <Link href={routes.register}>
                 Start Learning Free
                 <ArrowRight className="ml-2 size-5 transition-transform group-hover:translate-x-1" />
-              </Link>
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              className="border-slate-300 dark:border-slate-600 bg-white/80 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-slate-100 group px-8 py-4 text-lg backdrop-blur-sm"
-              asChild
-            >
-              <Link href={routes.demo}>
-                <Play className="mr-2 size-5 transition-transform group-hover:scale-110" />
-                Watch Demo
               </Link>
             </Button>
           </div>
