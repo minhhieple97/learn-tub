@@ -108,6 +108,7 @@ type INotesState = {
 
   openEvaluation: (noteId: string) => void;
   closeEvaluation: () => void;
+  closeEvaluationWithReset: () => void;
   setShowSettings: (show: boolean) => void;
   setActiveTab: (tab: string) => void;
   setProvider: (provider: string) => void;
@@ -425,6 +426,27 @@ export const useNotesStore = create<INotesState>()(
             ...state.evaluation,
             isOpen: false,
             currentNoteId: null,
+          },
+        }));
+      },
+
+      closeEvaluationWithReset: () => {
+        set((state) => ({
+          evaluation: {
+            ...state.evaluation,
+            isOpen: false,
+            showSettings: false,
+            activeTab: "evaluate",
+            currentNoteId: null,
+            status: STATUS_STREAMING.IDLE,
+            feedback: null,
+            streamingContent: "",
+            error: null,
+            isEvaluating: false,
+            isCompleted: false,
+            hasError: false,
+            provider: state.evaluation.provider,
+            aiModelId: state.evaluation.aiModelId,
           },
         }));
       },

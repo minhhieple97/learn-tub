@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -6,9 +5,7 @@ import { Brain, Sparkles, History, Loader2 } from "lucide-react";
 import { EvaluationDialogHeader } from "./evaluation-dialog-header";
 import { EvaluationContent } from "./evaluation-content";
 import { AIFeedbackHistory } from "./note-feedback-history";
-import { useNotesStore } from "../store";
-import { useAIModelData } from "@/features/ai/hooks/use-ai-models";
-import type { IAIModelOption } from "@/features/ai/types";
+import { useNoteEvaluation } from "../hooks";
 
 type INoteEvaluationProps = {
   noteId: string;
@@ -16,75 +13,78 @@ type INoteEvaluationProps = {
 };
 
 export const NoteEvaluation = ({ noteId, disabled }: INoteEvaluationProps) => {
-  const { data, isLoading } = useAIModelData();
-  const providers = data?.providers || [];
-  const modelOptions = data?.modelOptions || [];
-
   const {
+    isLoading,
     evaluation,
-    openEvaluation,
-    closeEvaluation,
-    setActiveTab,
-    setProvider,
-    setAiModelId,
+    handleOpenDialog,
+    handleCloseDialog,
+    handleTabChange,
     toggleSettings,
-  } = useNotesStore();
+  } = useNoteEvaluation({ noteId, disabled });
 
-  useEffect(() => {
-    if (
-      providers.length > 0 &&
-      !providers.some((p) => p.name === evaluation.provider)
-    ) {
-      setProvider(providers[0]?.name || "");
-    }
-  }, [providers, evaluation.provider, setProvider]);
+  const renderAnalyzeButton = () => (
+    <Button
+      variant="outline"
+      size="sm"
+      disabled={disabled || isLoading}
+      onClick={handleOpenDialog}
+      className="h-8 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-700 transition-colors"
+    >
+      {isLoading ? (
+        <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+      ) : (
+        <Brain className="h-4 w-4 mr-1" />
+      )}
+      {isLoading ? "Loading..." : "Analyze"}
+    </Button>
+  );
 
-  // Auto-select model when provider changes or when models are loaded
-  useEffect(() => {
-    if (
-      evaluation.provider &&
-      modelOptions.length > 0 &&
-      !evaluation.aiModelId
-    ) {
-      const providerModel = modelOptions.find(
-        (opt: IAIModelOption) => opt.provider_name === evaluation.provider,
-      );
-      if (providerModel) {
-        setAiModelId(providerModel.ai_model_id);
-      }
-    }
-  }, [evaluation.provider, evaluation.aiModelId, modelOptions, setAiModelId]);
+  const renderLoadingState = () => (
+    <div className="flex flex-col items-center justify-center h-64 space-y-4">
+      <div className="h-12 w-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+        <Loader2 className="h-6 w-6 text-white animate-spin" />
+      </div>
+      <div className="text-center space-y-2">
+        <h3 className="text-lg font-medium text-gray-900">
+          Loading AI Models...
+        </h3>
+        <p className="text-sm text-gray-500">
+          Please wait while we fetch the available AI models and providers.
+        </p>
+      </div>
+    </div>
+  );
 
-  const handleOpenDialog = () => {
-    openEvaluation(noteId);
-  };
+  const renderTabs = () => (
+    <Tabs
+      value={evaluation.activeTab}
+      onValueChange={handleTabChange}
+      className="w-full"
+    >
+      <TabsList className="grid w-full grid-cols-2 mb-6">
+        <TabsTrigger value="evaluate" className="flex items-center gap-2">
+          <Sparkles className="h-4 w-4" />
+          New Analysis
+        </TabsTrigger>
+        <TabsTrigger value="history" className="flex items-center gap-2">
+          <History className="h-4 w-4" />
+          History
+        </TabsTrigger>
+      </TabsList>
 
-  const handleCloseDialog = (open: boolean) => {
-    if (!open) {
-      closeEvaluation();
-    }
-  };
+      <TabsContent value="evaluate" className="space-y-6">
+        <EvaluationContent />
+      </TabsContent>
 
-  const handleTabChange = (value: string) => {
-    setActiveTab(value);
-  };
+      <TabsContent value="history" className="space-y-6 pb-4">
+        <AIFeedbackHistory noteId={noteId} />
+      </TabsContent>
+    </Tabs>
+  );
 
   return (
     <>
-      <Button
-        variant="outline"
-        size="sm"
-        disabled={disabled || isLoading}
-        onClick={handleOpenDialog}
-        className="h-8 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-700 transition-colors"
-      >
-        {isLoading ? (
-          <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-        ) : (
-          <Brain className="h-4 w-4 mr-1" />
-        )}
-        {isLoading ? "Loading..." : "Analyze"}
-      </Button>
+      {renderAnalyzeButton()}
 
       <Dialog open={evaluation.isOpen} onOpenChange={handleCloseDialog}>
         <DialogContent
@@ -99,53 +99,7 @@ export const NoteEvaluation = ({ noteId, disabled }: INoteEvaluationProps) => {
           />
 
           <div className="overflow-y-auto flex-1 py-4 pb-6">
-            {isLoading ? (
-              <div className="flex flex-col items-center justify-center h-64 space-y-4">
-                <div className="h-12 w-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                  <Loader2 className="h-6 w-6 text-white animate-spin" />
-                </div>
-                <div className="text-center space-y-2">
-                  <h3 className="text-lg font-medium text-gray-900">
-                    Loading AI Models...
-                  </h3>
-                  <p className="text-sm text-gray-500">
-                    Please wait while we fetch the available AI models and
-                    providers.
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <Tabs
-                value={evaluation.activeTab}
-                onValueChange={handleTabChange}
-                className="w-full"
-              >
-                <TabsList className="grid w-full grid-cols-2 mb-6">
-                  <TabsTrigger
-                    value="evaluate"
-                    className="flex items-center gap-2"
-                  >
-                    <Sparkles className="h-4 w-4" />
-                    New Analysis
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="history"
-                    className="flex items-center gap-2"
-                  >
-                    <History className="h-4 w-4" />
-                    History
-                  </TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="evaluate" className="space-y-6">
-                  <EvaluationContent />
-                </TabsContent>
-
-                <TabsContent value="history" className="space-y-6 pb-4">
-                  <AIFeedbackHistory noteId={noteId} />
-                </TabsContent>
-              </Tabs>
-            )}
+            {isLoading ? renderLoadingState() : renderTabs()}
           </div>
         </DialogContent>
       </Dialog>
