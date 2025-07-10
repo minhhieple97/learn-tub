@@ -3,18 +3,18 @@ import { useQueryState } from "nuqs";
 import { useEffect, useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 import { debounce } from "lodash";
-
+const DEBOUNCE_TIME = 500;
 export const useVideoSearch = (): IUseVideoSearchReturn => {
   const router = useRouter();
-  const [searchQuery, setSearchQuery] = useQueryState("q");
-  const [localSearchQuery, setLocalSearchQuery] = useState(searchQuery || "");
+  const [searchQuery, setSearchQuery] = useQueryState('q');
+  const [localSearchQuery, setLocalSearchQuery] = useState(searchQuery || '');
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedSetSearchQuery = useCallback(
     debounce(async (value: string) => {
       await setSearchQuery(value || null);
       router.refresh();
-    }, 1000),
+    }, DEBOUNCE_TIME),
     [],
   );
 
@@ -33,7 +33,7 @@ export const useVideoSearch = (): IUseVideoSearchReturn => {
   );
 
   useEffect(() => {
-    setLocalSearchQuery(searchQuery || "");
+    setLocalSearchQuery(searchQuery || '');
   }, [searchQuery]);
 
   return {
