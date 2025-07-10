@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Brain, Sparkles, History, Loader2 } from "lucide-react";
-import { STATUS_STREAMING } from "@/config/constants";
 import { EvaluationDialogHeader } from "./evaluation-dialog-header";
 import { EvaluationContent } from "./evaluation-content";
 import { AIFeedbackHistory } from "./note-feedback-history";
@@ -28,7 +27,6 @@ export const NoteEvaluation = ({ noteId, disabled }: INoteEvaluationProps) => {
     setActiveTab,
     setProvider,
     setAiModelId,
-    evaluateNote,
     toggleSettings,
   } = useNotesStore();
 
@@ -41,8 +39,13 @@ export const NoteEvaluation = ({ noteId, disabled }: INoteEvaluationProps) => {
     }
   }, [providers, evaluation.provider, setProvider]);
 
+  // Auto-select model when provider changes or when models are loaded
   useEffect(() => {
-    if (!evaluation.aiModelId && modelOptions.length > 0) {
+    if (
+      evaluation.provider &&
+      modelOptions.length > 0 &&
+      !evaluation.aiModelId
+    ) {
       const providerModel = modelOptions.find(
         (opt: IAIModelOption) => opt.provider_name === evaluation.provider,
       );
@@ -51,11 +54,6 @@ export const NoteEvaluation = ({ noteId, disabled }: INoteEvaluationProps) => {
       }
     }
   }, [evaluation.provider, evaluation.aiModelId, modelOptions, setAiModelId]);
-
-  const handleEvaluate = async () => {
-    if (!evaluation.aiModelId) return;
-    await evaluateNote(noteId, evaluation.aiModelId);
-  };
 
   const handleOpenDialog = () => {
     openEvaluation(noteId);
@@ -69,20 +67,6 @@ export const NoteEvaluation = ({ noteId, disabled }: INoteEvaluationProps) => {
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
-  };
-
-  const handleProviderChange = (newProvider: string) => {
-    setProvider(newProvider);
-    const providerModel = modelOptions.find(
-      (opt: IAIModelOption) => opt.provider_name === newProvider,
-    );
-    if (providerModel) {
-      setAiModelId(providerModel.ai_model_id);
-    }
-  };
-
-  const handleModelChange = (newModelId: string) => {
-    setAiModelId(newModelId);
   };
 
   return (
@@ -125,7 +109,8 @@ export const NoteEvaluation = ({ noteId, disabled }: INoteEvaluationProps) => {
                     Loading AI Models...
                   </h3>
                   <p className="text-sm text-gray-500">
-                    Please wait while we fetch the available AI models and providers.
+                    Please wait while we fetch the available AI models and
+                    providers.
                   </p>
                 </div>
               </div>
@@ -153,13 +138,7 @@ export const NoteEvaluation = ({ noteId, disabled }: INoteEvaluationProps) => {
                 </TabsList>
 
                 <TabsContent value="evaluate" className="space-y-6">
-                  <EvaluationContent
-                    provider={evaluation.provider}
-                    aiModelId={evaluation.aiModelId}
-                    onProviderChange={handleProviderChange}
-                    onModelChange={handleModelChange}
-                    onEvaluate={handleEvaluate}
-                  />
+                  <EvaluationContent />
                 </TabsContent>
 
                 <TabsContent value="history" className="space-y-6 pb-4">

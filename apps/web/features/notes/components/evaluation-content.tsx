@@ -6,21 +6,7 @@ import { NoteFeedbackDisplay } from "./note-feedback-display";
 import { STATUS_STREAMING } from "@/config/constants";
 import { useNotesStore } from "../store";
 
-type IEvaluationContentProps = {
-  provider: string | null;
-  aiModelId: string;
-  onProviderChange: (provider: string) => void;
-  onModelChange: (modelId: string) => void;
-  onEvaluate: () => Promise<void>;
-};
-
-export const EvaluationContent = ({
-  provider,
-  aiModelId,
-  onProviderChange,
-  onModelChange,
-  onEvaluate,
-}: IEvaluationContentProps) => {
+export const EvaluationContent = () => {
   const {
     evaluation,
     resetEvaluation,
@@ -30,18 +16,7 @@ export const EvaluationContent = ({
 
   return (
     <div className="space-y-6">
-      {evaluation.showSettings && (
-        <EvaluationSettings
-          provider={provider}
-          aiModelId={aiModelId}
-          onProviderChange={onProviderChange}
-          onModelChange={onModelChange}
-          onEvaluate={onEvaluate}
-          onReset={resetEvaluation}
-          isEvaluating={evaluation.isEvaluating}
-          showReset={evaluation.isCompleted || evaluation.hasError}
-        />
-      )}
+      {evaluation.showSettings && <EvaluationSettings />}
 
       {evaluation.hasError && (
         <EvaluationError
