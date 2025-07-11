@@ -15,41 +15,32 @@ import {
   Loader2,
   Clock,
 } from "lucide-react";
-import { IUserAnswer, IQuestion } from "../types";
+import { useQuizStore } from "../store";
 
-type IQuizzNavigationProps = {
-  currentQuestionIndex: number;
-  totalQuestions: number;
-  currentAnswer?: IUserAnswer;
-  canGoNext: boolean;
-  canGoPrevious: boolean;
-  hasAnsweredAll: boolean;
-  isEvaluating: boolean;
-  questions: IQuestion[];
-  answers: IUserAnswer[];
-  formattedTime?: string;
-  onPrevious: () => void;
-  onNext: () => void;
-  onGoToQuestion: (index: number) => void;
-  onSubmitQuiz: () => void;
-};
+export const QuizzNavigation = () => {
+  const {
+    questions,
+    answers,
+    currentQuestionIndex,
+    isEvaluating,
+    getCurrentAnswer,
+    getHasAnsweredAll,
+    getCanGoNext,
+    getCanGoPrevious,
+    getFormattedTime,
+    nextQuestion,
+    previousQuestion,
+    goToQuestion,
+    submitQuiz,
+  } = useQuizStore();
 
-export const QuizzNavigation = ({
-  currentQuestionIndex,
-  totalQuestions,
-  currentAnswer,
-  canGoNext,
-  canGoPrevious,
-  hasAnsweredAll,
-  isEvaluating,
-  questions,
-  answers,
-  formattedTime,
-  onPrevious,
-  onNext,
-  onGoToQuestion,
-  onSubmitQuiz,
-}: IQuizzNavigationProps) => {
+  const currentAnswer = getCurrentAnswer();
+  const hasAnsweredAll = getHasAnsweredAll();
+  const canGoNext = getCanGoNext();
+  const canGoPrevious = getCanGoPrevious();
+  const formattedTime = getFormattedTime();
+  const totalQuestions = questions.length;
+
   return (
     <div className="space-y-4">
       {formattedTime && (
@@ -66,7 +57,7 @@ export const QuizzNavigation = ({
       <div className="flex justify-center">
         <Select
           value={currentQuestionIndex.toString()}
-          onValueChange={(value) => onGoToQuestion(parseInt(value))}
+          onValueChange={(value) => goToQuestion(parseInt(value))}
         >
           <SelectTrigger className="w-[200px] border-slate-300 dark:border-slate-600">
             <SelectValue>
@@ -100,7 +91,7 @@ export const QuizzNavigation = ({
       <div className="flex items-center justify-between">
         <Button
           variant="outline"
-          onClick={onPrevious}
+          onClick={previousQuestion}
           disabled={!canGoPrevious}
           className="flex items-center gap-2 px-6 border-slate-300 hover:bg-slate-50 dark:border-slate-600 dark:hover:bg-slate-800"
         >
@@ -133,7 +124,7 @@ export const QuizzNavigation = ({
 
         {canGoNext ? (
           <Button
-            onClick={onNext}
+            onClick={nextQuestion}
             className="flex items-center gap-2 px-6 bg-blue-600 hover:bg-blue-700 text-white"
           >
             <span className="hidden sm:inline">Next</span>
@@ -142,7 +133,7 @@ export const QuizzNavigation = ({
           </Button>
         ) : (
           <Button
-            onClick={onSubmitQuiz}
+            onClick={submitQuiz}
             disabled={!hasAnsweredAll || isEvaluating}
             variant="success"
             className="flex items-center gap-2 px-6"

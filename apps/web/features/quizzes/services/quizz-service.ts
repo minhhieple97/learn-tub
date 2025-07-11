@@ -169,9 +169,9 @@ class QuizzService {
   }
 
   private createQuestionGenerationPrompt(params: {
-    videoTitle?: string;
-    videoDescription?: string;
-    videoTutorial?: string;
+    videoTitle?: string | null;
+    videoDescription?: string | null;
+    videoTutorial?: string | null;
     questionCount: number;
     difficulty: string;
     topics?: string[];
@@ -217,7 +217,11 @@ ${AI_QUIZZ_PROMPTS.GENERATION_FOOTER}`;
       questionId: string;
       selectedAnswer: "A" | "B" | "C" | "D";
     }>,
-    videoContext?: { title?: string; description?: string; tutorial?: string },
+    videoContext?: {
+      title?: string | null;
+      description?: string | null;
+      tutorial?: string | null;
+    },
   ): string {
     const contextInfo = this.buildVideoContext({
       videoTitle: videoContext?.title,
@@ -250,9 +254,9 @@ ${AI_QUIZZ_PROMPTS.EVALUATION_FOCUS}`;
   }
 
   private buildVideoContext(context?: {
-    videoTitle?: string;
-    videoDescription?: string;
-    videoTutorial?: string;
+    videoTitle?: string | null;
+    videoDescription?: string | null;
+    videoTutorial?: string | null;
   }): string {
     if (!context) return "";
 

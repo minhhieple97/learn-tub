@@ -26,26 +26,13 @@ export const QuizzRetakeContent = ({
 
   const {
     questions,
-    answers,
-    currentQuestionIndex,
     showResults,
     feedback,
-    isEvaluating,
     initializeRetake,
     answerQuestion,
-    nextQuestion,
-    previousQuestion,
-    goToQuestion,
-    submitQuiz,
     startTimer,
     getCurrentQuestion,
     getCurrentAnswer,
-    getHasAnsweredAll,
-    getCanGoNext,
-    getCanGoPrevious,
-    getProgress,
-    getAnsweredCount,
-    getFormattedTime,
   } = useQuizStore();
 
   useEffect(() => {
@@ -54,12 +41,6 @@ export const QuizzRetakeContent = ({
 
   const currentQuestion = getCurrentQuestion();
   const currentAnswer = getCurrentAnswer();
-  const hasAnsweredAll = getHasAnsweredAll();
-  const canGoNext = getCanGoNext();
-  const canGoPrevious = getCanGoPrevious();
-  const progress = getProgress();
-  const answeredCount = getAnsweredCount();
-  const formattedTime = getFormattedTime();
 
   const handleStartRetake = () => {
     setHasStarted(true);
@@ -94,7 +75,7 @@ export const QuizzRetakeContent = ({
             </p>
           </CardHeader>
           <CardContent>
-            <QuizzResults feedback={feedback} isGenerating={false} />
+            <QuizzResults />
           </CardContent>
         </Card>
       </div>
@@ -139,8 +120,8 @@ export const QuizzRetakeContent = ({
 
             <div className="text-center">
               <p className="text-sm text-muted-foreground mb-4">
-                You're about to retake this quiz. Your previous answers will be
-                cleared and you'll start fresh.
+                You&apos;re about to retake this quiz. Your previous answers
+                will be cleared and you&apos;ll start fresh.
               </p>
               <Button
                 onClick={handleStartRetake}
@@ -175,14 +156,7 @@ export const QuizzRetakeContent = ({
         <div className="w-24" />
       </div>
 
-      <QuizzProgress
-        currentQuestionIndex={currentQuestionIndex}
-        totalQuestions={questions.length}
-        answeredCount={answeredCount}
-        progress={progress}
-        questions={questions}
-        answers={answers}
-      />
+      <QuizzProgress />
 
       {currentQuestion && (
         <QuestionCard
@@ -194,22 +168,7 @@ export const QuizzRetakeContent = ({
         />
       )}
 
-      <QuizzNavigation
-        currentQuestionIndex={currentQuestionIndex}
-        totalQuestions={questions.length}
-        currentAnswer={currentAnswer ?? undefined}
-        canGoNext={canGoNext}
-        canGoPrevious={canGoPrevious}
-        hasAnsweredAll={hasAnsweredAll}
-        isEvaluating={isEvaluating}
-        questions={questions}
-        answers={answers}
-        formattedTime={formattedTime}
-        onPrevious={previousQuestion}
-        onNext={nextQuestion}
-        onGoToQuestion={goToQuestion}
-        onSubmitQuiz={submitQuiz}
-      />
+      <QuizzNavigation />
     </div>
   );
 };

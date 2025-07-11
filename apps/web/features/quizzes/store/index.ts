@@ -15,7 +15,7 @@ import { generateQuizQuestionsAction, evaluateQuizAction } from "../actions";
 import { AI_QUIZZ_CONFIG } from "@/config/constants";
 import { toast } from "@/hooks/use-toast";
 
-type QuizState = {
+type IQuizState = {
   questions: IQuizQuestion[];
   answers: IUserAnswer[];
   currentQuestionIndex: number;
@@ -37,16 +37,21 @@ type QuizState = {
   retakeSession: IQuizSession | null;
 
   videoId: string | null;
-  videoTitle?: string;
-  videoDescription?: string;
-  videoTutorial?: string;
+  videoTitle?: string | null;
+  videoDescription?: string | null;
+  videoTutorial?: string | null;
 
-  setVideoContext: (
-    videoId: string,
-    title?: string,
-    description?: string,
-    tutorial?: string,
-  ) => void;
+  setVideoContext: ({
+    videoId,
+    title,
+    description,
+    tutorial,
+  }: {
+    videoId: string;
+    title?: string;
+    description?: string | null;
+    tutorial?: string | null;
+  }) => void;
   updateSettings: (settings: Partial<IQuizSettings>) => void;
   generateQuestions: () => Promise<void>;
   answerQuestion: (
@@ -76,7 +81,7 @@ type QuizState = {
   getFormattedTimeTaken: () => string;
 };
 
-export const useQuizStore = create<QuizState>()(
+export const useQuizStore = create<IQuizState>()(
   devtools(
     (set, get) => {
       if (typeof window !== "undefined") {
@@ -114,12 +119,17 @@ export const useQuizStore = create<QuizState>()(
         videoDescription: undefined,
         videoTutorial: undefined,
 
-        setVideoContext: (
-          videoId: string,
-          title?: string,
-          description?: string,
-          tutorial?: string,
-        ) => {
+        setVideoContext: ({
+          videoId,
+          title,
+          description,
+          tutorial,
+        }: {
+          videoId: string;
+          title?: string | null;
+          description?: string | null;
+          tutorial?: string | null;
+        }) => {
           set({
             videoId,
             videoTitle: title,

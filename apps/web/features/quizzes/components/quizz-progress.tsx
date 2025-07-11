@@ -2,25 +2,21 @@
 
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
-import { IUserAnswer, IQuestion } from "../types";
+import { useQuizStore } from "../store";
 
-type IQuizzProgressProps = {
-  currentQuestionIndex: number;
-  totalQuestions: number;
-  answeredCount: number;
-  progress: number;
-  questions: IQuestion[];
-  answers: IUserAnswer[];
-};
+export const QuizzProgress = () => {
+  const {
+    questions,
+    answers,
+    currentQuestionIndex,
+    getProgress,
+    getAnsweredCount,
+  } = useQuizStore();
 
-export const QuizzProgress = ({
-  currentQuestionIndex,
-  totalQuestions,
-  answeredCount,
-  progress,
-  questions,
-  answers,
-}: IQuizzProgressProps) => {
+  const progress = getProgress();
+  const answeredCount = getAnsweredCount();
+  const totalQuestions = questions.length;
+
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between text-sm text-slate-600 dark:text-slate-400">

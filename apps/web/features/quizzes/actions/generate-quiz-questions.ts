@@ -11,9 +11,9 @@ import { CREDIT_ACTION_COUNTS } from "@/config/constants";
 
 const GenerateQuizQuestionsSchema = z.object({
   videoId: z.string().min(1, "Video ID is required"),
-  videoTitle: z.string().optional(),
-  videoDescription: z.string().optional(),
-  videoTutorial: z.string().optional(),
+  videoTitle: z.string().optional().nullable(),
+  videoDescription: z.string().optional().nullable(),
+  videoTutorial: z.string().optional().nullable(),
   questionCount: z.number().min(1).max(50).default(10),
   difficulty: z.enum(["easy", "medium", "hard", "mixed"]).default("mixed"),
   topics: z.array(z.string()).optional(),

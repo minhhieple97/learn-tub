@@ -74,9 +74,9 @@ export const EvaluateQuizSchema = z.object({
   answers: z.array(UserAnswerSchema).min(1, "At least one answer is required"),
   videoContext: z
     .object({
-      title: z.string().optional(),
-      description: z.string().optional(),
-      tutorial: z.string().optional(),
+      title: z.string().optional().nullable(),
+      description: z.string().optional().nullable(),
+      tutorial: z.string().optional().nullable(),
     })
     .optional(),
   aiModelId: z.string().uuid("AI model ID is required"),

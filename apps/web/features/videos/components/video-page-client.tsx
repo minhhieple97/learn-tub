@@ -7,6 +7,7 @@ import { VideoMainContent } from "./video-main-content";
 import { VideoSidebar } from "./video-sidebar";
 import { ResizablePanels } from "./resizable-panels";
 import { IVideoPageData } from "../types";
+import { useQuizStore } from "@/features/quizzes/store";
 
 type IVideoPageClientProps = {
   video: IVideoPageData;
@@ -15,10 +16,18 @@ type IVideoPageClientProps = {
 export const VideoPageClient = ({ video }: IVideoPageClientProps) => {
   const { initializeYouTubeAPI, setCurrentVideo } = useNotesStore();
 
+  const { setVideoContext } = useQuizStore();
+
   useEffect(() => {
     initializeYouTubeAPI();
     setCurrentVideo(video);
-  }, [video, initializeYouTubeAPI, setCurrentVideo]);
+    setVideoContext({
+      videoId: video.id,
+      title: video.title,
+      description: video.description,
+      tutorial: video.tutorial,
+    });
+  }, [video, initializeYouTubeAPI, setCurrentVideo, setVideoContext]);
 
   const leftPanel = <VideoMainContent />;
 

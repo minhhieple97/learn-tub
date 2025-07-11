@@ -3,7 +3,6 @@
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { RotateCcw } from "lucide-react";
-import { IQuizFeedback } from "../types";
 import { useQuizStore } from "../store";
 import { ScoreCard } from "./quiz-results/score-card";
 import { AssessmentCard } from "./quiz-results/assessment-card";
@@ -11,16 +10,17 @@ import { StrengthsCard } from "./quiz-results/strengths-card";
 import { ImprovementAreasCard } from "./quiz-results/improvement-areas-card";
 import { QuestionReviewCard } from "./quiz-results/question-review-card";
 
-type IQuizzResultsProps = {
-  feedback: IQuizFeedback;
-  isGenerating: boolean;
-};
+export const QuizzResults = () => {
+  const { feedback, resetQuiz } = useQuizStore();
 
-export const QuizzResults = ({ feedback }: IQuizzResultsProps) => {
-  const { resetQuiz } = useQuizStore();
+  if (!feedback) return null;
 
   return (
-    <ScrollArea className="h-[calc(100vh-200px)] pr-4">
+    <ScrollArea
+      className="h-[calc(100vh-200px)] pr-4"
+      type="always"
+      scrollHideDelay={0}
+    >
       <div className="space-y-6">
         <ScoreCard
           score={feedback.score}
