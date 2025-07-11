@@ -7,7 +7,7 @@ import { useQuizWelcome } from "../hooks/use-quiz-welcome";
 import { useQuizStore } from "../store";
 
 export const QuizzWelcomeScreen = () => {
-  const { showSettings, toggleSettings } = useQuizWelcome();
+  const { showSettings, toggleSettings, isLoadingAIModel } = useQuizWelcome();
   const { isGenerating, generateQuestions } = useQuizStore();
 
   return (
@@ -29,7 +29,7 @@ export const QuizzWelcomeScreen = () => {
         <Button
           variant="outline"
           onClick={toggleSettings}
-          disabled={isGenerating}
+          disabled={isGenerating || isLoadingAIModel}
           className="border-blue-300 text-blue-600 hover:bg-blue-50 dark:border-blue-600 dark:text-blue-400 dark:hover:bg-blue-950/50"
         >
           <Settings className="mr-2 size-4" />
@@ -37,15 +37,17 @@ export const QuizzWelcomeScreen = () => {
         </Button>
         <Button
           onClick={generateQuestions}
-          disabled={isGenerating}
+          disabled={isGenerating || isLoadingAIModel}
           className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg"
         >
           {isGenerating ? (
             <Loader2 className="mr-2 size-4 animate-spin" />
+          ) : isLoadingAIModel ? (
+            <Loader2 className="mr-2 size-4 animate-spin" />
           ) : (
             <Play className="mr-2 size-4" />
           )}
-          Generate Quiz
+          {isLoadingAIModel ? "Loading AI Model Data" : "Generate Quiz"}
         </Button>
       </div>
     </div>
