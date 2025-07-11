@@ -13,19 +13,12 @@ import { IQuizDifficulty } from "../types";
 import { AIModelSelector } from "@/features/ai/components/ai-model-selector";
 import { useQuizStore } from "../store";
 
-type IQuizzSettingsProps = {
-  isGenerating?: boolean;
-};
+export const QuizzSettings = () => {
+  const { settings, updateSettings, isGenerating } = useQuizStore();
 
-export const QuizzSettings = ({
-  isGenerating = false,
-}: IQuizzSettingsProps) => {
-  const { settings, updateSettings } = useQuizStore();
   return (
     <Card
-      className={`mb-6 w-full max-w-md border-blue-200 dark:border-blue-800 shadow-md ${
-        isGenerating ? "opacity-60" : ""
-      }`}
+      className={`mb-6 w-full max-w-md border-blue-200 dark:border-blue-800 shadow-md ${isGenerating ? "opacity-60" : ""}`}
     >
       <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/50 dark:to-indigo-950/50">
         <CardTitle className="flex items-center gap-2 text-blue-700 dark:text-blue-300">

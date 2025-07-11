@@ -1,7 +1,6 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { NoteEditor } from "@/features/notes/components/note-editor";
 import { QuizzTab } from "@/features/quizzes/components/quizz-tab";
-import { IVideoPageData } from "../types";
 
 export const VideoSidebar = () => {
   return (

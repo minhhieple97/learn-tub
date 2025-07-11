@@ -2,10 +2,6 @@
 
 import { useQuizStore } from "../store";
 
-/**
- * Utility hook that provides commonly used computed values from the quiz store
- * This helps avoid repetitive getter calls in components
- */
 export const useQuizProgress = () => {
   const {
     getCurrentQuestion,
@@ -32,9 +28,6 @@ export const useQuizProgress = () => {
   };
 };
 
-/**
- * Utility hook that provides quiz actions
- */
 export const useQuizActions = () => {
   const {
     setVideoContext,
@@ -69,9 +62,6 @@ export const useQuizActions = () => {
   };
 };
 
-/**
- * Utility hook that provides quiz state
- */
 export const useQuizState = () => {
   const {
     questions,

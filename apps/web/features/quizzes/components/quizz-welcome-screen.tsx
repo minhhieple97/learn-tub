@@ -4,17 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Brain, Play, Settings, Loader2 } from "lucide-react";
 import { QuizzSettings } from "./quizz-settings";
 import { useQuizWelcome } from "../hooks/use-quiz-welcome";
+import { useQuizStore } from "../store";
 
-type IQuizzWelcomeScreenProps = {
-  isGenerating: boolean;
-  onGenerateQuestions: () => void;
-};
-
-export const QuizzWelcomeScreen = ({
-  isGenerating,
-  onGenerateQuestions,
-}: IQuizzWelcomeScreenProps) => {
+export const QuizzWelcomeScreen = () => {
   const { showSettings, toggleSettings } = useQuizWelcome();
+  const { isGenerating, generateQuestions } = useQuizStore();
 
   return (
     <div className="flex flex-col items-center justify-center py-12 text-center">
@@ -29,7 +23,7 @@ export const QuizzWelcomeScreen = ({
         content. Get personalized feedback to improve your understanding.
       </p>
 
-      {showSettings && <QuizzSettings isGenerating={isGenerating} />}
+      {showSettings && <QuizzSettings />}
 
       <div className="flex gap-3">
         <Button
@@ -42,7 +36,7 @@ export const QuizzWelcomeScreen = ({
           Settings
         </Button>
         <Button
-          onClick={onGenerateQuestions}
+          onClick={generateQuestions}
           disabled={isGenerating}
           className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg"
         >

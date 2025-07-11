@@ -83,9 +83,9 @@ export type IQuizFeedback = {
 
 export type IGenerateQuestionsRequest = {
   videoId: string;
-  videoTitle?: string;
-  videoDescription?: string;
-  videoTutorial?: string;
+  videoTitle?: string | null;
+  videoDescription?: string | null;
+  videoTutorial?: string | null;
   questionCount?: number;
   difficulty?: IQuizDifficulty;
   topics?: string[];
@@ -98,9 +98,9 @@ export type IEvaluateQuizRequest = {
   questions: IQuizQuestion[];
   answers: Array<{ questionId: string; selectedAnswer: "A" | "B" | "C" | "D" }>;
   videoContext?: {
-    title?: string;
-    description?: string;
-    tutorial?: string;
+    title?: string | null;
+    description?: string | null;
+    tutorial?: string | null;
   };
   userId: string;
 };
