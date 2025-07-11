@@ -11,13 +11,10 @@ import type {
   IQuizFeedback,
   IQuizGenerationResponse,
   IQuizQuestion,
-  IQuizStreamChunk,
 } from "../types";
 import { aiUsageTracker } from "@/features/ai";
 import { AIClientFactory } from "@/features/ai/services/ai-client";
 import { createClient } from "@/lib/supabase/server";
-
-type IStreamController = ReadableStreamDefaultController<IQuizStreamChunk>;
 
 class QuizzService {
   async generateQuestions(
@@ -103,32 +100,6 @@ class QuizzService {
             : AI_QUIZZ_ERRORS.FAILED_TO_GENERATE,
       };
     }
-  }
-
-  async generateQuestionsStream(
-    request: IGenerateQuestionsRequest,
-  ): Promise<ReadableStream<Uint8Array>> {
-    const {
-      aiModelId,
-      videoTitle,
-      videoDescription,
-      videoTutorial,
-      questionCount = AI_QUIZZ_CONFIG.DEFAULT_QUESTION_COUNT,
-      difficulty = AI_QUIZZ_CONFIG.DEFAULT_DIFFICULTY,
-      topics,
-      userId,
-    } = request;
-
-    const prompt = this.createQuestionGenerationPrompt({
-      videoTitle,
-      videoDescription,
-      videoTutorial,
-      questionCount,
-      difficulty,
-      topics,
-    });
-
-    return this.callAIProviderStreamForAPI(aiModelId, prompt, userId);
   }
 
   async evaluateQuiz(
@@ -280,52 +251,6 @@ ${AI_QUIZZ_PROMPTS.EVALUATION_FOCUS}`;
     return parts.join("\n");
   }
 
-  private async callAIProvider(
-    aiModelId: string,
-    prompt: string,
-    userId: string,
-  ): Promise<string> {
-    const supabase = await createClient();
-    const { data: modelData, error } = await supabase
-      .from("ai_model_pricing_view")
-      .select("model_name")
-      .eq("id", aiModelId)
-      .single();
-
-    if (error || !modelData?.model_name) {
-      throw new Error(`${AI_QUIZZ_ERRORS.UNSUPPORTED_PROVIDER}: ${aiModelId}`);
-    }
-
-    const modelName = modelData.model_name;
-
-    return aiUsageTracker.wrapAIOperationWithTokens(
-      {
-        user_id: userId,
-        command: "generate_quizz_questions",
-        ai_model_id: aiModelId,
-        request_payload: { prompt_length: prompt.length },
-      },
-      async () => {
-        const aiClient = AIClientFactory.getClient();
-
-        const messages = aiClient.createSystemUserMessages(
-          AI_SYSTEM_MESSAGES.EDUCATIONAL_ASSISTANT,
-          prompt,
-        );
-
-        const { result, tokenUsage } = await aiClient.chatCompletionWithUsage({
-          model: modelName,
-          messages,
-        });
-
-        return {
-          result,
-          tokenUsage,
-        };
-      },
-    );
-  }
-
   private async callAIProviderForEvaluation(
     aiModelId: string,
     prompt: string,
@@ -370,209 +295,6 @@ ${AI_QUIZZ_PROMPTS.EVALUATION_FOCUS}`;
         };
       },
     );
-  }
-
-  private async callAIProviderStream(
-    aiModelId: string,
-    prompt: string,
-    userId: string,
-  ): Promise<ReadableStream<IQuizStreamChunk>> {
-    const supabase = await createClient();
-    const { data: modelData, error } = await supabase
-      .from("ai_model_pricing_view")
-      .select("model_name")
-      .eq("id", aiModelId)
-      .single();
-
-    if (error || !modelData?.model_name) {
-      throw new Error(`${AI_QUIZZ_ERRORS.UNSUPPORTED_PROVIDER}: ${aiModelId}`);
-    }
-
-    const modelName = modelData.model_name;
-
-    return aiUsageTracker.wrapStreamingOperation(
-      {
-        user_id: userId,
-        command: "generate_quizz_questions",
-        ai_model_id: aiModelId,
-        request_payload: { prompt_length: prompt.length },
-      },
-      async () => {
-        const aiClient = AIClientFactory.getClient();
-
-        const messages = aiClient.createSystemUserMessages(
-          AI_SYSTEM_MESSAGES.EDUCATIONAL_ASSISTANT,
-          prompt,
-        );
-
-        const { stream, getUsage } =
-          await aiClient.streamChatCompletionWithUsage({
-            model: modelName,
-            messages,
-          });
-
-        const transformedStream = this.createStreamFromAIClient(stream);
-
-        return {
-          stream: transformedStream,
-          getUsage,
-        };
-      },
-    );
-  }
-
-  private async callAIProviderStreamForAPI(
-    aiModelId: string,
-    prompt: string,
-    userId: string,
-  ): Promise<ReadableStream<Uint8Array>> {
-    const supabase = await createClient();
-    const { data: modelData, error } = await supabase
-      .from("ai_model_pricing_view")
-      .select("model_name")
-      .eq("id", aiModelId)
-      .single();
-
-    if (error || !modelData?.model_name) {
-      throw new Error(`${AI_QUIZZ_ERRORS.UNSUPPORTED_PROVIDER}: ${aiModelId}`);
-    }
-
-    const modelName = modelData.model_name;
-
-    return aiUsageTracker.wrapStreamingOperation(
-      {
-        user_id: userId,
-        command: "generate_quizz_questions",
-        ai_model_id: aiModelId,
-        request_payload: { prompt_length: prompt.length },
-      },
-      async () => {
-        const aiClient = AIClientFactory.getClient();
-
-        const messages = aiClient.createSystemUserMessages(
-          AI_SYSTEM_MESSAGES.EDUCATIONAL_ASSISTANT,
-          prompt,
-        );
-
-        const { stream, getUsage } =
-          await aiClient.streamChatCompletionWithUsage({
-            model: modelName,
-            messages,
-          });
-
-        const transformedStream = this.createAPIStreamFromAIClient(stream);
-
-        return {
-          stream: transformedStream,
-          getUsage,
-        };
-      },
-    );
-  }
-
-  private createStreamFromAIClient(
-    responseBody: ReadableStream<Uint8Array>,
-  ): ReadableStream<IQuizStreamChunk> {
-    const aiClient = AIClientFactory.getClient();
-    const aiStream = aiClient.createStreamFromResponse(responseBody);
-
-    return new ReadableStream<IQuizStreamChunk>({
-      async start(controller) {
-        try {
-          let fullContent = "";
-          const reader = aiStream.getReader();
-
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-
-            const content = value.choices[0]?.delta?.content || "";
-            fullContent += content;
-
-            controller.enqueue({
-              type: "question",
-              content,
-              finished: false,
-            });
-          }
-
-          quizService.handleStreamCompletion(controller, fullContent);
-        } catch (error) {
-          quizService.handleStreamError(controller, error);
-        }
-      },
-    });
-  }
-
-  private createAPIStreamFromAIClient(
-    responseBody: ReadableStream<Uint8Array>,
-  ): ReadableStream<Uint8Array> {
-    const encoder = new TextEncoder();
-    const aiClient = AIClientFactory.getClient();
-    const aiStream = aiClient.createStreamFromResponse(responseBody);
-
-    return new ReadableStream<Uint8Array>({
-      async start(controller) {
-        try {
-          let fullContent = "";
-          const reader = aiStream.getReader();
-
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-
-            const content = value.choices[0]?.delta?.content || "";
-            fullContent += content;
-
-            const chunkData =
-              JSON.stringify({
-                type: "question",
-                content,
-                finished: false,
-              }) + "\n";
-
-            controller.enqueue(encoder.encode(chunkData));
-          }
-
-          try {
-            const questions =
-              quizService.parseQuestionsFromResponse(fullContent);
-            const completeData =
-              JSON.stringify({
-                type: "complete",
-                content: JSON.stringify(questions),
-                finished: true,
-              }) + "\n";
-
-            controller.enqueue(encoder.encode(completeData));
-          } catch {
-            const errorData =
-              JSON.stringify({
-                type: "error",
-                content: AI_QUIZZ_ERRORS.FAILED_TO_PARSE_QUESTIONS,
-                finished: true,
-              }) + "\n";
-
-            controller.enqueue(encoder.encode(errorData));
-          }
-        } catch (error) {
-          const errorMessage =
-            error instanceof Error
-              ? error.message
-              : AI_QUIZZ_ERRORS.FAILED_TO_GENERATE;
-          const errorData =
-            JSON.stringify({
-              type: "error",
-              content: `${AI_QUIZZ_ERRORS.FAILED_TO_GENERATE}: ${errorMessage}`,
-              finished: true,
-            }) + "\n";
-
-          controller.enqueue(encoder.encode(errorData));
-        } finally {
-          controller.close();
-        }
-      },
-    });
   }
 
   private parseQuestionsFromResponse(responseText: string): IQuizQuestion[] {
@@ -746,62 +468,6 @@ ${AI_QUIZZ_PROMPTS.EVALUATION_FOCUS}`;
         performanceByTopic: {},
       };
     }
-  }
-
-  private handleStreamCompletion(
-    controller: IStreamController,
-    fullContent: string,
-  ): void {
-    try {
-      const questions = this.parseQuestionsFromResponse(fullContent);
-      controller.enqueue({
-        type: "complete",
-        content: JSON.stringify(questions),
-        finished: true,
-      });
-    } catch {
-      controller.enqueue({
-        type: "error",
-        content: AI_QUIZZ_ERRORS.FAILED_TO_PARSE_QUESTIONS,
-        finished: true,
-      });
-    } finally {
-      controller.close();
-    }
-  }
-
-  private handleStreamError(
-    controller: IStreamController,
-    error: unknown,
-  ): void {
-    const errorMessage =
-      error instanceof Error
-        ? error.message
-        : AI_QUIZZ_ERRORS.FAILED_TO_GENERATE;
-
-    controller.enqueue({
-      type: "error",
-      content: `${AI_QUIZZ_ERRORS.FAILED_TO_GENERATE}: ${errorMessage}`,
-      finished: true,
-    });
-
-    controller.close();
-  }
-
-  async generateQuizQuestionsStream(
-    prompt: string,
-    userId: string,
-    aiModelId: string,
-  ): Promise<ReadableStream<IQuizStreamChunk>> {
-    return this.callAIProviderStream(aiModelId, prompt, userId);
-  }
-
-  async generateQuizQuestionsStreamForAPI(
-    prompt: string,
-    userId: string,
-    aiModelId: string,
-  ): Promise<ReadableStream<Uint8Array>> {
-    return this.callAIProviderStreamForAPI(aiModelId, prompt, userId);
   }
 }
 
