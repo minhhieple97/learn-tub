@@ -5,7 +5,7 @@ import { useAIModelData } from "@/features/ai/hooks/use-ai-models";
 export const useQuizWelcome = () => {
   const [showSettings, setShowSettings] = useState(false);
   const { settings, updateSettings } = useQuizStore();
-  const { data: aiModelData } = useAIModelData();
+  const { data: aiModelData, isLoading: isLoadingAIModel } = useAIModelData();
 
   useEffect(() => {
     if (aiModelData && !settings.provider && !settings.aiModelId) {
@@ -36,5 +36,6 @@ export const useQuizWelcome = () => {
     showSettings,
     toggleSettings,
     setShowSettings,
+    isLoadingAIModel,
   };
 };
