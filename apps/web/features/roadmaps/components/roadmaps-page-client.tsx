@@ -1,38 +1,47 @@
 "use client";
 
-import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
+import { useRoadmapsPage } from '@/features/roadmaps/hooks/use-roadmaps-page';
 import { RoadmapList, RoadmapChatbox, RoadmapMindmap } from "./index";
-import type { LearningRoadmap, RoadmapWithNodes } from "../types";
+import type { LearningRoadmap } from "../types";
 
-type RoadmapsPageClientProps = {
+type IRoadmapsPageClientProps = {
   initialRoadmaps: LearningRoadmap[];
 };
 
 export const RoadmapsPageClient = ({
   initialRoadmaps,
-}: RoadmapsPageClientProps) => {
-  const [roadmaps, setRoadmaps] = useState(initialRoadmaps);
-  const [generatedRoadmap, setGeneratedRoadmap] =
-    useState<RoadmapWithNodes | null>(null);
-  const [isGenerating, setIsGenerating] = useState(false);
+}: IRoadmapsPageClientProps) => {
+  const {
+    roadmaps,
+    selectedRoadmap,
+    generatedRoadmap,
+    displayedRoadmap,
+    isGenerating,
+    isFetchingDetails,
+    handleRoadmapSelect,
+    handleRoadmapGenerated,
+    handleGenerationStart,
+    handleGenerationEnd,
+    handleBackToOverview,
+  } = useRoadmapsPage({ initialRoadmaps });
 
-  const handleRoadmapGenerated = (newRoadmap: RoadmapWithNodes) => {
-    setGeneratedRoadmap(newRoadmap);
-    // Add to the roadmaps list as well
-    setRoadmaps((prev) => [newRoadmap, ...prev]);
+  const getHeaderTitle = () => {
+    if (!displayedRoadmap) {
+      return "Roadmap Mindmap";
+    }
+
+    let title = displayedRoadmap.title;
+
+    if (isGenerating) {
+      title += " (Generating...)";
+    } else if (isFetchingDetails) {
+      title += " (Loading...)";
+    }
+
+    return title;
   };
-
-  const handleGenerationStart = () => {
-    setIsGenerating(true);
-    setGeneratedRoadmap(null);
-  };
-
-  const handleGenerationEnd = () => {
-    setIsGenerating(false);
-  };
-
-  // Use roadmaps directly since new ones are already added to the state
-  const displayRoadmaps = roadmaps;
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
@@ -49,7 +58,12 @@ export const RoadmapsPageClient = ({
             <div className="flex-1 flex flex-col min-h-0 space-y-4">
               {/* Roadmap List - Scrollable */}
               <div className="flex-1 min-h-0 overflow-hidden">
-                <RoadmapList roadmaps={roadmaps} />
+                <RoadmapList
+                  roadmaps={roadmaps}
+                  onRoadmapSelect={handleRoadmapSelect}
+                  selectedRoadmapId={displayedRoadmap?.id}
+                  isLoading={isFetchingDetails}
+                />
               </div>
 
               {/* Chatbox - Fixed at bottom */}
@@ -66,21 +80,28 @@ export const RoadmapsPageClient = ({
           {/* Right Side - Mindmap Visualization */}
           <div className="lg:col-span-2 h-full">
             <div className="bg-white dark:bg-slate-800 rounded-lg border h-full flex flex-col">
-              <div className="p-4 border-b flex-shrink-0">
+              <div className="p-4 border-b flex-shrink-0 flex items-center justify-between">
                 <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
-                  Roadmap Mindmap
-                  {isGenerating && (
-                    <span className="ml-2 text-sm text-blue-600 dark:text-blue-400">
-                      (Generating...)
-                    </span>
-                  )}
+                  {getHeaderTitle()}
                 </h2>
+                {displayedRoadmap && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleBackToOverview}
+                    className="flex items-center gap-2"
+                  >
+                    <ArrowLeft className="h-4 w-4" />
+                    Back to Overview
+                  </Button>
+                )}
               </div>
               <div className="flex-1 min-h-0 overflow-hidden">
                 <RoadmapMindmap
-                  roadmaps={displayRoadmaps}
+                  roadmaps={roadmaps}
                   isGenerating={isGenerating}
-                  generatedRoadmap={generatedRoadmap}
+                  generatedRoadmap={generatedRoadmap || undefined}
+                  selectedRoadmap={selectedRoadmap || undefined}
                 />
               </div>
             </div>

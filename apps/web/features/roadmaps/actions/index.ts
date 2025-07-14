@@ -27,12 +27,10 @@ import {
   removeVideoFromNode,
   updateNodeProgress,
   markNodeCompleted,
+  getRoadmapWithNodes,
 } from "../queries";
 import { roadmapService } from "../services";
 
-/**
- * Create a new learning roadmap
- */
 export const createRoadmapAction = authAction
   .inputSchema(createRoadmapInputSchema)
   .action(async ({ parsedInput, ctx: { user } }) => {
@@ -56,9 +54,6 @@ export const createRoadmapAction = authAction
     };
   });
 
-/**
- * Update an existing roadmap
- */
 export const updateRoadmapAction = authAction
   .inputSchema(updateRoadmapInputSchema)
   .action(async ({ parsedInput, ctx: { user } }) => {
@@ -77,9 +72,6 @@ export const updateRoadmapAction = authAction
     };
   });
 
-/**
- * Delete a roadmap
- */
 export const deleteRoadmapAction = authAction
   .inputSchema(deleteRoadmapInputSchema)
   .action(async ({ parsedInput, ctx: { user } }) => {
@@ -92,9 +84,6 @@ export const deleteRoadmapAction = authAction
     };
   });
 
-/**
- * Generate a complete roadmap with AI
- */
 const generateRoadmapWithAiModelSchema = generateRoadmapRequestSchema.extend({
   aiModelId: z.string().uuid("Invalid AI model ID"),
 });
@@ -127,9 +116,6 @@ export const generateRoadmapAction = authAction
     };
   });
 
-/**
- * Update progress for roadmap nodes
- */
 export const updateRoadmapProgressAction = authAction
   .inputSchema(updateRoadmapProgressSchema)
   .action(async ({ parsedInput, ctx: { user } }) => {
@@ -159,9 +145,6 @@ export const updateRoadmapProgressAction = authAction
     };
   });
 
-/**
- * Create a new roadmap node
- */
 export const createRoadmapNodeAction = authAction
   .inputSchema(createRoadmapNodeSchema)
   .action(async ({ parsedInput, ctx: { user } }) => {
@@ -190,12 +173,9 @@ export const createRoadmapNodeAction = authAction
     };
   });
 
-/**
- * Update a roadmap node
- */
 export const updateRoadmapNodeAction = authAction
   .inputSchema(updateRoadmapNodeSchema)
-  .action(async ({ parsedInput, ctx: { user } }) => {
+  .action(async ({ parsedInput }) => {
     await updateRoadmapNode(parsedInput.nodeId, {
       title: parsedInput.title,
       description: parsedInput.description,
@@ -211,12 +191,9 @@ export const updateRoadmapNodeAction = authAction
     };
   });
 
-/**
- * Delete a roadmap node
- */
 export const deleteRoadmapNodeAction = authAction
   .inputSchema(deleteRoadmapNodeSchema)
-  .action(async ({ parsedInput, ctx: { user } }) => {
+  .action(async ({ parsedInput }) => {
     await deleteRoadmapNode(parsedInput.nodeId);
 
     revalidatePath("/roadmaps");
@@ -226,12 +203,9 @@ export const deleteRoadmapNodeAction = authAction
     };
   });
 
-/**
- * Add a video to a roadmap node
- */
 export const addVideoToNodeAction = authAction
   .inputSchema(addVideoToNodeSchema)
-  .action(async ({ parsedInput, ctx: { user } }) => {
+  .action(async ({ parsedInput }) => {
     await addVideoToNode({
       node_id: parsedInput.nodeId,
       video_id: parsedInput.videoId,
@@ -247,12 +221,9 @@ export const addVideoToNodeAction = authAction
     };
   });
 
-/**
- * Remove a video from a roadmap node
- */
 export const removeVideoFromNodeAction = authAction
   .inputSchema(removeVideoFromNodeSchema)
-  .action(async ({ parsedInput, ctx: { user } }) => {
+  .action(async ({ parsedInput }) => {
     await removeVideoFromNode(parsedInput.nodeId, parsedInput.videoId);
 
     revalidatePath("/roadmaps");
@@ -262,9 +233,6 @@ export const removeVideoFromNodeAction = authAction
     };
   });
 
-/**
- * Generate a complete roadmap with AI in one step
- */
 const generateCompleteRoadmapRequestSchema = z.object({
   userPrompt: z
     .string()
@@ -336,7 +304,6 @@ export const generateCompleteRoadmapAction = authAction
         "🔄 [generateCompleteRoadmapAction] Calling roadmapService.generateCompleteRoadmapFromScratch...",
       );
 
-      // Create the complete roadmap with nodes and videos
       const roadmapWithNodes =
         await roadmapService.generateCompleteRoadmapFromScratch(
           skillName,
@@ -360,7 +327,7 @@ export const generateCompleteRoadmapAction = authAction
       console.log(
         "🔄 [generateCompleteRoadmapAction] Revalidated /roadmaps path",
       );
-
+      console.log("roadmapWithNodes", roadmapWithNodes);
       return {
         success: true,
         roadmap: roadmapWithNodes,
@@ -372,4 +339,23 @@ export const generateCompleteRoadmapAction = authAction
       );
       throw error;
     }
+  });
+
+const getRoadmapWithNodesInputSchema = z.object({
+  roadmapId: z.string().uuid("Invalid roadmap ID"),
+});
+
+export const getRoadmapWithNodesAction = authAction
+  .inputSchema(getRoadmapWithNodesInputSchema)
+  .action(async ({ parsedInput, ctx: { user } }) => {
+    const roadmap = await getRoadmapWithNodes(parsedInput.roadmapId, user.id);
+
+    if (!roadmap) {
+      throw new Error("Roadmap not found");
+    }
+
+    return {
+      success: true,
+      roadmap,
+    };
   });
