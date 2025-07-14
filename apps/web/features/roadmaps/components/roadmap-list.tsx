@@ -3,14 +3,23 @@
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Clock, BookOpen } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Clock, BookOpen, Loader2, ExternalLink } from "lucide-react";
 import type { LearningRoadmap } from "../types";
 
 type RoadmapListProps = {
   roadmaps: LearningRoadmap[];
+  onRoadmapSelect?: (roadmap: LearningRoadmap) => void;
+  selectedRoadmapId?: string;
+  isLoading?: boolean;
 };
 
-export const RoadmapList = ({ roadmaps }: RoadmapListProps) => {
+export const RoadmapList = ({
+  roadmaps,
+  onRoadmapSelect,
+  selectedRoadmapId,
+  isLoading = false,
+}: RoadmapListProps) => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "active":
@@ -35,6 +44,12 @@ export const RoadmapList = ({ roadmaps }: RoadmapListProps) => {
     }
   };
 
+  const handleRoadmapClick = (roadmap: LearningRoadmap) => {
+    if (onRoadmapSelect && !isLoading) {
+      onRoadmapSelect(roadmap);
+    }
+  };
+
   if (roadmaps.length === 0) {
     return (
       <Card className="p-8 text-center">
@@ -49,14 +64,42 @@ export const RoadmapList = ({ roadmaps }: RoadmapListProps) => {
 
   return (
     <div className="space-y-3 h-full overflow-y-auto pr-2">
-      {roadmaps.map((roadmap) => (
-        <Link key={roadmap.id} href={`/roadmaps/${roadmap.id}`}>
-          <Card className="hover:shadow-md transition-shadow cursor-pointer">
+      {roadmaps.map((roadmap) => {
+        const isSelected = selectedRoadmapId === roadmap.id;
+
+        return (
+          <Card
+            key={roadmap.id}
+            className={`hover:shadow-md transition-all cursor-pointer ${
+              isSelected
+                ? "ring-2 ring-blue-500 shadow-md bg-blue-50 dark:bg-blue-950/20"
+                : "hover:bg-slate-50 dark:hover:bg-slate-800/50"
+            } ${isLoading ? "opacity-50" : ""}`}
+            onClick={() => handleRoadmapClick(roadmap)}
+          >
             <CardContent className="p-4">
               <div className="flex items-start justify-between mb-2">
-                <h3 className="font-semibold text-sm line-clamp-2 flex-1">
-                  {roadmap.title}
-                </h3>
+                <div className="flex items-center gap-2 flex-1">
+                  <h3 className="font-semibold text-sm line-clamp-2 flex-1">
+                    {roadmap.title}
+                  </h3>
+                  {isLoading && isSelected && (
+                    <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+                  )}
+                  <Link
+                    href={`/roadmaps/${roadmap.id}`}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 w-6 p-0 opacity-50 hover:opacity-100"
+                      title="Open in full page"
+                    >
+                      <ExternalLink className="h-3 w-3" />
+                    </Button>
+                  </Link>
+                </div>
                 <Badge
                   variant="outline"
                   className={`ml-2 ${getStatusColor(roadmap.status ?? "draft")}`}
@@ -83,8 +126,8 @@ export const RoadmapList = ({ roadmaps }: RoadmapListProps) => {
               )}
             </CardContent>
           </Card>
-        </Link>
-      ))}
+        );
+      })}
     </div>
   );
 };
