@@ -13,7 +13,6 @@ import type {
   RoadmapNodeVideoInsert,
   RoadmapProgress,
   RoadmapProgressInsert,
-  RoadmapProgressUpdate,
   RoadmapInteraction,
   RoadmapInteractionInsert,
   RoadmapWithNodes,
@@ -23,7 +22,7 @@ import type {
   MindmapData,
   MindmapNode,
   RoadmapNodeStatus,
-} from "../types";
+} from '../types';
 
 // Roadmap CRUD operations
 export const getUserRoadmaps = cache(
