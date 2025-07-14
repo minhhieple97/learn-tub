@@ -8,6 +8,7 @@ import {
   ChevronLeft,
   Menu,
   Settings,
+  Map,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -17,6 +18,7 @@ import { useState } from "react";
 
 const navigation = [
   { name: "Learn", href: routes.learn, icon: Play },
+  { name: "Roadmaps", href: routes.roadmaps.root, icon: Map },
   { name: "Dashboard", href: routes.dashboard.root, icon: Home },
   { name: "Settings", href: routes.settings.root, icon: Settings },
 ];
