@@ -47,17 +47,19 @@ export const RoadmapList = ({
         return (
           <Card
             key={roadmap.id}
-            className={`hover:shadow-md transition-all cursor-pointer ${
+            className={`transition-all duration-200 cursor-pointer ${
               isSelected
-                ? 'ring-2 ring-blue-500 shadow-md bg-blue-50 dark:bg-blue-950/20'
-                : 'hover:bg-slate-50 dark:hover:bg-slate-800/50'
+                ? 'ring-2 ring-blue-500 shadow-lg bg-blue-50 border-blue-200 dark:bg-slate-800 dark:border-slate-600 dark:ring-blue-400'
+                : 'hover:shadow-md hover:bg-slate-50 hover:border-slate-300 dark:hover:bg-slate-700 dark:hover:border-slate-500'
             } ${isLoading ? 'opacity-50' : ''}`}
             onClick={() => handleRoadmapClick(roadmap)}
           >
             <CardContent className="p-4">
               <div className="flex items-start justify-between mb-2">
                 <div className="flex items-center gap-2 flex-1">
-                  <h3 className="font-semibold text-sm line-clamp-2 flex-1">{roadmap.title}</h3>
+                  <h3 className="font-semibold text-sm line-clamp-2 flex-1 text-slate-900 dark:text-slate-100">
+                    {roadmap.title}
+                  </h3>
                   {isLoading && isSelected && (
                     <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
                   )}
