@@ -1,6 +1,4 @@
-import {
-  AI_SYSTEM_MESSAGES,
-} from "@/config/constants";
+import { AI_SYSTEM_MESSAGES } from "@/config/constants";
 import type {
   GenerateRoadmapRequest,
   RoadmapGenerationResult,
@@ -74,7 +72,7 @@ class RoadmapService {
     const response = await aiUsageTracker.wrapAIOperationWithTokens(
       {
         user_id: userId,
-        command: "generate_roadmap" as any, // This would need to be added to AI_COMMANDS
+        command: "generate_roadmap",
         ai_model_id: aiModelId,
         request_payload: { prompt_length: prompt.length },
       },
@@ -89,6 +87,7 @@ class RoadmapService {
         const { result, tokenUsage } = await aiClient.chatCompletionWithUsage({
           model: modelName,
           messages,
+          max_tokens: 10000,
         });
 
         return {
@@ -627,7 +626,6 @@ class RoadmapService {
         }
       }
 
-      // Update roadmap status and metadata
       const supabase = await createClient();
       await supabase
         .from("learning_roadmaps")
@@ -644,19 +642,17 @@ class RoadmapService {
         })
         .eq("id", roadmap.id);
 
-      // Return updated roadmap with nodes (this would need to be fetched)
       return {
         ...roadmap,
         title: generationResult.roadmap.title,
         description: generationResult.roadmap.description,
         status: "active",
-        nodes: [], // Would need to fetch with full details
+        nodes: [],
         total_nodes: createdNodes.length,
         completed_nodes: 0,
         total_duration: generationResult.roadmap.estimatedDuration,
       };
     } catch (error) {
-      // If generation fails, clean up the roadmap
       const supabase = await createClient();
       await supabase.from("learning_roadmaps").delete().eq("id", roadmap.id);
 
@@ -664,9 +660,6 @@ class RoadmapService {
     }
   }
 
-  /**
-   * Create the prompt for roadmap generation
-   */
   private createRoadmapGenerationPrompt(
     request: GenerateRoadmapRequest,
   ): string {
@@ -674,45 +667,126 @@ class RoadmapService {
 
     const contextInfo = this.buildPreferencesContext(preferences);
 
-    return `You are an educational expert creating a comprehensive learning roadmap. Create a structured learning path for the skill: "${skill}".
+    return `You are a world-class educational expert and curriculum designer with decades of experience creating comprehensive learning pathways. Your expertise spans across multiple domains, and you understand how to structure learning for maximum retention and practical application.
 
-## User Request:
+## Mission:
+Create a detailed, progressive learning roadmap for: "${skill}"
+
+## User's Learning Goal:
 "${userPrompt}"
 
 ${contextInfo}
 
-## Instructions:
-Create a learning roadmap with 5-10 learning nodes organized hierarchically. Each node should represent a key concept or skill area that builds upon previous knowledge.
+## Expert Instructions:
+You must create a scientifically-structured learning roadmap that follows proven educational principles:
 
-## Required Response Format (JSON):
+### Cognitive Load Theory Application:
+- Start with foundational concepts (level 0) before introducing complex ideas
+- Each node should focus on ONE core concept to avoid cognitive overload
+- Build prerequisite knowledge systematically before advancing
+
+### Learning Taxonomy Integration:
+- Level 0: Understanding & Remembering (foundational concepts)
+- Level 1: Applying & Analyzing (practical implementation)
+- Level 2: Evaluating & Creating (advanced synthesis)
+
+### Spaced Learning Principles:
+- Distribute learning across multiple nodes for better retention
+- Include review and reinforcement concepts where necessary
+- Balance theoretical knowledge with hands-on practice
+
+## Required Response Format (STRICT JSON):
 {
   "roadmap": {
-    "title": "Clear, engaging title for the roadmap",
-    "description": "2-3 sentence overview of what the learner will achieve",
-    "estimatedDuration": number (total estimated minutes for the entire roadmap)
+    "title": "Compelling, action-oriented title (e.g., 'Master Machine Learning: From Beginner to AI Engineer')",
+    "description": "Comprehensive 3-4 sentence overview that clearly states: (1) what the learner will achieve, (2) key skills they'll develop, (3) real-world applications they'll be able to create",
+    "estimatedDuration": number (total realistic minutes for entire roadmap based on complexity)
   },
   "nodes": [
     {
-      "title": "Node title (clear and specific)",
-      "description": "1-2 sentence description of what this node covers",
-      "level": number (0 for root concepts, 1 for main topics, 2+ for subtopics),
-      "parentIndex": number (optional, index of parent node in this array),
-      "estimatedDuration": number (estimated minutes for this specific node),
-      "order": number (sequential order within the same level)
+      "title": "Clear, specific learning objective (action-oriented, e.g., 'Build Your First Neural Network')",
+      "description": "Detailed 2-3 sentence description that includes: (1) what specifically will be learned, (2) why it's important, (3) how it connects to previous/next concepts",
+      "level": number (0 for foundations, 1 for core skills, 2+ for advanced topics),
+      "parentIndex": number (index of prerequisite node, omit for level 0),
+      "estimatedDuration": number (realistic time in minutes for this specific learning objective),
+      "order": number (sequential order within the same level for logical progression)
     }
   ]
 }
 
-## Guidelines:
-- Start with foundational concepts (level 0)
-- Build complexity gradually through levels
-- Ensure each node has clear learning objectives
-- Balance theoretical understanding with practical application
-- Consider the user's specified preferences and experience level
-- Make the roadmap actionable and achievable
-- Provide realistic time estimates based on typical learning speeds
+## Roadmap Structure Requirements:
 
-Generate a well-structured, progressive learning path that will effectively guide the learner from beginner to competent in ${skill}.`;
+### Foundation Layer (Level 0) - 2-3 nodes:
+- Core concepts and terminology
+- Essential prerequisites
+- Fundamental principles
+
+### Implementation Layer (Level 1) - 3-5 nodes:
+- Practical application of foundations
+- Hands-on exercises and projects
+- Key methodologies and techniques
+
+### Mastery Layer (Level 2+) - 2-4 nodes:
+- Advanced concepts and specializations
+- Complex projects and real-world applications
+- Integration and synthesis
+
+## Quality Standards:
+
+### Node Design:
+- Each node must be ACTIONABLE and have clear completion criteria
+- Include specific deliverables or outcomes for each node
+- Ensure logical dependencies (no node should require knowledge from a later node)
+- Balance theoretical understanding with practical application
+
+### Time Estimation Guidelines:
+- Beginner concepts: 45-90 minutes per node
+- Intermediate concepts: 60-120 minutes per node
+- Advanced concepts: 90-180 minutes per node
+- Include time for practice, review, and project work
+
+### Progressive Complexity:
+- Each level should build meaningfully on the previous
+- Introduce complexity gradually and systematically
+- Ensure each node adds substantial value to the learning journey
+- Create clear progression milestones
+
+### Learning Outcome Focus:
+- Each node should have a specific, measurable learning outcome
+- Include both knowledge acquisition and skill development
+- Ensure practical applicability of learned concepts
+- Build towards real-world competency in ${skill}
+
+## Domain-Specific Considerations:
+
+### For Technical Skills:
+- Include setup and environment configuration
+- Balance theory with hands-on coding/implementation
+- Include debugging and troubleshooting skills
+- Progress from simple examples to complex projects
+
+### For Creative Skills:
+- Include fundamental techniques and principles
+- Progress from basic exercises to creative projects
+- Include style development and personal voice
+- Balance structured learning with creative exploration
+
+### For Business/Soft Skills:
+- Include theoretical frameworks and practical application
+- Use case studies and real-world scenarios
+- Include communication and collaboration elements
+- Focus on measurable skill development
+
+## Validation Checklist:
+Before finalizing, ensure:
+✓ Each node builds logically on previous knowledge
+✓ Time estimates are realistic and achievable
+✓ Learning objectives are specific and measurable
+✓ The roadmap provides clear value and progression
+✓ Advanced concepts have proper prerequisites
+✓ The overall journey leads to practical competency
+
+Generate a roadmap that will transform a learner from their current state to confident, practical competency in ${skill}. Focus on creating a learning experience that is both comprehensive and achievable, with clear milestones and measurable progress.`;
   }
 
   /**
