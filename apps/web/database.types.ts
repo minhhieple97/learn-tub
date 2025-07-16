@@ -1413,7 +1413,8 @@ export type Database = {
         | "bonus"
         | "subscription_grant"
         | "admin_adjustment"
-        | "switch_plan";
+        | "switch_plan"
+        | "generate_roadmap";
       webhook_event_status:
         | "pending"
         | "processing"
@@ -1598,6 +1599,7 @@ export const Constants = {
         "subscription_grant",
         "admin_adjustment",
         "switch_plan",
+        "generate_roadmap",
       ],
       webhook_event_status: [
         "pending",
