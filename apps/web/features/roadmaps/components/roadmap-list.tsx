@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Clock, BookOpen, Loader2, ExternalLink } from "lucide-react";
-import { getStatusColor, formatDate } from '../utils';
+import { getStatusColor, formatDate } from "../utils";
 import type { LearningRoadmap } from "../types";
 
 type RoadmapListProps = {
@@ -49,9 +49,9 @@ export const RoadmapList = ({
             key={roadmap.id}
             className={`transition-all duration-200 cursor-pointer ${
               isSelected
-                ? 'ring-2 ring-blue-500 shadow-lg bg-blue-50 border-blue-200 dark:bg-slate-800 dark:border-slate-600 dark:ring-blue-400'
-                : 'hover:shadow-md hover:bg-slate-50 hover:border-slate-300 dark:hover:bg-slate-700 dark:hover:border-slate-500'
-            } ${isLoading ? 'opacity-50' : ''}`}
+                ? "ring-2 ring-blue-500 shadow-lg bg-blue-50 border-blue-200 dark:bg-slate-800 dark:border-slate-600 dark:ring-blue-400"
+                : "hover:shadow-md hover:bg-slate-50 hover:border-slate-300 dark:hover:bg-slate-700 dark:hover:border-slate-500"
+            } ${isLoading ? "opacity-50" : ""}`}
             onClick={() => handleRoadmapClick(roadmap)}
           >
             <CardContent className="p-4">
@@ -63,7 +63,10 @@ export const RoadmapList = ({
                   {isLoading && isSelected && (
                     <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
                   )}
-                  <Link href={`/roadmaps/${roadmap.id}`} onClick={(e) => e.stopPropagation()}>
+                  <Link
+                    href={`/roadmaps/${roadmap.id}`}
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <Button
                       variant="ghost"
                       size="sm"
@@ -76,9 +79,9 @@ export const RoadmapList = ({
                 </div>
                 <Badge
                   variant="outline"
-                  className={`ml-2 ${getStatusColor(roadmap.status ?? 'draft')}`}
+                  className={`ml-2 ${getStatusColor(roadmap.status ?? "draft")}`}
                 >
-                  {roadmap.status ?? 'draft'}
+                  {roadmap.status ?? "draft"}
                 </Badge>
               </div>
 

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createAIUsageLog } from "../queries";
 import { getAIModelCostDetails } from "../queries/ai-model-pricing-queries";
 import type {

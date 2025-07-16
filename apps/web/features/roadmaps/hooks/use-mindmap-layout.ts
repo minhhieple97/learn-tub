@@ -72,99 +72,64 @@ export const getStatusColor = (status: string): StatusColors => {
   }
 };
 
-const createRoadmapCircularLayout = (
-  roadmaps: LearningRoadmap[],
-): { nodes: MindmapNode[]; edges: Edge[] } => {
-  const nodes: MindmapNode[] = [];
-  const edges: Edge[] = [];
-
-  if (roadmaps.length === 0) {
-    return { nodes: [], edges: [] };
-  }
-
-  const uniqueRoadmaps = roadmaps.filter(
-    (roadmap, index, self) =>
-      index === self.findIndex((r) => r.id === roadmap.id),
-  );
-
-  const centerNode: MindmapNode = {
-    id: "center",
+const createEmptyState = (): { nodes: MindmapNode[]; edges: Edge[] } => {
+  const emptyNode: MindmapNode = {
+    id: "empty-state",
     type: "default",
     position: { x: 400, y: 300 },
     data: {
-      label: "Learning Journey",
-      status: "active",
-      skill: "Overview",
-      description: "Your learning roadmaps",
+      label: "No Roadmaps Yet",
+      status: "draft",
+      skill: "Getting Started",
+      description: "Create your first learning roadmap to get started",
     },
     style: {
-      background: "linear-gradient(135deg, #1f2937 0%, #374151 100%)",
-      border: "3px solid #60a5fa",
+      background: "linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%)",
+      border: "3px dashed #9ca3af",
       borderRadius: "16px",
-      padding: "16px",
+      padding: "20px",
       fontSize: "18px",
-      fontWeight: "bold",
-      color: "#ffffff",
-      boxShadow: "0 8px 25px rgba(96, 165, 250, 0.4)",
-      minWidth: "180px",
+      fontWeight: "600",
+      color: "#6b7280",
+      minWidth: "250px",
+      textAlign: "center",
     },
-    sourcePosition: Position.Right,
-    targetPosition: Position.Left,
   };
 
-  nodes.push(centerNode);
+  return { nodes: [emptyNode], edges: [] };
+};
 
-  const radius = 200;
-  const angleStep = (2 * Math.PI) / uniqueRoadmaps.length;
+const createLatestRoadmapLayout = (
+  roadmap: LearningRoadmap,
+): { nodes: MindmapNode[]; edges: Edge[] } => {
+  const colors = getStatusColor(roadmap.status || "draft");
 
-  uniqueRoadmaps.forEach((roadmap, index) => {
-    const angle = index * angleStep;
-    const x = 400 + radius * Math.cos(angle);
-    const y = 300 + radius * Math.sin(angle);
-    const colors = getStatusColor(roadmap.status || "draft");
+  const roadmapNode: MindmapNode = {
+    id: roadmap.id,
+    type: "default",
+    position: { x: 400, y: 300 },
+    data: {
+      label: roadmap.title || "Untitled Roadmap",
+      status: roadmap.status || "draft",
+      skill: roadmap.skill_name,
+      description: roadmap.description || "Click to view details",
+    },
+    style: {
+      background: colors.background,
+      border: `4px solid ${colors.border}`,
+      borderRadius: "16px",
+      padding: "24px",
+      fontSize: "20px",
+      fontWeight: "700",
+      minWidth: "300px",
+      maxWidth: "400px",
+      textAlign: "center",
+      boxShadow: colors.shadow,
+      color: "#1f2937",
+    },
+  };
 
-    const roadmapNode: MindmapNode = {
-      id: roadmap.id,
-      type: "default",
-      position: { x, y },
-      data: {
-        label: roadmap.title || "Untitled Roadmap",
-        status: roadmap.status || "draft",
-        skill: roadmap.skill_name,
-        description: roadmap.description || undefined,
-      },
-      style: {
-        background: colors.background,
-        border: `3px solid ${colors.border}`,
-        borderRadius: "12px",
-        padding: "12px",
-        fontSize: "14px",
-        minWidth: "150px",
-        boxShadow: colors.shadow,
-        color: "#1f2937",
-        fontWeight: "600",
-      },
-      sourcePosition: Position.Right,
-      targetPosition: Position.Left,
-    };
-
-    nodes.push(roadmapNode);
-
-    const edge = {
-      id: `edge-center-to-${roadmap.id}`,
-      source: "center",
-      target: roadmap.id,
-      type: "smoothstep",
-      style: {
-        stroke: colors.border,
-        strokeWidth: 3,
-      },
-    };
-
-    edges.push(edge);
-  });
-
-  return { nodes, edges };
+  return { nodes: [roadmapNode], edges: [] };
 };
 
 const createNodeHierarchicalLayout = (
@@ -323,6 +288,7 @@ export const useMindmapLayout = ({
   const roadmapToShow = generatedRoadmap || selectedRoadmap;
 
   const layout = useMemo(() => {
+    // If we have a specific roadmap with nodes to display, show the detailed node layout
     if (shouldShowNodeLayout && roadmapToShow) {
       console.log(
         "📋 Showing node layout for roadmap:",
@@ -332,9 +298,18 @@ export const useMindmapLayout = ({
         "nodes",
       );
       return createNodeHierarchicalLayout(roadmapToShow);
-    } else {
-      return createRoadmapCircularLayout(roadmaps);
     }
+
+    // If no specific roadmap but we have roadmaps, show the latest roadmap as a single node
+    if (roadmaps.length > 0) {
+      const latestRoadmap = roadmaps[0]; // roadmaps are already sorted by updated_at desc
+      console.log("📋 Showing latest roadmap:", latestRoadmap?.title);
+      return createLatestRoadmapLayout(latestRoadmap!);
+    }
+
+    // If no roadmaps at all, show empty state
+    console.log("📋 Showing empty state");
+    return createEmptyState();
   }, [roadmaps, shouldShowNodeLayout, roadmapToShow]);
 
   return {

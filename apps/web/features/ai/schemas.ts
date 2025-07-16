@@ -4,6 +4,7 @@ const commandValues = [
   "evaluate_note",
   "generate_quizz_questions",
   "evaluate_quizz_answers",
+  "generate_roadmap",
 ] as const;
 
 export const IAICommandSchema = z.enum(commandValues);
