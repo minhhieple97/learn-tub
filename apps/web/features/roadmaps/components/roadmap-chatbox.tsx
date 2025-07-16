@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Send, Sparkles } from "lucide-react";
-import { useRoadmapChat } from '@/features/roadmaps/hooks/use-roadmap-chat';
+import { useRoadmapChat } from "@/features/roadmaps/hooks/use-roadmap-chat";
 import type { RoadmapWithNodes } from "../types";
 
 type RoadmapChatboxProps = {

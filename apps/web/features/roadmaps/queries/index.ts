@@ -22,7 +22,7 @@ import type {
   MindmapData,
   MindmapNode,
   RoadmapNodeStatus,
-} from '../types';
+} from "../types";
 
 // Roadmap CRUD operations
 export const getUserRoadmaps = cache(
