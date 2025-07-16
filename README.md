@@ -186,6 +186,15 @@ npm run start        # Start production server
   - Implement image upload, storage, and optimization
   - Support drag-and-drop image functionality
 
+- **🗺️ AI-Powered Learning Roadmaps** 🆕 **(planned)**
+  - Generate personalized learning roadmaps based on user's skill goals
+  - AI-curated YouTube video recommendations for each learning milestone
+  - Interactive mindmap visualization of learning paths
+  - Progress tracking and milestone completion system
+  - Smart video search and categorization for roadmap nodes
+  - Customizable difficulty levels and learning preferences
+  - Export roadmaps and share learning paths with others
+
 - **📄 Note Export & Review System**
   - Enable note export to Google Docs and PDF formats
   - Implement AI review summaries for exported content
