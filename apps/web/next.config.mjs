@@ -1,30 +1,17 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  webpack: (config, { isServer }) => {
-    // Suppress warnings from Supabase Realtime
-    config.ignoreWarnings = [
-      {
-        module: /node_modules\/@supabase\/realtime-js/,
-        message:
-          /Critical dependency: the request of a dependency is an expression/,
-      },
-      // Also suppress any other realtime-related warnings
-      /Critical dependency: the request of a dependency is an expression.*@supabase\/realtime-js/,
-    ];
-
-    // Additional webpack optimizations for Supabase
-    config.resolve.fallback = {
-      ...config.resolve.fallback,
-      fs: false,
-      net: false,
-      tls: false,
-    };
-
-    return config;
+  // Turbopack configuration (recommended for Next.js 15+)
+  turbopack: {
+    // Turbopack has built-in support for modern JavaScript and doesn't need
+    // the same fallbacks as webpack for browser environments
+    resolveAlias: {
+      // Add any module aliases if needed in the future
+    },
   },
-  // Experimental features that might help with bundle size
+
+  // Experimental features that help with bundle size
   experimental: {
-    optimizePackageImports: ["@supabase/supabase-js"],
+    optimizePackageImports: ['@supabase/supabase-js'],
   },
 };
 
