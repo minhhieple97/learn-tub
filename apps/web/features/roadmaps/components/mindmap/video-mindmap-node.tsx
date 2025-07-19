@@ -2,7 +2,8 @@
 
 import { memo, useCallback } from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
-import { Play, Clock, User } from "lucide-react";
+import { Play, Clock, User, Video } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 type VideoNodeData = {
   label: string;
@@ -81,33 +82,19 @@ export const VideoMindmapNode = memo(({ data }: VideoMindmapNodeProps) => {
     [primaryVideo?.youtubeId],
   );
 
-  const handleNodeClick = useCallback(
-    (e: React.MouseEvent) => {
-      e.stopPropagation();
-      // If no video, just prevent default behavior
-      if (!primaryVideo?.youtubeId) {
-        return;
-      }
-      // Otherwise, open the video
-      handleVideoClick(e);
-    },
-    [primaryVideo?.youtubeId, handleVideoClick],
-  );
-
-  return (
+  const nodeContent = (
     <div
       className="group relative cursor-pointer transition-all duration-200 hover:scale-105"
       style={{
         background: colors.background,
         border: `3px solid ${colors.border}`,
-        borderRadius: "12px",
-        padding: "0",
-        minWidth: "240px",
-        maxWidth: "280px",
+        borderRadius: '12px',
+        padding: '16px',
+        minWidth: '180px',
+        maxWidth: '220px',
         boxShadow: colors.shadow,
-        overflow: "hidden",
       }}
-      onClick={handleNodeClick}
+      onClick={handleVideoClick}
     >
       {/* Handles for ReactFlow connections */}
       <Handle
@@ -123,128 +110,152 @@ export const VideoMindmapNode = memo(({ data }: VideoMindmapNodeProps) => {
         style={{ background: colors.border }}
       />
 
-      {/* Video thumbnail section */}
-      {primaryVideo && (
-        <div className="relative">
-          <div
-            className="w-full h-32 bg-cover bg-center bg-gray-200 flex items-center justify-center"
+      {/* Node content */}
+      <div className="space-y-3">
+        {/* Header with title and video indicator */}
+        <div className="flex items-start justify-between gap-2">
+          <h3
+            className="font-semibold text-sm text-gray-900 flex-1 overflow-hidden"
             style={{
-              backgroundImage: primaryVideo.thumbnailUrl
-                ? `url(${primaryVideo.thumbnailUrl})`
-                : undefined,
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical',
+              textOverflow: 'ellipsis',
             }}
           >
-            {!primaryVideo.thumbnailUrl && (
-              <div className="text-gray-400 text-4xl">📹</div>
-            )}
-            
-            {/* Play overlay */}
-            <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-              <div className="bg-red-600 text-white rounded-full p-3 transform scale-75 group-hover:scale-100 transition-transform duration-200">
-                <Play className="w-6 h-6 ml-1" fill="currentColor" />
+            {data.label}
+          </h3>
+
+          {/* Video indicator */}
+          {primaryVideo && (
+            <div className="flex-shrink-0">
+              <div className="bg-red-600 text-white rounded-full p-1.5 group-hover:scale-110 transition-transform duration-200">
+                <Video className="w-3 h-3" />
               </div>
             </div>
-
-            {/* Duration badge */}
-            {primaryVideo.duration && (
-              <div className="absolute bottom-2 right-2 bg-black bg-opacity-75 text-white text-xs px-2 py-1 rounded flex items-center gap-1">
-                <Clock className="w-3 h-3" />
-                {formatDuration(primaryVideo.duration)}
-              </div>
-            )}
-          </div>
+          )}
         </div>
-      )}
-
-      {/* Content section */}
-      <div className="p-3">
-        {/* Node title */}
-        <h3 
-          className="font-semibold text-sm text-gray-900 mb-1 overflow-hidden"
-          style={{
-            display: "-webkit-box",
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: "vertical",
-            textOverflow: "ellipsis",
-          }}
-        >
-          {data.label}
-        </h3>
-
-        {/* Video title (if different from node title) */}
-        {primaryVideo && primaryVideo.title !== data.label && (
-          <p 
-            className="text-xs text-gray-600 mb-2 overflow-hidden"
-            style={{
-              display: "-webkit-box",
-              WebkitLineClamp: 1,
-              WebkitBoxOrient: "vertical",
-              textOverflow: "ellipsis",
-            }}
-          >
-            📹 {primaryVideo.title}
-          </p>
-        )}
-
-        {/* Channel info */}
-        {primaryVideo?.channelName && (
-          <div className="flex items-center gap-1 text-xs text-gray-500 mb-2">
-            <User className="w-3 h-3" />
-            <span 
-              className="overflow-hidden"
-              style={{
-                display: "-webkit-box",
-                WebkitLineClamp: 1,
-                WebkitBoxOrient: "vertical",
-                textOverflow: "ellipsis",
-              }}
-            >
-              {primaryVideo.channelName}
-            </span>
-          </div>
-        )}
 
         {/* Description */}
         {data.description && (
-          <p 
+          <p
             className="text-xs text-gray-600 overflow-hidden"
             style={{
-              display: "-webkit-box",
+              display: '-webkit-box',
               WebkitLineClamp: 2,
-              WebkitBoxOrient: "vertical",
-              textOverflow: "ellipsis",
+              WebkitBoxOrient: 'vertical',
+              textOverflow: 'ellipsis',
             }}
           >
             {data.description}
           </p>
         )}
 
-        {/* Status indicator */}
-        <div className="mt-2 flex items-center justify-between">
+        {/* Status and action hint */}
+        <div className="flex items-center justify-between">
           <span
             className="text-xs px-2 py-1 rounded-full font-medium"
             style={{
-              backgroundColor: colors.border + "20",
+              backgroundColor: colors.border + '20',
               color: colors.border,
             }}
           >
             {data.status}
           </span>
-          
+
           {primaryVideo && (
-            <span className="text-xs text-gray-500">Click to watch</span>
+            <span className="text-xs text-gray-500 flex items-center gap-1">
+              <Play className="w-3 h-3" />
+              Watch
+            </span>
           )}
         </div>
       </div>
 
-      {/* No video state */}
-      {!primaryVideo && (
-        <div className="p-3 text-center">
-          <div className="text-gray-400 text-2xl mb-2">📝</div>
-          <p className="text-xs text-gray-500">No video available</p>
+      {/* Hover play overlay */}
+      {primaryVideo && (
+        <div className="absolute inset-0 bg-black bg-opacity-20 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          <div className="bg-red-600 text-white rounded-full p-3 transform scale-75 group-hover:scale-100 transition-transform duration-200">
+            <Play className="w-5 h-5 ml-0.5" fill="currentColor" />
+          </div>
         </div>
       )}
     </div>
+  );
+
+  // If no video, return the node without tooltip
+  if (!primaryVideo) {
+    return nodeContent;
+  }
+
+  // Render with tooltip for video information
+  return (
+    <TooltipProvider>
+      <Tooltip delayDuration={300}>
+        <TooltipTrigger asChild>{nodeContent}</TooltipTrigger>
+        <TooltipContent
+          side="top"
+          className="max-w-xs p-0 overflow-hidden border-0 shadow-xl"
+          sideOffset={8}
+        >
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700">
+            {/* Video thumbnail */}
+            <div className="relative h-32 bg-gray-200 dark:bg-gray-700">
+              {primaryVideo.thumbnailUrl ? (
+                <img
+                  src={primaryVideo.thumbnailUrl}
+                  alt={primaryVideo.title}
+                  className="w-full h-full object-cover rounded-t-lg"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-gray-400">
+                  <Video className="w-8 h-8" />
+                </div>
+              )}
+
+              {/* Duration badge */}
+              {primaryVideo.duration && (
+                <div className="absolute bottom-2 right-2 bg-black bg-opacity-75 text-white text-xs px-2 py-1 rounded flex items-center gap-1">
+                  <Clock className="w-3 h-3" />
+                  {formatDuration(primaryVideo.duration)}
+                </div>
+              )}
+
+              {/* Play icon overlay */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="bg-red-600 text-white rounded-full p-2 opacity-90">
+                  <Play className="w-4 h-4 ml-0.5" fill="currentColor" />
+                </div>
+              </div>
+            </div>
+
+            {/* Video info */}
+            <div className="p-3 space-y-2">
+              <h4
+                className="font-medium text-sm text-gray-900 dark:text-gray-100 overflow-hidden"
+                style={{
+                  display: '-webkit-box',
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: 'vertical',
+                  textOverflow: 'ellipsis',
+                }}
+              >
+                {primaryVideo.title}
+              </h4>
+
+              {primaryVideo.channelName && (
+                <div className="flex items-center gap-1 text-xs text-gray-600 dark:text-gray-400">
+                  <User className="w-3 h-3" />
+                  <span className="truncate">{primaryVideo.channelName}</span>
+                </div>
+              )}
+
+              <p className="text-xs text-gray-500 dark:text-gray-400">Click to watch on YouTube</p>
+            </div>
+          </div>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 });
 
