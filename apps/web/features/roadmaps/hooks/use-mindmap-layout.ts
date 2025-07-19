@@ -16,6 +16,14 @@ type MindmapNode = Node & {
     description?: string;
     nodeId?: string;
     isRoadmapNode?: boolean;
+    videos?: {
+      id: string;
+      title: string;
+      channelName?: string;
+      thumbnailUrl?: string;
+      duration?: number;
+      youtubeId: string;
+    }[];
   };
 };
 
@@ -195,35 +203,49 @@ const createNodeHierarchicalLayout = (
     const nodeX =
       totalSiblings === 1
         ? parentX
-        : startX +
-          (siblingIndex * spreadWidth) / Math.max(1, totalSiblings - 1);
+        : startX + (siblingIndex * spreadWidth) / Math.max(1, totalSiblings - 1);
 
-    const colors = getStatusColor(node.status || "pending");
+    const colors = getStatusColor(node.status || 'pending');
+
+    // Extract video data from the node
+    const videos =
+      node.videos?.map((nodeVideo) => ({
+        id: nodeVideo.video.id,
+        title: nodeVideo.video.title,
+        channelName: nodeVideo.video.channel_name || undefined,
+        thumbnailUrl: nodeVideo.video.thumbnail_url || undefined,
+        duration: nodeVideo.video.duration || undefined,
+        youtubeId: nodeVideo.video.youtube_id,
+      })) || [];
 
     const mindmapNode: MindmapNode = {
       id: node.id,
-      type: "default",
+      type: videos.length > 0 ? 'videoNode' : 'default',
       position: { x: nodeX, y: levelY },
       data: {
         label: node.title,
-        status: node.status || "pending",
-        skill: "Node",
+        status: node.status || 'pending',
+        skill: 'Node',
         description: node.description || undefined,
         nodeId: node.id,
         isRoadmapNode: true,
+        videos,
       },
-      style: {
-        background: colors.background,
-        border: `3px solid ${colors.border}`,
-        borderRadius: "12px",
-        padding: "14px",
-        fontSize: "14px",
-        minWidth: "180px",
-        maxWidth: "220px",
-        boxShadow: colors.shadow,
-        color: "#1f2937",
-        fontWeight: "600",
-      },
+      style:
+        videos.length > 0
+          ? {}
+          : {
+              background: colors.background,
+              border: `3px solid ${colors.border}`,
+              borderRadius: '12px',
+              padding: '14px',
+              fontSize: '14px',
+              minWidth: '180px',
+              maxWidth: '220px',
+              boxShadow: colors.shadow,
+              color: '#1f2937',
+              fontWeight: '600',
+            },
       sourcePosition: Position.Bottom,
       targetPosition: Position.Top,
     };
@@ -234,7 +256,7 @@ const createNodeHierarchicalLayout = (
       id: `edge-${parentId}-to-${node.id}`,
       source: parentId,
       target: node.id,
-      type: "smoothstep",
+      type: 'smoothstep',
       style: {
         stroke: colors.border,
         strokeWidth: 3,
@@ -245,15 +267,7 @@ const createNodeHierarchicalLayout = (
 
     if (node.children && node.children.length > 0) {
       node.children.forEach((child, index) => {
-        processNode(
-          child,
-          level + 1,
-          nodeX,
-          levelY,
-          index,
-          node.children!.length,
-          node.id,
-        );
+        processNode(child, level + 1, nodeX, levelY, index, node.children!.length, node.id);
       });
     }
   };
