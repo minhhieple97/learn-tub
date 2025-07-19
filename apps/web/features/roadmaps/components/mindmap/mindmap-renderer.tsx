@@ -11,10 +11,16 @@ import {
   Edge,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
+import { VideoMindmapNode } from './video-mindmap-node';
 
 type MindmapRendererProps = {
   nodes: Node[];
   edges: Edge[];
+};
+
+// Define custom node types
+const nodeTypes = {
+  videoNode: VideoMindmapNode,
 };
 
 export const MindmapRenderer = memo(
@@ -28,15 +34,16 @@ export const MindmapRenderer = memo(
     }, [nodes, edges, setFlowNodes, setFlowEdges]);
 
     return (
-      <div className="w-full h-full" style={{ minHeight: "400px" }}>
+      <div className="w-full h-full" style={{ minHeight: '400px' }}>
         <ReactFlow
           nodes={flowNodes}
           edges={flowEdges}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
+          nodeTypes={nodeTypes}
           fitView
           attributionPosition="bottom-left"
-          style={{ width: "100%", height: "100%" }}
+          style={{ width: '100%', height: '100%' }}
         >
           <Controls position="top-right" />
           <Background color="#f1f5f9" gap={16} />
