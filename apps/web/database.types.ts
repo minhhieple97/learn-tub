@@ -7,6 +7,11 @@ export type Json =
   | Json[];
 
 export type Database = {
+  // Allows to automatically instanciate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "12.2.3 (519615d)";
+  };
   public: {
     Tables: {
       ai_model_pricing: {
@@ -285,6 +290,67 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "credit_transactions_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      learning_roadmaps: {
+        Row: {
+          ai_model_id: string | null;
+          created_at: string | null;
+          description: string | null;
+          id: string;
+          metadata: Json | null;
+          skill_name: string;
+          status: Database["public"]["Enums"]["roadmap_status_enum"] | null;
+          title: string;
+          updated_at: string | null;
+          user_id: string;
+        };
+        Insert: {
+          ai_model_id?: string | null;
+          created_at?: string | null;
+          description?: string | null;
+          id?: string;
+          metadata?: Json | null;
+          skill_name: string;
+          status?: Database["public"]["Enums"]["roadmap_status_enum"] | null;
+          title: string;
+          updated_at?: string | null;
+          user_id: string;
+        };
+        Update: {
+          ai_model_id?: string | null;
+          created_at?: string | null;
+          description?: string | null;
+          id?: string;
+          metadata?: Json | null;
+          skill_name?: string;
+          status?: Database["public"]["Enums"]["roadmap_status_enum"] | null;
+          title?: string;
+          updated_at?: string | null;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "learning_roadmaps_ai_model_id_fkey";
+            columns: ["ai_model_id"];
+            isOneToOne: false;
+            referencedRelation: "ai_model_pricing";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "learning_roadmaps_ai_model_id_fkey";
+            columns: ["ai_model_id"];
+            isOneToOne: false;
+            referencedRelation: "ai_model_pricing_view";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "learning_roadmaps_user_id_fkey";
             columns: ["user_id"];
             isOneToOne: false;
             referencedRelation: "profiles";
@@ -754,6 +820,240 @@ export type Database = {
           },
         ];
       };
+      roadmap_interactions: {
+        Row: {
+          ai_model_id: string | null;
+          created_at: string | null;
+          id: string;
+          input_data: Json;
+          interaction_type: string;
+          output_data: Json | null;
+          roadmap_id: string;
+          user_id: string;
+        };
+        Insert: {
+          ai_model_id?: string | null;
+          created_at?: string | null;
+          id?: string;
+          input_data: Json;
+          interaction_type: string;
+          output_data?: Json | null;
+          roadmap_id: string;
+          user_id: string;
+        };
+        Update: {
+          ai_model_id?: string | null;
+          created_at?: string | null;
+          id?: string;
+          input_data?: Json;
+          interaction_type?: string;
+          output_data?: Json | null;
+          roadmap_id?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "roadmap_interactions_ai_model_id_fkey";
+            columns: ["ai_model_id"];
+            isOneToOne: false;
+            referencedRelation: "ai_model_pricing";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "roadmap_interactions_ai_model_id_fkey";
+            columns: ["ai_model_id"];
+            isOneToOne: false;
+            referencedRelation: "ai_model_pricing_view";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "roadmap_interactions_roadmap_id_fkey";
+            columns: ["roadmap_id"];
+            isOneToOne: false;
+            referencedRelation: "learning_roadmaps";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "roadmap_interactions_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      roadmap_node_videos: {
+        Row: {
+          created_at: string | null;
+          id: string;
+          is_primary: boolean | null;
+          node_id: string;
+          order_index: number;
+          relevance_score: number | null;
+          video_id: string;
+        };
+        Insert: {
+          created_at?: string | null;
+          id?: string;
+          is_primary?: boolean | null;
+          node_id: string;
+          order_index?: number;
+          relevance_score?: number | null;
+          video_id: string;
+        };
+        Update: {
+          created_at?: string | null;
+          id?: string;
+          is_primary?: boolean | null;
+          node_id?: string;
+          order_index?: number;
+          relevance_score?: number | null;
+          video_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "roadmap_node_videos_node_id_fkey";
+            columns: ["node_id"];
+            isOneToOne: false;
+            referencedRelation: "roadmap_nodes";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "roadmap_node_videos_video_id_fkey";
+            columns: ["video_id"];
+            isOneToOne: false;
+            referencedRelation: "videos";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      roadmap_nodes: {
+        Row: {
+          created_at: string | null;
+          description: string | null;
+          estimated_duration_minutes: number | null;
+          id: string;
+          level: number;
+          metadata: Json | null;
+          order_index: number;
+          parent_node_id: string | null;
+          roadmap_id: string;
+          status:
+            | Database["public"]["Enums"]["roadmap_node_status_enum"]
+            | null;
+          title: string;
+          updated_at: string | null;
+        };
+        Insert: {
+          created_at?: string | null;
+          description?: string | null;
+          estimated_duration_minutes?: number | null;
+          id?: string;
+          level?: number;
+          metadata?: Json | null;
+          order_index: number;
+          parent_node_id?: string | null;
+          roadmap_id: string;
+          status?:
+            | Database["public"]["Enums"]["roadmap_node_status_enum"]
+            | null;
+          title: string;
+          updated_at?: string | null;
+        };
+        Update: {
+          created_at?: string | null;
+          description?: string | null;
+          estimated_duration_minutes?: number | null;
+          id?: string;
+          level?: number;
+          metadata?: Json | null;
+          order_index?: number;
+          parent_node_id?: string | null;
+          roadmap_id?: string;
+          status?:
+            | Database["public"]["Enums"]["roadmap_node_status_enum"]
+            | null;
+          title?: string;
+          updated_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "roadmap_nodes_parent_node_id_fkey";
+            columns: ["parent_node_id"];
+            isOneToOne: false;
+            referencedRelation: "roadmap_nodes";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "roadmap_nodes_roadmap_id_fkey";
+            columns: ["roadmap_id"];
+            isOneToOne: false;
+            referencedRelation: "learning_roadmaps";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      roadmap_progress: {
+        Row: {
+          completed_at: string | null;
+          created_at: string | null;
+          id: string;
+          node_id: string;
+          notes: string | null;
+          roadmap_id: string;
+          started_at: string | null;
+          time_spent_minutes: number | null;
+          updated_at: string | null;
+          user_id: string;
+        };
+        Insert: {
+          completed_at?: string | null;
+          created_at?: string | null;
+          id?: string;
+          node_id: string;
+          notes?: string | null;
+          roadmap_id: string;
+          started_at?: string | null;
+          time_spent_minutes?: number | null;
+          updated_at?: string | null;
+          user_id: string;
+        };
+        Update: {
+          completed_at?: string | null;
+          created_at?: string | null;
+          id?: string;
+          node_id?: string;
+          notes?: string | null;
+          roadmap_id?: string;
+          started_at?: string | null;
+          time_spent_minutes?: number | null;
+          updated_at?: string | null;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "roadmap_progress_node_id_fkey";
+            columns: ["node_id"];
+            isOneToOne: false;
+            referencedRelation: "roadmap_nodes";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "roadmap_progress_roadmap_id_fkey";
+            columns: ["roadmap_id"];
+            isOneToOne: false;
+            referencedRelation: "learning_roadmaps";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "roadmap_progress_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       subscription_plans: {
         Row: {
           created_at: string | null;
@@ -914,6 +1214,7 @@ export type Database = {
           course_id: string | null;
           created_at: string | null;
           description: string | null;
+          discovered_via_roadmap: boolean | null;
           duration: number | null;
           id: string;
           published_at: string | null;
@@ -929,6 +1230,7 @@ export type Database = {
           course_id?: string | null;
           created_at?: string | null;
           description?: string | null;
+          discovered_via_roadmap?: boolean | null;
           duration?: number | null;
           id?: string;
           published_at?: string | null;
@@ -944,6 +1246,7 @@ export type Database = {
           course_id?: string | null;
           created_at?: string | null;
           description?: string | null;
+          discovered_via_roadmap?: boolean | null;
           duration?: number | null;
           id?: string;
           published_at?: string | null;
@@ -1093,6 +1396,12 @@ export type Database = {
         | "compensation"
         | "cancelled_plan";
       file_type_enum: "image" | "video_screenshot";
+      roadmap_node_status_enum:
+        | "pending"
+        | "in_progress"
+        | "completed"
+        | "skipped";
+      roadmap_status_enum: "draft" | "active" | "completed" | "archived";
       subscription_status: "active" | "exhausted" | "expired" | "cancelled";
       transaction_type_enum:
         | "monthly_reset"
@@ -1104,7 +1413,8 @@ export type Database = {
         | "bonus"
         | "subscription_grant"
         | "admin_adjustment"
-        | "switch_plan";
+        | "switch_plan"
+        | "generate_roadmap";
       webhook_event_status:
         | "pending"
         | "processing"
@@ -1127,21 +1437,28 @@ export type Database = {
   };
 };
 
-type DefaultSchema = Database[Extract<keyof Database, "public">];
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">;
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<
+  keyof Database,
+  "public"
+>];
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database;
+    schema: keyof DatabaseWithoutInternals;
   }
-    ? keyof (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-        Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-      Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals;
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R;
     }
     ? R
@@ -1159,14 +1476,16 @@ export type Tables<
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database;
+    schema: keyof DatabaseWithoutInternals;
   }
-    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals;
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Insert: infer I;
     }
     ? I
@@ -1182,14 +1501,16 @@ export type TablesInsert<
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database;
+    schema: keyof DatabaseWithoutInternals;
   }
-    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals;
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Update: infer U;
     }
     ? U
@@ -1205,14 +1526,16 @@ export type TablesUpdate<
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
-    schema: keyof Database;
+    schema: keyof DatabaseWithoutInternals;
   }
-    ? keyof Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
     : never = never,
-> = DefaultSchemaEnumNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals;
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
     ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
     : never;
@@ -1220,14 +1543,16 @@ export type Enums<
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-    schema: keyof Database;
+    schema: keyof DatabaseWithoutInternals;
   }
-    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
     : never = never,
-> = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals;
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
     ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never;
@@ -1255,6 +1580,13 @@ export const Constants = {
         "cancelled_plan",
       ],
       file_type_enum: ["image", "video_screenshot"],
+      roadmap_node_status_enum: [
+        "pending",
+        "in_progress",
+        "completed",
+        "skipped",
+      ],
+      roadmap_status_enum: ["draft", "active", "completed", "archived"],
       subscription_status: ["active", "exhausted", "expired", "cancelled"],
       transaction_type_enum: [
         "monthly_reset",
@@ -1267,6 +1599,7 @@ export const Constants = {
         "subscription_grant",
         "admin_adjustment",
         "switch_plan",
+        "generate_roadmap",
       ],
       webhook_event_status: [
         "pending",

@@ -10,6 +10,13 @@ export const routes = {
     quizz: (quizId: string) => `/dashboard/quizzes/${quizId}`,
     quizRetake: (quizId: string) => `/dashboard/quizzes/${quizId}/retake`,
   },
+  roadmaps: {
+    root: "/roadmaps",
+    new: "/roadmaps/new",
+    roadmap: (roadmapId: string) => `/roadmaps/${roadmapId}`,
+    edit: (roadmapId: string) => `/roadmaps/${roadmapId}/edit`,
+    mindmap: (roadmapId: string) => `/roadmaps/${roadmapId}/mindmap`,
+  },
   settings: {
     root: "/settings",
   },
