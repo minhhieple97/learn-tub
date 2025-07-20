@@ -20,7 +20,7 @@ export const RoadmapMindmap = ({
 }: IRoadmapMindmapProps) => {
   const [mounted, setMounted] = useState(false);
 
-  const { nodes, edges, shouldShowNodeLayout } = useMindmapLayout({
+  const { nodes, edges } = useMindmapLayout({
     roadmaps,
     generatedRoadmap,
     selectedRoadmap,

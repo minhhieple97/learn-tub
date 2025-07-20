@@ -24,7 +24,6 @@ export const RoadmapsPageClient = ({
     handleRoadmapGenerated,
     handleGenerationStart,
     handleGenerationEnd,
-    handleBackToOverview,
   } = useRoadmapsPage({ initialRoadmaps });
 
   const getHeaderTitle = () => {
