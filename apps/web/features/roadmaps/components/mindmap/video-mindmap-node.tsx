@@ -1,10 +1,15 @@
 "use client";
 
-import { memo } from 'react';
+import { memo } from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
-import { Play, Clock, User, Video } from 'lucide-react';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { useVideoMindmapNode } from '@/hooks/use-video-mindmap-node';
+import { Play, Clock, User, Video } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { useVideoMindmapNode } from "@/hooks/use-video-mindmap-node";
 
 type VideoNodeData = {
   label: string;
@@ -28,8 +33,13 @@ type VideoMindmapNodeProps = NodeProps & {
 };
 
 export const VideoMindmapNode = memo(({ data }: VideoMindmapNodeProps) => {
-  const { statusColors, primaryVideo, hasVideo, formatDuration, handleVideoClick } =
-    useVideoMindmapNode(data);
+  const {
+    statusColors,
+    primaryVideo,
+    hasVideo,
+    formatDuration,
+    handleVideoClick,
+  } = useVideoMindmapNode(data);
 
   const nodeContent = (
     <div
@@ -37,10 +47,10 @@ export const VideoMindmapNode = memo(({ data }: VideoMindmapNodeProps) => {
       style={{
         background: statusColors.background,
         border: `3px solid ${statusColors.border}`,
-        borderRadius: '12px',
-        padding: '16px',
-        minWidth: '180px',
-        maxWidth: '220px',
+        borderRadius: "12px",
+        padding: "16px",
+        minWidth: "180px",
+        maxWidth: "220px",
         boxShadow: statusColors.shadow,
       }}
       onClick={handleVideoClick}
@@ -66,10 +76,10 @@ export const VideoMindmapNode = memo(({ data }: VideoMindmapNodeProps) => {
           <h3
             className="font-semibold text-sm text-gray-900 flex-1 overflow-hidden"
             style={{
-              display: '-webkit-box',
+              display: "-webkit-box",
               WebkitLineClamp: 2,
-              WebkitBoxOrient: 'vertical',
-              textOverflow: 'ellipsis',
+              WebkitBoxOrient: "vertical",
+              textOverflow: "ellipsis",
             }}
           >
             {data.label}
@@ -90,10 +100,10 @@ export const VideoMindmapNode = memo(({ data }: VideoMindmapNodeProps) => {
           <p
             className="text-xs text-gray-600 overflow-hidden"
             style={{
-              display: '-webkit-box',
+              display: "-webkit-box",
               WebkitLineClamp: 2,
-              WebkitBoxOrient: 'vertical',
-              textOverflow: 'ellipsis',
+              WebkitBoxOrient: "vertical",
+              textOverflow: "ellipsis",
             }}
           >
             {data.description}
@@ -105,7 +115,7 @@ export const VideoMindmapNode = memo(({ data }: VideoMindmapNodeProps) => {
           <span
             className="text-xs px-2 py-1 rounded-full font-medium"
             style={{
-              backgroundColor: statusColors.border + '20',
+              backgroundColor: statusColors.border + "20",
               color: statusColors.border,
             }}
           >
@@ -183,10 +193,10 @@ export const VideoMindmapNode = memo(({ data }: VideoMindmapNodeProps) => {
               <h4
                 className="font-medium text-sm text-gray-900 dark:text-gray-100 overflow-hidden"
                 style={{
-                  display: '-webkit-box',
+                  display: "-webkit-box",
                   WebkitLineClamp: 2,
-                  WebkitBoxOrient: 'vertical',
-                  textOverflow: 'ellipsis',
+                  WebkitBoxOrient: "vertical",
+                  textOverflow: "ellipsis",
                 }}
               >
                 {primaryVideo?.title}
@@ -199,7 +209,9 @@ export const VideoMindmapNode = memo(({ data }: VideoMindmapNodeProps) => {
                 </div>
               )}
 
-              <p className="text-xs text-gray-500 dark:text-gray-400">Click to watch on YouTube</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Click to watch on YouTube
+              </p>
             </div>
           </div>
         </TooltipContent>
@@ -208,4 +220,4 @@ export const VideoMindmapNode = memo(({ data }: VideoMindmapNodeProps) => {
   );
 });
 
-VideoMindmapNode.displayName = "VideoMindmapNode"; 
+VideoMindmapNode.displayName = "VideoMindmapNode";

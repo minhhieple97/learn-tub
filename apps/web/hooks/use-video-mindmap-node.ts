@@ -100,4 +100,4 @@ export const useVideoMindmapNode = (data: NodeData) => {
     formatDuration,
     handleVideoClick,
   };
-}; 
+};
