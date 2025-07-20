@@ -92,7 +92,9 @@ class AIClient {
     }
   }
 
-  async chatCompletionWithUsage(request: IAICompletionRequest): Promise<{
+  async chatCompletionWithUsage(
+    request: IAICompletionRequest & { max_tokens?: number },
+  ): Promise<{
     result: string;
     tokenUsage?: ITokenUsage;
   }> {
@@ -104,7 +106,7 @@ class AIClient {
         model,
         messages,
         temperature: request.temperature,
-        maxTokens: request.max_tokens,
+        maxTokens: request.max_tokens || AI_CONFIG.MAX_TOKENS,
       });
 
       const tokenUsage = result.usage
