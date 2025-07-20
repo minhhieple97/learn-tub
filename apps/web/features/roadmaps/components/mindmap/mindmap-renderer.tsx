@@ -11,7 +11,7 @@ import {
   Edge,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { VideoMindmapNode } from './video-mindmap-node';
+import { VideoMindmapNode } from "./video-mindmap-node";
 
 type IMindmapRendererProps = {
   nodes: Node[];
@@ -23,29 +23,30 @@ const nodeTypes = {
   videoNode: VideoMindmapNode,
 };
 
-export const MindmapRenderer = memo(({ nodes, edges }: IMindmapRendererProps) => {
-  const [flowNodes, setFlowNodes, onNodesChange] = useNodesState(nodes);
-  const [flowEdges, setFlowEdges, onEdgesChange] = useEdgesState(edges);
+export const MindmapRenderer = memo(
+  ({ nodes, edges }: IMindmapRendererProps) => {
+    const [flowNodes, setFlowNodes, onNodesChange] = useNodesState(nodes);
+    const [flowEdges, setFlowEdges, onEdgesChange] = useEdgesState(edges);
 
-  useEffect(() => {
-    setFlowNodes(nodes);
-    setFlowEdges(edges);
-  }, [nodes, edges, setFlowNodes, setFlowEdges]);
+    useEffect(() => {
+      setFlowNodes(nodes);
+      setFlowEdges(edges);
+    }, [nodes, edges, setFlowNodes, setFlowEdges]);
 
-  // Inject dark mode styles for React Flow controls
-  useEffect(() => {
-    const styleId = 'react-flow-dark-mode-styles';
+    // Inject dark mode styles for React Flow controls
+    useEffect(() => {
+      const styleId = "react-flow-dark-mode-styles";
 
-    // Remove existing styles if any
-    const existingStyle = document.getElementById(styleId);
-    if (existingStyle) {
-      existingStyle.remove();
-    }
+      // Remove existing styles if any
+      const existingStyle = document.getElementById(styleId);
+      if (existingStyle) {
+        existingStyle.remove();
+      }
 
-    // Create and inject new styles
-    const style = document.createElement('style');
-    style.id = styleId;
-    style.textContent = `
+      // Create and inject new styles
+      const style = document.createElement("style");
+      style.id = styleId;
+      style.textContent = `
         .dark .react-flow__controls {
           background: rgb(30 41 59) !important;
           border-color: rgb(51 65 85) !important;
@@ -94,38 +95,43 @@ export const MindmapRenderer = memo(({ nodes, edges }: IMindmapRendererProps) =>
         }
       `;
 
-    document.head.appendChild(style);
+      document.head.appendChild(style);
 
-    // Cleanup function to remove styles when component unmounts
-    return () => {
-      const styleToRemove = document.getElementById(styleId);
-      if (styleToRemove) {
-        styleToRemove.remove();
-      }
-    };
-  }, []);
+      // Cleanup function to remove styles when component unmounts
+      return () => {
+        const styleToRemove = document.getElementById(styleId);
+        if (styleToRemove) {
+          styleToRemove.remove();
+        }
+      };
+    }, []);
 
-  return (
-    <div
-      className="w-full h-full bg-slate-50 dark:bg-slate-900 transition-colors duration-200"
-      style={{ minHeight: '400px' }}
-    >
-      <ReactFlow
-        nodes={flowNodes}
-        edges={flowEdges}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        nodeTypes={nodeTypes}
-        fitView
-        attributionPosition="bottom-left"
-        className="bg-slate-50 dark:bg-slate-900"
-        style={{ width: '100%', height: '100%' }}
+    return (
+      <div
+        className="w-full h-full bg-slate-50 dark:bg-slate-900 transition-colors duration-200"
+        style={{ minHeight: "400px" }}
       >
-        <Controls position="top-right" />
-        <Background color="currentColor" gap={16} className="text-slate-300 dark:text-slate-600" />
-      </ReactFlow>
-    </div>
-  );
-});
+        <ReactFlow
+          nodes={flowNodes}
+          edges={flowEdges}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
+          nodeTypes={nodeTypes}
+          fitView
+          attributionPosition="bottom-left"
+          className="bg-slate-50 dark:bg-slate-900"
+          style={{ width: "100%", height: "100%" }}
+        >
+          <Controls position="top-right" />
+          <Background
+            color="currentColor"
+            gap={16}
+            className="text-slate-300 dark:text-slate-600"
+          />
+        </ReactFlow>
+      </div>
+    );
+  },
+);
 
 MindmapRenderer.displayName = "MindmapRenderer";
