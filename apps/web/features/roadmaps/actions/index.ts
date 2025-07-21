@@ -1,8 +1,11 @@
 "use server";
 
 import { z } from "zod";
-import { authAction } from "@/lib/safe-action";
+import { ActionError, authAction } from "@/lib/safe-action";
 import { revalidatePath } from "next/cache";
+import { validateUserCreditsForOperation } from "@/features/payments/queries";
+import { deductCredits } from "@/features/payments/services/deduction-credit";
+import { CREDIT_ACTION_COUNTS } from "@/config/constants";
 import {
   createRoadmapInputSchema,
   updateRoadmapInputSchema,
@@ -14,6 +17,7 @@ import {
   deleteRoadmapNodeSchema,
   addVideoToNodeSchema,
   removeVideoFromNodeSchema,
+  generateCompleteRoadmapRequestSchema,
 } from "../schemas";
 import {
   createRoadmap,
@@ -233,14 +237,6 @@ export const removeVideoFromNodeAction = authAction
     };
   });
 
-const generateCompleteRoadmapRequestSchema = z.object({
-  userPrompt: z
-    .string()
-    .min(10, "Please provide more details")
-    .max(2000, "Prompt too long"),
-  aiModelId: z.string().uuid("Invalid AI model ID"),
-});
-
 export const generateCompleteRoadmapAction = authAction
   .inputSchema(generateCompleteRoadmapRequestSchema)
   .action(async ({ parsedInput, ctx: { user } }) => {
@@ -252,6 +248,17 @@ export const generateCompleteRoadmapAction = authAction
         userId: user.id,
       },
     );
+
+    // Validate user has enough credits
+    const creditValidation = await validateUserCreditsForOperation(
+      user.id,
+      CREDIT_ACTION_COUNTS["generate_roadmap"],
+    );
+    if (!creditValidation.success) {
+      throw new ActionError(
+        creditValidation.message || "Insufficient credits to generate roadmap",
+      );
+    }
 
     // Extract skill name from prompt (simple approach)
     const extractSkillFromMessage = (msg: string): string => {
@@ -322,6 +329,21 @@ export const generateCompleteRoadmapAction = authAction
         nodeCount: roadmapWithNodes.nodes?.length || 0,
         status: roadmapWithNodes.status,
       });
+
+      // Deduct credits after successful roadmap generation
+      const creditResult = await deductCredits({
+        userId: user.id,
+        command: "generate_roadmap",
+        description: `Roadmap generation for skill: ${skillName}`,
+        relatedActionId: roadmapWithNodes.id,
+      });
+
+      if (!creditResult.success) {
+        console.error(
+          "Failed to deduct credits after roadmap generation:",
+          creditResult.error,
+        );
+      }
 
       revalidatePath("/roadmaps");
       console.log(

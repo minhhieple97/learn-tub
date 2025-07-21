@@ -1,5 +1,5 @@
 "use server";
-import { ActionError, authAction } from '@/lib/safe-action';
+import { ActionError, authAction } from "@/lib/safe-action";
 import { quizService } from "../services/quizz-service";
 import { createQuizSession } from "../queries";
 import { getVideoById } from "@/features/videos/queries";
@@ -7,8 +7,7 @@ import { RateLimiter } from "@/lib/rate-limiter";
 import { deductCredits } from "@/features/payments/services/deduction-credit";
 import { validateUserCreditsForOperation } from "@/features/payments/queries";
 import { CREDIT_ACTION_COUNTS } from "@/config/constants";
-import { GenerateQuizQuestionsSchema } from '../schema';
-
+import { GenerateQuizQuestionsSchema } from "../schema";
 
 export const generateQuizQuestionsAction = authAction
   .inputSchema(GenerateQuizQuestionsSchema)
