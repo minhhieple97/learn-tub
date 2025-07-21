@@ -1,6 +1,6 @@
 import { NoteCard } from "./note-card";
 import { NotesListSkeleton } from "./notes-list-skeleton";
-import { useNotesList } from "@/hooks/use-notes-list";
+import { useNotesList } from "@/features/notes/hooks/use-notes-list";
 
 export const NotesList = () => {
   const { displayNotes, isLoading, isEmpty, emptyMessage } = useNotesList();

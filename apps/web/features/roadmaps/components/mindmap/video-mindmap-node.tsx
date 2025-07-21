@@ -9,7 +9,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useVideoMindmapNode } from "@/hooks/use-video-mindmap-node";
+import { useVideoMindmapNode } from "@/features/quizzes/hooks/use-video-mindmap-node";
 
 type VideoNodeData = {
   label: string;

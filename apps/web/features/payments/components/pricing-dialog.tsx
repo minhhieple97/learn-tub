@@ -4,7 +4,7 @@ import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Clock, Info } from "lucide-react";
 import { PricingSection } from "./pricing-section";
-import { useSubscriptionManagement } from "@/hooks/use-subscription-management";
+import { useSubscriptionManagement } from "@/features/payments/hooks/use-subscription-management";
 
 export function PricingDialog() {
   const { isSubscriptionCancelledButActive, daysUntilExpiry, subscription } =
