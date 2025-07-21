@@ -202,38 +202,10 @@ export const roadmapSearchFiltersSchema = z.object({
   sortOrder: z.enum(["asc", "desc"]).default("desc"),
 });
 
-// Validation utilities
-export const validateRoadmapId = (id: string): boolean => {
-  return z.string().uuid().safeParse(id).success;
-};
-
-export const validateNodeId = (id: string): boolean => {
-  return z.string().uuid().safeParse(id).success;
-};
-
-export const validateVideoId = (id: string): boolean => {
-  return z.string().uuid().safeParse(id).success;
-};
-
-// Type inference exports
-export type CreateRoadmapInput = z.infer<typeof createRoadmapInputSchema>;
-export type UpdateRoadmapInput = z.infer<typeof updateRoadmapInputSchema>;
-export type DeleteRoadmapInput = z.infer<typeof deleteRoadmapInputSchema>;
-export type GenerateRoadmapRequest = z.infer<
-  typeof generateRoadmapRequestSchema
->;
-export type NodeProgressUpdate = z.infer<typeof nodeProgressUpdateSchema>;
-export type UpdateRoadmapProgress = z.infer<typeof updateRoadmapProgressSchema>;
-export type CreateRoadmapNode = z.infer<typeof createRoadmapNodeSchema>;
-export type UpdateRoadmapNode = z.infer<typeof updateRoadmapNodeSchema>;
-export type DeleteRoadmapNode = z.infer<typeof deleteRoadmapNodeSchema>;
-export type AddVideoToNode = z.infer<typeof addVideoToNodeSchema>;
-export type RemoveVideoFromNode = z.infer<typeof removeVideoFromNodeSchema>;
-export type SearchYouTubeVideos = z.infer<typeof searchYouTubeVideosSchema>;
-export type CreateRoadmapForm = z.infer<typeof createRoadmapFormSchema>;
-export type GetRoadmap = z.infer<typeof getRoadmapSchema>;
-export type GetRoadmapList = z.infer<typeof getRoadmapListSchema>;
-export type GetRoadmapNodes = z.infer<typeof getRoadmapNodesSchema>;
-export type GetRoadmapMindmap = z.infer<typeof getRoadmapMindmapSchema>;
-export type GetRoadmapProgress = z.infer<typeof getRoadmapProgressSchema>;
-export type RoadmapSearchFilters = z.infer<typeof roadmapSearchFiltersSchema>;
+export const generateCompleteRoadmapRequestSchema = z.object({
+  userPrompt: z
+    .string()
+    .min(10, "Please provide more details")
+    .max(2000, "Prompt too long"),
+  aiModelId: z.string().uuid("Invalid AI model ID"),
+});
