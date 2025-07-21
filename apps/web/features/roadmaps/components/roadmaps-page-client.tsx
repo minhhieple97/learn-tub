@@ -27,18 +27,19 @@ export const RoadmapsPageClient = ({
   } = useRoadmapsPage({ initialRoadmaps });
 
   const getHeaderTitle = () => {
+    if (isGenerating) {
+      return '';
+    }
+
     if (!displayedRoadmap) {
       return "Roadmap Mindmap";
     }
 
     let title = displayedRoadmap.title;
 
-    if (isGenerating) {
-      title += " (Generating...)";
-    } else if (isFetchingDetails) {
-      title += " (Loading...)";
+    if (isFetchingDetails) {
+      title += ' (Loading...)';
     }
-
     return title;
   };
 
