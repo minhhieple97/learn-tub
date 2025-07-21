@@ -1,6 +1,5 @@
 "use server";
-import { ActionError, authAction } from "@/lib/safe-action";
-import { z } from "zod";
+import { ActionError, authAction } from '@/lib/safe-action';
 import { quizService } from "../services/quizz-service";
 import { createQuizSession } from "../queries";
 import { getVideoById } from "@/features/videos/queries";
@@ -8,17 +7,8 @@ import { RateLimiter } from "@/lib/rate-limiter";
 import { deductCredits } from "@/features/payments/services/deduction-credit";
 import { validateUserCreditsForOperation } from "@/features/payments/queries";
 import { CREDIT_ACTION_COUNTS } from "@/config/constants";
+import { GenerateQuizQuestionsSchema } from '../schema';
 
-const GenerateQuizQuestionsSchema = z.object({
-  videoId: z.string().min(1, "Video ID is required"),
-  videoTitle: z.string().optional().nullable(),
-  videoDescription: z.string().optional().nullable(),
-  videoTutorial: z.string().optional().nullable(),
-  questionCount: z.number().min(1).max(50).default(10),
-  difficulty: z.enum(["easy", "medium", "hard", "mixed"]).default("mixed"),
-  topics: z.array(z.string()).optional(),
-  aiModelId: z.string().uuid("AI model ID is required"),
-});
 
 export const generateQuizQuestionsAction = authAction
   .inputSchema(GenerateQuizQuestionsSchema)
