@@ -28,7 +28,7 @@ export const RoadmapsPageClient = ({
 
   const getHeaderTitle = () => {
     if (isGenerating) {
-      return '';
+      return "";
     }
 
     if (!displayedRoadmap) {
@@ -38,7 +38,7 @@ export const RoadmapsPageClient = ({
     let title = displayedRoadmap.title;
 
     if (isFetchingDetails) {
-      title += ' (Loading...)';
+      title += " (Loading...)";
     }
     return title;
   };

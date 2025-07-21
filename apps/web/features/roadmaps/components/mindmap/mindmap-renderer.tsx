@@ -9,7 +9,7 @@ import {
   type Edge,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { useMindmapRenderer } from "@/hooks/use-mindmap-renderer";
+import { useMindmapRenderer } from "@/features/roadmaps/hooks/use-mindmap-renderer";
 
 type IMindmapRendererProps = {
   nodes: Node[];

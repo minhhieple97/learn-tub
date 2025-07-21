@@ -1,7 +1,7 @@
 "use client";
 
-import { useSubscriptionManagement } from "@/hooks/use-subscription-management";
-import { useBillingManagement } from "@/hooks/use-billing-management";
+import { useSubscriptionManagement } from "@/features/payments/hooks";
+import { useBillingManagement } from "@/features/payments/hooks";
 import { SubscriptionCard } from "./subscription-card";
 import { NoSubscriptionCard } from "./no-subscription-card";
 import { SubscriptionSkeleton } from "./subscription-skeleton";

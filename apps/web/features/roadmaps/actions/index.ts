@@ -245,13 +245,13 @@ export const generateCompleteRoadmapAction = authAction
   .inputSchema(generateCompleteRoadmapRequestSchema)
   .action(async ({ parsedInput, ctx: { user } }) => {
     console.log(
-      "🚀 [generateCompleteRoadmapAction] Starting roadmap generation...",
+      "📝 [generateCompleteRoadmapAction] Starting roadmap generation... Input:",
+      {
+        userPrompt: parsedInput.userPrompt,
+        aiModelId: parsedInput.aiModelId,
+        userId: user.id,
+      },
     );
-    console.log("📝 [generateCompleteRoadmapAction] Input:", {
-      userPrompt: parsedInput.userPrompt,
-      aiModelId: parsedInput.aiModelId,
-      userId: user.id,
-    });
 
     // Extract skill name from prompt (simple approach)
     const extractSkillFromMessage = (msg: string): string => {

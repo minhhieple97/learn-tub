@@ -4,7 +4,7 @@ import { use } from "react";
 import { VideoGrid } from "./video-grid";
 import { IVideo } from "../types";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { useVideoSearch } from "@/hooks/use-video-search";
+import { useVideoSearch } from "@/features/videos/hooks/use-video-search";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
