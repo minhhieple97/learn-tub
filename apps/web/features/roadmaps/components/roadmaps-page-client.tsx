@@ -1,7 +1,5 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
 import { useRoadmapsPage } from "@/features/roadmaps/hooks/use-roadmaps-page";
 import { RoadmapList, RoadmapChatbox, RoadmapMindmap } from "./index";
 import type { LearningRoadmap } from "../types";
@@ -20,6 +18,7 @@ export const RoadmapsPageClient = ({
     displayedRoadmap,
     isGenerating,
     isFetchingDetails,
+    loadingRoadmapId,
     handleRoadmapSelect,
     handleRoadmapGenerated,
     handleGenerationStart,
@@ -60,6 +59,7 @@ export const RoadmapsPageClient = ({
                   roadmaps={roadmaps}
                   onRoadmapSelect={handleRoadmapSelect}
                   selectedRoadmapId={displayedRoadmap?.id}
+                  loadingRoadmapId={loadingRoadmapId}
                   isLoading={isFetchingDetails}
                 />
               </div>

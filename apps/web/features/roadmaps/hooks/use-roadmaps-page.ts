@@ -19,16 +19,22 @@ export const useRoadmapsPage = ({ initialRoadmaps }: UseRoadmapsPageProps) => {
   const [generatedRoadmap, setGeneratedRoadmap] =
     useState<RoadmapWithNodes | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [loadingRoadmapId, setLoadingRoadmapId] = useState<string | null>(null);
 
   const { execute: fetchRoadmapDetails, isExecuting: isFetchingDetails } =
     useAction(getRoadmapWithNodesAction, {
+      onExecute: ({ input }) => {
+        setLoadingRoadmapId(input.roadmapId);
+      },
       onSuccess: ({ data }) => {
         if (data?.roadmap) {
           setSelectedRoadmap(data.roadmap);
         }
+        setLoadingRoadmapId(null);
       },
       onError: ({ error }) => {
         console.error("Failed to fetch roadmap details:", error);
+        setLoadingRoadmapId(null);
       },
     });
 
@@ -54,6 +60,7 @@ export const useRoadmapsPage = ({ initialRoadmaps }: UseRoadmapsPageProps) => {
     setGeneratedRoadmap(newRoadmap);
     setSelectedRoadmap(null);
     setRoadmaps((prev) => [newRoadmap, ...prev]);
+    setLoadingRoadmapId(null);
   }, []);
 
   const handleGenerationStart = useCallback(() => {
@@ -68,6 +75,7 @@ export const useRoadmapsPage = ({ initialRoadmaps }: UseRoadmapsPageProps) => {
   const handleBackToOverview = useCallback(() => {
     setGeneratedRoadmap(null);
     setSelectedRoadmap(null);
+    setLoadingRoadmapId(null);
   }, []);
 
   const displayedRoadmap = generatedRoadmap || selectedRoadmap;
@@ -80,6 +88,7 @@ export const useRoadmapsPage = ({ initialRoadmaps }: UseRoadmapsPageProps) => {
     displayedRoadmap,
     isGenerating,
     isFetchingDetails,
+    loadingRoadmapId,
 
     // Actions
     handleRoadmapSelect,
