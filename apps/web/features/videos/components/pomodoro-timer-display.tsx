@@ -17,7 +17,7 @@ export const PomodoroTimerDisplay = ({
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
-    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+    return `${minutes.toString().padStart(2, "0")}:${remainingSeconds.toString().padStart(2, "0")}`;
   };
 
   const getPhaseLabel = (phase: PomodoroPhase) => {
@@ -56,7 +56,7 @@ export const PomodoroTimerDisplay = ({
         "px-4 py-3 min-w-[120px] text-center",
         "hover:scale-105 hover:shadow-3xl hover:border-primary/60",
         status === "running" && "animate-pulse",
-        status === "paused" && "opacity-80"
+        status === "paused" && "opacity-80",
       )}
     >
       <div className="flex flex-col items-center space-y-1">
@@ -65,7 +65,7 @@ export const PomodoroTimerDisplay = ({
           className={cn(
             "text-xs font-medium uppercase tracking-wider",
             "text-primary dark:text-primary-foreground",
-            getPhaseColor(currentPhase)
+            getPhaseColor(currentPhase),
           )}
         >
           {getPhaseLabel(currentPhase)}
@@ -76,7 +76,7 @@ export const PomodoroTimerDisplay = ({
           className={cn(
             "text-lg font-bold tabular-nums",
             "text-foreground dark:text-white",
-            "drop-shadow-sm"
+            "drop-shadow-sm",
           )}
         >
           {formatTime(timeRemaining)}
@@ -86,7 +86,9 @@ export const PomodoroTimerDisplay = ({
         <div
           className={cn(
             "w-2 h-2 rounded-full transition-all duration-300",
-            status === "running" ? "bg-green-500 animate-pulse" : "bg-yellow-500"
+            status === "running"
+              ? "bg-green-500 animate-pulse"
+              : "bg-yellow-500",
           )}
         />
       </div>

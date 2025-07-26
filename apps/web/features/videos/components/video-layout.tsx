@@ -19,7 +19,7 @@ export const VideoLayout = ({ focusModeEnabled }: VideoLayoutProps) => {
       <div
         className={cn(
           "transition-all duration-300",
-          focusModeEnabled && "focus-mode-highlight"
+          focusModeEnabled && "focus-mode-highlight",
         )}
       >
         <VideoPageHeader />
@@ -28,7 +28,7 @@ export const VideoLayout = ({ focusModeEnabled }: VideoLayoutProps) => {
       <div
         className={cn(
           "transition-all duration-300",
-          focusModeEnabled && "focus-mode-highlight"
+          focusModeEnabled && "focus-mode-highlight",
         )}
       >
         <ResizablePanels

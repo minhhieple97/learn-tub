@@ -29,14 +29,14 @@ export const PomodoroToggleButton = ({
         // State-based styling
         isDialogOpen
           ? "animate-pulse border-primary/60 shadow-primary/30 rotate-180 scale-105"
-          : "hover:animate-none animate-bounce"
+          : "hover:animate-none animate-bounce",
       )}
       variant="outline"
     >
       <div
         className={cn(
           "transition-all duration-300 ease-in-out",
-          isDialogOpen ? "rotate-180 scale-90" : "rotate-0 scale-100"
+          isDialogOpen ? "rotate-180 scale-90" : "rotate-0 scale-100",
         )}
       >
         {isDialogOpen ? (
