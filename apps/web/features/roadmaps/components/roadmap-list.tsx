@@ -1,7 +1,7 @@
 "use client";
 
-import { RoadmapEmptyState } from './roadmap-empty-state';
-import { RoadmapCard } from './roadmap-card';
+import { RoadmapEmptyState } from "./roadmap-empty-state";
+import { RoadmapCard } from "./roadmap-card";
 import type { LearningRoadmap } from "../types";
 
 type RoadmapListProps = {
