@@ -52,7 +52,7 @@ export const PomodoroSimpleDialog = () => {
     <Dialog open={isDialogOpen} onOpenChange={closeDialog}>
       <DialogContent
         className={cn(
-          "border-border/50 bg-black/90 backdrop-blur-sm",
+          "border-4 border-primary bg-black/90 backdrop-blur-sm shadow-2xl shadow-primary/40 ring-2 ring-primary/30",
           showAdvancedSettings ? "sm:max-w-[500px]" : "sm:max-w-xl",
         )}
       >
@@ -96,7 +96,7 @@ export const PomodoroSimpleDialog = () => {
               <Button
                 onClick={closeDialog}
                 variant="outline"
-                className="flex-1 border-border hover:bg-muted hover:border-muted-foreground/20 text-white"
+                className="flex-1 border-border hover:bg-white/10 hover:border-white/20 text-white"
               >
                 Maybe Later
               </Button>

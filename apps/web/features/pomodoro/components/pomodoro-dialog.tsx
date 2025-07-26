@@ -27,13 +27,13 @@ export const PomodoroDialog = () => {
 
   return (
     <Dialog open={isDialogOpen} onOpenChange={closeDialog}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="border-4 border-primary bg-black/90 backdrop-blur-sm sm:max-w-[500px] shadow-2xl shadow-primary/40 ring-2 ring-primary/30">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-xl">
-            <Timer className="h-6 w-6" />
+          <DialogTitle className="flex items-center gap-2 text-xl text-white">
+            <Timer className="h-6 w-6 text-primary" />
             Pomodoro Timer
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-gray-300">
             Configure your focus sessions and break durations. Use the Pomodoro
             Technique to boost your productivity while learning.
           </DialogDescription>
@@ -48,7 +48,7 @@ export const PomodoroDialog = () => {
           <Button
             variant="outline"
             onClick={handleCloseDialog}
-            className="flex-1"
+            className="flex-1 border-border hover:bg-muted hover:border-muted-foreground/20 text-white"
           >
             Maybe Later
           </Button>
