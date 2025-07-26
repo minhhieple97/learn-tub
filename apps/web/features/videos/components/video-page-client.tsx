@@ -21,7 +21,7 @@ export const VideoPageClient = ({ video }: IVideoPageClientProps) => {
     <div
       className={cn(
         "transition-all duration-300",
-        focusModeEnabled && "focus-workspace"
+        focusModeEnabled && "focus-workspace",
       )}
     >
       <VideoLayout focusModeEnabled={focusModeEnabled} />

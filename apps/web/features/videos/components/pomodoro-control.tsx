@@ -21,7 +21,8 @@ export const PomodoroControl = ({
   currentPhase,
   onToggleDialog,
 }: PomodoroControlProps) => {
-  const isSessionActive = isEnabled && (status === "running" || status === "paused");
+  const isSessionActive =
+    isEnabled && (status === "running" || status === "paused");
 
   if (isSessionActive) {
     return (

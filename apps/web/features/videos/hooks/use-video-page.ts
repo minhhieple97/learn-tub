@@ -45,7 +45,7 @@ export const useVideoPage = (video: IVideoPageData) => {
   return {
     // Focus mode state
     focusModeEnabled,
-    
+
     // Pomodoro state
     pomodoro: {
       isEnabled,
