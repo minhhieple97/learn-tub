@@ -15,3 +15,7 @@ export { VideoPageHeader } from "./video-page-header";
 export { VideoInfoCard } from "./video-info-card";
 export { VideoSidebar } from "./video-sidebar";
 export { VideoMainContent } from "./video-main-content";
+export { SearchInput } from "./search-input";
+export { EmptyState } from "./empty-state";
+export { VideoSearchSection } from "./video-search-section";
+export { VideoContentSection } from "./video-content-section";

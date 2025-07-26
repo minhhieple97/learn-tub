@@ -61,4 +61,6 @@ export type IUseAddVideoFormReturn = {
 export type IUseVideoSearchReturn = {
   searchQuery: string;
   setSearchQuery: (value: string) => void;
+  clearSearch: () => void;
+  isSearching: boolean;
 };

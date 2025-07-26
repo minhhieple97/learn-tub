@@ -230,3 +230,98 @@ MUTED NEUTRAL PALETTE
 All colors automatically adapt between light and dark modes
 while maintaining proper contrast ratios (4.5:1 minimum)
 */
+
+/* Focus Mode Styles */
+@layer base {
+  :root {
+    /* Focus Mode Variables */
+    --focus-overlay: 0 0% 0% / 0.1;
+    --focus-accent: var(--neutral-sage);
+    --focus-accent-foreground: var(--neutral-sage-foreground);
+    --focus-blur: blur(2px);
+    --focus-transition: all 0.3s ease-in-out;
+  }
+
+  .dark {
+    --focus-overlay: 0 0% 0% / 0.3;
+  }
+}
+
+@layer utilities {
+  /* Focus Mode Utilities */
+  .focus-mode {
+    position: relative;
+  }
+
+  .focus-mode::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: hsl(var(--focus-overlay));
+    backdrop-filter: var(--focus-blur);
+    z-index: 1;
+    pointer-events: none;
+    transition: var(--focus-transition);
+  }
+
+  .focus-mode .focus-content {
+    position: relative;
+    z-index: 2;
+  }
+
+  .focus-mode-active {
+    background: hsl(var(--focus-accent));
+    border-color: hsl(var(--focus-accent));
+    color: hsl(var(--focus-accent-foreground));
+    box-shadow: 0 0 0 2px hsl(var(--focus-accent));
+  }
+
+  .focus-mode-dimmed {
+    opacity: 0.6;
+    filter: var(--focus-blur);
+    transition: var(--focus-transition);
+  }
+
+  .focus-mode-highlight {
+    box-shadow: 0 0 20px hsl(var(--focus-accent) / 0.3);
+    border: 2px solid hsl(var(--focus-accent));
+    background: hsl(var(--background));
+    position: relative;
+    z-index: 10;
+  }
+
+  /* Pomodoro Timer Focus Animations */
+  .pomodoro-pulse {
+    animation: pomodoro-pulse 2s infinite;
+  }
+
+  @keyframes pomodoro-pulse {
+    0%, 100% { 
+      box-shadow: 0 0 20px hsl(var(--focus-accent) / 0.3);
+    }
+    50% { 
+      box-shadow: 0 0 30px hsl(var(--focus-accent) / 0.5);
+    }
+  }
+
+  .pomodoro-timer-glow {
+    box-shadow: 
+      0 0 20px hsl(var(--focus-accent) / 0.4),
+      0 0 40px hsl(var(--focus-accent) / 0.2),
+      0 0 60px hsl(var(--focus-accent) / 0.1);
+  }
+
+  /* Professional Focus Mode Layout */
+  .focus-workspace {
+    background: hsl(var(--neutral-pearl));
+    border: 1px solid hsl(var(--neutral-stone));
+  }
+
+  .dark .focus-workspace {
+    background: hsl(var(--neutral-pearl));
+    border: 1px solid hsl(var(--neutral-stone));
+  }
+}
