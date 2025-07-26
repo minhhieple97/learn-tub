@@ -1,17 +1,17 @@
-'use client';
+"use client";
 
-import { IUseVideoSearchReturn } from '@/features/videos/types';
-import { useQueryState } from 'nuqs';
-import { useEffect, useCallback, useState, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
-import { debounce } from 'lodash';
+import { IUseVideoSearchReturn } from "@/features/videos/types";
+import { useQueryState } from "nuqs";
+import { useEffect, useCallback, useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
+import { debounce } from "lodash";
 
 const DEBOUNCE_TIME = 500;
 
 export const useVideoSearch = (): IUseVideoSearchReturn => {
   const router = useRouter();
-  const [urlSearchQuery, setUrlSearchQuery] = useQueryState('q');
-  const [displayValue, setDisplayValue] = useState(urlSearchQuery || '');
+  const [urlSearchQuery, setUrlSearchQuery] = useQueryState("q");
+  const [displayValue, setDisplayValue] = useState(urlSearchQuery || "");
 
   const debouncedUpdateUrl = useCallback(
     debounce(async (value: string) => {
@@ -42,7 +42,7 @@ export const useVideoSearch = (): IUseVideoSearchReturn => {
 
   // Handle clear search
   const handleClearSearch = useCallback(() => {
-    setDisplayValue('');
+    setDisplayValue("");
     debouncedUpdateUrl.cancel();
     setUrlSearchQuery(null);
     router.refresh();
@@ -50,7 +50,7 @@ export const useVideoSearch = (): IUseVideoSearchReturn => {
 
   // Sync display value with URL when URL changes externally
   useEffect(() => {
-    setDisplayValue(urlSearchQuery || '');
+    setDisplayValue(urlSearchQuery || "");
   }, [urlSearchQuery]);
 
   // Memoize the return value to prevent unnecessary re-renders
@@ -59,7 +59,7 @@ export const useVideoSearch = (): IUseVideoSearchReturn => {
       searchQuery: displayValue,
       setSearchQuery: handleSearchChange,
       clearSearch: handleClearSearch,
-      isSearching: displayValue !== (urlSearchQuery || ''),
+      isSearching: displayValue !== (urlSearchQuery || ""),
     }),
     [displayValue, handleSearchChange, handleClearSearch, urlSearchQuery],
   );

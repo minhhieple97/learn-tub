@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { SearchInput } from './search-input';
-import { useVideoSearch } from '@/features/videos/hooks/use-video-search';
-import { Loader2 } from 'lucide-react';
+import { SearchInput } from "./search-input";
+import { useVideoSearch } from "@/features/videos/hooks/use-video-search";
+import { Loader2 } from "lucide-react";
 
 type VideoSearchSectionProps = {
   className?: string;

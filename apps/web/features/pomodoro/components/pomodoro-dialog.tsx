@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { usePomodoroStore } from "../store";
 import { PomodoroSettings } from "./pomodoro-settings";
 import { Button } from "@/components/ui/button";
@@ -15,27 +14,19 @@ import {
 import { Timer, Play } from "lucide-react";
 
 export const PomodoroDialog = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const { isEnabled, enablePomodoro } = usePomodoroStore();
-
-  // Show dialog by default when component mounts (user visits page)
-  useEffect(() => {
-    if (!isEnabled) {
-      setIsOpen(true);
-    }
-  }, [isEnabled]);
+  const { isDialogOpen, enablePomodoro, closeDialog } = usePomodoroStore();
 
   const handleEnablePomodoro = () => {
     enablePomodoro();
-    setIsOpen(false);
+    closeDialog();
   };
 
   const handleCloseDialog = () => {
-    setIsOpen(false);
+    closeDialog();
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog open={isDialogOpen} onOpenChange={closeDialog}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl">
