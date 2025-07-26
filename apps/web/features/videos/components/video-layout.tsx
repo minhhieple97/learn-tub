@@ -15,11 +15,19 @@ export const VideoLayout = ({ focusModeEnabled }: VideoLayoutProps) => {
   const rightPanel = <VideoSidebar />;
 
   return (
-    <div className="space-y-6">
+    <div
+      className={cn('space-y-6 transition-all duration-300', focusModeEnabled && 'relative z-10')}
+    >
       <div
         className={cn(
-          "transition-all duration-300",
-          focusModeEnabled && "focus-mode-highlight",
+          'transition-all duration-300 rounded-lg',
+          focusModeEnabled
+            ? [
+                'bg-background/95 backdrop-blur-sm border border-neutral-sage/30',
+                'shadow-lg shadow-neutral-sage/10',
+                'focus-mode-highlight',
+              ]
+            : 'bg-transparent',
         )}
       >
         <VideoPageHeader />
@@ -27,8 +35,15 @@ export const VideoLayout = ({ focusModeEnabled }: VideoLayoutProps) => {
 
       <div
         className={cn(
-          "transition-all duration-300",
-          focusModeEnabled && "focus-mode-highlight",
+          'transition-all duration-300 rounded-lg',
+          focusModeEnabled
+            ? [
+                'bg-background/95 backdrop-blur-sm border border-neutral-sage/30',
+                'shadow-xl shadow-neutral-sage/15',
+                'focus-mode-highlight',
+                'pomodoro-timer-glow',
+              ]
+            : 'bg-transparent',
         )}
       >
         <ResizablePanels
