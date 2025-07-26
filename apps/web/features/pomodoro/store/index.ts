@@ -154,6 +154,7 @@ export const usePomodoroStore = create<IPomodoroStore>()(
         completedPomodoros: 0,
         currentCycle: 0,
         isSettingsOpen: false,
+        isDialogOpen: true,
         focusModeEnabled: false,
         settings: DEFAULT_SETTINGS,
 
@@ -269,6 +270,19 @@ export const usePomodoroStore = create<IPomodoroStore>()(
           set((state) => ({ isSettingsOpen: !state.isSettingsOpen }));
         },
 
+        // Dialog controls
+        openDialog: () => {
+          set({ isDialogOpen: true });
+        },
+
+        closeDialog: () => {
+          set({ isDialogOpen: false });
+        },
+
+        toggleDialog: () => {
+          set((state) => ({ isDialogOpen: !state.isDialogOpen }));
+        },
+
         // Focus mode
         enablePomodoro: () => {
           set({
@@ -316,6 +330,7 @@ export const usePomodoroStore = create<IPomodoroStore>()(
             completedPomodoros: 0,
             currentCycle: 0,
             isSettingsOpen: false,
+            isDialogOpen: true,
             focusModeEnabled: false,
             settings: DEFAULT_SETTINGS,
           });

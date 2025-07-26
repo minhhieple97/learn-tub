@@ -28,6 +28,7 @@ export type IPomodoroState = {
 
   // UI state
   isSettingsOpen: boolean;
+  isDialogOpen: boolean;
   focusModeEnabled: boolean;
 
   // Settings
@@ -44,6 +45,11 @@ export type IPomodoroActions = {
   // Settings
   updateSettings: (settings: Partial<IPomodoroSettings>) => void;
   toggleSettings: () => void;
+
+  // Dialog controls
+  openDialog: () => void;
+  closeDialog: () => void;
+  toggleDialog: () => void;
 
   // Focus mode
   enablePomodoro: () => void;

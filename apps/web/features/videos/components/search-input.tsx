@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
-import { X, Search } from 'lucide-react';
-import { forwardRef } from 'react';
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { X, Search } from "lucide-react";
+import { forwardRef } from "react";
 
 type SearchInputProps = {
   value: string;
@@ -15,7 +15,7 @@ type SearchInputProps = {
 };
 
 export const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
-  ({ value, onChange, onClear, placeholder = 'Search...', className }, ref) => {
+  ({ value, onChange, onClear, placeholder = "Search...", className }, ref) => {
     return (
       <div className="max-w-md mx-auto relative">
         <div className="relative flex items-center">
@@ -25,9 +25,9 @@ export const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
             value={value}
             onChange={(e) => onChange(e.target.value)}
             className={cn(
-              'pl-10 pr-10 py-2 h-10 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700',
-              'focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-0',
-              'shadow-sm hover:shadow transition-shadow duration-200',
+              "pl-10 pr-10 py-2 h-10 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700",
+              "focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-0",
+              "shadow-sm hover:shadow transition-shadow duration-200",
               className,
             )}
           />
@@ -48,4 +48,4 @@ export const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(
   },
 );
 
-SearchInput.displayName = 'SearchInput';
+SearchInput.displayName = "SearchInput";
