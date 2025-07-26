@@ -1,20 +1,20 @@
-'use client';
+"use client";
 
-import { usePomodoroStore } from '../store';
-import { Button } from '@/components/ui/button';
+import { usePomodoroStore } from "../store";
+import { Button } from "@/components/ui/button";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from '@/components/ui/popover';
-import { Card, CardContent } from '@/components/ui/card';
-import { Play, Settings, Timer } from 'lucide-react';
-import { PomodoroSettings } from './pomodoro-settings';
+} from "@/components/ui/popover";
+import { Card, CardContent } from "@/components/ui/card";
+import { Play, Settings, Timer } from "lucide-react";
+import { PomodoroSettings } from "./pomodoro-settings";
 
 const formatTime = (seconds: number): string => {
   const mins = Math.floor(seconds / 60);
   const secs = seconds % 60;
-  return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
 };
 
 export const PomodoroSimpleStart = () => {
