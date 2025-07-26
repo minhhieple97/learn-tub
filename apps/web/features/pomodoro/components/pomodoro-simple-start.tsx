@@ -33,17 +33,15 @@ export const PomodoroSimpleStart = () => {
           <div className="flex items-center gap-4 min-w-[320px]">
             {/* Pomodoro Info */}
             <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center w-12 h-12 bg-emerald-500/10 rounded-full">
-                <Timer className="h-6 w-6 text-emerald-600" />
+              <div className="flex items-center justify-center w-12 h-12 bg-neutral-sage/20 rounded-full">
+                <Timer className="h-6 w-6 text-neutral-sage-foreground" />
               </div>
 
               <div className="flex flex-col">
                 <div className="text-lg font-semibold text-foreground">
                   {formatTime(settings.workDuration * 60)}
                 </div>
-                <div className="text-sm text-muted-foreground">
-                  Focus Session
-                </div>
+                <div className="text-sm text-muted-foreground">Focus Session</div>
               </div>
             </div>
 
@@ -56,7 +54,7 @@ export const PomodoroSimpleStart = () => {
               <Button
                 onClick={handleStartPomodoro}
                 size="lg"
-                className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-500/25 hover:shadow-xl hover:scale-105 transition-all duration-200 min-w-[120px]"
+                className="bg-neutral-sage hover:bg-neutral-sage/80 text-neutral-sage-foreground shadow-neutral-sage/25 hover:shadow-xl hover:scale-105 transition-all duration-200 min-w-[120px]"
               >
                 <Play className="h-5 w-5 mr-2" />
                 Start Focus
@@ -68,17 +66,12 @@ export const PomodoroSimpleStart = () => {
                   <Button
                     variant="outline"
                     size="lg"
-                    className="hover:bg-muted transition-colors"
+                    className="bg-neutral-mist hover:bg-neutral-mist/80 border-neutral-mist text-neutral-mist-foreground hover:text-neutral-mist-foreground transition-colors"
                   >
                     <Settings className="h-5 w-5" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent
-                  className="w-[600px] p-0"
-                  align="center"
-                  side="top"
-                  sideOffset={10}
-                >
+                <PopoverContent className="w-[600px] p-0" align="center" side="top" sideOffset={10}>
                   <PomodoroSettings />
                 </PopoverContent>
               </Popover>
@@ -87,9 +80,7 @@ export const PomodoroSimpleStart = () => {
             {/* Quick Info */}
             <div className="flex flex-col items-center text-center">
               <div className="text-xl mb-1">🍅</div>
-              <div className="text-xs text-muted-foreground">
-                Ready to focus
-              </div>
+              <div className="text-xs text-muted-foreground">Ready to focus</div>
             </div>
           </div>
         </CardContent>
