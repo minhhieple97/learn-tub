@@ -2,12 +2,12 @@
 
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import { 
-  IPomodoroState, 
-  IPomodoroActions, 
+import {
+  IPomodoroState,
+  IPomodoroActions,
   IPomodoroSettings,
   PomodoroPhase,
-  PomodoroStatus 
+  PomodoroStatus,
 } from "../types";
 
 const DEFAULT_SETTINGS: IPomodoroSettings = {
@@ -35,7 +35,10 @@ export const usePomodoroStore = create<IPomodoroStore>()(
         });
       }
 
-      const calculateTimeForPhase = (phase: PomodoroPhase, settings: IPomodoroSettings): number => {
+      const calculateTimeForPhase = (
+        phase: PomodoroPhase,
+        settings: IPomodoroSettings,
+      ): number => {
         switch (phase) {
           case "work":
             return settings.workDuration * 60;
@@ -48,22 +51,37 @@ export const usePomodoroStore = create<IPomodoroStore>()(
         }
       };
 
-      const getNextPhase = (currentPhase: PomodoroPhase, completedPomodoros: number, longBreakInterval: number): PomodoroPhase => {
+      const getNextPhase = (
+        currentPhase: PomodoroPhase,
+        completedPomodoros: number,
+        longBreakInterval: number,
+      ): PomodoroPhase => {
         if (currentPhase === "work") {
           // After work, check if it's time for a long break
-          return (completedPomodoros + 1) % longBreakInterval === 0 ? "long-break" : "short-break";
+          return (completedPomodoros + 1) % longBreakInterval === 0
+            ? "long-break"
+            : "short-break";
         }
         // After any break, return to work
         return "work";
       };
 
       const moveToNextPhase = () => {
-        const { currentPhase, completedPomodoros, settings, focusModeEnabled } = get();
-        const nextPhase = getNextPhase(currentPhase, completedPomodoros, settings.longBreakInterval);
+        const { currentPhase, completedPomodoros, settings, focusModeEnabled } =
+          get();
+        const nextPhase = getNextPhase(
+          currentPhase,
+          completedPomodoros,
+          settings.longBreakInterval,
+        );
         const nextTime = calculateTimeForPhase(nextPhase, settings);
-        
-        const newCompletedPomodoros = currentPhase === "work" ? completedPomodoros + 1 : completedPomodoros;
-        const newCycle = currentPhase === "long-break" ? Math.floor(newCompletedPomodoros / settings.longBreakInterval) : Math.floor(newCompletedPomodoros / settings.longBreakInterval);
+
+        const newCompletedPomodoros =
+          currentPhase === "work" ? completedPomodoros + 1 : completedPomodoros;
+        const newCycle =
+          currentPhase === "long-break"
+            ? Math.floor(newCompletedPomodoros / settings.longBreakInterval)
+            : Math.floor(newCompletedPomodoros / settings.longBreakInterval);
 
         set({
           currentPhase: nextPhase,
@@ -75,7 +93,10 @@ export const usePomodoroStore = create<IPomodoroStore>()(
         });
 
         // Auto-start next phase if enabled
-        const shouldAutoStart = nextPhase === "work" ? settings.autoStartPomodoros : settings.autoStartBreaks;
+        const shouldAutoStart =
+          nextPhase === "work"
+            ? settings.autoStartPomodoros
+            : settings.autoStartBreaks;
         if (shouldAutoStart && focusModeEnabled) {
           // Small delay to let the user see the phase change
           setTimeout(() => {
@@ -87,7 +108,8 @@ export const usePomodoroStore = create<IPomodoroStore>()(
         if (settings.enableSounds && typeof window !== "undefined") {
           // Create notification sound
           try {
-            const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+            const audioContext = new (window.AudioContext ||
+              (window as any).webkitAudioContext)();
             const oscillator = audioContext.createOscillator();
             const gainNode = audioContext.createGain();
 
@@ -95,17 +117,27 @@ export const usePomodoroStore = create<IPomodoroStore>()(
             gainNode.connect(audioContext.destination);
 
             // Different tones for different phases
-            oscillator.frequency.value = nextPhase === 'work' ? 600 : 800;
+            oscillator.frequency.value = nextPhase === "work" ? 600 : 800;
             gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-            gainNode.gain.linearRampToValueAtTime(0.3, audioContext.currentTime + 0.1);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.8);
+            gainNode.gain.linearRampToValueAtTime(
+              0.3,
+              audioContext.currentTime + 0.1,
+            );
+            gainNode.gain.exponentialRampToValueAtTime(
+              0.01,
+              audioContext.currentTime + 0.8,
+            );
 
             oscillator.start(audioContext.currentTime);
             oscillator.stop(audioContext.currentTime + 0.8);
 
-            console.log(`🍅 ${nextPhase === 'work' ? 'Time to focus!' : 'Time for a break!'}`);
+            console.log(
+              `🍅 ${nextPhase === "work" ? "Time to focus!" : "Time for a break!"}`,
+            );
           } catch (error) {
-            console.log(`🍅 ${nextPhase === 'work' ? 'Time to focus!' : 'Time for a break!'}`);
+            console.log(
+              `🍅 ${nextPhase === "work" ? "Time to focus!" : "Time for a break!"}`,
+            );
           }
         }
       };
@@ -113,8 +145,8 @@ export const usePomodoroStore = create<IPomodoroStore>()(
       return {
         // Initial state
         isEnabled: false,
-        currentPhase: 'work' as PomodoroPhase,
-        status: 'idle' as PomodoroStatus,
+        currentPhase: "work" as PomodoroPhase,
+        status: "idle" as PomodoroStatus,
         timeRemaining: DEFAULT_SETTINGS.workDuration * 60,
         totalTime: DEFAULT_SETTINGS.workDuration * 60,
         startTime: null,
@@ -134,16 +166,19 @@ export const usePomodoroStore = create<IPomodoroStore>()(
             clearInterval(timerInterval);
           }
 
-          const startTime = Date.now() - (get().totalTime - timeRemaining) * 1000;
+          const startTime =
+            Date.now() - (get().totalTime - timeRemaining) * 1000;
           set({
-            status: 'running' as PomodoroStatus,
+            status: "running" as PomodoroStatus,
             startTime,
           });
 
           const interval = setInterval(() => {
             set((state) => {
-              if (state.startTime && state.status === 'running') {
-                const elapsed = Math.floor((Date.now() - state.startTime) / 1000);
+              if (state.startTime && state.status === "running") {
+                const elapsed = Math.floor(
+                  (Date.now() - state.startTime) / 1000,
+                );
                 const remaining = Math.max(0, state.totalTime - elapsed);
 
                 if (remaining === 0) {
@@ -152,7 +187,7 @@ export const usePomodoroStore = create<IPomodoroStore>()(
                   moveToNextPhase();
                   return {
                     timerInterval: null,
-                    status: 'completed' as PomodoroStatus,
+                    status: "completed" as PomodoroStatus,
                     startTime: null,
                   };
                 }
@@ -172,7 +207,7 @@ export const usePomodoroStore = create<IPomodoroStore>()(
             clearInterval(timerInterval);
             set({
               timerInterval: null,
-              status: 'paused' as PomodoroStatus,
+              status: "paused" as PomodoroStatus,
               startTime: null,
             });
           }
@@ -189,7 +224,7 @@ export const usePomodoroStore = create<IPomodoroStore>()(
 
           set({
             timerInterval: null,
-            status: 'idle' as PomodoroStatus,
+            status: "idle" as PomodoroStatus,
             timeRemaining: resetTime,
             totalTime: resetTime,
             startTime: null,
@@ -211,14 +246,17 @@ export const usePomodoroStore = create<IPomodoroStore>()(
         updateSettings: (newSettings: Partial<IPomodoroSettings>) => {
           set((state) => {
             const updatedSettings = { ...state.settings, ...newSettings };
-            const newTime = calculateTimeForPhase(state.currentPhase, updatedSettings);
+            const newTime = calculateTimeForPhase(
+              state.currentPhase,
+              updatedSettings,
+            );
 
             // If timer is idle, update the time
             const updates: Partial<IPomodoroState> = {
               settings: updatedSettings,
             };
 
-            if (state.status === 'idle') {
+            if (state.status === "idle") {
               updates.timeRemaining = newTime;
               updates.totalTime = newTime;
             }
@@ -250,7 +288,7 @@ export const usePomodoroStore = create<IPomodoroStore>()(
             isEnabled: false,
             focusModeEnabled: false,
             timerInterval: null,
-            status: 'idle' as PomodoroStatus,
+            status: "idle" as PomodoroStatus,
             startTime: null,
           });
         },
@@ -269,8 +307,8 @@ export const usePomodoroStore = create<IPomodoroStore>()(
 
           set({
             isEnabled: false,
-            currentPhase: 'work' as PomodoroPhase,
-            status: 'idle' as PomodoroStatus,
+            currentPhase: "work" as PomodoroPhase,
+            status: "idle" as PomodoroStatus,
             timeRemaining: DEFAULT_SETTINGS.workDuration * 60,
             totalTime: DEFAULT_SETTINGS.workDuration * 60,
             startTime: null,
@@ -284,6 +322,6 @@ export const usePomodoroStore = create<IPomodoroStore>()(
         },
       };
     },
-    { name: "pomodoro-store" }
-  )
-); 
+    { name: "pomodoro-store" },
+  ),
+);

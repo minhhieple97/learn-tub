@@ -43,7 +43,8 @@ export const PomodoroDialog = () => {
             Pomodoro Timer
           </DialogTitle>
           <DialogDescription>
-            Configure your focus sessions and break durations. Use the Pomodoro Technique to boost your productivity while learning.
+            Configure your focus sessions and break durations. Use the Pomodoro
+            Technique to boost your productivity while learning.
           </DialogDescription>
         </DialogHeader>
 
@@ -71,4 +72,4 @@ export const PomodoroDialog = () => {
       </DialogContent>
     </Dialog>
   );
-}; 
+};
