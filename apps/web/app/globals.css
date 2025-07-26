@@ -235,15 +235,21 @@ while maintaining proper contrast ratios (4.5:1 minimum)
 @layer base {
   :root {
     /* Focus Mode Variables */
-    --focus-overlay: 0 0% 0% / 0.1;
+    --focus-overlay: 0 0% 0% / 0.15;
     --focus-accent: var(--neutral-sage);
     --focus-accent-foreground: var(--neutral-sage-foreground);
-    --focus-blur: blur(2px);
-    --focus-transition: all 0.3s ease-in-out;
+    --focus-blur: blur(3px);
+    --focus-transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    --focus-content-bg: var(--background) / 0.98;
+    --focus-border: var(--neutral-sage) / 0.4;
+    --focus-shadow: var(--neutral-sage) / 0.2;
   }
 
   .dark {
-    --focus-overlay: 0 0% 0% / 0.3;
+    --focus-overlay: 0 0% 0% / 0.4;
+    --focus-content-bg: var(--background) / 0.95;
+    --focus-border: var(--neutral-sage) / 0.6;
+    --focus-shadow: var(--neutral-sage) / 0.3;
   }
 }
 
@@ -280,48 +286,134 @@ while maintaining proper contrast ratios (4.5:1 minimum)
   }
 
   .focus-mode-dimmed {
-    opacity: 0.6;
-    filter: var(--focus-blur);
+    opacity: 0.4;
+    filter: blur(1px);
     transition: var(--focus-transition);
+    transform: scale(0.98);
   }
 
   .focus-mode-highlight {
-    box-shadow: 0 0 20px hsl(var(--focus-accent) / 0.3);
-    border: 2px solid hsl(var(--focus-accent));
-    background: hsl(var(--background));
+    box-shadow: 
+      0 0 0 1px hsl(var(--focus-border)),
+      0 4px 12px hsl(var(--focus-shadow)),
+      0 8px 24px hsl(var(--focus-shadow));
+    border: 1px solid hsl(var(--focus-border));
+    background: hsl(var(--focus-content-bg));
     position: relative;
     z-index: 10;
+    backdrop-filter: blur(8px);
+    transition: var(--focus-transition);
   }
 
-  /* Pomodoro Timer Focus Animations */
+  /* Enhanced Pomodoro Timer Focus Animations */
   .pomodoro-pulse {
-    animation: pomodoro-pulse 2s infinite;
+    animation: pomodoro-pulse 3s ease-in-out infinite;
   }
 
   @keyframes pomodoro-pulse {
     0%, 100% { 
-      box-shadow: 0 0 20px hsl(var(--focus-accent) / 0.3);
+      box-shadow: 
+        0 0 0 1px hsl(var(--focus-border)),
+        0 4px 12px hsl(var(--focus-shadow)),
+        0 8px 24px hsl(var(--focus-shadow));
+      transform: scale(1);
     }
     50% { 
-      box-shadow: 0 0 30px hsl(var(--focus-accent) / 0.5);
+      box-shadow: 
+        0 0 0 2px hsl(var(--focus-accent) / 0.6),
+        0 6px 20px hsl(var(--focus-shadow)),
+        0 12px 40px hsl(var(--focus-shadow));
+      transform: scale(1.005);
     }
   }
 
   .pomodoro-timer-glow {
     box-shadow: 
-      0 0 20px hsl(var(--focus-accent) / 0.4),
-      0 0 40px hsl(var(--focus-accent) / 0.2),
-      0 0 60px hsl(var(--focus-accent) / 0.1);
+      0 0 0 1px hsl(var(--focus-border)),
+      0 4px 12px hsl(var(--focus-shadow)),
+      0 8px 24px hsl(var(--focus-shadow)),
+      0 0 30px hsl(var(--focus-accent) / 0.3),
+      0 0 60px hsl(var(--focus-accent) / 0.15);
+    animation: focus-glow 4s ease-in-out infinite alternate;
+  }
+
+  @keyframes focus-glow {
+    0% {
+      box-shadow: 
+        0 0 0 1px hsl(var(--focus-border)),
+        0 4px 12px hsl(var(--focus-shadow)),
+        0 8px 24px hsl(var(--focus-shadow)),
+        0 0 30px hsl(var(--focus-accent) / 0.2),
+        0 0 60px hsl(var(--focus-accent) / 0.1);
+    }
+    100% {
+      box-shadow: 
+        0 0 0 1px hsl(var(--focus-border)),
+        0 6px 16px hsl(var(--focus-shadow)),
+        0 12px 32px hsl(var(--focus-shadow)),
+        0 0 40px hsl(var(--focus-accent) / 0.4),
+        0 0 80px hsl(var(--focus-accent) / 0.2);
+    }
   }
 
   /* Professional Focus Mode Layout */
   .focus-workspace {
     background: hsl(var(--neutral-pearl));
-    border: 1px solid hsl(var(--neutral-stone));
+    border: 1px solid hsl(var(--neutral-stone) / 0.3);
+    backdrop-filter: blur(8px);
+    position: relative;
   }
 
   .dark .focus-workspace {
     background: hsl(var(--neutral-pearl));
-    border: 1px solid hsl(var(--neutral-stone));
+    border: 1px solid hsl(var(--neutral-stone) / 0.4);
+  }
+
+  /* Focus Mode Content Styling */
+  .focus-content-card {
+    background: hsl(var(--background) / 0.95);
+    backdrop-filter: blur(12px);
+    border: 1px solid hsl(var(--neutral-sage) / 0.3);
+    border-radius: 12px;
+    box-shadow: 
+      0 4px 12px hsl(var(--neutral-sage) / 0.1),
+      0 8px 32px hsl(var(--neutral-sage) / 0.05);
+    transition: var(--focus-transition);
+  }
+
+  .focus-content-card:hover {
+    border-color: hsl(var(--neutral-sage) / 0.5);
+    box-shadow: 
+      0 6px 16px hsl(var(--neutral-sage) / 0.15),
+      0 12px 40px hsl(var(--neutral-sage) / 0.1);
+    transform: translateY(-2px);
+  }
+
+  /* Focus Mode Text Enhancements */
+  .focus-text-primary {
+    color: hsl(var(--neutral-sage-foreground));
+    font-weight: 600;
+    text-shadow: 0 1px 2px hsl(var(--neutral-sage) / 0.1);
+  }
+
+  .focus-text-secondary {
+    color: hsl(var(--neutral-mist-foreground));
+    opacity: 0.8;
+  }
+
+  /* Focus Mode Button Styles */
+  .focus-button {
+    background: linear-gradient(135deg, hsl(var(--neutral-sage)), hsl(var(--neutral-sage)) 100%);
+    border: 1px solid hsl(var(--neutral-sage) / 0.4);
+    color: hsl(var(--neutral-sage-foreground));
+    transition: var(--focus-transition);
+    backdrop-filter: blur(8px);
+  }
+
+  .focus-button:hover {
+    background: linear-gradient(135deg, hsl(var(--neutral-sage) / 0.9), hsl(var(--neutral-sage) / 0.8));
+    border-color: hsl(var(--neutral-sage) / 0.6);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px hsl(var(--neutral-sage) / 0.3);
   }
 }

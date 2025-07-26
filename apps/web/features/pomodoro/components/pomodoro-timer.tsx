@@ -45,13 +45,26 @@ export const PomodoroTimer = () => {
     resetTimer,
     skipPhase,
     disablePomodoro,
+    focusModeEnabled,
   } = usePomodoroStore();
 
   const progress = ((totalTime - timeRemaining) / totalTime) * 100;
 
   return (
     <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50">
-      <Card className="shadow-xl border bg-card text-card-foreground backdrop-blur-sm">
+      <Card
+        className={cn(
+          'shadow-xl border backdrop-blur-sm transition-all duration-500',
+          focusModeEnabled
+            ? [
+                'bg-background/95 border-neutral-sage/40',
+                'shadow-2xl shadow-neutral-sage/20',
+                'pomodoro-timer-glow',
+                'ring-1 ring-neutral-sage/30',
+              ]
+            : ['bg-card border-border', 'text-card-foreground'],
+        )}
+      >
         <CardContent className="p-3">
           {/* Compact Layout */}
           <div className="flex items-center gap-4 min-w-[380px]">
@@ -67,7 +80,7 @@ export const PomodoroTimer = () => {
                     stroke="currentColor"
                     strokeWidth="6"
                     fill="none"
-                    className="text-muted/20"
+                    className={cn(focusModeEnabled ? 'text-neutral-sage/20' : 'text-muted/20')}
                   />
                   <circle
                     cx="50"
@@ -80,29 +93,54 @@ export const PomodoroTimer = () => {
                     strokeDashoffset={`${2 * Math.PI * 40 * (1 - progress / 100)}`}
                     className={cn(
                       'transition-all duration-1000 ease-linear',
-                      currentPhase === 'work' && 'text-emerald-500',
-                      currentPhase === 'short-break' && 'text-blue-500',
-                      currentPhase === 'long-break' && 'text-purple-500',
+                      currentPhase === 'work' &&
+                        (focusModeEnabled ? 'text-emerald-400' : 'text-emerald-500'),
+                      currentPhase === 'short-break' &&
+                        (focusModeEnabled ? 'text-blue-400' : 'text-blue-500'),
+                      currentPhase === 'long-break' &&
+                        (focusModeEnabled ? 'text-purple-400' : 'text-purple-500'),
                     )}
                     strokeLinecap="round"
                   />
                 </svg>
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <Timer className="h-4 w-4 text-muted-foreground" />
+                  <Timer
+                    className={cn(
+                      'h-4 w-4 transition-colors duration-300',
+                      focusModeEnabled ? 'text-neutral-sage-foreground' : 'text-muted-foreground',
+                    )}
+                  />
                 </div>
               </div>
 
               {/* Timer and Phase */}
               <div className="flex flex-col">
-                <div className="text-2xl font-mono font-bold text-foreground tabular-nums">
+                <div
+                  className={cn(
+                    'text-2xl font-mono font-bold tabular-nums transition-colors duration-300',
+                    focusModeEnabled ? 'focus-text-primary' : 'text-foreground',
+                  )}
+                >
                   {formatTime(timeRemaining)}
                 </div>
-                <div className="text-xs text-muted-foreground">{getPhaseLabel(currentPhase)}</div>
+                <div
+                  className={cn(
+                    'text-xs transition-colors duration-300',
+                    focusModeEnabled ? 'focus-text-secondary' : 'text-muted-foreground',
+                  )}
+                >
+                  {getPhaseLabel(currentPhase)}
+                </div>
               </div>
             </div>
 
             {/* Divider */}
-            <div className="h-8 w-px bg-border"></div>
+            <div
+              className={cn(
+                'h-8 w-px transition-colors duration-300',
+                focusModeEnabled ? 'bg-neutral-sage/30' : 'bg-border',
+              )}
+            ></div>
 
             {/* Controls */}
             <div className="flex items-center gap-2">
@@ -114,6 +152,7 @@ export const PomodoroTimer = () => {
                   status === 'running'
                     ? 'bg-destructive hover:bg-destructive/90 text-destructive-foreground'
                     : cn(
+                        focusModeEnabled && 'focus-button',
                         currentPhase === 'work' && 'bg-emerald-600 hover:bg-emerald-700 text-white',
                         currentPhase === 'short-break' &&
                           'bg-blue-600 hover:bg-blue-700 text-white',
@@ -135,34 +174,79 @@ export const PomodoroTimer = () => {
                 )}
               </Button>
 
-              <Button onClick={skipPhase} variant="outline" size="sm" className="h-8 px-3 text-xs">
+              <Button
+                onClick={skipPhase}
+                variant="outline"
+                size="sm"
+                className={cn(
+                  'h-8 px-3 text-xs transition-all duration-200',
+                  focusModeEnabled && [
+                    'border-neutral-sage/40 bg-background/80',
+                    'hover:bg-neutral-sage/20 hover:border-neutral-sage/60',
+                  ],
+                )}
+              >
                 <SkipForward className="h-3 w-3 mr-1" />
                 Skip
               </Button>
             </div>
 
             {/* Divider */}
-            <div className="h-8 w-px bg-border"></div>
+            <div
+              className={cn(
+                'h-8 w-px transition-colors duration-300',
+                focusModeEnabled ? 'bg-neutral-sage/30' : 'bg-border',
+              )}
+            ></div>
 
             {/* Session Info */}
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2">
                 <div className="text-lg">🍅</div>
                 <div className="flex flex-col">
-                  <div className="text-sm font-semibold text-foreground">{completedPomodoros}</div>
-                  <div className="text-xs text-muted-foreground">sessions</div>
+                  <div
+                    className={cn(
+                      'text-sm font-semibold transition-colors duration-300',
+                      focusModeEnabled ? 'focus-text-primary' : 'text-foreground',
+                    )}
+                  >
+                    {completedPomodoros}
+                  </div>
+                  <div
+                    className={cn(
+                      'text-xs transition-colors duration-300',
+                      focusModeEnabled ? 'focus-text-secondary' : 'text-muted-foreground',
+                    )}
+                  >
+                    sessions
+                  </div>
                 </div>
               </div>
             </div>
 
             {/* Divider */}
-            <div className="h-8 w-px bg-border"></div>
+            <div
+              className={cn(
+                'h-8 w-px transition-colors duration-300',
+                focusModeEnabled ? 'bg-neutral-sage/30' : 'bg-border',
+              )}
+            ></div>
 
             {/* Settings & Exit */}
             <div className="flex items-center gap-1">
               <Popover open={isSettingsOpen} onOpenChange={toggleSettings}>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" size="sm" className="h-8 w-8 p-0">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className={cn(
+                      'h-8 w-8 p-0 transition-all duration-200',
+                      focusModeEnabled && [
+                        'border-neutral-sage/40 bg-background/80',
+                        'hover:bg-neutral-sage/20 hover:border-neutral-sage/60',
+                      ],
+                    )}
+                  >
                     <Settings className="h-3 w-3" />
                   </Button>
                 </PopoverTrigger>
@@ -175,7 +259,15 @@ export const PomodoroTimer = () => {
                 onClick={disablePomodoro}
                 variant="outline"
                 size="sm"
-                className="h-8 w-8 p-0 hover:bg-destructive/10 hover:border-destructive/20"
+                className={cn(
+                  'h-8 w-8 p-0 transition-all duration-200',
+                  focusModeEnabled
+                    ? [
+                        'border-destructive/40 bg-background/80 text-destructive',
+                        'hover:bg-destructive/20 hover:border-destructive/60',
+                      ]
+                    : ['hover:bg-destructive/10 hover:border-destructive/20'],
+                )}
                 title="Exit Focus Mode"
               >
                 <X className="h-3 w-3" />
