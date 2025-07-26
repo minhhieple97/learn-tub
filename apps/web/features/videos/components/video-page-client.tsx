@@ -1,13 +1,19 @@
-"use client";
+'use client';
 
-import { useEffect } from "react";
-import { useNotesStore } from "@/features/notes/store";
-import { VideoPageHeader } from "./video-page-header";
-import { VideoMainContent } from "./video-main-content";
-import { VideoSidebar } from "./video-sidebar";
-import { ResizablePanels } from "./resizable-panels";
-import { IVideoPageData } from "../types";
-import { useQuizStore } from "@/features/quizzes/store";
+import { useEffect } from 'react';
+import { useNotesStore } from '@/features/notes/store';
+import { VideoPageHeader } from './video-page-header';
+import { VideoMainContent } from './video-main-content';
+import { VideoSidebar } from './video-sidebar';
+import { ResizablePanels } from './resizable-panels';
+import { IVideoPageData } from '../types';
+import { useQuizStore } from '@/features/quizzes/store';
+import { usePomodoroStore } from '@/features/pomodoro/store';
+import {
+  PomodoroTimer,
+  PomodoroSimpleStart,
+} from '@/features/pomodoro/components';
+import { cn } from '@/lib/utils';
 
 type IVideoPageClientProps = {
   video: IVideoPageData;
@@ -15,8 +21,8 @@ type IVideoPageClientProps = {
 
 export const VideoPageClient = ({ video }: IVideoPageClientProps) => {
   const { initializeYouTubeAPI, setCurrentVideo } = useNotesStore();
-
   const { setVideoContext } = useQuizStore();
+  const { focusModeEnabled, resetAll, isEnabled } = usePomodoroStore();
 
   useEffect(() => {
     initializeYouTubeAPI();
@@ -29,21 +35,47 @@ export const VideoPageClient = ({ video }: IVideoPageClientProps) => {
     });
   }, [video, initializeYouTubeAPI, setCurrentVideo, setVideoContext]);
 
-  const leftPanel = <VideoMainContent />;
+  useEffect(() => {
+    return () => {
+      resetAll();
+    };
+  }, [resetAll]);
 
+  const leftPanel = <VideoMainContent />;
   const rightPanel = <VideoSidebar />;
 
   return (
-    <div className="space-y-6">
-      <VideoPageHeader />
+    <div
+      className={cn(
+        'space-y-6 transition-all duration-300',
+        focusModeEnabled && 'focus-workspace',
+      )}
+    >
+      <div
+        className={cn(
+          'transition-all duration-300',
+          focusModeEnabled && 'focus-mode-highlight',
+        )}
+      >
+        <VideoPageHeader />
+      </div>
 
-      <ResizablePanels
-        leftPanel={leftPanel}
-        rightPanel={rightPanel}
-        initialLeftWidth={66.666667}
-        minLeftWidth={30}
-        maxLeftWidth={80}
-      />
+      <div
+        className={cn(
+          'transition-all duration-300',
+          focusModeEnabled && 'focus-mode-highlight',
+        )}
+      >
+        <ResizablePanels
+          leftPanel={leftPanel}
+          rightPanel={rightPanel}
+          initialLeftWidth={66.666667}
+          minLeftWidth={30}
+          maxLeftWidth={80}
+        />
+      </div>
+
+      {isEnabled ? <PomodoroTimer /> : <PomodoroSimpleStart />}
     </div>
   );
 };
