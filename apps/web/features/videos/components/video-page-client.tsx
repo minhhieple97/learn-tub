@@ -1,15 +1,18 @@
-"use client";
+'use client';
 
-import { useEffect } from "react";
-import { useNotesStore } from "@/features/notes/store";
-import { VideoPageHeader } from "./video-page-header";
-import { VideoMainContent } from "./video-main-content";
-import { VideoSidebar } from "./video-sidebar";
-import { ResizablePanels } from "./resizable-panels";
-import { IVideoPageData } from "../types";
-import { useQuizStore } from "@/features/quizzes/store";
+import { useEffect } from 'react';
+import { useNotesStore } from '@/features/notes/store';
+import { VideoPageHeader } from './video-page-header';
+import { VideoMainContent } from './video-main-content';
+import { VideoSidebar } from './video-sidebar';
+import { ResizablePanels } from './resizable-panels';
+import { IVideoPageData } from '../types';
+import { useQuizStore } from '@/features/quizzes/store';
 import { usePomodoroStore } from '@/features/pomodoro/store';
-import { PomodoroTimer, PomodoroSimpleStart } from '@/features/pomodoro/components';
+import {
+  PomodoroTimer,
+  PomodoroSimpleStart,
+} from '@/features/pomodoro/components';
 import { cn } from '@/lib/utils';
 
 type IVideoPageClientProps = {
@@ -32,7 +35,6 @@ export const VideoPageClient = ({ video }: IVideoPageClientProps) => {
     });
   }, [video, initializeYouTubeAPI, setCurrentVideo, setVideoContext]);
 
-  // Cleanup pomodoro when component unmounts (user navigates away)
   useEffect(() => {
     return () => {
       resetAll();
@@ -44,16 +46,25 @@ export const VideoPageClient = ({ video }: IVideoPageClientProps) => {
 
   return (
     <div
-      className={cn('space-y-6 transition-all duration-300', focusModeEnabled && 'focus-workspace')}
+      className={cn(
+        'space-y-6 transition-all duration-300',
+        focusModeEnabled && 'focus-workspace',
+      )}
     >
       <div
-        className={cn('transition-all duration-300', focusModeEnabled && 'focus-mode-highlight')}
+        className={cn(
+          'transition-all duration-300',
+          focusModeEnabled && 'focus-mode-highlight',
+        )}
       >
         <VideoPageHeader />
       </div>
 
       <div
-        className={cn('transition-all duration-300', focusModeEnabled && 'focus-mode-highlight')}
+        className={cn(
+          'transition-all duration-300',
+          focusModeEnabled && 'focus-mode-highlight',
+        )}
       >
         <ResizablePanels
           leftPanel={leftPanel}
@@ -64,7 +75,6 @@ export const VideoPageClient = ({ video }: IVideoPageClientProps) => {
         />
       </div>
 
-      {/* Pomodoro UI - Shows timer when active, simple start when inactive */}
       {isEnabled ? <PomodoroTimer /> : <PomodoroSimpleStart />}
     </div>
   );
