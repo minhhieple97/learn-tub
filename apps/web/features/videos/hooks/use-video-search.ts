@@ -13,34 +13,30 @@ export const useVideoSearch = (): IUseVideoSearchReturn => {
   const [urlSearchQuery, setUrlSearchQuery] = useQueryState("q");
   const [displayValue, setDisplayValue] = useState(urlSearchQuery || "");
 
-  const debouncedUpdateUrl = useCallback(
-    debounce(async (value: string) => {
-      const trimmedValue = value.trim();
-      await setUrlSearchQuery(trimmedValue || null);
-      router.refresh();
-    }, DEBOUNCE_TIME),
+  const debouncedUpdateUrl = useMemo(
+    () =>
+      debounce(async (value: string) => {
+        const trimmedValue = value.trim();
+        await setUrlSearchQuery(trimmedValue || null);
+        router.refresh();
+      }, DEBOUNCE_TIME),
     [setUrlSearchQuery, router],
   );
 
-  // Cleanup debounced function on unmount
   useEffect(() => {
     return () => {
       debouncedUpdateUrl.cancel();
     };
   }, [debouncedUpdateUrl]);
 
-  // Handle immediate display update and debounced URL update
   const handleSearchChange = useCallback(
     (value: string) => {
-      // Update display immediately for instant feedback
       setDisplayValue(value);
-      // Update URL with debounce
       debouncedUpdateUrl(value);
     },
     [debouncedUpdateUrl],
   );
 
-  // Handle clear search
   const handleClearSearch = useCallback(() => {
     setDisplayValue("");
     debouncedUpdateUrl.cancel();
@@ -48,12 +44,10 @@ export const useVideoSearch = (): IUseVideoSearchReturn => {
     router.refresh();
   }, [debouncedUpdateUrl, setUrlSearchQuery, router]);
 
-  // Sync display value with URL when URL changes externally
   useEffect(() => {
     setDisplayValue(urlSearchQuery || "");
   }, [urlSearchQuery]);
 
-  // Memoize the return value to prevent unnecessary re-renders
   const returnValue = useMemo(
     () => ({
       searchQuery: displayValue,
