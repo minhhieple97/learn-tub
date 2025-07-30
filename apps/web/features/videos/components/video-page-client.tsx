@@ -20,8 +20,8 @@ export const VideoPageClient = ({ video }: IVideoPageClientProps) => {
   return (
     <div
       className={cn(
-        'transition-all duration-500 ease-in-out',
-        focusModeEnabled && ['min-h-screen'],
+        "transition-all duration-500 ease-in-out",
+        focusModeEnabled && ["min-h-screen"],
       )}
     >
       <VideoLayout focusModeEnabled={focusModeEnabled} />

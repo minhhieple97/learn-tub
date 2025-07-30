@@ -41,7 +41,9 @@ export const PomodoroSimpleStart = () => {
                 <div className="text-lg font-semibold text-foreground">
                   {formatTime(settings.workDuration * 60)}
                 </div>
-                <div className="text-sm text-muted-foreground">Focus Session</div>
+                <div className="text-sm text-muted-foreground">
+                  Focus Session
+                </div>
               </div>
             </div>
 
@@ -71,7 +73,12 @@ export const PomodoroSimpleStart = () => {
                     <Settings className="h-5 w-5" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-[600px] p-0" align="center" side="top" sideOffset={10}>
+                <PopoverContent
+                  className="w-[600px] p-0"
+                  align="center"
+                  side="top"
+                  sideOffset={10}
+                >
                   <PomodoroSettings />
                 </PopoverContent>
               </Popover>
@@ -80,7 +87,9 @@ export const PomodoroSimpleStart = () => {
             {/* Quick Info */}
             <div className="flex flex-col items-center text-center">
               <div className="text-xl mb-1">🍅</div>
-              <div className="text-xs text-muted-foreground">Ready to focus</div>
+              <div className="text-xs text-muted-foreground">
+                Ready to focus
+              </div>
             </div>
           </div>
         </CardContent>

@@ -1,10 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  useProfileSettings,
-  useAvatarUpload,
-} from "@/features/settings/hooks";
+import { useProfileSettings, useAvatarUpload } from "@/features/settings/hooks";
 import { ProfileSchema } from "@/features/settings/schemas";
 import type { ProfileFormData } from "@/features/settings/types";
 import type { IUserProfile } from "@/types";

@@ -16,18 +16,21 @@ export const VideoLayout = ({ focusModeEnabled }: VideoLayoutProps) => {
 
   return (
     <div
-      className={cn('space-y-6 transition-all duration-300', focusModeEnabled && 'relative z-10')}
+      className={cn(
+        "space-y-6 transition-all duration-300",
+        focusModeEnabled && "relative z-10",
+      )}
     >
       <div
         className={cn(
-          'transition-all duration-300 rounded-lg',
+          "transition-all duration-300 rounded-lg",
           focusModeEnabled
             ? [
-                'bg-background/95 backdrop-blur-sm border border-neutral-sage/30',
-                'shadow-lg shadow-neutral-sage/10',
-                'focus-mode-highlight',
+                "bg-background/95 backdrop-blur-sm border border-neutral-sage/30",
+                "shadow-lg shadow-neutral-sage/10",
+                "focus-mode-highlight",
               ]
-            : 'bg-transparent',
+            : "bg-transparent",
         )}
       >
         <VideoPageHeader />
@@ -35,15 +38,15 @@ export const VideoLayout = ({ focusModeEnabled }: VideoLayoutProps) => {
 
       <div
         className={cn(
-          'transition-all duration-300 rounded-lg',
+          "transition-all duration-300 rounded-lg",
           focusModeEnabled
             ? [
-                'bg-background/95 backdrop-blur-sm border border-neutral-sage/30',
-                'shadow-xl shadow-neutral-sage/15',
-                'focus-mode-highlight',
-                'pomodoro-timer-glow',
+                "bg-background/95 backdrop-blur-sm border border-neutral-sage/30",
+                "shadow-xl shadow-neutral-sage/15",
+                "focus-mode-highlight",
+                "pomodoro-timer-glow",
               ]
-            : 'bg-transparent',
+            : "bg-transparent",
         )}
       >
         <ResizablePanels

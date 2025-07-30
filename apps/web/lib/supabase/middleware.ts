@@ -1,9 +1,9 @@
-import { env } from '@/env.mjs';
-import { routes } from '@/routes';
-import { createServerClient } from '@supabase/ssr';
-import { NextResponse, type NextRequest } from 'next/server';
+import { env } from "@/env.mjs";
+import { routes } from "@/routes";
+import { createServerClient } from "@supabase/ssr";
+import { NextResponse, type NextRequest } from "next/server";
 
-const PROTECTED_ROUTES = ['/learn', '/dashboard'];
+const PROTECTED_ROUTES = ["/learn", "/dashboard"];
 
 export const updateSession = async (request: NextRequest) => {
   let supabaseResponse = NextResponse.next({
