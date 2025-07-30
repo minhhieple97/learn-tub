@@ -1,17 +1,16 @@
-import { env } from "@/env.mjs";
-import { getUserInSession } from "@/features/profile/queries";
-import { routes } from "@/routes";
-import { createServerClient } from "@supabase/ssr";
-import { NextResponse, type NextRequest } from "next/server";
+import { env } from '@/env.mjs';
+import { routes } from '@/routes';
+import { createServerClient } from '@supabase/ssr';
+import { NextResponse, type NextRequest } from 'next/server';
 
-const PROTECTED_ROUTES = ["/learn", "/dashboard"];
+const PROTECTED_ROUTES = ['/learn', '/dashboard'];
 
 export const updateSession = async (request: NextRequest) => {
   let supabaseResponse = NextResponse.next({
     request,
   });
 
-  createServerClient(
+  const supabase = createServerClient(
     env.NEXT_PUBLIC_SUPABASE_URL,
     env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     {
@@ -39,7 +38,10 @@ export const updateSession = async (request: NextRequest) => {
   );
 
   if (isProtectedRoute) {
-    const user = await getUserInSession();
+    // Get user directly from the Edge Runtime compatible Supabase client
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) {
       const url = request.nextUrl.clone();
