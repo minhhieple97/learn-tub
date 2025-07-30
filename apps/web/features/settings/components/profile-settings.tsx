@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Spinner } from "@/components/ui/spinner";
 import { Camera, User } from "lucide-react";
-import { useProfileSettingsForm } from "@/hooks/use-profile-settings-form";
+import { useProfileSettingsForm } from '@/features/settings/hooks';
 import { IUserProfile } from "@/types";
 
 type ProfileSettingsProps = {

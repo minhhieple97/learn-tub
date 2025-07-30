@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   useProfileSettings,
   useAvatarUpload,
-} from "@/hooks/use-profile-settings";
+} from "@/features/settings/hooks";
 import { ProfileSchema } from "@/features/settings/schemas";
 import type { ProfileFormData } from "@/features/settings/types";
 import type { IUserProfile } from "@/types";
