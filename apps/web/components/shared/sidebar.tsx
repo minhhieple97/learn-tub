@@ -34,28 +34,35 @@ export const Sidebar = () => {
   return (
     <div
       className={cn(
-        'bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transition-all duration-300 ease-in-out relative flex-shrink-0 h-full',
-        isCollapsed ? 'w-16' : 'w-64',
+        "bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transition-all duration-300 ease-in-out relative flex-shrink-0 h-full",
+        isCollapsed ? "w-16" : "w-64",
       )}
     >
-      <div className={cn('transition-all duration-300 h-full', isCollapsed ? 'p-2' : 'p-6')}>
+      <div
+        className={cn(
+          "transition-all duration-300 h-full",
+          isCollapsed ? "p-2" : "p-6",
+        )}
+      >
         {!isCollapsed && (
           <div className="mb-8 flex items-center justify-between">
             <Link href={routes.home} className="flex items-center space-x-2">
               <BookOpen className="size-8 text-blue-600" />
-              <span className="text-2xl font-bold text-gray-900 dark:text-white">LearnTub</span>
+              <span className="text-2xl font-bold text-gray-900 dark:text-white">
+                LearnTub
+              </span>
             </Link>
             <Button
               variant="ghost"
               size="sm"
               onClick={toggleSidebar}
               className={cn(
-                'h-8 w-8 p-0 rounded-full transition-all duration-200',
-                'hover:bg-gray-100 dark:hover:bg-gray-700',
-                'border border-gray-200 dark:border-gray-600',
-                'bg-white dark:bg-gray-800 shadow-sm',
-                'hover:shadow-md hover:scale-105',
-                'focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
+                "h-8 w-8 p-0 rounded-full transition-all duration-200",
+                "hover:bg-gray-100 dark:hover:bg-gray-700",
+                "border border-gray-200 dark:border-gray-600",
+                "bg-white dark:bg-gray-800 shadow-sm",
+                "hover:shadow-md hover:scale-105",
+                "focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
               )}
               title="Collapse sidebar"
             >
@@ -74,12 +81,12 @@ export const Sidebar = () => {
               size="sm"
               onClick={toggleSidebar}
               className={cn(
-                'h-8 w-8 p-0 rounded-full transition-all duration-200',
-                'hover:bg-gray-100 dark:hover:bg-gray-700',
-                'border border-gray-200 dark:border-gray-600',
-                'bg-white dark:bg-gray-800 shadow-sm',
-                'hover:shadow-md hover:scale-105',
-                'focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
+                "h-8 w-8 p-0 rounded-full transition-all duration-200",
+                "hover:bg-gray-100 dark:hover:bg-gray-700",
+                "border border-gray-200 dark:border-gray-600",
+                "bg-white dark:bg-gray-800 shadow-sm",
+                "hover:shadow-md hover:scale-105",
+                "focus:ring-2 focus:ring-blue-500 focus:ring-offset-2",
               )}
               title="Expand sidebar"
             >
@@ -94,17 +101,19 @@ export const Sidebar = () => {
             return (
               <Button
                 key={item.name}
-                variant={isActive ? 'default' : 'ghost'}
+                variant={isActive ? "default" : "ghost"}
                 className={cn(
-                  'w-full transition-all duration-200',
-                  isCollapsed ? 'justify-center p-2 h-10' : 'justify-start',
-                  isActive && 'bg-blue-600 text-white hover:bg-blue-700',
+                  "w-full transition-all duration-200",
+                  isCollapsed ? "justify-center p-2 h-10" : "justify-start",
+                  isActive && "bg-blue-600 text-white hover:bg-blue-700",
                 )}
                 asChild
                 title={isCollapsed ? item.name : undefined}
               >
                 <Link href={item.href}>
-                  <item.icon className={cn('h-4 w-4', !isCollapsed && 'mr-2')} />
+                  <item.icon
+                    className={cn("h-4 w-4", !isCollapsed && "mr-2")}
+                  />
                   {!isCollapsed && item.name}
                 </Link>
               </Button>

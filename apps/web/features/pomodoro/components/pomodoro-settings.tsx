@@ -51,7 +51,9 @@ export const PomodoroSettings = () => {
           <Timer className="h-5 w-5" />
           Pomodoro Settings
         </CardTitle>
-        <CardDescription>Customize your focus session and break durations</CardDescription>
+        <CardDescription>
+          Customize your focus session and break durations
+        </CardDescription>
       </CardHeader>
 
       <CardContent className="space-y-6">
@@ -75,7 +77,9 @@ export const PomodoroSettings = () => {
                   min="1"
                   max="60"
                   value={settings.workDuration}
-                  onChange={(e) => handleNumberChange('workDuration', e.target.value)}
+                  onChange={(e) =>
+                    handleNumberChange("workDuration", e.target.value)
+                  }
                   className="border-0 bg-transparent text-center font-medium p-0 h-auto focus-visible:ring-0"
                 />
               </div>
@@ -93,7 +97,9 @@ export const PomodoroSettings = () => {
                   min="1"
                   max="30"
                   value={settings.shortBreakDuration}
-                  onChange={(e) => handleNumberChange('shortBreakDuration', e.target.value)}
+                  onChange={(e) =>
+                    handleNumberChange("shortBreakDuration", e.target.value)
+                  }
                   className="border-0 bg-transparent text-center font-medium p-0 h-auto focus-visible:ring-0"
                 />
               </div>
@@ -111,7 +117,9 @@ export const PomodoroSettings = () => {
                   min="1"
                   max="60"
                   value={settings.longBreakDuration}
-                  onChange={(e) => handleNumberChange('longBreakDuration', e.target.value)}
+                  onChange={(e) =>
+                    handleNumberChange("longBreakDuration", e.target.value)
+                  }
                   className="border-0 bg-transparent text-center font-medium p-0 h-auto focus-visible:ring-0"
                 />
               </div>
@@ -138,7 +146,9 @@ export const PomodoroSettings = () => {
                   min="2"
                   max="10"
                   value={settings.longBreakInterval}
-                  onChange={(e) => handleNumberChange('longBreakInterval', e.target.value)}
+                  onChange={(e) =>
+                    handleNumberChange("longBreakInterval", e.target.value)
+                  }
                   className="border-0 bg-transparent text-center font-medium p-0 h-auto focus-visible:ring-0"
                 />
               </div>
@@ -150,7 +160,9 @@ export const PomodoroSettings = () => {
               <div className="flex items-center gap-2">
                 <Switch
                   checked={settings.autoStartBreaks}
-                  onCheckedChange={(checked) => handleBooleanChange('autoStartBreaks', checked)}
+                  onCheckedChange={(checked) =>
+                    handleBooleanChange("autoStartBreaks", checked)
+                  }
                 />
                 <Label className="text-sm">Auto breaks</Label>
               </div>
@@ -158,7 +170,9 @@ export const PomodoroSettings = () => {
               <div className="flex items-center gap-2">
                 <Switch
                   checked={settings.autoStartPomodoros}
-                  onCheckedChange={(checked) => handleBooleanChange('autoStartPomodoros', checked)}
+                  onCheckedChange={(checked) =>
+                    handleBooleanChange("autoStartPomodoros", checked)
+                  }
                 />
                 <Label className="text-sm">Auto sessions</Label>
               </div>
@@ -173,7 +187,9 @@ export const PomodoroSettings = () => {
           <div className="flex items-center gap-2">
             <Switch
               checked={settings.enableSounds}
-              onCheckedChange={(checked) => handleBooleanChange('enableSounds', checked)}
+              onCheckedChange={(checked) =>
+                handleBooleanChange("enableSounds", checked)
+              }
             />
             <Label className="text-sm">Enable sounds</Label>
           </div>
