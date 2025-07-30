@@ -1,8 +1,8 @@
-import { Button } from "@/components/ui/button";
-import { ArrowRight, Play } from "lucide-react";
-import Link from "next/link";
-import { routes } from "@/routes";
-import { StatsDisplay } from "./stats-display";
+import { Button } from '@/components/ui/button';
+import { ArrowRight } from 'lucide-react';
+import Link from 'next/link';
+import { routes } from '@/routes';
+import { StatsDisplay } from './stats-display';
 
 export function HeroSection() {
   return (
@@ -16,7 +16,7 @@ export function HeroSection() {
           </div>
 
           <h1 className="text-slate-900 dark:text-slate-100 mb-8 text-5xl font-bold leading-tight lg:text-7xl">
-            Turn YouTube into Your{" "}
+            Turn YouTube into Your{' '}
             <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
               Learning Platform
             </span>
