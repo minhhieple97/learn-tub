@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Clock, BookOpen, Play, Eye, Calendar } from "lucide-react";
@@ -21,12 +22,14 @@ export const VideoCard = ({ video }: VideoCardProps) => {
     <Link href={`${routes.learn}/${video.youtube_id}`}>
       <Card className="group h-full flex flex-col overflow-hidden border-0 shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:scale-[1.03] hover:-translate-y-2 bg-gradient-to-br from-white via-slate-50/90 to-slate-100/80 dark:from-slate-800/95 dark:via-slate-850/90 dark:to-slate-900/85 hover:from-blue-50/90 hover:via-indigo-50/80 hover:to-purple-50/70 dark:hover:from-slate-700/95 dark:hover:via-slate-750/90 dark:hover:to-slate-800/85 backdrop-blur-sm rounded-2xl">
         <div className="aspect-video relative overflow-hidden rounded-t-2xl flex-shrink-0">
-          <img
+          <Image
             src={
               video.thumbnail_url ||
               `https://img.youtube.com/vi/${video.youtube_id}/hqdefault.jpg`
             }
             alt={video.title}
+            width={480}
+            height={360}
             className="object-cover w-full h-full group-hover:scale-125 transition-transform duration-700 ease-out"
           />
 
