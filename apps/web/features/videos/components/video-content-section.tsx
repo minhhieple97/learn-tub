@@ -1,5 +1,3 @@
-"use client";
-
 import { VideoGrid } from "./video-grid";
 import { EmptyState } from "./empty-state";
 import { IVideo } from "../types";
