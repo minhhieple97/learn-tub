@@ -18,9 +18,9 @@ export const PomodoroToggleButton = ({
       onClick={onToggle}
       size="lg"
       className={cn(
-        'fixed bottom-6 right-6 z-50 h-16 w-16 rounded-full',
-        'bg-background border-2 border-border',
-        isDialogOpen ? 'border-primary' : '',
+        "fixed bottom-6 right-6 z-50 h-16 w-16 rounded-full",
+        "bg-background border-2 border-border",
+        isDialogOpen ? "border-primary" : "",
       )}
       variant="outline"
     >

@@ -17,42 +17,6 @@ export default async function SettingsPage() {
             <ProfileSettings userProfile={profile} />
             <SubscriptionManagement />
           </div>
-
-          <div className="lg:col-span-1">
-            <div className="sticky top-8">
-              <div className="bg-white dark:bg-slate-800 rounded-lg p-6 border border-slate-200 dark:border-slate-700">
-                <h3 className="font-semibold text-lg mb-4 text-foreground">
-                  Quick Links
-                </h3>
-                <div className="space-y-3 text-sm">
-                  <a
-                    href="#profile"
-                    className="block text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    Profile Settings
-                  </a>
-                  <a
-                    href="#subscription"
-                    className="block text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    Subscription Management
-                  </a>
-                  <a
-                    href="#security"
-                    className="block text-muted-foreground hover:text-foreground transition-colors opacity-50 cursor-not-allowed"
-                  >
-                    Security Settings (Coming Soon)
-                  </a>
-                  <a
-                    href="#notifications"
-                    className="block text-muted-foreground hover:text-foreground transition-colors opacity-50 cursor-not-allowed"
-                  >
-                    Notifications (Coming Soon)
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>
