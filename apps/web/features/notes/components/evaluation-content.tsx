@@ -15,7 +15,7 @@ export const EvaluationContent = () => {
   } = useNotesStore();
 
   return (
-    <div className="space-y-6">
+    <div className="h-full flex flex-col space-y-6">
       {evaluation.showSettings && <EvaluationSettings />}
 
       {evaluation.hasError && (

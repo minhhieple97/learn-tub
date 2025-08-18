@@ -64,7 +64,7 @@ export const AIFeedbackHistory = ({ noteId }: AIFeedbackHistoryProps) => {
   if (selectedFeedback) {
     return (
       <div className="flex flex-col h-full space-y-6">
-        <div className="flex items-center justify-between px-1">
+        <div className="flex items-center justify-between px-1 flex-shrink-0">
           <h3 className="text-lg font-semibold text-foreground">
             Feedback Details
           </h3>
@@ -77,7 +77,7 @@ export const AIFeedbackHistory = ({ noteId }: AIFeedbackHistoryProps) => {
             ← Back to History
           </Button>
         </div>
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 overflow-hidden min-h-0">
           <NoteFeedbackDisplay
             feedback={selectedFeedback}
             onReset={() => setSelectedFeedback(null)}
@@ -90,14 +90,14 @@ export const AIFeedbackHistory = ({ noteId }: AIFeedbackHistoryProps) => {
   if (isLoading) {
     return (
       <div className="flex flex-col h-full space-y-6">
-        <div className="flex items-center justify-between px-1">
+        <div className="flex items-center justify-between px-1 flex-shrink-0">
           <h3 className="text-lg font-semibold text-foreground">
             AI Feedback History
           </h3>
           <Skeleton className="h-6 w-24 rounded-full" />
         </div>
-        <div className="flex-1 space-y-4 overflow-y-auto pr-2 pb-6">
-          {[...Array(3)].map((_, i) => (
+        <div className="flex-1 space-y-4 overflow-y-auto pr-2 pb-6 min-h-0">
+          {[...Array(5)].map((_, i) => (
             <Card key={i} className="border border-border">
               <CardHeader className="pb-4">
                 <div className="flex items-start justify-between gap-4">
@@ -120,6 +120,7 @@ export const AIFeedbackHistory = ({ noteId }: AIFeedbackHistoryProps) => {
                 <div className="space-y-3">
                   <Skeleton className="h-4 w-full" />
                   <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-4 w-1/2" />
                   <div className="flex items-center gap-5">
                     <Skeleton className="h-3 w-16" />
                     <Skeleton className="h-3 w-20" />
@@ -137,7 +138,7 @@ export const AIFeedbackHistory = ({ noteId }: AIFeedbackHistoryProps) => {
   if (error) {
     return (
       <div className="flex flex-col h-full space-y-6">
-        <div className="flex items-center justify-between px-1">
+        <div className="flex items-center justify-between px-1 flex-shrink-0">
           <h3 className="text-lg font-semibold text-foreground">
             AI Feedback History
           </h3>
@@ -148,7 +149,7 @@ export const AIFeedbackHistory = ({ noteId }: AIFeedbackHistoryProps) => {
             Error
           </Badge>
         </div>
-        <div className="flex-1 flex items-center justify-center">
+        <div className="flex-1 flex items-center justify-center min-h-0">
           <Card className="border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/50 w-full max-w-md mx-auto">
             <CardContent className="pt-8 pb-8">
               <div className="flex flex-col items-center gap-4">
@@ -182,7 +183,7 @@ export const AIFeedbackHistory = ({ noteId }: AIFeedbackHistoryProps) => {
   if (!hasHistory) {
     return (
       <div className="flex flex-col h-full space-y-6">
-        <div className="flex items-center justify-between px-1">
+        <div className="flex items-center justify-between px-1 flex-shrink-0">
           <h3 className="text-lg font-semibold text-foreground">
             AI Feedback History
           </h3>
@@ -190,7 +191,7 @@ export const AIFeedbackHistory = ({ noteId }: AIFeedbackHistoryProps) => {
             0 evaluations
           </Badge>
         </div>
-        <div className="flex-1 flex items-center justify-center">
+        <div className="flex-1 flex items-center justify-center min-h-0">
           <Card className="border-dashed border-2 border-border w-full max-w-md mx-auto">
             <CardContent className="pt-12 pb-12">
               <div className="text-center space-y-4">
@@ -217,7 +218,7 @@ export const AIFeedbackHistory = ({ noteId }: AIFeedbackHistoryProps) => {
 
   return (
     <div className="flex flex-col h-full space-y-6">
-      <div className="flex items-center justify-between px-1">
+      <div className="flex items-center justify-between px-1 flex-shrink-0">
         <h3 className="text-lg font-semibold text-foreground">
           AI Feedback History
         </h3>
@@ -227,9 +228,8 @@ export const AIFeedbackHistory = ({ noteId }: AIFeedbackHistoryProps) => {
       </div>
 
       <div
-        className="flex-1 space-y-4 overflow-y-auto pr-2 pb-6 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-gray-100 dark:scrollbar-track-gray-800 hover:scrollbar-thumb-gray-400 dark:hover:scrollbar-thumb-gray-500"
+        className="flex-1 space-y-4 overflow-y-auto pr-2 pb-6 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-gray-100 dark:scrollbar-track-gray-800 hover:scrollbar-thumb-gray-400 dark:hover:scrollbar-thumb-gray-500 min-h-0"
         style={{
-          maxHeight: "60vh",
           scrollbarWidth: "thin",
           scrollbarColor: "hsl(var(--muted-foreground)) hsl(var(--muted))",
         }}

@@ -35,7 +35,7 @@ export const NoteEvaluation = ({ noteId, disabled }: INoteEvaluationProps) => {
       ) : (
         <Brain className="h-3.5 w-3.5 mr-2" />
       )}
-      {isLoading ? 'Loading...' : 'Analyze'}
+      {isLoading ? "Loading..." : "Analyze"}
     </Button>
   );
 
@@ -56,8 +56,12 @@ export const NoteEvaluation = ({ noteId, disabled }: INoteEvaluationProps) => {
   );
 
   const renderTabs = () => (
-    <Tabs value={evaluation.activeTab} onValueChange={handleTabChange} className="w-full">
-      <TabsList className="grid w-full grid-cols-2 mb-6 h-10 bg-slate-100 dark:bg-slate-800 p-1 rounded-lg">
+    <Tabs
+      value={evaluation.activeTab}
+      onValueChange={handleTabChange}
+      className="w-full h-full flex flex-col"
+    >
+      <TabsList className="grid w-full grid-cols-2 mb-6 h-10 bg-slate-100 dark:bg-slate-800 p-1 rounded-lg flex-shrink-0">
         <TabsTrigger
           value="evaluate"
           className="flex items-center gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700 data-[state=active]:shadow-sm rounded-md text-xs font-medium px-4"
@@ -74,13 +78,15 @@ export const NoteEvaluation = ({ noteId, disabled }: INoteEvaluationProps) => {
         </TabsTrigger>
       </TabsList>
 
-      <TabsContent value="evaluate" className="space-y-6 mt-0">
-        <EvaluationContent />
-      </TabsContent>
+      <div className="flex-1 min-h-0">
+        <TabsContent value="evaluate" className="h-full mt-0">
+          <EvaluationContent />
+        </TabsContent>
 
-      <TabsContent value="history" className="space-y-6 pb-6 mt-0">
-        <AIFeedbackHistory noteId={noteId} />
-      </TabsContent>
+        <TabsContent value="history" className="h-full mt-0">
+          <AIFeedbackHistory noteId={noteId} />
+        </TabsContent>
+      </div>
     </Tabs>
   );
 
@@ -90,9 +96,10 @@ export const NoteEvaluation = ({ noteId, disabled }: INoteEvaluationProps) => {
 
       <Dialog open={evaluation.isOpen} onOpenChange={handleCloseDialog}>
         <DialogContent
-          className="max-w-3xl overflow-hidden p-0 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-xl"
+          className="max-w-3xl overflow-hidden p-0 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-xl flex flex-col"
           style={{
-            maxHeight: '85vh',
+            maxHeight: "85vh",
+            height: "85vh",
           }}
         >
           <EvaluationDialogHeader
@@ -100,7 +107,7 @@ export const NoteEvaluation = ({ noteId, disabled }: INoteEvaluationProps) => {
             onToggleSettings={toggleSettings}
           />
 
-          <div className="overflow-y-auto flex-1 px-6 py-6">
+          <div className="overflow-y-auto flex-1 px-6 py-6 min-h-0">
             {isLoading ? renderLoadingState() : renderTabs()}
           </div>
         </DialogContent>
