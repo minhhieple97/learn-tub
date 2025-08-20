@@ -1,33 +1,80 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Play, Plus, Library, Youtube, Rocket } from "lucide-react";
+import { Play, Plus, Library, Youtube, Rocket, Sparkles, BookOpen, HelpCircle } from 'lucide-react';
 
 function AddVideoFormSkeleton() {
   return (
-    <Card className="relative overflow-hidden border-0 bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 shadow-xl dark:from-blue-600 dark:via-blue-700 dark:to-blue-800">
-      <CardHeader className="relative pb-6 pt-8 text-center">
-        <div className="mx-auto mb-6 flex size-20 items-center justify-center rounded-full border border-white/30 bg-white/20 shadow-lg backdrop-blur-sm">
-          <Youtube className="size-10 text-white" />
-        </div>
-        <Skeleton className="mx-auto mb-2 h-8 w-64 bg-white/30" />
-        <Skeleton className="mx-auto h-5 w-80 bg-white/20" />
-      </CardHeader>
+    <div className="relative w-full mx-auto">
+      <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 rounded-2xl blur-xl opacity-25 animate-pulse"></div>
 
-      <CardContent className="relative space-y-6 pb-8">
-        <div className="space-y-6">
-          <div className="space-y-4">
-            <Skeleton className="h-6 w-32 bg-white/30" />
-            <div className="relative">
-              <Skeleton className="h-14 w-full bg-white/95" />
+      <Card className="relative overflow-hidden border-0 shadow-2xl bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 dark:from-blue-600 dark:via-blue-700 dark:to-blue-800">
+        <div className="absolute top-4 right-4 text-white/20">
+          <Sparkles className="h-6 w-6 animate-pulse" />
+        </div>
+        <div className="absolute bottom-4 left-4 text-white/20">
+          <Sparkles className="h-4 w-4 animate-pulse delay-1000" />
+        </div>
+
+        <CardHeader className="relative text-center pb-8 pt-10">
+          <div className="mx-auto mb-8 relative">
+            <div className="absolute inset-0 bg-white/30 rounded-full blur-md scale-110"></div>
+            <div className="relative flex h-24 w-24 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm border-2 border-white/30 shadow-2xl">
+              <Youtube className="h-12 w-12 text-white drop-shadow-lg" />
             </div>
-            <Skeleton className="h-4 w-72 bg-white/20" />
           </div>
 
-          <Skeleton className="h-14 w-full bg-white/90" />
-        </div>
-      </CardContent>
-    </Card>
+          <Skeleton className="mx-auto mb-4 h-12 w-80 bg-white/30" />
+          <Skeleton className="mx-auto h-6 w-96 bg-white/20" />
+        </CardHeader>
+
+        <CardContent className="relative space-y-8 pb-10 px-8">
+          <div className="space-y-8">
+            {/* YouTube URL Field */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <Youtube className="h-6 w-6 text-white" />
+                <Skeleton className="h-6 w-32 bg-white/30" />
+                <Skeleton className="h-4 w-16 bg-white/20" />
+              </div>
+              <div className="relative">
+                <Skeleton className="h-16 w-full bg-white/95 rounded-xl" />
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="h-1 w-1 bg-blue-200 dark:bg-blue-300 rounded-full"></div>
+                <Skeleton className="h-4 w-72 bg-white/20" />
+              </div>
+            </div>
+
+            {/* Tutorial Field */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <BookOpen className="h-6 w-6 text-white" />
+                <Skeleton className="h-6 w-48 bg-white/30" />
+                <Skeleton className="h-4 w-16 bg-white/20" />
+                <HelpCircle className="h-5 w-5 text-white/70" />
+              </div>
+              <div className="relative">
+                <Skeleton className="h-32 w-full bg-white/95 rounded-xl" />
+                <div className="absolute bottom-3 right-4">
+                  <Skeleton className="h-4 w-12 bg-gray-400" />
+                </div>
+              </div>
+              <div className="flex items-start gap-3 bg-white/10 dark:bg-white/5 p-4 rounded-lg backdrop-blur-sm">
+                <Sparkles className="h-5 w-5 text-blue-300 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-32 bg-white/30" />
+                  <Skeleton className="h-3 w-full bg-white/20" />
+                </div>
+              </div>
+            </div>
+
+            {/* Submit Button */}
+            <Skeleton className="h-16 w-full bg-white/90 rounded-xl" />
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
 
@@ -121,35 +168,32 @@ export default function Loading() {
               Learn
             </h2>
             <p className="mt-1 text-base text-slate-600 dark:text-slate-300">
-              Transform YouTube videos into interactive learning experiences
-              with AI-powered insights
+              Transform YouTube videos into interactive learning experiences with AI-powered
+              insights
             </p>
           </div>
         </div>
 
         <Tabs defaultValue="add" className="space-y-4">
-          <TabsList className="grid w-full max-w-md grid-cols-2 rounded-lg border border-slate-200 bg-white/80 p-1 backdrop-blur-sm dark:border-slate-700 dark:bg-slate-800/80">
+          <TabsList className="grid w-full max-w-md grid-cols-2 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 rounded-lg p-1">
             <TabsTrigger
               value="add"
-              className="flex items-center gap-2 rounded-md transition-all data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+              className="flex items-center gap-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white rounded-md transition-all"
             >
-              <Plus className="size-4" />
+              <Plus className="h-4 w-4" />
               Add Video
             </TabsTrigger>
             <TabsTrigger
               value="library"
-              className="flex items-center gap-2 rounded-md transition-all data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+              className="flex items-center gap-2 data-[state=active]:bg-blue-600 data-[state=active]:text-white rounded-md transition-all"
             >
-              <Library className="size-4" />
+              <Library className="h-4 w-4" />
               My Library
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent
-            value="add"
-            className="space-y-4 duration-300 animate-in fade-in-50"
-          >
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+          <TabsContent value="add" className="space-y-4 animate-in fade-in-50 duration-300">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
               <div className="lg:col-span-2">
                 <AddVideoFormSkeleton />
               </div>
@@ -159,10 +203,7 @@ export default function Loading() {
             </div>
           </TabsContent>
 
-          <TabsContent
-            value="library"
-            className="duration-300 animate-in fade-in-50"
-          >
+          <TabsContent value="library" className="animate-in fade-in-50 duration-300">
             <VideoLibrarySkeleton />
           </TabsContent>
         </Tabs>

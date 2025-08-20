@@ -63,11 +63,9 @@ export const AIFeedbackHistory = ({ noteId }: AIFeedbackHistoryProps) => {
 
   if (selectedFeedback) {
     return (
-      <div className="flex flex-col h-full space-y-6">
-        <div className="flex items-center justify-between px-1 flex-shrink-0">
-          <h3 className="text-lg font-semibold text-foreground">
-            Feedback Details
-          </h3>
+      <div className="space-y-6">
+        <div className="flex items-center justify-between px-1">
+          <h3 className="text-lg font-semibold text-foreground">Feedback Details</h3>
           <Button
             variant="outline"
             size="sm"
@@ -77,7 +75,7 @@ export const AIFeedbackHistory = ({ noteId }: AIFeedbackHistoryProps) => {
             ← Back to History
           </Button>
         </div>
-        <div className="flex-1 overflow-hidden min-h-0">
+        <div>
           <NoteFeedbackDisplay
             feedback={selectedFeedback}
             onReset={() => setSelectedFeedback(null)}
@@ -89,15 +87,13 @@ export const AIFeedbackHistory = ({ noteId }: AIFeedbackHistoryProps) => {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col h-full space-y-6">
-        <div className="flex items-center justify-between px-1 flex-shrink-0">
-          <h3 className="text-lg font-semibold text-foreground">
-            AI Feedback History
-          </h3>
+      <div className="space-y-6">
+        <div className="flex items-center justify-between px-1">
+          <h3 className="text-lg font-semibold text-foreground">AI Feedback History</h3>
           <Skeleton className="h-6 w-24 rounded-full" />
         </div>
-        <div className="flex-1 space-y-4 overflow-y-auto pr-2 pb-6 min-h-0">
-          {[...Array(5)].map((_, i) => (
+        <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2 pb-6 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-gray-100 dark:scrollbar-track-gray-800 hover:scrollbar-thumb-gray-400 dark:hover:scrollbar-thumb-gray-500">
+          {[...Array(2)].map((_, i) => (
             <Card key={i} className="border border-border">
               <CardHeader className="pb-4">
                 <div className="flex items-start justify-between gap-4">
@@ -137,11 +133,9 @@ export const AIFeedbackHistory = ({ noteId }: AIFeedbackHistoryProps) => {
 
   if (error) {
     return (
-      <div className="flex flex-col h-full space-y-6">
-        <div className="flex items-center justify-between px-1 flex-shrink-0">
-          <h3 className="text-lg font-semibold text-foreground">
-            AI Feedback History
-          </h3>
+      <div className="space-y-6">
+        <div className="flex items-center justify-between px-1">
+          <h3 className="text-lg font-semibold text-foreground">AI Feedback History</h3>
           <Badge
             variant="outline"
             className="text-xs font-medium px-2 py-1 border-red-200 text-red-700"
@@ -149,7 +143,7 @@ export const AIFeedbackHistory = ({ noteId }: AIFeedbackHistoryProps) => {
             Error
           </Badge>
         </div>
-        <div className="flex-1 flex items-center justify-center min-h-0">
+        <div className="flex items-center justify-center py-16">
           <Card className="border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/50 w-full max-w-md mx-auto">
             <CardContent className="pt-8 pb-8">
               <div className="flex flex-col items-center gap-4">
@@ -160,9 +154,7 @@ export const AIFeedbackHistory = ({ noteId }: AIFeedbackHistoryProps) => {
                   <h4 className="font-semibold text-red-900 dark:text-red-100">
                     Failed to Load History
                   </h4>
-                  <p className="text-sm text-red-700 dark:text-red-300 leading-relaxed">
-                    {error}
-                  </p>
+                  <p className="text-sm text-red-700 dark:text-red-300 leading-relaxed">{error}</p>
                 </div>
                 <Button
                   variant="outline"
@@ -182,56 +174,40 @@ export const AIFeedbackHistory = ({ noteId }: AIFeedbackHistoryProps) => {
 
   if (!hasHistory) {
     return (
-      <div className="flex flex-col h-full space-y-6">
-        <div className="flex items-center justify-between px-1 flex-shrink-0">
-          <h3 className="text-lg font-semibold text-foreground">
-            AI Feedback History
-          </h3>
+      <div className="space-y-6">
+        <div className="flex items-center justify-between px-1">
+          <h3 className="text-lg font-semibold text-foreground">AI Feedback History</h3>
           <Badge variant="outline" className="text-xs font-medium px-2 py-1">
             0 evaluations
           </Badge>
         </div>
-        <div className="flex-1 flex items-center justify-center min-h-0">
-          <Card className="border-dashed border-2 border-border w-full max-w-md mx-auto">
-            <CardContent className="pt-12 pb-12">
-              <div className="text-center space-y-4">
-                <div className="h-16 w-16 bg-gradient-to-br from-muted to-muted/80 rounded-2xl flex items-center justify-center mx-auto">
-                  <Clock className="h-8 w-8 text-muted-foreground" />
-                </div>
-                <div className="space-y-2">
-                  <h3 className="text-lg font-semibold text-foreground">
-                    No History Yet
-                  </h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    Your AI feedback history will appear here after you run
-                    evaluations. Start analyzing your notes to see insights and
-                    track your progress.
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        <div className="text-center py-12">
+          <div className="space-y-3">
+            <h3 className="text-lg font-semibold text-foreground">No History Yet</h3>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Your AI feedback history will appear here after you run evaluations. Start analyzing
+              your notes to see insights and track your progress.
+            </p>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-full space-y-6">
-      <div className="flex items-center justify-between px-1 flex-shrink-0">
-        <h3 className="text-lg font-semibold text-foreground">
-          AI Feedback History
-        </h3>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between px-1">
+        <h3 className="text-lg font-semibold text-foreground">AI Feedback History</h3>
         <Badge variant="outline" className="text-xs font-medium px-2 py-1">
-          {history.length} {history.length === 1 ? "evaluation" : "evaluations"}
+          {history.length} {history.length === 1 ? 'evaluation' : 'evaluations'}
         </Badge>
       </div>
 
       <div
-        className="flex-1 space-y-4 overflow-y-auto pr-2 pb-6 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-gray-100 dark:scrollbar-track-gray-800 hover:scrollbar-thumb-gray-400 dark:hover:scrollbar-thumb-gray-500 min-h-0"
+        className="space-y-4 pr-2 pb-6 max-h-[60vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-gray-100 dark:scrollbar-track-gray-800 hover:scrollbar-thumb-gray-400 dark:hover:scrollbar-thumb-gray-500"
         style={{
-          scrollbarWidth: "thin",
-          scrollbarColor: "hsl(var(--muted-foreground)) hsl(var(--muted))",
+          scrollbarWidth: 'thin',
+          scrollbarColor: 'hsl(var(--muted-foreground)) hsl(var(--muted))',
         }}
       >
         {history.map((result, index) => {
@@ -326,9 +302,7 @@ export const AIFeedbackHistory = ({ noteId }: AIFeedbackHistoryProps) => {
                   </div>
 
                   {/* Card number indicator */}
-                  <div className="text-xs text-muted-foreground/70 font-medium">
-                    #{index + 1}
-                  </div>
+                  <div className="text-xs text-muted-foreground/70 font-medium">#{index + 1}</div>
                 </div>
               </CardContent>
             </Card>
