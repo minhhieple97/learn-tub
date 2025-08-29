@@ -4,10 +4,7 @@ import { cn } from "@/lib/utils";
 import { useVideoPage } from "../hooks/use-video-page";
 import { VideoLayout } from "./video-layout";
 import { PomodoroControl } from "./pomodoro-control";
-import {
-  PomodoroTimer,
-  PomodoroSimpleDialog,
-} from "@/features/pomodoro/components";
+import { PomodoroTimer, PomodoroDialog } from "@/features/pomodoro/components";
 import type { IVideoPageData } from "../types";
 
 type IVideoPageClientProps = {
@@ -27,7 +24,7 @@ export const VideoPageClient = ({ video }: IVideoPageClientProps) => {
       <VideoLayout focusModeEnabled={focusModeEnabled} />
 
       {/* Pomodoro Components */}
-      <PomodoroSimpleDialog />
+      <PomodoroDialog />
       {pomodoro.isEnabled && <PomodoroTimer />}
 
       {/* Pomodoro Control - Fixed Bottom Right */}

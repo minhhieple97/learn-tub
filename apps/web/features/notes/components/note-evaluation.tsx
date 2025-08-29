@@ -56,7 +56,11 @@ export const NoteEvaluation = ({ noteId, disabled }: INoteEvaluationProps) => {
   );
 
   const renderTabs = () => (
-    <Tabs value={evaluation.activeTab} onValueChange={handleTabChange} className="w-full">
+    <Tabs
+      value={evaluation.activeTab}
+      onValueChange={handleTabChange}
+      className="w-full"
+    >
       <TabsList className="grid w-full grid-cols-2 mb-6 h-10 bg-slate-100 dark:bg-slate-800 p-1 rounded-lg flex-shrink-0">
         <TabsTrigger
           value="evaluate"
@@ -92,8 +96,8 @@ export const NoteEvaluation = ({ noteId, disabled }: INoteEvaluationProps) => {
         <DialogContent
           className="max-w-3xl p-0 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-xl flex flex-col"
           style={{
-            marginTop: '60px',
-            marginBottom: '20px',
+            marginTop: "60px",
+            marginBottom: "20px",
           }}
         >
           <EvaluationDialogHeader
@@ -101,7 +105,9 @@ export const NoteEvaluation = ({ noteId, disabled }: INoteEvaluationProps) => {
             onToggleSettings={toggleSettings}
           />
 
-          <div className="px-6 py-6">{isLoading ? renderLoadingState() : renderTabs()}</div>
+          <div className="px-6 py-6">
+            {isLoading ? renderLoadingState() : renderTabs()}
+          </div>
         </DialogContent>
       </Dialog>
     </>

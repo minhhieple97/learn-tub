@@ -20,7 +20,7 @@ export const EvaluationContent = () => {
 
       {evaluation.hasError && (
         <EvaluationError
-          error={evaluation.error || ''}
+          error={evaluation.error || ""}
           onAdjustSettings={adjustEvaluationSettings}
         />
       )}
@@ -33,12 +33,16 @@ export const EvaluationContent = () => {
       )}
 
       {evaluation.feedback && evaluation.isCompleted && (
-        <NoteFeedbackDisplay feedback={evaluation.feedback} onReset={resetEvaluation} />
+        <NoteFeedbackDisplay
+          feedback={evaluation.feedback}
+          onReset={resetEvaluation}
+        />
       )}
 
-      {evaluation.status === STATUS_STREAMING.IDLE && !evaluation.showSettings && (
-        <EvaluationWelcome onStartAnalysis={showEvaluationSettings} />
-      )}
+      {evaluation.status === STATUS_STREAMING.IDLE &&
+        !evaluation.showSettings && (
+          <EvaluationWelcome onStartAnalysis={showEvaluationSettings} />
+        )}
     </div>
   );
 };

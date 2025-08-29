@@ -109,7 +109,8 @@ export const usePomodoroStore = create<IPomodoroStore>()(
           // Create notification sound
           try {
             const audioContext = new (window.AudioContext ||
-              (window as any).webkitAudioContext)();
+              (window as unknown as { webkitAudioContext: AudioContext })
+                .webkitAudioContext)();
             const oscillator = audioContext.createOscillator();
             const gainNode = audioContext.createGain();
 
@@ -135,7 +136,9 @@ export const usePomodoroStore = create<IPomodoroStore>()(
               `🍅 ${nextPhase === "work" ? "Time to focus!" : "Time for a break!"}`,
             );
           } catch (error) {
-            console.log(
+            console.error(
+              "🍅 Error playing notification sound",
+              error,
               `🍅 ${nextPhase === "work" ? "Time to focus!" : "Time for a break!"}`,
             );
           }

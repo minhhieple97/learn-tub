@@ -41,11 +41,21 @@ export const NoteFeedbackDisplay = ({
           >
             {feedback.overall_score}/10
           </Badge>
-          <Button variant="ghost" size="sm" onClick={handleCopyFeedback} className="h-8 w-8 p-0">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleCopyFeedback}
+            className="h-8 w-8 p-0"
+          >
             <Copy className="h-4 w-4" />
           </Button>
           {onReset && (
-            <Button variant="ghost" size="sm" onClick={onReset} className="h-8 w-8 p-0">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onReset}
+              className="h-8 w-8 p-0"
+            >
               <RotateCcw className="h-4 w-4" />
             </Button>
           )}
@@ -53,7 +63,9 @@ export const NoteFeedbackDisplay = ({
       </CardHeader>
       <CardContent className="space-y-4 pt-4 pb-6">
         <div>
-          <h4 className="font-medium text-sm text-muted-foreground mb-2">Summary</h4>
+          <h4 className="font-medium text-sm text-muted-foreground mb-2">
+            Summary
+          </h4>
           <p className="text-sm">{feedback.summary}</p>
         </div>
 
@@ -110,8 +122,12 @@ export const NoteFeedbackDisplay = ({
 
         {feedback.detailed_analysis && (
           <div>
-            <h4 className="font-medium text-sm text-muted-foreground mb-2">Detailed Analysis</h4>
-            <p className="text-sm whitespace-pre-wrap">{feedback.detailed_analysis}</p>
+            <h4 className="font-medium text-sm text-muted-foreground mb-2">
+              Detailed Analysis
+            </h4>
+            <p className="text-sm whitespace-pre-wrap">
+              {feedback.detailed_analysis}
+            </p>
           </div>
         )}
       </CardContent>
